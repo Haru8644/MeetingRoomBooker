@@ -1,0 +1,24 @@
+﻿@page "/reservation"
+
+<h3>会議室予約</h3>
+
+<div class="mb-3">
+    <label>予約者名</label>
+    <input class="form-control" @bind="reserveName"/>
+</div>
+
+<div class="mb-3">
+    <label>利用日</label>
+    <input type="date" class="form-control" @bind="reserveDate" />
+</div>
+
+<button class="btn btn-primary" @onclick="OnSubmit">予約する</button>
+
+@code{
+    private string reserveName = "";
+    private DateTime reserveDate = DateTime.Today;
+    private void OnSubmit()
+    {
+        System.Diagnostics.Debug.WriteLine($"予約者名:{reserveName}, 利用日:{reserveDate.ToShortDateString()}");
+    }
+}
