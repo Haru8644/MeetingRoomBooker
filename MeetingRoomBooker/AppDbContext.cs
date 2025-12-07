@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MeetingRoomBooker.Components.Pages;
+using MeetingRoomBooker.Models;
 
 namespace MeetingRoomBooker
 {
@@ -9,6 +10,6 @@ namespace MeetingRoomBooker
         { 
             Database.EnsureCreated();
         }
-        public DbSet<Reservation.ReservationModel> Reservations { get; set; }
+        public DbSet<ReservationModel> Reservations { get; set; }
     }
 }
