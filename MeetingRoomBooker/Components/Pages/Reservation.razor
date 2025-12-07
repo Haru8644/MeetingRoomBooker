@@ -18,9 +18,29 @@
     </div>
 
     <div class="mb-3">
+        <label>会議室</label>
+        <select class="form-control" @bind="selectedRoom">
+            <option value="大会議室">大会議室</option>
+            <option value="小会議室">小会議室</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
         <label>利用日</label>
         <input type="date" class="form-control" @bind="reserveDate" />
     </div>
+
+    <div class="row">
+        <div class="col">
+            <label>開始時間</label>
+            <input type="time" class="form-control" @bind="startTime" />
+        </div>
+        <div class="col">
+            <label>終了時間</label>
+            <input type="time" class="form-control" @bind="endTime" />
+        </div>
+    </div>
+    <br />
 
     <button class="btn btn-primary" @onclick="OnSubmit">予約を追加する</button>
 </div>
@@ -36,8 +56,10 @@ else
     <table class="table table-striped align-middle">
         <thead>
             <tr>
-                <th>名前</th>
+                <th>部屋</th>
                 <th>日付</th>
+                <th>時間</th>
+                <th>名前</th>
                 <th>操作</th>
             </tr>
         </thead>
@@ -45,8 +67,10 @@ else
             @foreach (var item in reservationHistory)
             {
                 <tr>
-                    <td>@item.Name</td>
+                    <td>@item.Room</td>
                     <td>@item.Date.ToShortDateString()</td>
+                    <td>@item.StartTime.ToString("HH:mm") ～ @item.EndTime.ToString("HH:mm")</td>
+                    <td>@item.Name</td>
                     <td>
                         <button class="btn btn-danger btn-sm" @onclick="() => OnRemove(item)">
                             削除
@@ -60,9 +84,11 @@ else
 
 @code {
     private string reserveName = "";
-    private DateTime reserveDate = DateTime.Today;
-
     private string errorMessage = "";
+    private string selectedRoom = "大会議室"; 
+    private DateTime reserveDate = DateTime.Today;
+    private DateTime startTime = DateTime.Today.AddHours(9);  
+    private DateTime endTime = DateTime.Today.AddHours(10);   
 
     private List<ReservationModel> reservationHistory = new List<ReservationModel>();
 
@@ -70,11 +96,16 @@ else
     {
         public int Id { get; set; }
         public string Name { get; set; } = "";
+        public string Room { get; set; } = "";
         public DateTime Date { get; set; }
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
     }
 
     protected override async Task OnInitializedAsync()
     {
+        await DbContext.Database.EnsureDeletedAsync();
+        await DbContext.Database.EnsureCreatedAsync();
         reservationHistory = await DbContext.Reservations.ToListAsync();
     }
 
@@ -82,20 +113,46 @@ else
     {
         errorMessage = "";
         if (string.IsNullOrWhiteSpace(reserveName)) return;
-        bool isBatting = await DbContext.Reservations.AnyAsync(x => x.Date == reserveDate);
+        if (endTime <= startTime)
+        {
+            errorMessage = "エラー：終了時間は開始時間より後に設定してください！";
+            return;
+        }
+
+        DateTime dtStart = new DateTime(reserveDate.Year, reserveDate.Month, reserveDate.Day, startTime.Hour, startTime.Minute, 0);
+        DateTime dtEnd = new DateTime(reserveDate.Year, reserveDate.Month, reserveDate.Day, endTime.Hour, endTime.Minute, 0);
+
+        if (dtEnd <= dtStart)
+        {
+            errorMessage = "エラー：終了時間は開始時間より後に設定してください！";
+            return;
+        }
+
+        bool isBatting = await DbContext.Reservations
+             .AnyAsync(x =>
+                 x.Room == selectedRoom &&   
+                 x.Date == reserveDate &&    
+                 x.StartTime < dtEnd &&      
+                 x.EndTime > dtStart         
+             );
 
         if (isBatting)
         {
             errorMessage = "エラー：その日は既に予約が入っています！";
-            return; 
+            return;
         }
-        DbContext.Reservations.Add(new ReservationModel
+
+        var newRes = new ReservationModel
         {
             Name = reserveName,
-            Date = reserveDate
-        });
+            Room = selectedRoom,
+            Date = reserveDate,
+            StartTime = dtStart,
+            EndTime = dtEnd
+        };
 
-        await DbContext.SaveChangesAsync();
+        DbContext.Reservations.Add(newRes); 
+        await DbContext.SaveChangesAsync(); 
         reservationHistory = await DbContext.Reservations.ToListAsync();
         reserveName = "";
     }
