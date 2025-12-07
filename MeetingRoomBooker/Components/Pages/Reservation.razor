@@ -43,7 +43,16 @@
     </div>
     <br />
 
-    <button class="btn btn-primary" @onclick="OnSubmit">予約を追加する</button>
+    <div class="d-flex gap-2">
+        <button class="btn @(editingId == 0 ? "btn-primary" : "btn-success")" @onclick="OnSubmit">
+            @(editingId == 0 ? "予約を追加する" : "変更を保存する")
+        </button>
+
+        @if (editingId != 0)
+        {
+            <button class="btn btn-secondary" @onclick="OnCancelEdit">キャンセル</button>
+        }
+    </div>
 </div>
 
 <h4 class="mt-4 mb-3">
@@ -69,9 +78,14 @@ else
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <h5 class="card-title mb-0 fw-bold">@item.Room</h5>
 
-                            <button class="btn btn-outline-danger btn-sm" @onclick="() => OnRemove(item)">
-                                削除
-                            </button>
+                            <div>
+                                <button class="btn btn-outline-primary btn-sm me-1" @onclick="() => OnEdit(item)">
+                                    編集
+                                </button>
+                                <button class="btn btn-outline-danger btn-sm" @onclick="() => OnRemove(item)">
+                                    削除
+                                </button>
+                            </div>
                         </div>
 
                         <h6 class="card-subtitle mb-3 text-muted">
@@ -102,29 +116,44 @@ else
 @code {
     private string reserveName = "";
     private string errorMessage = "";
-    private string selectedRoom = "大会議室"; 
+    private string selectedRoom = "大会議室";
     private DateTime reserveDate = DateTime.Today;
-    private DateTime startTime = DateTime.Today.AddHours(9);  
-    private DateTime endTime = DateTime.Today.AddHours(10);   
+    private DateTime startTime = DateTime.Today.AddHours(9);
+    private DateTime endTime = DateTime.Today.AddHours(10);
+
+    private int editingId = 0;
 
     private List<ReservationModel> reservationHistory = new List<ReservationModel>();
 
     protected override async Task OnInitializedAsync()
     {
-        await DbContext.Database.EnsureDeletedAsync();
         await DbContext.Database.EnsureCreatedAsync();
         reservationHistory = await DbContext.Reservations.ToListAsync();
+    }
+
+    private void OnEdit(ReservationModel item)
+    {
+        editingId = item.Id;
+        reserveName = item.Name;
+        selectedRoom = item.Room;
+        reserveDate = item.Date;
+        startTime = item.StartTime;
+        endTime = item.EndTime;
+
+        errorMessage = ""; 
+    }
+
+    private void OnCancelEdit()
+    {
+        editingId = 0;
+        reserveName = "";
+        errorMessage = "";
     }
 
     private async Task OnSubmit()
     {
         errorMessage = "";
         if (string.IsNullOrWhiteSpace(reserveName)) return;
-        if (endTime <= startTime)
-        {
-            errorMessage = "エラー：終了時間は開始時間より後に設定してください！";
-            return;
-        }
 
         DateTime dtStart = new DateTime(reserveDate.Year, reserveDate.Month, reserveDate.Day, startTime.Hour, startTime.Minute, 0);
         DateTime dtEnd = new DateTime(reserveDate.Year, reserveDate.Month, reserveDate.Day, endTime.Hour, endTime.Minute, 0);
@@ -137,10 +166,11 @@ else
 
         bool isBatting = await DbContext.Reservations
              .AnyAsync(x =>
-                 x.Room == selectedRoom &&   
-                 x.Date == reserveDate &&    
-                 x.StartTime < dtEnd &&      
-                 x.EndTime > dtStart         
+                 x.Id != editingId &&        
+                 x.Room == selectedRoom &&
+                 x.Date == reserveDate &&
+                 x.StartTime < dtEnd &&
+                 x.EndTime > dtStart
              );
 
         if (isBatting)
@@ -149,32 +179,51 @@ else
             return;
         }
 
-        var newRes = new ReservationModel
+        if (editingId == 0)
         {
-            Name = reserveName,
-            Room = selectedRoom,
-            Date = reserveDate,
-            StartTime = dtStart,
-            EndTime = dtEnd
-        };
+            var newRes = new ReservationModel
+            {
+                Name = reserveName,
+                Room = selectedRoom,
+                Date = reserveDate,
+                StartTime = dtStart,
+                EndTime = dtEnd
+            };
+            DbContext.Reservations.Add(newRes);
+        }
+        else
+        {
+            var target = await DbContext.Reservations.FindAsync(editingId);
 
-        DbContext.Reservations.Add(newRes); 
-        await DbContext.SaveChangesAsync(); 
+            if (target != null)
+            {
+                target.Name = reserveName;
+                target.Room = selectedRoom;
+                target.Date = reserveDate;
+                target.StartTime = dtStart;
+                target.EndTime = dtEnd;
+            }
+        }
+
+        await DbContext.SaveChangesAsync();
         reservationHistory = await DbContext.Reservations.ToListAsync();
-        reserveName = "";
+
+        OnCancelEdit();
     }
 
     private async Task OnRemove(ReservationModel item)
     {
         DbContext.Reservations.Remove(item);
         await DbContext.SaveChangesAsync();
-        reservationHistory.Remove(item);
+        reservationHistory = await DbContext.Reservations.ToListAsync();
+
+        if (editingId == item.Id) OnCancelEdit();
     }
 
     private string GetBorderColor(string roomName)
     {
         if (roomName == "大会議室") return "border-primary";
-        if (roomName == "小会議室") return "border-success"; 
-        return "border-warning"; 
+        if (roomName == "小会議室") return "border-success";
+        return "border-warning";
     }
 }
