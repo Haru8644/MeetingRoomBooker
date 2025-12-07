@@ -2,6 +2,7 @@
 @page "/reservation"
 @using Microsoft.EntityFrameworkCore
 @using MeetingRoomBooker
+@using MeetingRoomBooker.Models
 @inject AppDbContext DbContext
 
 <h3>会議室予約</h3>
@@ -107,16 +108,6 @@ else
     private DateTime endTime = DateTime.Today.AddHours(10);   
 
     private List<ReservationModel> reservationHistory = new List<ReservationModel>();
-
-    public class ReservationModel
-    {
-        public int Id { get; set; }
-        public string Name { get; set; } = "";
-        public string Room { get; set; } = "";
-        public DateTime Date { get; set; }
-        public DateTime StartTime { get; set; }
-        public DateTime EndTime { get; set; }
-    }
 
     protected override async Task OnInitializedAsync()
     {
