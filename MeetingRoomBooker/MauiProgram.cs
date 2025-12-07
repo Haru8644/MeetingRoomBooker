@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
+using MeetingRoomBooker;
 
 namespace MeetingRoomBooker
 {
@@ -7,9 +9,7 @@ namespace MeetingRoomBooker
         public static MauiApp CreateMauiApp()
         {
             var builder = MauiApp.CreateBuilder();
-            builder
-                .UseMauiApp<App>()
-                .ConfigureFonts(fonts =>
+            builder.UseMauiApp<App>().ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 });
@@ -20,7 +20,8 @@ namespace MeetingRoomBooker
     		builder.Services.AddBlazorWebViewDeveloperTools();
     		builder.Logging.AddDebug();
 #endif
-
+            string dbPath = Path.Combine(FileSystem.AppDataDirectory, "app.db");
+            builder.Services.AddDbContext<AppDbContext>(options =>options.UseSqlite($"Data Source={dbPath}"));
             return builder.Build();
         }
     }

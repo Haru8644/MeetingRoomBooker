@@ -1,24 +1,109 @@
-﻿@page "/reservation"
+﻿@page "/"
+@page "/reservation"
+@using Microsoft.EntityFrameworkCore
+@using MeetingRoomBooker
+@inject AppDbContext DbContext
 
 <h3>会議室予約</h3>
 
-<div class="mb-3">
-    <label>予約者名</label>
-    <input class="form-control" @bind="reserveName"/>
+<div class="p-3 border rounded mb-4">
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger">@errorMessage</div>
+    }
+
+    <div class="mb-3">
+        <label>予約者名</label>
+        <input class="form-control" @bind="reserveName" />
+    </div>
+
+    <div class="mb-3">
+        <label>利用日</label>
+        <input type="date" class="form-control" @bind="reserveDate" />
+    </div>
+
+    <button class="btn btn-primary" @onclick="OnSubmit">予約を追加する</button>
 </div>
 
-<div class="mb-3">
-    <label>利用日</label>
-    <input type="date" class="form-control" @bind="reserveDate" />
-</div>
+<h4>予約一覧 (@reservationHistory.Count 件)</h4>
 
-<button class="btn btn-primary" @onclick="OnSubmit">予約する</button>
+@if (reservationHistory.Count == 0)
+{
+    <p class="text-muted">予約はまだありません。</p>
+}
+else
+{
+    <table class="table table-striped align-middle">
+        <thead>
+            <tr>
+                <th>名前</th>
+                <th>日付</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in reservationHistory)
+            {
+                <tr>
+                    <td>@item.Name</td>
+                    <td>@item.Date.ToShortDateString()</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" @onclick="() => OnRemove(item)">
+                            削除
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
 
-@code{
+@code {
     private string reserveName = "";
     private DateTime reserveDate = DateTime.Today;
-    private void OnSubmit()
+
+    private string errorMessage = "";
+
+    private List<ReservationModel> reservationHistory = new List<ReservationModel>();
+
+    public class ReservationModel
     {
-        System.Diagnostics.Debug.WriteLine($"予約者名:{reserveName}, 利用日:{reserveDate.ToShortDateString()}");
+        public int Id { get; set; }
+        public string Name { get; set; } = "";
+        public DateTime Date { get; set; }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        reservationHistory = await DbContext.Reservations.ToListAsync();
+    }
+
+    private async Task OnSubmit()
+    {
+        errorMessage = "";
+        if (string.IsNullOrWhiteSpace(reserveName)) return;
+        bool isBatting = await DbContext.Reservations.AnyAsync(x => x.Date == reserveDate);
+
+        if (isBatting)
+        {
+            errorMessage = "エラー：その日は既に予約が入っています！";
+            return; 
+        }
+        DbContext.Reservations.Add(new ReservationModel
+        {
+            Name = reserveName,
+            Date = reserveDate
+        });
+
+        await DbContext.SaveChangesAsync();
+        reservationHistory = await DbContext.Reservations.ToListAsync();
+        reserveName = "";
+    }
+
+    private async Task OnRemove(ReservationModel item)
+    {
+        DbContext.Reservations.Remove(item);
+        await DbContext.SaveChangesAsync();
+        reservationHistory.Remove(item);
     }
 }
