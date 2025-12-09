@@ -1,6 +1,8 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using MeetingRoomBooker;
 using Microsoft.EntityFrameworkCore;
-using MeetingRoomBooker;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using MeetingRoomBooker.Services;
 
 namespace MeetingRoomBooker
 {
@@ -20,8 +22,7 @@ namespace MeetingRoomBooker
     		builder.Services.AddBlazorWebViewDeveloperTools();
     		builder.Logging.AddDebug();
 #endif
-            string dbPath = Path.Combine(FileSystem.AppDataDirectory, "app.db");
-            builder.Services.AddDbContext<AppDbContext>(options =>options.UseSqlite($"Data Source={dbPath}"));
+            builder.Services.AddScoped<IBookingService, MockBookingService>();
             return builder.Build();
         }
     }
