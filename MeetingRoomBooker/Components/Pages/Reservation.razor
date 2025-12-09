@@ -1,11 +1,10 @@
 ﻿@page "/"
 @page "/reservation"
-@using Microsoft.EntityFrameworkCore
-@using MeetingRoomBooker
 @using MeetingRoomBooker.Models
-@inject AppDbContext DbContext
+@using MeetingRoomBooker.Services
+@inject IBookingService BookingService
 
-<h3>会議室予約</h3>
+<h3>会議室予約 (テストモード)</h3>
 
 <div class="p-3 border rounded mb-4">
     @if (!string.IsNullOrEmpty(errorMessage))
@@ -77,31 +76,17 @@ else
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <h5 class="card-title mb-0 fw-bold">@item.Room</h5>
-
                             <div>
-                                <button class="btn btn-outline-primary btn-sm me-1" @onclick="() => OnEdit(item)">
-                                    編集
-                                </button>
-                                <button class="btn btn-outline-danger btn-sm" @onclick="() => OnRemove(item)">
-                                    削除
-                                </button>
+                                <button class="btn btn-outline-primary btn-sm me-1" @onclick="() => OnEdit(item)">編集</button>
+                                <button class="btn btn-outline-danger btn-sm" @onclick="() => OnRemove(item)">削除</button>
                             </div>
                         </div>
-
-                        <h6 class="card-subtitle mb-3 text-muted">
-                            @item.Date.ToString("yyyy/MM/dd")
-                        </h6>
-
+                        <h6 class="card-subtitle mb-3 text-muted">@item.Date.ToString("yyyy/MM/dd")</h6>
                         <div class="d-flex align-items-center mb-3">
-                            <span class="fs-4 fw-bold text-dark">
-                                @item.StartTime.ToString("HH:mm")
-                            </span>
+                            <span class="fs-4 fw-bold text-dark">@item.StartTime.ToString("HH:mm")</span>
                             <span class="mx-2 text-muted">～</span>
-                            <span class="fs-4 fw-bold text-dark">
-                                @item.EndTime.ToString("HH:mm")
-                            </span>
+                            <span class="fs-4 fw-bold text-dark">@item.EndTime.ToString("HH:mm")</span>
                         </div>
-
                         <div class="border-top pt-2">
                             <span class="small text-muted">予約者:</span>
                             <span class="fw-bold ms-1">@item.Name</span>
@@ -120,15 +105,13 @@ else
     private DateTime reserveDate = DateTime.Today;
     private DateTime startTime = DateTime.Today.AddHours(9);
     private DateTime endTime = DateTime.Today.AddHours(10);
-
     private int editingId = 0;
 
     private List<ReservationModel> reservationHistory = new List<ReservationModel>();
 
     protected override async Task OnInitializedAsync()
     {
-        await DbContext.Database.EnsureCreatedAsync();
-        reservationHistory = await DbContext.Reservations.ToListAsync();
+        reservationHistory = await BookingService.GetReservationsAsync();
     }
 
     private void OnEdit(ReservationModel item)
@@ -139,8 +122,7 @@ else
         reserveDate = item.Date;
         startTime = item.StartTime;
         endTime = item.EndTime;
-
-        errorMessage = ""; 
+        errorMessage = "";
     }
 
     private void OnCancelEdit()
@@ -164,14 +146,14 @@ else
             return;
         }
 
-        bool isBatting = await DbContext.Reservations
-             .AnyAsync(x =>
-                 x.Id != editingId &&        
-                 x.Room == selectedRoom &&
-                 x.Date == reserveDate &&
-                 x.StartTime < dtEnd &&
-                 x.EndTime > dtStart
-             );
+        var currentList = await BookingService.GetReservationsAsync();
+        bool isBatting = currentList.Any(x =>
+            x.Id != editingId &&
+            x.Room == selectedRoom &&
+            x.Date == reserveDate &&
+            x.StartTime < dtEnd &&
+            x.EndTime > dtStart
+        );
 
         if (isBatting)
         {
@@ -189,34 +171,30 @@ else
                 StartTime = dtStart,
                 EndTime = dtEnd
             };
-            DbContext.Reservations.Add(newRes);
+            await BookingService.AddReservationAsync(newRes);
         }
         else
         {
-            var target = await DbContext.Reservations.FindAsync(editingId);
-
-            if (target != null)
+            var updateRes = new ReservationModel
             {
-                target.Name = reserveName;
-                target.Room = selectedRoom;
-                target.Date = reserveDate;
-                target.StartTime = dtStart;
-                target.EndTime = dtEnd;
-            }
+                Id = editingId,
+                Name = reserveName,
+                Room = selectedRoom,
+                Date = reserveDate,
+                StartTime = dtStart,
+                EndTime = dtEnd
+            };
+            await BookingService.UpdateReservationAsync(updateRes);
         }
 
-        await DbContext.SaveChangesAsync();
-        reservationHistory = await DbContext.Reservations.ToListAsync();
-
+        reservationHistory = await BookingService.GetReservationsAsync();
         OnCancelEdit();
     }
 
     private async Task OnRemove(ReservationModel item)
     {
-        DbContext.Reservations.Remove(item);
-        await DbContext.SaveChangesAsync();
-        reservationHistory = await DbContext.Reservations.ToListAsync();
-
+        await BookingService.RemoveReservationAsync(item);
+        reservationHistory = await BookingService.GetReservationsAsync();
         if (editingId == item.Id) OnCancelEdit();
     }
 
