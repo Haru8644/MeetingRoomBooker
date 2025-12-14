@@ -1,19 +1,10 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">MeetingRoomBooker</a>
+﻿@using Microsoft.FluentUI.AspNetCore.Components
+
+<FluentNavMenu Width="250" Collapsible="true">
+    <FluentNavLink Href="/" Match="NavLinkMatch.All" Icon="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.Home())">ホーム</FluentNavLink>
+    <FluentNavLink Href="/reservation" Icon="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.Calendar())">会議室予約</FluentNavLink>
+    <FluentNavLink Href="/schedule" Icon="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size20.CalendarLtr())">予約カレンダー</FluentNavLink>
+    <div style="margin-top: auto; padding: 15px; display: flex; align-items: center; gap: 10px;">
+        <FluentPersona Name="Haru"Status="PresenceStatus.Available"ImageSize="32px"Initials="H"Color="Color.Accent" />
     </div>
-</div>
-
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
-
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="reservation">
-                <span class="bi bi-calendar-plus-fill-nav-menu" aria-hidden="true"></span> 会議室予約
-            </NavLink>
-        </div>
-    </nav>
-</div>
-
-
+</FluentNavMenu>

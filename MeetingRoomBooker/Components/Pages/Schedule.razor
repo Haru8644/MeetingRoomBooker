@@ -1,0 +1,324 @@
+﻿@page "/schedule"
+@using MeetingRoomBooker.Models
+@using MeetingRoomBooker.Services
+@inject IBookingService BookingService
+
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="20" Style="height: 100%;">
+    <h3 class="gradient-text">RESERVATION CALENDAR</h3>
+    <div style="display: flex; justify-content: center;">
+        <div class="cyber-card" style="padding: 20px; text-align: center; max-width: 400px; width: 100%;">
+            <FluentCalendar @bind-Value="selectedDate" @bind-Value:after="OnDateChanged" />
+            <div style="margin-top: 10px; color: #8b949e;">
+                Selected: @(selectedDate?.ToString("yyyy/MM/dd (ddd)") ?? "日付を選択してください")
+            </div>
+        </div>
+    </div>
+    <div class="cyber-card" style="padding: 20px; overflow-x: auto; width: 100%;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px;">
+            <h4 style="margin: 0;">
+                TIMELINE <span style="font-size:0.8em; color:#8b949e;">(9:00 - 22:00)</span>
+            </h4>
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <span style="font-size: 0.9em; color: #8b949e;">Legend:</span>
+                <span style="font-size: 0.8em; padding: 4px 10px; border-radius: 4px; background: #1b6ec2; color: white;">社内</span>
+                <span style="font-size: 0.8em; padding: 4px 10px; border-radius: 4px; background: #b32121; color: white;">来客</span>
+            </div>
+        </div>
+
+        <div class="timeline-container">
+            <div class="timeline-header">
+                <div class="room-label-placeholder"></div>
+                <div class="time-scale">
+                    @for (int h = 9; h <= 22; h++)
+                    {
+                        <div class="time-mark" style="left: @GetTimePosition(h, 0)%">@h:00</div>
+                    }
+                </div>
+            </div>
+
+            @foreach (var room in roomList)
+            {
+                <div class="timeline-row">
+                    <div class="room-label" style="border-left: 4px solid @GetRoomColor(room)">
+                        @room
+                    </div>
+
+                    <div class="timeline-track">
+                        @for (int h = 9; h <= 22; h++)
+                        {
+                            <div class="grid-line" style="left: @GetTimePosition(h, 0)%"></div>
+                        }
+
+                        @foreach (var booking in GetBookingsForRoom(room))
+                        {
+                            <div class="booking-block"
+                                 style="left: @GetBlockLeft(booking)%; width: @GetBlockWidth(booking)%; background: @GetTypeColor(booking.Type); cursor: pointer;"
+                                 @onclick="() => ShowDetail(booking)">
+
+                                <div class="block-content">
+                                    <span class="block-text name">@booking.Name</span>
+                                    <span class="block-text purpose">@(string.IsNullOrEmpty(booking.Purpose) ? "-" : booking.Purpose)</span>
+                                    <span class="block-text people">@booking.NumberOfPeople 名</span>
+                                </div>
+
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</FluentStack>
+
+@if (selectedBooking != null)
+{
+    <div class="modal-backdrop" @onclick="CloseDetail">
+        <div class="modal-content cyber-card" @onclick:stopPropagation="true">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                <div>
+                    <span style="background: @GetTypeColor(selectedBooking.Type); padding: 4px 10px; border-radius: 4px; font-size: 0.8em; color: white;">
+                        @selectedBooking.Type
+                    </span>
+                    <h2 style="margin: 10px 0 5px 0;">@selectedBooking.Name</h2>
+                </div>
+                <button class="close-btn" @onclick="CloseDetail">×</button>
+            </div>
+            <div class="detail-row">
+                <label>日時</label>
+                <div>
+                    @selectedBooking.Date.ToString("yyyy/MM/dd")<br />
+                    <span style="font-size: 1.2em; font-weight: bold;">
+                        @selectedBooking.StartTime.ToString("HH:mm") ～ @selectedBooking.EndTime.ToString("HH:mm")
+                    </span>
+                </div>
+            </div>
+            <div class="detail-row">
+                <label>会議室</label>
+                <div style="color: @GetRoomColor(selectedBooking.Room); font-weight: bold;">@selectedBooking.Room</div>
+            </div>
+            <div class="detail-row">
+                <label>利用人数</label>
+                <div>@selectedBooking.NumberOfPeople 名</div>
+            </div>
+            <div class="detail-row">
+                <label>利用目的</label>
+                <div>@(string.IsNullOrEmpty(selectedBooking.Purpose) ? "(なし)" : selectedBooking.Purpose)</div>
+            </div>
+            <div style="margin-top: 20px; text-align: right;">
+                <FluentButton Appearance="Appearance.Accent" OnClick="CloseDetail">閉じる</FluentButton>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private DateTime? selectedDate = DateTime.Today;
+    private List<ReservationModel> allReservations = new();
+    private List<string> roomList = new() { "大会議室", "小会議室", "応接室" };
+    private ReservationModel? selectedBooking = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        allReservations = await BookingService.GetReservationsAsync();
+    }
+    private async Task OnDateChanged() => await InvokeAsync(StateHasChanged);
+    private IEnumerable<ReservationModel> GetBookingsForRoom(string room)
+    {
+        if (selectedDate == null) return Enumerable.Empty<ReservationModel>();
+        return allReservations.Where(x => x.Date.Date == selectedDate.Value.Date && x.Room == room);
+    }
+    private void ShowDetail(ReservationModel booking) => selectedBooking = booking;
+    private void CloseDetail() => selectedBooking = null;
+    private double GetTimePosition(int hour, int minute)
+    {
+        double totalMinutes = 13 * 60;
+        double currentMinutes = (hour - 9) * 60 + minute;
+        if (currentMinutes < 0) currentMinutes = 0;
+        if (currentMinutes > totalMinutes) currentMinutes = totalMinutes;
+        return (currentMinutes / totalMinutes) * 100.0;
+    }
+    private double GetBlockLeft(ReservationModel b) => GetTimePosition(b.StartTime.Hour, b.StartTime.Minute);
+    private double GetBlockWidth(ReservationModel b) => GetTimePosition(b.EndTime.Hour, b.EndTime.Minute) - GetBlockLeft(b);
+    private string GetRoomColor(string room) => room == "大会議室" ? "#58a6ff" : (room == "小会議室" ? "#3fb950" : "#a371f7");
+    private string GetTypeColor(string type) => type == "来客" ? "#b32121" : "#1b6ec2";
+}
+
+<style>
+    .timeline-container {
+        position: relative;
+        min-width: 800px;
+        width: 100%;
+    }
+
+    .timeline-header {
+        display: flex;
+        height: 30px;
+        border-bottom: 1px solid #30363d;
+        margin-bottom: 10px;
+    }
+
+    .room-label-placeholder {
+        width: 100px;
+        flex-shrink: 0;
+    }
+
+    .time-scale {
+        flex-grow: 1;
+        position: relative;
+    }
+
+    .time-mark {
+        position: absolute;
+        transform: translateX(-50%);
+        font-size: 0.8em;
+        color: #8b949e;
+    }
+
+    .timeline-row {
+        display: flex;
+        height: 60px;
+        margin-bottom: 15px;
+        align-items: center;
+    }
+
+    .room-label {
+        width: 100px;
+        font-weight: bold;
+        flex-shrink: 0;
+        padding-left: 10px;
+    }
+
+    .timeline-track {
+        flex-grow: 1;
+        position: relative;
+        height: 100%;
+        background: rgba(255,255,255,0.03);
+        border-radius: 4px;
+    }
+
+    .grid-line {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 1px;
+        background: rgba(255,255,255,0.08);
+    }
+
+    .booking-block {
+        position: absolute;
+        top: 2px;
+        bottom: 2px;
+        border-radius: 4px;
+        color: white;
+        padding: 0 4px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        border: 1px solid rgba(255,255,255,0.2);
+        transition: transform 0.1s;
+        z-index: 5;
+    }
+
+    .booking-block:hover {
+        transform: scaleY(1.05);
+        z-index: 10;
+     }
+
+    .block-content {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        height: 100%;
+        overflow: hidden;
+    }
+
+    .block-text {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        line-height: 1.2;
+        display: block;
+    }
+
+    .name {
+        font-weight: bold;
+        font-size: 0.85em;
+    }
+
+    .purpose {
+        font-size: 0.75em;
+        opacity: 0.9;
+    }
+
+    .people {
+        font-size: 0.75em;
+        opacity: 0.9;
+    }
+
+    .modal-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        animation: fadeIn 0.2s;
+    }
+
+    .modal-content {
+        width: 90%;
+        max-width: 500px;
+        padding: 30px !important;
+        background: #161b22;
+        border: 1px solid #58a6ff;
+        box-shadow: 0 0 30px rgba(88, 166, 255, 0.2) !important;
+        animation: scaleIn 0.2s;
+    }
+
+    .close-btn {
+        background: none;
+        border: none;
+        color: #8b949e;
+        font-size: 1.5rem;
+        cursor: pointer;
+    }
+
+        .close-btn:hover {
+            color: white;
+        }
+
+    .detail-row {
+        margin-bottom: 15px;
+        border-bottom: 1px solid #30363d;
+        padding-bottom: 10px;
+    }
+
+        .detail-row label {
+            display: block;
+            font-size: 0.85em;
+            color: #8b949e;
+            margin-bottom: 4px;
+        }
+
+    @@keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    @@keyframes scaleIn {
+        from {
+            transform: scale(0.9);
+        }
+
+        to {
+            transform: scale(1);
+        }
+    }
+</style>
