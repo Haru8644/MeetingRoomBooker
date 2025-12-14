@@ -84,3 +84,105 @@ h1:focus {
         padding-left: env(safe-area-inset-left);
     }
 }
+
+body {
+    background-color: #0d1117 !important;
+    color: #e6edf3 !important;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+    body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 200%;
+        height: 200%;
+        background-image: linear-gradient(rgba(88, 166, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(88, 166, 255, 0.03) 1px, transparent 1px);
+        background-size: 40px 40px;
+        transform: perspective(500px) rotateX(60deg) translateY(-100px) translateZ(-200px);
+        animation: gridMove 20s linear infinite;
+        z-index: -1;
+        pointer-events: none;
+    }
+
+@keyframes gridMove {
+    0% {
+        transform: perspective(500px) rotateX(60deg) translateY(0) translateZ(-200px);
+    }
+
+    100% {
+        transform: perspective(500px) rotateX(60deg) translateY(40px) translateZ(-200px);
+    }
+}
+
+.cyber-card {
+    background-color: #161b22 !important;
+    border: 1px solid #30363d !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 20px rgba(88, 166, 255, 0.15), 0 0 0 1px rgba(139, 148, 158, 0.1) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+    .cyber-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(187, 134, 252, 0.25) !important;
+        border-color: #8b949e !important;
+    }
+
+fluent-text-field, fluent-number-field, fluent-select, fluent-date-picker, fluent-time-picker {
+    --neutral-fill-input-rest: #0d1117;
+    --neutral-stroke-input-rest: #30363d;
+    color: white;
+}
+
+.cyber-button-primary {
+    background: linear-gradient(135deg, #2b32b2 0%, #1488cc 100%);
+    color: white !important;
+    border: none !important;
+    box-shadow: 0 0 10px rgba(20, 136, 204, 0.5);
+}
+
+.cyber-button-danger {
+    color: #ff7b72 !important;
+    border: 1px solid #ff7b72 !important;
+}
+
+.gradient-text {
+    background: linear-gradient(to right, #58a6ff, #bc8cff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: bold;
+}
+
+.hero-button {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    min-height: 50px;
+    padding: 0 30px !important;
+    font-size: 1.2rem !important;
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-decoration: none;
+}
+
+.cyber-clock {
+    font-family: 'Consolas', 'Monaco', monospace;
+    color: #58a6ff;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(88, 166, 255, 0.8);
+    background: rgba(13, 17, 23, 0.8);
+    padding: 5px 15px;
+    border-radius: 4px;
+    border: 1px solid rgba(88, 166, 255, 0.3);
+    display: inline-block;
+}
+
+.date-text {
+    font-size: 0.9rem;
+    color: #8b949e;
+    margin-right: 10px;
+    font-family: 'Consolas', monospace;
+}
