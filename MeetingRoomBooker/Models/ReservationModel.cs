@@ -20,5 +20,7 @@ namespace MeetingRoomBooker.Models
         public DateTime EndTime { get; set; }
         public int UserId { get; set; }
         public List<int> ParticipantIds { get; set; } = new List<int>();
+        public string RepeatType { get; set; } = "しない";
+        public DateTime? RepeatUntil { get; set; }
     }
 }
