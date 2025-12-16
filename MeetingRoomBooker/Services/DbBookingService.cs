@@ -33,7 +33,7 @@ namespace MeetingRoomBooker.Services
             {
                 target.Name = reservation.Name;
                 target.Room = reservation.Room;
-                target.NumberOfPeople = reservation.NumberOfPeople; 
+                target.NumberOfPeople = reservation.NumberOfPeople;
                 target.Date = reservation.Date;
                 target.StartTime = reservation.StartTime;
                 target.EndTime = reservation.EndTime;
@@ -41,6 +41,43 @@ namespace MeetingRoomBooker.Services
                 target.Purpose = reservation.Purpose;
                 await _context.SaveChangesAsync();
             }
+        }
+        public Task<UserModel?> LoginAsync(string email, string password)
+        {
+            throw new NotImplementedException("DB mode is currently under maintenance. Use Mock mode.");
+        }
+
+        public Task RegisterUserAsync(UserModel user)
+        {
+            throw new NotImplementedException("DB mode is currently under maintenance. Use Mock mode.");
+        }
+
+        public Task<List<UserModel>> GetAllUsersAsync()
+        {
+            throw new NotImplementedException("DB mode is currently under maintenance. Use Mock mode.");
+        }
+
+        public UserModel? GetCurrentUser()
+        {
+            return null;
+        }
+
+        public void Logout()
+        {
+        }
+        public Task<List<NotificationModel>> GetNotificationsAsync(int userId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task AddNotificationAsync(NotificationModel notification)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task MarkNotificationAsReadAsync(int notificationId)
+        {
+            throw new NotImplementedException();
         }
     }
 }
