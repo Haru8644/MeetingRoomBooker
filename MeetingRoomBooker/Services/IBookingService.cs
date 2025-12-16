@@ -16,5 +16,6 @@ namespace MeetingRoomBooker.Services
         Task<List<NotificationModel>> GetNotificationsAsync(int userId);
         Task AddNotificationAsync(NotificationModel notification);
         Task MarkNotificationAsReadAsync(int notificationId);
+        event Action OnChange;
     }
 }
