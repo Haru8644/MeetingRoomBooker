@@ -241,7 +241,6 @@
     private DateTime? editStart;
     private DateTime? editEnd;
     private string editPurpose = "";
-
     protected override async Task OnInitializedAsync()
     {
         await LoadData();
@@ -290,12 +289,13 @@
             foreach (var cluster in clusters)
             {
                 var lanes = CalculateLanes(cluster);
-                int depth = lanes.Count;
-                bool isOverflow = depth > 3;
-                int displayRows = isOverflow ? 3 : depth;
+                int totalLanes = lanes.Count;
+                int maxRows = 3;
+                bool isOverflow = totalLanes > maxRows;
+                int displayRows = isOverflow ? maxRows : totalLanes;
                 double heightPercent = (displayRows > 0) ? (100.0 / displayRows) : 100;
-                double actualHeight = heightPercent - 2.0; 
-                int normalLanes = isOverflow ? 2 : depth;
+                double actualHeight = heightPercent - 2.0;
+                int normalLanes = isOverflow ? (maxRows - 1) : totalLanes;
 
                 for (int i = 0; i < normalLanes; i++)
                 {
@@ -313,7 +313,7 @@
                 if (isOverflow)
                 {
                     var overflowItems = new List<ReservationModel>();
-                    for (int i = 2; i < lanes.Count; i++)
+                    for (int i = normalLanes; i < lanes.Count; i++)
                     {
                         overflowItems.AddRange(lanes[i]);
                     }
@@ -415,11 +415,7 @@
         if (!items.Any()) yield break;
 
         var sorted = items.OrderBy(b => b.StartTime).ToList();
-        var currentBlock = new OverflowBlock
-        {
-            Start = sorted[0].StartTime,
-            End = sorted[0].EndTime
-        };
+        var currentBlock = new OverflowBlock { Start = sorted[0].StartTime, End = sorted[0].EndTime };
         currentBlock.Items.Add(sorted[0]);
 
         for (int i = 1; i < sorted.Count; i++)
@@ -432,11 +428,7 @@
             else
             {
                 yield return currentBlock;
-                currentBlock = new OverflowBlock
-                {
-                    Start = sorted[i].StartTime,
-                    End = sorted[i].EndTime
-                };
+                currentBlock = new OverflowBlock { Start = sorted[i].StartTime, End = sorted[i].EndTime };
                 currentBlock.Items.Add(sorted[i]);
             }
         }
@@ -525,6 +517,30 @@
 }
 
 <style>
+    .cyber-card {
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+    }
+
+    .cyber-card::-webkit-scrollbar {
+        height: 8px;
+        width: 8px;
+    }
+
+    .cyber-card::-webkit-scrollbar-track {
+        background: #0d1117;
+        border-radius: 4px;
+    }
+
+    .cyber-card::-webkit-scrollbar-thumb {
+        background: #30363d;
+        border-radius: 4px;
+    }
+
+    .cyber-card::-webkit-scrollbar-thumb:hover {
+        background: #58a6ff;
+    }
+
     .warning-icon {
         position: absolute;
         top: 2px;
@@ -646,6 +662,7 @@
         flex-shrink: 0;
         padding-left: 10px;
         color: #e6edf3;
+        font-size: 0.9rem;
     }
 
     .timeline-track {
@@ -733,6 +750,8 @@
         border: 1px solid #58a6ff;
         box-shadow: 0 0 30px rgba(88, 166, 255, 0.2) !important;
         animation: scaleIn 0.2s;
+        max-height: 90vh;
+        overflow-y: auto;
     }
 
     .close-btn {
@@ -743,9 +762,9 @@
         cursor: pointer;
     }
 
-        .close-btn:hover {
-            color: white;
-        }
+    .close-btn:hover {
+        color: white;
+    }
 
     .detail-row {
         margin-bottom: 15px;
@@ -753,12 +772,12 @@
         padding-bottom: 10px;
     }
 
-        .detail-row label {
-            display: block;
-            font-size: 0.85em;
-            color: #8b949e;
-            margin-bottom: 4px;
-        }
+    .detail-row label {
+        display: block;
+        font-size: 0.85em;
+        color: #8b949e;
+        margin-bottom: 4px;
+    }
 
     @@keyframes fadeIn {
         from {
