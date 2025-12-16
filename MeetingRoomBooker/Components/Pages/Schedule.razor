@@ -2,26 +2,42 @@
 @using MeetingRoomBooker.Models
 @using MeetingRoomBooker.Services
 @inject IBookingService BookingService
+@inject NavigationManager Navigation
 
-<FluentStack Orientation="Orientation.Vertical" VerticalGap="20" Style="height: 100%;">
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="20" Style="width: 100%; padding-bottom: 50px;">
     <h3 class="gradient-text">RESERVATION CALENDAR</h3>
-    <div style="display: flex; justify-content: center;">
-        <div class="cyber-card" style="padding: 20px; text-align: center; max-width: 400px; width: 100%;">
+
+    <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+        <div class="cyber-card" style="padding: 15px; text-align: center; width: 300px;">
             <FluentCalendar @bind-Value="selectedDate" @bind-Value:after="OnDateChanged" />
-            <div style="margin-top: 10px; color: #8b949e;">
-                Selected: @(selectedDate?.ToString("yyyy/MM/dd (ddd)") ?? "日付を選択してください")
+        </div>
+
+        <div class="cyber-card" style="padding: 15px; width: 300px; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+                <label style="color: #8b949e; font-size: 0.9em; display: block; margin-bottom: 5px;">View Mode</label>
+                <div class="view-switcher">
+                    <button class="@(currentView == ViewMode.Day ? "active" : "")" @onclick="() => ChangeView(ViewMode.Day)">Day</button>
+                    <button class="@(currentView == ViewMode.Week ? "active" : "")" @onclick="() => ChangeView(ViewMode.Week)">Week</button>
+                    <button class="@(currentView == ViewMode.Month ? "active" : "")" @onclick="() => ChangeView(ViewMode.Month)">Month</button>
+                </div>
+            </div>
+            <div style="margin-top: 15px;">
+                <label style="color: #8b949e; font-size: 0.9em;">Current Range</label>
+                <div style="font-weight: bold; color: #58a6ff; font-size: 1.1em;">
+                    @GetRangeLabel()
+                </div>
             </div>
         </div>
     </div>
-    <div class="cyber-card" style="padding: 20px; overflow-x: auto; width: 100%;">
+
+    <div class="cyber-card" style="padding: 20px; overflow-x: auto; width: 100%; min-height: 400px;">
         <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px;">
-            <h4 style="margin: 0;">
-                TIMELINE <span style="font-size:0.8em; color:#8b949e;">(9:00 - 22:00)</span>
-            </h4>
-            <div style="display: flex; gap: 15px; align-items: center;">
-                <span style="font-size: 0.9em; color: #8b949e;">Legend:</span>
-                <span style="font-size: 0.8em; padding: 4px 10px; border-radius: 4px; background: #1b6ec2; color: white;">社内</span>
-                <span style="font-size: 0.8em; padding: 4px 10px; border-radius: 4px; background: #b32121; color: white;">来客</span>
+            <h4 style="margin: 0;">TIMELINE</h4>
+            <div style="display: flex; gap: 10px; align-items: center; font-size: 0.8em;">
+                <span style="color: #8b949e;">Legend:</span>
+                <span style="padding: 2px 8px; border-radius: 4px; background: #1b6ec2; color: white;">社内</span>
+                <span style="padding: 2px 8px; border-radius: 4px; background: #b32121; color: white;">来客</span>
+                <span style="padding: 2px 8px; border-radius: 4px; border: 1px solid #d29922; color: #d29922;">My Booking</span>
             </div>
         </div>
 
@@ -29,9 +45,9 @@
             <div class="timeline-header">
                 <div class="room-label-placeholder"></div>
                 <div class="time-scale">
-                    @for (int h = 9; h <= 22; h++)
+                    @foreach (var tick in GetTimeTicks())
                     {
-                        <div class="time-mark" style="left: @GetTimePosition(h, 0)%">@h:00</div>
+                        <div class="time-mark" style="left: @tick.Position%">@tick.Label</div>
                     }
                 </div>
             </div>
@@ -39,28 +55,26 @@
             @foreach (var room in roomList)
             {
                 <div class="timeline-row">
-                    <div class="room-label" style="border-left: 4px solid @GetRoomColor(room)">
-                        @room
-                    </div>
-
+                    <div class="room-label" style="border-left: 4px solid @GetRoomColor(room)">@room</div>
                     <div class="timeline-track">
-                        @for (int h = 9; h <= 22; h++)
+                        @foreach (var tick in GetTimeTicks())
                         {
-                            <div class="grid-line" style="left: @GetTimePosition(h, 0)%"></div>
+                            <div class="grid-line" style="left: @tick.Position%"></div>
                         }
 
                         @foreach (var booking in GetBookingsForRoom(room))
                         {
-                            <div class="booking-block"
+                            <div class="booking-block @(IsMyBooking(booking) ? "my-booking" : "")"
                                  style="left: @GetBlockLeft(booking)%; width: @GetBlockWidth(booking)%; background: @GetTypeColor(booking.Type); cursor: pointer;"
                                  @onclick="() => ShowDetail(booking)">
 
                                 <div class="block-content">
                                     <span class="block-text name">@booking.Name</span>
-                                    <span class="block-text purpose">@(string.IsNullOrEmpty(booking.Purpose) ? "-" : booking.Purpose)</span>
-                                    <span class="block-text people">@booking.NumberOfPeople 名</span>
+                                    @if (currentView == ViewMode.Day)
+                                    {
+                                        <span class="block-text purpose">@(string.IsNullOrEmpty(booking.Purpose) ? "-" : booking.Purpose)</span>
+                                    }
                                 </div>
-
                             </div>
                         }
                     </div>
@@ -100,6 +114,15 @@
                 <label>利用人数</label>
                 <div>@selectedBooking.NumberOfPeople 名</div>
             </div>
+            @if (selectedBooking.ParticipantIds.Any())
+            {
+                <div class="detail-row">
+                    <label>参加メンバー (ID)</label>
+                    <div style="color: #d29922;">
+                        @string.Join(", ", selectedBooking.ParticipantIds.Select(id => $"User:{id}"))
+                    </div>
+                </div>
+            }
             <div class="detail-row">
                 <label>利用目的</label>
                 <div>@(string.IsNullOrEmpty(selectedBooking.Purpose) ? "(なし)" : selectedBooking.Purpose)</div>
@@ -112,38 +135,190 @@
 }
 
 @code {
-    private DateTime? selectedDate = DateTime.Today;
+    [SupplyParameterFromQuery]
+    public string? Date { get; set; }
+
+    private DateTime selectedDateValue = DateTime.Today;
+    private DateTime? selectedDate
+    {
+        get => selectedDateValue;
+        set { if (value.HasValue) { selectedDateValue = value.Value; OnDateChanged(); } }
+    }
     private List<ReservationModel> allReservations = new();
     private List<string> roomList = new() { "大会議室", "小会議室", "応接室" };
     private ReservationModel? selectedBooking = null;
+    private UserModel? currentUser;
+    private enum ViewMode { Day, Week, Month }
+    private ViewMode currentView = ViewMode.Day;
 
     protected override async Task OnInitializedAsync()
     {
         allReservations = await BookingService.GetReservationsAsync();
+        currentUser = BookingService.GetCurrentUser();
     }
+
+    protected override void OnParametersSet()
+    {
+        if (!string.IsNullOrEmpty(Date) && DateTime.TryParse(Date, out DateTime parsedDate))
+        {
+            selectedDateValue = parsedDate;
+        }
+    }
+
     private async Task OnDateChanged() => await InvokeAsync(StateHasChanged);
+    private void ChangeView(ViewMode mode) => currentView = mode;
+
+    private string GetRangeLabel()
+    {
+        var start = GetViewStartDate();
+        var end = GetViewEndDate();
+        if (currentView == ViewMode.Day) return start.ToString("yyyy/MM/dd (ddd)");
+        if (currentView == ViewMode.Week) return $"{start:MM/dd} - {end:MM/dd}";
+        return start.ToString("yyyy/MM");
+    }
+
+    private DateTime GetViewStartDate()
+    {
+        if (currentView == ViewMode.Day) return selectedDateValue.Date;
+        if (currentView == ViewMode.Week)
+        {
+            var diff = (7 + (selectedDateValue.DayOfWeek - DayOfWeek.Monday)) % 7;
+            return selectedDateValue.AddDays(-1 * diff).Date;
+        }
+        return new DateTime(selectedDateValue.Year, selectedDateValue.Month, 1);
+    }
+
+    private DateTime GetViewEndDate()
+    {
+        if (currentView == ViewMode.Day) return selectedDateValue.Date;
+        if (currentView == ViewMode.Week) return GetViewStartDate().AddDays(6);
+        return GetViewStartDate().AddMonths(1).AddDays(-1);
+    }
+
     private IEnumerable<ReservationModel> GetBookingsForRoom(string room)
     {
-        if (selectedDate == null) return Enumerable.Empty<ReservationModel>();
-        return allReservations.Where(x => x.Date.Date == selectedDate.Value.Date && x.Room == room);
+        var start = GetViewStartDate();
+        var end = GetViewEndDate();
+        return allReservations.Where(x =>
+            x.Room == room &&
+            x.Date.Date >= start &&
+            x.Date.Date <= end
+        );
     }
-    private void ShowDetail(ReservationModel booking) => selectedBooking = booking;
-    private void CloseDetail() => selectedBooking = null;
+
+    private struct TimeTick { public string Label; public double Position; }
+
+    private List<TimeTick> GetTimeTicks()
+    {
+        var list = new List<TimeTick>();
+        if (currentView == ViewMode.Day)
+        {
+            for (int h = 9; h <= 22; h++) list.Add(new TimeTick { Label = $"{h}:00", Position = GetTimePosition(h, 0) });
+        }
+        else if (currentView == ViewMode.Week)
+        {
+            var start = GetViewStartDate();
+            for (int i = 0; i < 7; i++)
+            {
+                var d = start.AddDays(i);
+                list.Add(new TimeTick { Label = d.ToString("dd(ddd)"), Position = (i / 7.0) * 100 });
+            }
+        }
+        else 
+        {
+            var start = GetViewStartDate();
+            var days = DateTime.DaysInMonth(start.Year, start.Month);
+            for (int i = 0; i < days; i += 5)
+            {
+                list.Add(new TimeTick { Label = (i + 1).ToString(), Position = (i / (double)days) * 100 });
+            }
+        }
+        return list;
+    }
+
+    private double GetBlockLeft(ReservationModel b)
+    {
+        if (currentView == ViewMode.Day)
+        {
+            return GetTimePosition(b.StartTime.Hour, b.StartTime.Minute);
+        }
+        else
+        {
+            var viewStart = GetViewStartDate();
+            var totalDays = (currentView == ViewMode.Week) ? 7.0 : DateTime.DaysInMonth(viewStart.Year, viewStart.Month);
+            var offsetDays = (b.Date.Date - viewStart).TotalDays;
+            if (offsetDays < 0) offsetDays = 0;
+            return (offsetDays / totalDays) * 100.0;
+        }
+    }
+
+    private double GetBlockWidth(ReservationModel b)
+    {
+        if (currentView == ViewMode.Day)
+        {
+            return GetTimePosition(b.EndTime.Hour, b.EndTime.Minute) - GetBlockLeft(b);
+        }
+        else
+        {
+            var viewStart = GetViewStartDate();
+            var totalDays = (currentView == ViewMode.Week) ? 7.0 : DateTime.DaysInMonth(viewStart.Year, viewStart.Month);
+            return (1.0 / totalDays) * 100.0;
+        }
+    }
+
     private double GetTimePosition(int hour, int minute)
     {
-        double totalMinutes = 13 * 60;
+        double totalMinutes = 13 * 60; 
         double currentMinutes = (hour - 9) * 60 + minute;
         if (currentMinutes < 0) currentMinutes = 0;
         if (currentMinutes > totalMinutes) currentMinutes = totalMinutes;
         return (currentMinutes / totalMinutes) * 100.0;
     }
-    private double GetBlockLeft(ReservationModel b) => GetTimePosition(b.StartTime.Hour, b.StartTime.Minute);
-    private double GetBlockWidth(ReservationModel b) => GetTimePosition(b.EndTime.Hour, b.EndTime.Minute) - GetBlockLeft(b);
+
+    private void ShowDetail(ReservationModel booking) => selectedBooking = booking;
+    private void CloseDetail() => selectedBooking = null;
     private string GetRoomColor(string room) => room == "大会議室" ? "#58a6ff" : (room == "小会議室" ? "#3fb950" : "#a371f7");
     private string GetTypeColor(string type) => type == "来客" ? "#b32121" : "#1b6ec2";
+
+    private bool IsMyBooking(ReservationModel b)
+    {
+        if (currentUser == null) return false;
+        return b.UserId == currentUser.Id || b.ParticipantIds.Contains(currentUser.Id);
+    }
 }
 
 <style>
+    .view-switcher {
+        display: flex;
+        background: #0d1117;
+        border: 1px solid #30363d;
+        border-radius: 6px;
+        overflow: hidden;
+        margin-top: 5px;
+    }
+
+    .view-switcher button {
+        flex: 1;
+        background: transparent;
+        border: none;
+        color: #8b949e;
+        padding: 5px 10px;
+        cursor: pointer;
+        font-size: 0.9em;
+        transition: all 0.2s;
+    }
+
+    .view-switcher button.active {
+        background: #1b6ec2;
+        color: white;
+    }
+
+    .view-switcher button:hover:not(.active) {
+        background: rgba(255,255,255,0.05);
+        color: white;
+    }
+
+
     .timeline-container {
         position: relative;
         min-width: 800px;
@@ -172,6 +347,7 @@
         transform: translateX(-50%);
         font-size: 0.8em;
         color: #8b949e;
+        white-space: nowrap;
     }
 
     .timeline-row {
@@ -186,6 +362,7 @@
         font-weight: bold;
         flex-shrink: 0;
         padding-left: 10px;
+        color: #e6edf3;
     }
 
     .timeline-track {
@@ -206,8 +383,8 @@
 
     .booking-block {
         position: absolute;
-        top: 2px;
-        bottom: 2px;
+        top: 4px;
+        bottom: 4px;
         border-radius: 4px;
         color: white;
         padding: 0 4px;
@@ -215,19 +392,25 @@
         border: 1px solid rgba(255,255,255,0.2);
         transition: transform 0.1s;
         z-index: 5;
+        overflow: hidden;
     }
 
-    .booking-block:hover {
-        transform: scaleY(1.05);
-        z-index: 10;
-     }
+        .booking-block:hover {
+            transform: scaleY(1.05);
+            z-index: 10;
+        }
+
+    .my-booking {
+        border: 2px solid #d29922 !important;
+        box-shadow: 0 0 10px rgba(210, 153, 34, 0.6) !important;
+        z-index: 6;
+    }
 
     .block-content {
         display: flex;
         flex-direction: column;
         justify-content: center;
         height: 100%;
-        overflow: hidden;
     }
 
     .block-text {
@@ -244,11 +427,6 @@
     }
 
     .purpose {
-        font-size: 0.75em;
-        opacity: 0.9;
-    }
-
-    .people {
         font-size: 0.75em;
         opacity: 0.9;
     }
@@ -285,9 +463,9 @@
         cursor: pointer;
     }
 
-        .close-btn:hover {
-            color: white;
-        }
+    .close-btn:hover {
+        color: white;
+    }
 
     .detail-row {
         margin-bottom: 15px;
@@ -295,12 +473,12 @@
         padding-bottom: 10px;
     }
 
-        .detail-row label {
-            display: block;
-            font-size: 0.85em;
-            color: #8b949e;
-            margin-bottom: 4px;
-        }
+    .detail-row label {
+        display: block;
+        font-size: 0.85em;
+        color: #8b949e;
+        margin-bottom: 4px
+    }
 
     @@keyframes fadeIn {
         from {

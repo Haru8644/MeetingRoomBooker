@@ -6,7 +6,7 @@ namespace MeetingRoomBooker.Services
     public class DbBookingService : IBookingService
     {
         private readonly AppDbContext _context;
-
+        public event Action OnChange;
         public DbBookingService(AppDbContext context)
         {
             _context = context;

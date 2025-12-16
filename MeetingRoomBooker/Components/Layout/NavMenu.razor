@@ -2,6 +2,7 @@
 @using MeetingRoomBooker.Models
 @inject IBookingService BookingService
 @inject NavigationManager Navigation
+@implements IDisposable
 
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
@@ -29,10 +30,21 @@
             </NavLink>
         </div>
 
-        <div class="nav-separator"></div>
-
         @if (currentUser != null)
         {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="notifications">
+                    <span class="bi bi-bell-fill-nav-menu" aria-hidden="true">
+                        @if (unreadCount > 0)
+                        {
+                            <span class="notify-badge">@unreadCount</span>
+                        }
+                    </span> 通知
+                </NavLink>
+            </div>
+
+            <div class="nav-separator"></div>
+
             <div class="user-profile-item px-3">
                 <div class="user-profile-content">
                     <div class="user-avatar" style="background-color: @currentUser.AvatarColor">
@@ -48,9 +60,15 @@
         }
         else
         {
+            <div class="nav-separator"></div>
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="login">
                     <span class="bi bi-box-arrow-in-right-nav-menu" aria-hidden="true"></span> ログイン
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="register">
+                    <span class="bi bi-person-plus-fill-nav-menu" aria-hidden="true"></span> ユーザー登録
                 </NavLink>
             </div>
         }
@@ -61,10 +79,33 @@
     private bool collapseNavMenu = true;
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
     private UserModel? currentUser;
+    private int unreadCount = 0;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
+    {
+        BookingService.OnChange += StateHasChangedWrapper;
+        await LoadData();
+    }
+
+    private async void StateHasChangedWrapper()
+    {
+        await LoadData();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task LoadData()
     {
         currentUser = BookingService.GetCurrentUser();
+        if (currentUser != null)
+        {
+            var notes = await BookingService.GetNotificationsAsync(currentUser.Id);
+            unreadCount = notes.Count(n => !n.IsRead);
+        }
+    }
+
+    public void Dispose()
+    {
+        BookingService.OnChange -= StateHasChangedWrapper;
     }
 
     private void ToggleNavMenu()
@@ -84,6 +125,7 @@
         white-space: nowrap !important;
         overflow: hidden;
         text-overflow: ellipsis;
+        position: relative;
     }
 
     .nav-separator {
@@ -93,8 +135,7 @@
     }
 
     .user-profile-item {
-        padding-top: 10px;
-        padding-bottom: 10px;
+        padding: 10px 0;
         color: #d7d7d7;
         overflow: hidden;
     }
@@ -152,5 +193,30 @@
     .logout-link:hover span {
         color: #ff7b72 !important;
         text-decoration: underline;
+    }
+
+    .notify-badge {
+        position: absolute;
+        top: 8px; 
+        right: 10px;
+        background-color: #f85149;
+        color: white;
+        border-radius: 50%; 
+        width: 18px; 
+        height: 18px; 
+        font-size: 0.65rem;
+        display: flex; 
+        align-items: center;
+        justify-content: center;
+        border: 2px solid #161b22;
+        font-weight: bold;
+    }
+
+    .bi-bell-fill-nav-menu {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' class='bi bi-bell-fill' viewBox='0 0 16 16'%3E%3Cpath d='M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zm.995-14.901a1 1 0 1 0-1.99 0A5.002 5.002 0 0 0 3 6c0 1.098-.5 6-2 7h14c-1.5-1-2-5.902-2-7 0-2.42-1.72-4.44-4.005-4.901z'/%3E%3C/svg%3E");
+    }
+
+    .bi-person-plus-fill-nav-menu {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' class='bi bi-person-plus-fill' viewBox='0 0 16 16'%3E%3Cpath d='M1 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6z'/%3E%3Cpath fill-rule='evenodd' d='M13.5 5a.5.5 0 0 1 .5.5V7h1.5a.5.5 0 0 1 0 1H14v1.5a.5.5 0 0 1-1 0V8h-1.5a.5.5 0 0 1 0-1H13V5.5a.5.5 0 0 1 .5-.5z'/%3E%3C/svg%3E");
     }
 </style>

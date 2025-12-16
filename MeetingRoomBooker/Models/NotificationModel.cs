@@ -7,6 +7,8 @@
         public string Message { get; set; } = "";
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public bool IsRead { get; set; } = false;
-        public string Type { get; set; } = "Info"; 
+        public string Type { get; set; } = "Info";
+        public int TargetReservationId { get; set; }
+        public DateTime TargetDate { get; set; }
     }
 }
