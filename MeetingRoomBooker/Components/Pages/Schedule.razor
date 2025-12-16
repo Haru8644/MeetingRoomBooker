@@ -38,6 +38,7 @@
                 <span style="padding: 2px 8px; border-radius: 4px; background: #1b6ec2; color: white;">社内</span>
                 <span style="padding: 2px 8px; border-radius: 4px; background: #b32121; color: white;">来客</span>
                 <span style="padding: 2px 8px; border-radius: 4px; border: 1px solid #d29922; color: #d29922;">My Booking</span>
+                <span style="color: #ffbf00; font-weight: bold; margin-left: 5px;">⚠ Warning</span>
             </div>
         </div>
 
@@ -77,6 +78,12 @@
                                 <div class="booking-block @(IsMyBooking(item.Booking!) ? "my-booking" : "")"
                                      style="@item.Style"
                                      @onclick="() => ShowDetail(item.Booking!)">
+
+                                    @if (item.HasConflict)
+                                    {
+                                        <div class="warning-icon" title="重複しています">⚠</div>
+                                    }
+
                                     <div class="block-content">
                                         <span class="block-text name">@item.Booking!.Name</span>
                                         @if (currentView == ViewMode.Day)
@@ -111,6 +118,10 @@
                             <span style="font-size:0.8em; color:#8b949e">@b.StartTime.ToString("HH:mm")-@b.EndTime.ToString("HH:mm")</span>
                         </div>
                         <div style="font-weight:bold;">@b.Name</div>
+                        @if (HasConflict(b))
+                        {
+                            <div style="color: #ffbf00; font-size: 0.8em;">⚠ 重複あり</div>
+                        }
                     </div>
                 }
             </div>
@@ -130,6 +141,12 @@
                             @selectedBooking.Type
                         </span>
                         <h2 style="margin: 10px 0 5px 0;">@selectedBooking.Name</h2>
+                        @if (HasConflict(selectedBooking))
+                        {
+                            <div style="color: #ffbf00; margin-top: 5px; font-weight: bold;">
+                                ⚠ この予約は他の予約と時間が重複しています
+                            </div>
+                        }
                     }
                     else
                     {
@@ -234,7 +251,7 @@
     {
         allReservations = await BookingService.GetReservationsAsync();
         currentUser = BookingService.GetCurrentUser();
-        try { allUsers = await BookingService.GetAllUsersAsync(); } catch { /* Mockなら無視 */ }
+        try { allUsers = await BookingService.GetAllUsersAsync(); } catch { }
     }
     protected override void OnParametersSet()
     {
@@ -249,7 +266,16 @@
         public string Style { get; set; } = "";
         public bool IsMoreButton { get; set; }
         public int Count { get; set; }
+        public bool HasConflict { get; set; }
         public List<ReservationModel> HiddenBookings { get; set; } = new();
+    }
+
+    private class OverflowBlock
+    {
+        public DateTime Start { get; set; }
+        public DateTime End { get; set; }
+        public List<ReservationModel> Items { get; set; } = new();
+        public int Count => Items.Count;
     }
 
     private IEnumerable<RenderItem> GetRenderItems(string room)
@@ -260,13 +286,49 @@
 
         if (currentView == ViewMode.Day)
         {
-            foreach (var b in bookings)
+            var clusters = GetClusters(bookings);
+            foreach (var cluster in clusters)
             {
-                yield return new RenderItem
+                var lanes = CalculateLanes(cluster);
+                int depth = lanes.Count;
+                bool isOverflow = depth > 3;
+                int displayRows = isOverflow ? 3 : depth;
+                double heightPercent = (displayRows > 0) ? (100.0 / displayRows) : 100;
+                double actualHeight = heightPercent - 2.0; 
+                int normalLanes = isOverflow ? 2 : depth;
+
+                for (int i = 0; i < normalLanes; i++)
                 {
-                    Booking = b,
-                    Style = $"left: {GetTimePosition(b.StartTime.Hour, b.StartTime.Minute)}%; width: {GetDurationWidth(b)}%; background: {GetTypeColor(b.Type)}; top: 5%; height: 90%; opacity: 0.9;"
-                };
+                    foreach (var booking in lanes[i])
+                    {
+                        yield return new RenderItem
+                        {
+                            Booking = booking,
+                            HasConflict = HasConflict(booking),
+                            Style = $"left: {GetTimePosition(booking.StartTime.Hour, booking.StartTime.Minute)}%; width: {GetDurationWidth(booking)}%; background: {GetTypeColor(booking.Type)}; top: {i * heightPercent}%; height: {actualHeight}%; position: absolute; box-sizing: border-box; border-top: 1px solid #161b22; opacity: 0.95;"
+                        };
+                    }
+                }
+
+                if (isOverflow)
+                {
+                    var overflowItems = new List<ReservationModel>();
+                    for (int i = 2; i < lanes.Count; i++)
+                    {
+                        overflowItems.AddRange(lanes[i]);
+                    }
+
+                    foreach (var block in GetOverflowBlocks(overflowItems))
+                    {
+                        yield return new RenderItem
+                        {
+                            IsMoreButton = true,
+                            Count = block.Count,
+                            HiddenBookings = block.Items,
+                            Style = $"left: {GetTimePosition(block.Start.Hour, block.Start.Minute)}%; width: {GetDurationWidth(block.Start, block.End)}%; background: #30363d; border: 1px dashed #8b949e; top: {2 * heightPercent}%; height: {actualHeight}%; position: absolute; box-sizing: border-box; display: flex; align-items: center; justify-content: center;"
+                        };
+                    }
+                }
             }
         }
         else
@@ -276,11 +338,9 @@
             {
                 var sorted = group.OrderBy(b => b.StartTime).ToList();
                 int count = sorted.Count;
-                int maxVisible = 3;
-
                 for (int i = 0; i < count; i++)
                 {
-                    if (i == 2 && count > 3) 
+                    if (i == 2 && count > 3)
                     {
                         var hidden = sorted.Skip(2).ToList();
                         yield return new RenderItem
@@ -295,11 +355,97 @@
                     yield return new RenderItem
                     {
                         Booking = sorted[i],
+                        HasConflict = HasConflict(sorted[i]),
                         Style = GetGridStyle(group.Key, i, (count > 3 ? 3 : count)) + $"background: {GetTypeColor(sorted[i].Type)};"
                     };
                 }
             }
         }
+    }
+
+    private List<List<ReservationModel>> GetClusters(List<ReservationModel> bookings)
+    {
+        var sorted = bookings.OrderBy(b => b.StartTime).ToList();
+        var clusters = new List<List<ReservationModel>>();
+        if (!sorted.Any()) return clusters;
+
+        var currentCluster = new List<ReservationModel> { sorted[0] };
+        var clusterEnd = sorted[0].EndTime;
+
+        for (int i = 1; i < sorted.Count; i++)
+        {
+            if (sorted[i].StartTime < clusterEnd)
+            {
+                currentCluster.Add(sorted[i]);
+                if (sorted[i].EndTime > clusterEnd) clusterEnd = sorted[i].EndTime;
+            }
+            else
+            {
+                clusters.Add(currentCluster);
+                currentCluster = new List<ReservationModel> { sorted[i] };
+                clusterEnd = sorted[i].EndTime;
+            }
+        }
+        clusters.Add(currentCluster);
+        return clusters;
+    }
+
+    private List<List<ReservationModel>> CalculateLanes(List<ReservationModel> cluster)
+    {
+        var lanes = new List<List<ReservationModel>>();
+        foreach (var booking in cluster)
+        {
+            bool placed = false;
+            foreach (var lane in lanes)
+            {
+                if (lane.Last().EndTime <= booking.StartTime)
+                {
+                    lane.Add(booking);
+                    placed = true;
+                    break;
+                }
+            }
+            if (!placed) lanes.Add(new List<ReservationModel> { booking });
+        }
+        return lanes;
+    }
+
+    private IEnumerable<OverflowBlock> GetOverflowBlocks(List<ReservationModel> items)
+    {
+        if (!items.Any()) yield break;
+
+        var sorted = items.OrderBy(b => b.StartTime).ToList();
+        var currentBlock = new OverflowBlock
+        {
+            Start = sorted[0].StartTime,
+            End = sorted[0].EndTime
+        };
+        currentBlock.Items.Add(sorted[0]);
+
+        for (int i = 1; i < sorted.Count; i++)
+        {
+            if (sorted[i].StartTime < currentBlock.End)
+            {
+                if (sorted[i].EndTime > currentBlock.End) currentBlock.End = sorted[i].EndTime;
+                currentBlock.Items.Add(sorted[i]);
+            }
+            else
+            {
+                yield return currentBlock;
+                currentBlock = new OverflowBlock
+                {
+                    Start = sorted[i].StartTime,
+                    End = sorted[i].EndTime
+                };
+                currentBlock.Items.Add(sorted[i]);
+            }
+        }
+        yield return currentBlock;
+    }
+
+    private bool HasConflict(ReservationModel target)
+    {
+        return allReservations.Any(x => x.Id != target.Id && x.Room == target.Room && x.Date.Date == target.Date.Date && x.StartTime < target.EndTime && x.EndTime > target.StartTime);
     }
 
     private string GetGridStyle(DateTime date, int index, int totalInStack)
@@ -312,7 +458,6 @@
         double height = 100.0 / totalInStack;
         height -= 2;
         double top = index * (100.0 / totalInStack);
-
         return $"left: {left}%; width: {width}%; top: {top}%; height: {height}%; box-sizing: border-box; border-top: 1px solid #161b22; position: absolute; padding: 0 2px;";
     }
 
@@ -346,6 +491,8 @@
     }
     private double GetTimePosition(int hour, int minute) { double total = 13 * 60; double cur = (hour - 9) * 60 + minute; return (Math.Max(0, Math.Min(cur, total)) / total) * 100.0; }
     private double GetDurationWidth(ReservationModel b) => GetTimePosition(b.EndTime.Hour, b.EndTime.Minute) - GetTimePosition(b.StartTime.Hour, b.StartTime.Minute);
+    private double GetDurationWidth(DateTime start, DateTime end) => GetTimePosition(end.Hour, end.Minute) - GetTimePosition(start.Hour, start.Minute);
+
     private string GetRangeLabel()
     {
         var s = GetViewStartDate(); var e = GetViewEndDate();
@@ -378,6 +525,31 @@
 }
 
 <style>
+    .warning-icon {
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        font-size: 14px;
+        color: #ffbf00;
+        z-index: 10;
+        text-shadow: 0 0 3px rgba(0,0,0,0.8);
+        animation: pulse 2s infinite;
+    }
+
+    @@keyframes pulse {
+        0% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.2);
+        }
+
+        100% {
+            transform: scale(1);
+        }
+    }
+
     .timeline-row {
         display: flex;
         height: 120px;
@@ -403,9 +575,9 @@
         cursor: pointer;
     }
 
-        .list-item:hover {
-            background: rgba(255,255,255,0.05);
-        }
+    .list-item:hover {
+        background: rgba(255,255,255,0.05);
+    }
 
     .view-switcher {
         display: flex;
@@ -503,10 +675,10 @@
         position: absolute;
     }
 
-        .booking-block:hover {
-            z-index: 100;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.8);
-        }
+    .booking-block:hover {
+        z-index: 100;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.8);
+    }
 
     .my-booking {
         border: 2px solid #d29922 !important;
@@ -581,12 +753,12 @@
         padding-bottom: 10px;
     }
 
-    .detail-row label {
-        display: block;
-        font-size: 0.85em;
-        color: #8b949e;
-        margin-bottom: 4px;
-    }
+        .detail-row label {
+            display: block;
+            font-size: 0.85em;
+            color: #8b949e;
+            margin-bottom: 4px;
+        }
 
     @@keyframes fadeIn {
         from {
