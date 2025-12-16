@@ -99,56 +99,6 @@
             </FluentStack>
         </div>
     </div>
-
-    <div>
-        <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
-            <h3 style="margin: 0;">RESERVATION LIST</h3>
-            <span style="background: #30363d; padding: 2px 8px; border-radius: 10px; font-size: 0.8em;">@reservationHistory.Count</span>
-        </div>
-        <FluentSearch Placeholder="Search..." @bind-Value="searchText" Style="width: 100%; max-width: 400px; margin-bottom: 20px;" />
-        <div style="display: flex; flex-wrap: wrap; gap: 20px;">
-            @foreach (var item in FilteredList)
-            {
-                <div class="cyber-card" style="@GetCardStyle(item.Room) width: 300px; padding: 15px; position: relative;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px; align-items: center;">
-                        <span style="font-weight: bold; color: @GetRoomColor(item.Room);">@item.Room</span>
-                        <span style="font-size: 0.75em; padding: 2px 8px; border-radius: 4px; background: @(item.Type == "来客" ? "#b32121" : "#1b6ec2"); color: white; white-space: nowrap;">
-                            @item.Type
-                        </span>
-                    </div>
-
-                    <h4 style="margin: 0 0 5px 0; font-size: 1.2em;">@item.Name</h4>
-                    <div style="font-size: 0.85em; color: #a0a0a0; margin-bottom: 10px; min-height: 1.2em;">
-                        @(string.IsNullOrEmpty(item.Purpose) ? "(目的未入力)" : item.Purpose)
-                    </div>
-
-                    <div style="color: #8b949e; font-size: 0.9em; margin-bottom: 5px;">
-                        @item.Date.ToString("yyyy/MM/dd")
-                        @if (item.RepeatType != "しない")
-                        {
-                            <span style="font-size:0.8em; margin-left:5px; color:#d29922; border:1px solid #d29922; padding:0 4px; border-radius:4px;">@item.RepeatType</span>
-                        }
-                    </div>
-                    <div style="font-size: 1.1em; font-weight: bold; margin-bottom: 10px;">
-                        @item.StartTime.ToString("HH:mm") <span style="color:#58a6ff">➜</span> @item.EndTime.ToString("HH:mm")
-                        <span style="font-size: 0.8em; font-weight: normal; color: #8b949e; margin-left: 10px;">(@item.NumberOfPeople 名)</span>
-                    </div>
-
-                    <div style="display: flex; justify-content: flex-end; gap: 10px;">
-                        @if (currentUser != null && (item.UserId == currentUser.Id || item.UserId == 0))
-                        {
-                            <FluentButton IconStart="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.Edit())"
-                                          OnClick="() => OnEdit(item)" Size="Size.Small">Edit</FluentButton>
-                            <FluentButton IconStart="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.Delete())"
-                                          class="cyber-button-danger"
-                                          Appearance="Appearance.Outline"
-                                          OnClick="() => OnRemove(item)" Size="Size.Small">Del</FluentButton>
-                        }
-                    </div>
-                </div>
-            }
-        </div>
-    </div>
 </FluentStack>
 
 @code {
@@ -156,7 +106,6 @@
     {
         public bool IsSelected { get; set; }
     }
-
     private string currentTime = "";
     private string currentDate = "";
     private System.Threading.Timer? _timer;
@@ -168,7 +117,6 @@
     private DateTime? endTime = DateTime.Today.AddHours(10);
     private string reserveType = "社内";
     private string reservePurpose = "";
-    private string searchText = "";
     private string errorMessage = "";
     private int editingId = 0;
     private string repeatType = "しない";
@@ -176,16 +124,12 @@
     private List<string> roomOptions = new() { "大会議室", "小会議室", "応接室" };
     private List<string> typeOptions = new() { "社内", "来客" };
     private List<string> repeatOptions = new() { "しない", "毎日", "毎週" };
-    private List<ReservationModel> reservationHistory = new();
     private UserModel? currentUser;
     private List<UserSelectionViewModel> allUsers = new();
-    private IEnumerable<ReservationModel> FilteredList => reservationHistory.Where(x => string.IsNullOrEmpty(searchText) || x.Name.Contains(searchText) || x.Room.Contains(searchText) || x.Purpose.Contains(searchText));
 
     protected override async Task OnInitializedAsync()
     {
-        reservationHistory = await BookingService.GetReservationsAsync();
         currentUser = BookingService.GetCurrentUser();
-
         var users = await BookingService.GetAllUsersAsync();
         allUsers = users.Select(u => new UserSelectionViewModel
         {
@@ -196,10 +140,7 @@
             IsSelected = false
         }).ToList();
 
-        if (currentUser != null)
-        {
-            reserveName = currentUser.Name;
-        }
+        if (currentUser != null) reserveName = currentUser.Name;
 
         UpdateTime(null);
         _timer = new System.Threading.Timer(UpdateTime, null, 0, 1000);
@@ -207,28 +148,6 @@
 
     private void UpdateTime(object? state) { var now = DateTime.Now; currentTime = now.ToString("HH:mm:ss"); currentDate = now.ToString("yyyy/MM/dd dddd"); InvokeAsync(StateHasChanged); }
     public void Dispose() { _timer?.Dispose(); }
-
-    private void OnEdit(ReservationModel item)
-    {
-        editingId = item.Id;
-        reserveName = item.Name;
-        selectedRoom = item.Room;
-        numberOfPeople = item.NumberOfPeople;
-        reserveDate = item.Date;
-        startTime = item.StartTime;
-        endTime = item.EndTime;
-        reserveType = item.Type ?? "社内";
-        reservePurpose = item.Purpose ?? "";
-        repeatType = item.RepeatType ?? "しない";
-        repeatUntil = item.RepeatUntil;
-
-        errorMessage = "";
-
-        foreach (var u in allUsers)
-        {
-            u.IsSelected = item.ParticipantIds.Contains(u.Id);
-        }
-    }
 
     private void OnCancelEdit()
     {
@@ -244,16 +163,12 @@
     {
         errorMessage = "";
         if (string.IsNullOrEmpty(reserveName) || reserveDate == null || startTime == null || endTime == null) { errorMessage = "必須項目を入力してください"; return; }
-
         DateTime baseStart = reserveDate.Value.Date + startTime.Value.TimeOfDay;
         DateTime baseEnd = reserveDate.Value.Date + endTime.Value.TimeOfDay;
-
         if (baseEnd <= baseStart) { errorMessage = "終了時間は開始時間より後にしてください"; return; }
         if (baseStart.Hour < 9 || baseEnd > new DateTime(baseEnd.Year, baseEnd.Month, baseEnd.Day, 22, 0, 0)) { errorMessage = "予約可能な時間は 09:00 ～ 22:00 です。"; return; }
-
         var selectedParticipants = allUsers.Where(u => u.IsSelected).Select(u => u.Id).ToList();
         var currentList = await BookingService.GetReservationsAsync();
-
         List<DateTime> targetDates = new();
         if (editingId != 0 || repeatType == "しない")
         {
@@ -262,7 +177,6 @@
         else
         {
             if (repeatUntil == null || repeatUntil < reserveDate.Value) { errorMessage = "繰り返し終了日を正しく設定してください"; return; }
-
             var d = reserveDate.Value.Date;
             while (d <= repeatUntil.Value.Date)
             {
@@ -273,16 +187,17 @@
         }
 
         var reservationsToAdd = new List<ReservationModel>();
+        List<ReservationModel> conflictList = new();
 
         foreach (var date in targetDates)
         {
             DateTime dtStart = date + startTime.Value.TimeOfDay;
             DateTime dtEnd = date + endTime.Value.TimeOfDay;
+            var conflicts = currentList.Where(x => x.Id != editingId && x.Room == selectedRoom && x.StartTime < dtEnd && x.EndTime > dtStart).ToList();
 
-            if (currentList.Any(x => x.Id != editingId && x.Room == selectedRoom && x.StartTime < dtEnd && x.EndTime > dtStart))
+            if (conflicts.Any())
             {
-                errorMessage = $"{date:MM/dd} の時間帯は既に予約が入っています。";
-                return;
+                conflictList.AddRange(conflicts);
             }
 
             reservationsToAdd.Add(new ReservationModel
@@ -303,19 +218,33 @@
             });
         }
 
+        if (conflictList.Any())
+        {
+            bool force = await JSRuntime.InvokeAsync<bool>("confirm", $"{conflictList.Count} 件の予約と時間が重複しています。\n\n【警告】\n既存の予約者に重複通知を送り、強制的に予約を入れますか？\n（既存の予約はそのまま残ります）");
+
+            if (!force) return;
+
+            foreach (var conflict in conflictList)
+            {
+                await BookingService.AddNotificationAsync(new NotificationModel
+                {
+                    UserId = conflict.UserId,
+                    Message = $"【重要】あなたの予約 ({conflict.Date:MM/dd} {conflict.StartTime:HH:mm}~) に、{reserveName} さんが重複して予約を入れました。調整をお願いします。",
+                    Type = "Warning",
+                    TargetReservationId = conflict.Id,
+                    TargetDate = conflict.Date
+                });
+            }
+        }
+
         foreach (var model in reservationsToAdd)
         {
             if (model.Id == 0) await BookingService.AddReservationAsync(model);
             else await BookingService.UpdateReservationAsync(model);
         }
 
-        reservationHistory = await BookingService.GetReservationsAsync();
         OnCancelEdit();
     }
-
-    private async Task OnRemove(ReservationModel item) { if (await JSRuntime.InvokeAsync<bool>("confirm", $"削除しますか？")) { await BookingService.RemoveReservationAsync(item); reservationHistory = await BookingService.GetReservationsAsync(); if (editingId == item.Id) OnCancelEdit(); } }
-    private string GetRoomColor(string room) { return room == "大会議室" ? "#58a6ff" : (room == "小会議室" ? "#3fb950" : "#a371f7"); }
-    private string GetCardStyle(string room) { return $"border-left: 4px solid {GetRoomColor(room)};"; }
 }
 
 <style>
