@@ -1,8 +1,11 @@
 ﻿@page "/"
+@using MeetingRoomBooker.Services
+@using MeetingRoomBooker.Models
+@inject IBookingService BookingService
 
 <div class="hero-container">
     <div class="hero-content">
-        <h1 class="fade-in-up">Welcome, <span class="gradient-text">Haru</span>.</h1>
+        <h1 class="fade-in-up">Welcome, <span class="gradient-text">@(currentUser?.Name ?? "Guest")</span>.</h1>
         <p class="fade-in-up delay-1">会議室予約システムへようこそ。</p>
 
         <div class="fade-in-up delay-2" style="margin-top: 40px;">
@@ -12,6 +15,15 @@
         </div>
     </div>
 </div>
+
+@code {
+    private UserModel? currentUser;
+
+    protected override void OnInitialized()
+    {
+        currentUser = BookingService.GetCurrentUser();
+    }
+}
 
 <style>
     .hero-container {
