@@ -61,10 +61,22 @@
                     <label style="display:block; margin-bottom:5px; color:#8b949e;">利用目的 (プロジェクト名など)</label>
                     <FluentTextField @bind-Value="reservePurpose" Placeholder="例：〇〇プロジェクト定例、来客対応など" Style="width: 100%;" />
                 </div>
-                <div>
-                    <label style="display:block; margin-bottom:5px; color:#8b949e;">利用日</label>
-                    <FluentDatePicker @bind-Value="reserveDate" Style="width: 100%;" />
-                </div>
+
+                <FluentGrid Spacing="2">
+                    <FluentGridItem xs="12" sm="6">
+                        <label style="display:block; margin-bottom:5px; color:#8b949e;">利用日 (開始日)</label>
+                        <FluentDatePicker @bind-Value="reserveDate" Style="width: 100%;" />
+                    </FluentGridItem>
+                    <FluentGridItem xs="12" sm="3">
+                        <label style="display:block; margin-bottom:5px; color:#8b949e;">繰り返し</label>
+                        <FluentSelect Items="@repeatOptions" @bind-Value="repeatType" Style="width: 100%; min-width: 0;" />
+                    </FluentGridItem>
+                    <FluentGridItem xs="12" sm="3">
+                        <label style="display:block; margin-bottom:5px; color:#8b949e;">繰り返し終了日</label>
+                        <FluentDatePicker @bind-Value="repeatUntil" Style="width: 100%;" Disabled="@(repeatType == "しない")" />
+                    </FluentGridItem>
+                </FluentGrid>
+
                 <FluentGrid Spacing="2">
                     <FluentGridItem xs="6">
                         <label style="display:block; margin-bottom:5px; color:#8b949e;">開始時間</label>
@@ -112,6 +124,10 @@
 
                     <div style="color: #8b949e; font-size: 0.9em; margin-bottom: 5px;">
                         @item.Date.ToString("yyyy/MM/dd")
+                        @if (item.RepeatType != "しない")
+                        {
+                            <span style="font-size:0.8em; margin-left:5px; color:#d29922; border:1px solid #d29922; padding:0 4px; border-radius:4px;">@item.RepeatType</span>
+                        }
                     </div>
                     <div style="font-size: 1.1em; font-weight: bold; margin-bottom: 10px;">
                         @item.StartTime.ToString("HH:mm") <span style="color:#58a6ff">➜</span> @item.EndTime.ToString("HH:mm")
@@ -140,6 +156,7 @@
     {
         public bool IsSelected { get; set; }
     }
+
     private string currentTime = "";
     private string currentDate = "";
     private System.Threading.Timer? _timer;
@@ -154,8 +171,11 @@
     private string searchText = "";
     private string errorMessage = "";
     private int editingId = 0;
+    private string repeatType = "しない";
+    private DateTime? repeatUntil = DateTime.Today.AddMonths(1);
     private List<string> roomOptions = new() { "大会議室", "小会議室", "応接室" };
     private List<string> typeOptions = new() { "社内", "来客" };
+    private List<string> repeatOptions = new() { "しない", "毎日", "毎週" };
     private List<ReservationModel> reservationHistory = new();
     private UserModel? currentUser;
     private List<UserSelectionViewModel> allUsers = new();
@@ -165,6 +185,7 @@
     {
         reservationHistory = await BookingService.GetReservationsAsync();
         currentUser = BookingService.GetCurrentUser();
+
         var users = await BookingService.GetAllUsersAsync();
         allUsers = users.Select(u => new UserSelectionViewModel
         {
@@ -198,7 +219,11 @@
         endTime = item.EndTime;
         reserveType = item.Type ?? "社内";
         reservePurpose = item.Purpose ?? "";
+        repeatType = item.RepeatType ?? "しない";
+        repeatUntil = item.RepeatUntil;
+
         errorMessage = "";
+
         foreach (var u in allUsers)
         {
             u.IsSelected = item.ParticipantIds.Contains(u.Id);
@@ -209,7 +234,9 @@
     {
         editingId = 0;
         reserveName = currentUser != null ? currentUser.Name : "";
-        numberOfPeople = 1; reservePurpose = ""; reserveType = "社内"; errorMessage = "";
+        numberOfPeople = 1; reservePurpose = ""; reserveType = "社内";
+        repeatType = "しない"; repeatUntil = DateTime.Today.AddMonths(1);
+        errorMessage = "";
         foreach (var u in allUsers) u.IsSelected = false;
     }
 
@@ -217,36 +244,71 @@
     {
         errorMessage = "";
         if (string.IsNullOrEmpty(reserveName) || reserveDate == null || startTime == null || endTime == null) { errorMessage = "必須項目を入力してください"; return; }
-        DateTime dtStart = reserveDate.Value.Date + startTime.Value.TimeOfDay;
-        DateTime dtEnd = reserveDate.Value.Date + endTime.Value.TimeOfDay;
-        if (dtEnd <= dtStart) { errorMessage = "終了時間は開始時間より後にしてください"; return; }
-        if (dtStart.Hour < 9 || dtEnd > new DateTime(dtEnd.Year, dtEnd.Month, dtEnd.Day, 22, 0, 0)) { errorMessage = "予約可能な時間は 09:00 ～ 22:00 です。"; return; }
 
-        var currentList = await BookingService.GetReservationsAsync();
-        if (currentList.Any(x => x.Id != editingId && x.Room == selectedRoom && x.StartTime < dtEnd && x.EndTime > dtStart))
-        {
-            errorMessage = "その時間は既に予約が入っています！";
-            return;
-        }
+        DateTime baseStart = reserveDate.Value.Date + startTime.Value.TimeOfDay;
+        DateTime baseEnd = reserveDate.Value.Date + endTime.Value.TimeOfDay;
+
+        if (baseEnd <= baseStart) { errorMessage = "終了時間は開始時間より後にしてください"; return; }
+        if (baseStart.Hour < 9 || baseEnd > new DateTime(baseEnd.Year, baseEnd.Month, baseEnd.Day, 22, 0, 0)) { errorMessage = "予約可能な時間は 09:00 ～ 22:00 です。"; return; }
 
         var selectedParticipants = allUsers.Where(u => u.IsSelected).Select(u => u.Id).ToList();
+        var currentList = await BookingService.GetReservationsAsync();
 
-        var model = new ReservationModel
+        List<DateTime> targetDates = new();
+        if (editingId != 0 || repeatType == "しない")
         {
-            Id = editingId,
-            Name = reserveName,
-            Room = selectedRoom,
-            NumberOfPeople = numberOfPeople,
-            Date = reserveDate.Value,
-            StartTime = dtStart,
-            EndTime = dtEnd,
-            Type = reserveType,
-            Purpose = reservePurpose,
-            UserId = currentUser?.Id ?? 0,
-            ParticipantIds = selectedParticipants 
-        };
+            targetDates.Add(reserveDate.Value.Date);
+        }
+        else
+        {
+            if (repeatUntil == null || repeatUntil < reserveDate.Value) { errorMessage = "繰り返し終了日を正しく設定してください"; return; }
 
-        if (editingId == 0) await BookingService.AddReservationAsync(model); else await BookingService.UpdateReservationAsync(model);
+            var d = reserveDate.Value.Date;
+            while (d <= repeatUntil.Value.Date)
+            {
+                targetDates.Add(d);
+                if (repeatType == "毎日") d = d.AddDays(1);
+                else if (repeatType == "毎週") d = d.AddDays(7);
+            }
+        }
+
+        var reservationsToAdd = new List<ReservationModel>();
+
+        foreach (var date in targetDates)
+        {
+            DateTime dtStart = date + startTime.Value.TimeOfDay;
+            DateTime dtEnd = date + endTime.Value.TimeOfDay;
+
+            if (currentList.Any(x => x.Id != editingId && x.Room == selectedRoom && x.StartTime < dtEnd && x.EndTime > dtStart))
+            {
+                errorMessage = $"{date:MM/dd} の時間帯は既に予約が入っています。";
+                return;
+            }
+
+            reservationsToAdd.Add(new ReservationModel
+            {
+                Id = (targetDates.Count == 1) ? editingId : 0,
+                Name = reserveName,
+                Room = selectedRoom,
+                NumberOfPeople = numberOfPeople,
+                Date = date,
+                StartTime = dtStart,
+                EndTime = dtEnd,
+                Type = reserveType,
+                Purpose = reservePurpose,
+                UserId = currentUser?.Id ?? 0,
+                ParticipantIds = new List<int>(selectedParticipants),
+                RepeatType = repeatType,
+                RepeatUntil = (repeatType == "しない") ? null : repeatUntil
+            });
+        }
+
+        foreach (var model in reservationsToAdd)
+        {
+            if (model.Id == 0) await BookingService.AddReservationAsync(model);
+            else await BookingService.UpdateReservationAsync(model);
+        }
+
         reservationHistory = await BookingService.GetReservationsAsync();
         OnCancelEdit();
     }
