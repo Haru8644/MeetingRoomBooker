@@ -33,6 +33,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<EmbeddedResource Include="appsettings.json" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.22" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.22" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.22" />

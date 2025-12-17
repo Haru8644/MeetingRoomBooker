@@ -64,11 +64,11 @@
                 Name = name,
                 Email = email,
                 Password = password,
-                AvatarColor = GetRandomColor() 
+                AvatarColor = GetRandomColor()
             };
 
             await BookingService.RegisterUserAsync(newUser);
-            Navigation.NavigateTo("/", forceLoad: true);
+            Navigation.NavigateTo("/");
         }
         catch (Exception ex)
         {

@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# セキュリティ対策: 設定ファイルを無視
+**/appsettings.json
