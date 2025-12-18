@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using MeetingRoomBooker.Models;
+using MeetingRoomBooker.Shared.Models;
 
 public class AppDbContext : DbContext
 {

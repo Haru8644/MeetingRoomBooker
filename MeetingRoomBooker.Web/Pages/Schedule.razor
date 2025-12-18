@@ -100,6 +100,7 @@
         </div>
     </div>
 </FluentStack>
+
 @if (selectedList != null)
 {
     <div class="modal-backdrop" @onclick="CloseListModal">
@@ -199,39 +200,13 @@
             }
             else
             {
-                <FluentStack Orientation="Orientation.Vertical" VerticalGap="15" Style="overflow-y: auto; max-height: 60vh; padding-right: 5px;">
-
+                <FluentStack Orientation="Orientation.Vertical" VerticalGap="15">
                     <FluentTextField @bind-Value="editName" Label="予約名" Style="width: 100%;" />
-
-                    <FluentDatePicker @bind-Value="editDate" Label="利用日" Style="width: 100%;" />
-
                     <FluentSelect Items="@roomList" @bind-Value="editRoom" Label="会議室" Style="width: 100%;" />
-
-                    <FluentSelect Items="@typeList" @bind-Value="editType" Label="区分" Style="width: 100%;" />
-
                     <FluentGrid Spacing="2">
                         <FluentGridItem xs="6"><FluentTimePicker @bind-Value="editStart" Label="開始" Style="width:100%" /></FluentGridItem>
                         <FluentGridItem xs="6"><FluentTimePicker @bind-Value="editEnd" Label="終了" Style="width:100%" /></FluentGridItem>
                     </FluentGrid>
-
-                    <div>
-                        <label style="color: #8b949e; font-size: 0.85em; margin-bottom: 4px; display: block;">参加メンバー</label>
-                        <div class="member-select-box">
-                            @foreach (var user in allUsers)
-                            {
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox"
-                                           id="edit_user_@user.Id"
-                                           checked="@(editParticipantIds.Contains(user.Id))"
-                                           @onchange="@(e => ToggleEditMember(user.Id, e.Value))">
-                                    <label class="form-check-label" for="edit_user_@user.Id" style="color: #e6edf3;">
-                                        @user.Name
-                                    </label>
-                                </div>
-                            }
-                        </div>
-                    </div>
-
                     <FluentTextField @bind-Value="editPurpose" Label="目的" Style="width: 100%;" />
 
                     <div style="margin-top: 15px; display:flex; gap: 10px; justify-content: flex-end;">
@@ -249,8 +224,6 @@
     private List<ReservationModel> allReservations = new();
     private List<UserModel> allUsers = new();
     private List<string> roomList = new() { "大会議室", "小会議室", "応接室" };
-    private List<string> typeList = new() { "社内", "来客", "採用" }; // 区分の選択肢
-
     private UserModel? currentUser;
     private DateTime selectedDateValue = DateTime.Today;
     private DateTime? selectedDate
@@ -262,17 +235,12 @@
     private ViewMode currentView = ViewMode.Day;
     private ReservationModel? selectedBooking = null;
     private List<ReservationModel>? selectedList = null;
-
     private bool isEditing = false;
     private string editName = "";
     private string editRoom = "";
-    private string editType = "社内"; 
-    private DateTime? editDate;      
     private DateTime? editStart;
     private DateTime? editEnd;
     private string editPurpose = "";
-    private List<int> editParticipantIds = new();
-
     protected override async Task OnInitializedAsync()
     {
         await LoadData();
@@ -487,71 +455,32 @@
 
     private void ShowDetail(ReservationModel b) { selectedBooking = b; isEditing = false; }
     private void CloseDetail() { selectedBooking = null; isEditing = false; }
-
     private void StartEdit()
     {
-        if (selectedBooking == null) return;
-        editName = selectedBooking.Name;
-        editRoom = selectedBooking.Room;
-        editStart = selectedBooking.StartTime;
-        editEnd = selectedBooking.EndTime;
-        editPurpose = selectedBooking.Purpose;
-        editType = selectedBooking.Type; 
-        editDate = selectedBooking.Date; 
-        editParticipantIds = new List<int>(selectedBooking.ParticipantIds ?? new List<int>()); 
-        isEditing = true;
+        editName = selectedBooking!.Name; editRoom = selectedBooking!.Room; editStart = selectedBooking!.StartTime; editEnd = selectedBooking!.EndTime; editPurpose = selectedBooking!.Purpose; isEditing = true;
     }
-
     private void CancelEdit() => isEditing = false;
-
-    private void ToggleEditMember(int userId, object? isChecked)
-    {
-        if ((bool)(isChecked ?? false))
-        {
-            if (!editParticipantIds.Contains(userId)) editParticipantIds.Add(userId);
-        }
-        else
-        {
-            editParticipantIds.Remove(userId);
-        }
-    }
-
     private async Task SaveEdit()
     {
         if (selectedBooking == null) return;
-        selectedBooking.Name = editName;
-        selectedBooking.Room = editRoom;
-        if (editDate.HasValue) selectedBooking.Date = editDate.Value;
+        selectedBooking.Name = editName; selectedBooking.Room = editRoom;
         if (editStart.HasValue) selectedBooking.StartTime = selectedBooking.Date.Date + editStart.Value.TimeOfDay;
         if (editEnd.HasValue) selectedBooking.EndTime = selectedBooking.Date.Date + editEnd.Value.TimeOfDay;
         selectedBooking.Purpose = editPurpose;
-        selectedBooking.Type = editType;
-        selectedBooking.ParticipantIds = editParticipantIds;
-        await BookingService.UpdateReservationAsync(selectedBooking);
-        await LoadData();
-        isEditing = false;
+        await BookingService.UpdateReservationAsync(selectedBooking); await LoadData(); isEditing = false;
     }
-
     private async Task DeleteBooking()
     {
-        if (await JSRuntime.InvokeAsync<bool>("confirm", "本当に削除しますか？"))
-        {
-            if (selectedBooking != null) await BookingService.RemoveReservationAsync(selectedBooking);
-            CloseDetail();
-            await LoadData();
-        }
+        if (await JSRuntime.InvokeAsync<bool>("confirm", "本当に削除しますか？")) { if (selectedBooking != null) await BookingService.RemoveReservationAsync(selectedBooking); CloseDetail(); await LoadData(); }
     }
-
     private void ShowListModal(List<ReservationModel> list) => selectedList = list;
     private void CloseListModal() => selectedList = null;
-
     private string GetParticipantNames(List<int> ids)
     {
         if (ids == null || !ids.Any()) return "(なし)";
         var names = ids.Select(id => allUsers.FirstOrDefault(u => u.Id == id)?.Name ?? $"User:{id}");
         return string.Join(", ", names);
     }
-
     private double GetTimePosition(int hour, int minute) { double total = 13 * 60; double cur = (hour - 9) * 60 + minute; return (Math.Max(0, Math.Min(cur, total)) / total) * 100.0; }
     private double GetDurationWidth(ReservationModel b) => GetTimePosition(b.EndTime.Hour, b.EndTime.Minute) - GetTimePosition(b.StartTime.Hour, b.StartTime.Minute);
     private double GetDurationWidth(DateTime start, DateTime end) => GetTimePosition(end.Hour, end.Minute) - GetTimePosition(start.Hour, start.Minute);
@@ -584,7 +513,7 @@
     private struct TimeTick { public string Label; public double Position; }
     private string GetRoomColor(string r) => r == "大会議室" ? "#58a6ff" : (r == "小会議室" ? "#3fb950" : "#a371f7");
     private string GetTypeColor(string t) => t == "来客" ? "#b32121" : "#1b6ec2";
-    private bool IsMyBooking(ReservationModel b) => currentUser != null && b.UserId == currentUser.Id;
+    private bool IsMyBooking(ReservationModel b) => currentUser != null && (b.UserId == currentUser.Id || b.ParticipantIds.Contains(currentUser.Id));
 }
 
 <style>
@@ -652,9 +581,9 @@
         transition: background 0.2s;
     }
 
-        .more-btn:hover {
-            background: #454d55 !important;
-        }
+    .more-btn:hover {
+        background: #454d55 !important;
+    }
 
     .list-item {
         padding: 10px;
@@ -763,10 +692,10 @@
         position: absolute;
     }
 
-        .booking-block:hover {
-            z-index: 100;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.8);
-        }
+    .booking-block:hover {
+        z-index: 100;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.8);
+    }
 
     .my-booking {
         border: 2px solid #d29922 !important;
@@ -833,9 +762,9 @@
         cursor: pointer;
     }
 
-        .close-btn:hover {
-            color: white;
-        }
+    .close-btn:hover {
+        color: white;
+    }
 
     .detail-row {
         margin-bottom: 15px;
@@ -843,12 +772,12 @@
         padding-bottom: 10px;
     }
 
-        .detail-row label {
-            display: block;
-            font-size: 0.85em;
-            color: #8b949e;
-            margin-bottom: 4px;
-        }
+    .detail-row label {
+        display: block;
+        font-size: 0.85em;
+        color: #8b949e;
+        margin-bottom: 4px;
+    }
 
     @@keyframes fadeIn {
         from {
@@ -868,15 +797,5 @@
         to {
             transform: scale(1);
         }
-    }
-
-    /* ★追加: メンバー選択ボックスのスタイル */
-    .member-select-box {
-        border: 1px solid #30363d;
-        background-color: #0d1117;
-        padding: 10px;
-        max-height: 120px;
-        overflow-y: auto;
-        border-radius: 4px;
     }
 </style>
