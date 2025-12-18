@@ -1,4 +1,4 @@
-﻿namespace MeetingRoomBooker.Models
+﻿namespace MeetingRoomBooker.Shared.Models
 {
     public class NotificationModel
     {

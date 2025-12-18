@@ -1,10 +1,6 @@
 ﻿using MeetingRoomBooker.Services;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.FluentUI.AspNetCore.Components;
-using MeetingRoomBooker.Models;
-using System.Reflection;
 
 namespace MeetingRoomBooker
 {
@@ -24,16 +20,9 @@ namespace MeetingRoomBooker
             builder.Services.AddBlazorWebViewDeveloperTools();
             builder.Logging.AddDebug();
 #endif
-            var assembly = Assembly.GetExecutingAssembly();
-            using var stream = assembly.GetManifestResourceStream("MeetingRoomBooker.appsettings.json");
-            var config = new ConfigurationBuilder()
-                .AddJsonStream(stream)
-                .Build();
-            builder.Configuration.AddConfiguration(config);
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-            builder.Services.AddDbContextFactory<AppDbContext>(options =>
-                options.UseSqlServer(connectionString));
-            builder.Services.AddSingleton<IBookingService, DbBookingService>();
+            var apiUrl = "http://localhost:5123/";
+            builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(apiUrl) });
+            builder.Services.AddScoped<IBookingService, ApiBookingService>();
             builder.Services.AddFluentUIComponents();
             return builder.Build();
         }

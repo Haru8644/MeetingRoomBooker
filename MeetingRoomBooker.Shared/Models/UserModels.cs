@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace MeetingRoomBooker.Models
+namespace MeetingRoomBooker.Shared.Models
 {
     public class UserModel
     {

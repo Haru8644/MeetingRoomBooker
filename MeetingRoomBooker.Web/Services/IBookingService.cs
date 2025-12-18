@@ -11,7 +11,7 @@ namespace MeetingRoomBooker.Services
         Task<UserModel?> LoginAsync(string email, string password);
         Task RegisterUserAsync(UserModel user);
         Task<List<UserModel>> GetAllUsersAsync();
-        UserModel? GetCurrentUser(); 
+        UserModel? GetCurrentUser();
         void Logout();
         Task<List<NotificationModel>> GetNotificationsAsync(int userId);
         Task AddNotificationAsync(NotificationModel notification);
