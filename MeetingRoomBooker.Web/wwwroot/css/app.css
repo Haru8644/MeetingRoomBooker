@@ -5,20 +5,20 @@ html, body {
     -webkit-overflow-scrolling: touch;
 }
 
-    body::before {
-        content: "";
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 200%;
-        height: 200%;
-        background-image: linear-gradient(rgba(88, 166, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(88, 166, 255, 0.03) 1px, transparent 1px);
-        background-size: 40px 40px;
-        transform: perspective(500px) rotateX(60deg) translateY(-100px) translateZ(-200px);
-        animation: gridMove 20s linear infinite;
-        z-index: -1;
-        pointer-events: none;
-    }
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 200%;
+    height: 200%;
+    background-image: linear-gradient(rgba(88, 166, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(88, 166, 255, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    transform: perspective(500px) rotateX(60deg) translateY(-100px) translateZ(-200px);
+    animation: gridMove 20s linear infinite;
+    z-index: -1;
+    pointer-events: none;
+}
 
 @keyframes gridMove {
     0% {
@@ -43,9 +43,9 @@ h1, h2, h3, h4, h5, h6 {
     color: #e6edf3;
 }
 
-    h1:focus {
-        outline: none;
-    }
+h1:focus {
+    outline: none;
+}
 
 fluent-text-field, fluent-number-field, fluent-select, fluent-date-picker, fluent-time-picker, fluent-text-area {
     --neutral-fill-input-rest: #0d1117;
@@ -65,11 +65,11 @@ fluent-text-field, fluent-number-field, fluent-select, fluent-date-picker, fluen
     backdrop-filter: blur(10px);
 }
 
-    .cyber-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 30px rgba(88, 166, 255, 0.15) !important;
-        border-color: #58a6ff !important;
-    }
+.cyber-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(88, 166, 255, 0.15) !important;
+    border-color: #58a6ff !important;
+}
 
 .cyber-button-primary {
     background: linear-gradient(135deg, #1f6feb 0%, #238636 100%);
@@ -86,9 +86,9 @@ fluent-text-field, fluent-number-field, fluent-select, fluent-date-picker, fluen
     background: transparent;
 }
 
-    .cyber-button-danger:hover {
-        background: rgba(255, 123, 114, 0.1);
-    }
+.cyber-button-danger:hover {
+    background: rgba(255, 123, 114, 0.1);
+}
 
 .gradient-text {
     background: linear-gradient(to right, #58a6ff, #a371f7);
@@ -111,10 +111,10 @@ fluent-text-field, fluent-number-field, fluent-select, fluent-date-picker, fluen
     transition: all 0.3s ease;
 }
 
-    .hero-button:hover {
-        transform: scale(1.05);
-        box-shadow: 0 0 20px rgba(88, 166, 255, 0.6);
-    }
+.hero-button:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(88, 166, 255, 0.6);
+}
 
 .cyber-clock {
     font-family: 'Consolas', 'Monaco', monospace;
@@ -165,4 +165,26 @@ fluent-text-field, fluent-number-field, fluent-select, fluent-date-picker, fluen
     button, .fluent-button {
         min-height: 44px;
     }
+    [data-theme="light"] body {
+        color: #1f2328 !important; 
+    }
+
+    [data-theme="light"] h1,
+    [data-theme="light"] h2,
+    [data-theme="light"] h3,
+    [data-theme="light"] h4,
+    [data-theme="light"] h5,
+    [data-theme="light"] h6 {
+        color: #1f2328 !important;
+    }
+
+    [data-theme="light"] a,
+    [data-theme="light"] .btn-link {
+        color: #0969da;
+    }
+}
+
+*::before,
+*::after {
+    pointer-events: none !important;
 }

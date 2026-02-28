@@ -3,267 +3,209 @@
 @using MeetingRoomBooker.Services
 @inject IBookingService BookingService
 @inject IJSRuntime JSRuntime
-@implements IDisposable
+@inject NavigationManager Navigation
 
 <FluentStack Orientation="Orientation.Vertical" VerticalGap="30">
-    <div style="width: 100%; display: flex; justify-content: center;">
-        <div class="cyber-card" style="padding: 25px; max-width: 800px; width: 100%;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid #30363d; padding-bottom: 15px;">
-                <h3 class="gradient-text" style="margin: 0;">
-                    @(editingId == 0 ? "NEW RESERVATION" : "EDIT RESERVATION")
-                </h3>
-                <div style="text-align: right;">
-                    <span class="date-text">@currentDate</span>
-                    <span class="cyber-clock">@currentTime</span>
-                </div>
+    <div style="width: 100%; display: flex; justify-content: center; position: relative; z-index: 1;">
+        <div class="cyber-card-enhanced holo-card" style="padding: 25px; max-width: 800px; width: 100%;">
+            <div class="form-header fade-in-stagger" style="--i:0">
+                <h3 class="gradient-text-enhanced glitch-text" data-text="NEW RESERVATION">NEW RESERVATION</h3>
+                <div style="text-align: right;"><span class="date-text">@currentDate</span><span class="cyber-clock">@currentTime</span></div>
             </div>
             @if (!string.IsNullOrEmpty(errorMessage))
             {
-                <FluentMessageBar Intent="MessageIntent.Error" Style="margin-bottom: 15px;">
-                    @errorMessage
-                </FluentMessageBar>
+                <div class="alert-error fade-in">@errorMessage</div>
             }
             <FluentStack Orientation="Orientation.Vertical" VerticalGap="20">
-                <div>
-                    <label style="display:block; margin-bottom:5px; color:#8b949e;">予約者名</label>
-                    <FluentTextField @bind-Value="reserveName" ReadOnly="@(currentUser != null)" Style="width: 100%;" />
-                </div>
+                <div class="fade-in-stagger" style="--i:1"><label>予約者名</label><FluentTextField @bind-Value="reserveName" ReadOnly="@(currentUser != null)" Style="width: 100%;" /></div>
 
-                <div>
-                    <label style="display:block; margin-bottom:5px; color:#8b949e;">参加メンバー選択 (通知が送られます)</label>
+                <div class="fade-in-stagger" style="--i:2">
+                    <label>参加メンバー</label>
                     <div class="participant-selector">
                         @foreach (var user in allUsers)
                         {
                             if (currentUser != null && user.Id == currentUser.Id) continue;
-
-                            <div class="participant-item">
-                                <FluentCheckbox @bind-Value="user.IsSelected" Label="@user.Name" />
-                            </div>
+                            <div class="participant-item"><FluentCheckbox @bind-Value="user.IsSelected" Label="@user.Name" /></div>
                         }
                     </div>
                 </div>
 
-                <FluentGrid Spacing="2">
-                    <FluentGridItem xs="12" sm="6">
-                        <label style="display:block; margin-bottom:5px; color:#8b949e;">利用区分</label>
-                        <FluentSelect Items="@typeOptions" @bind-Value="reserveType" Style="width: 100%; min-width: 0;" />
-                    </FluentGridItem>
-                    <FluentGridItem xs="12" sm="6">
-                        <label style="display:block; margin-bottom:5px; color:#8b949e;">利用人数 (合計)</label>
-                        <FluentNumberField @bind-Value="numberOfPeople" Min="1" Style="width: 100%;" />
-                    </FluentGridItem>
-                </FluentGrid>
-                <div>
-                    <label style="display:block; margin-bottom:5px; color:#8b949e;">会議室</label>
-                    <FluentSelect Items="@roomOptions" @bind-Value="selectedRoom" Style="width: 100%;" />
-                </div>
-                <div>
-                    <label style="display:block; margin-bottom:5px; color:#8b949e;">利用目的 (プロジェクト名など)</label>
-                    <FluentTextField @bind-Value="reservePurpose" Placeholder="例：〇〇プロジェクト定例、来客対応など" Style="width: 100%;" />
-                </div>
-
-                <FluentGrid Spacing="2">
-                    <FluentGridItem xs="12" sm="6">
-                        <label style="display:block; margin-bottom:5px; color:#8b949e;">利用日 (開始日)</label>
-                        <FluentDatePicker @bind-Value="reserveDate" Style="width: 100%;" />
-                    </FluentGridItem>
-                    <FluentGridItem xs="12" sm="3">
-                        <label style="display:block; margin-bottom:5px; color:#8b949e;">繰り返し</label>
-                        <FluentSelect Items="@repeatOptions" @bind-Value="repeatType" Style="width: 100%; min-width: 0;" />
-                    </FluentGridItem>
-                    <FluentGridItem xs="12" sm="3">
-                        <label style="display:block; margin-bottom:5px; color:#8b949e;">繰り返し終了日</label>
-                        <FluentDatePicker @bind-Value="repeatUntil" Style="width: 100%;" Disabled="@(repeatType == "しない")" />
+                <FluentGrid Spacing="2" Class="fade-in-stagger" Style="--i:3">
+                    <FluentGridItem xs="12" sm="12">
+                        <label>利用区分</label>
+                        <div class="selection-group">
+                            @foreach (var type in typeOptions)
+                            {
+                                <div class="selection-chip @(reserveType == type ? "active" : "")" @onclick="() => reserveType = type">@type</div>
+                            }
+                        </div>
                     </FluentGridItem>
                 </FluentGrid>
 
-                <FluentGrid Spacing="2">
+                <div class="fade-in-stagger" style="--i:4">
+                    <label>会議室</label>
+                    <div class="selection-group">
+                        @foreach (var room in roomOptions)
+                        {
+                            <div class="selection-chip @(selectedRoom == room ? "active" : "")" @onclick="() => selectedRoom = room">@room</div>
+                        }
+                    </div>
+                </div>
+
+                <div class="fade-in-stagger" style="--i:5"><label>利用目的</label><FluentTextField @bind-Value="reservePurpose" Style="width: 100%;" /></div>
+
+                <FluentGrid Spacing="2" Class="fade-in-stagger" Style="--i:6">
+                    <FluentGridItem xs="12" sm="6"><label>利用日</label><FluentDatePicker @bind-Value="reserveDate" Style="width: 100%;" /></FluentGridItem>
+                    <FluentGridItem xs="12" sm="3">
+                        <label>繰り返し</label>
+                        <div class="selection-group">
+                            @foreach (var rep in repeatOptions)
+                            {
+                                <div class="selection-chip @(repeatType == rep ? "active" : "")" @onclick="() => repeatType = rep">@rep</div>
+                            }
+                        </div>
+                    </FluentGridItem>
+                    <FluentGridItem xs="12" sm="3"><label>終了日</label><FluentDatePicker @bind-Value="repeatUntil" Style="width: 100%;" Disabled="@(repeatType == "しない")" /></FluentGridItem>
+                </FluentGrid>
+
+                <FluentGrid Spacing="2" Class="fade-in-stagger" Style="--i:7">
                     <FluentGridItem xs="6">
-                        <label style="display:block; margin-bottom:5px; color:#8b949e;">開始時間</label>
-                        <FluentTimePicker @bind-Value="startTime" Style="width: 100%;" />
+                        <label>開始</label>
+                        <FluentTimePicker Value="startTime" ValueChanged="OnStartTimeChanged" Style="width: 100%;" />
                     </FluentGridItem>
                     <FluentGridItem xs="6">
-                        <label style="display:block; margin-bottom:5px; color:#8b949e;">終了時間</label>
+                        <label>終了</label>
                         <FluentTimePicker @bind-Value="endTime" Style="width: 100%;" />
                     </FluentGridItem>
                 </FluentGrid>
-                <div style="margin-top: 15px; display: flex; gap: 10px;">
-                    <button class="cyber-button-primary" style="padding: 8px 20px; border-radius: 4px; cursor: pointer;" @onclick="OnSubmit">
-                        @(editingId == 0 ? "予約を追加" : "変更を保存")
-                    </button>
-                    @if (editingId != 0)
-                    {
-                        <FluentButton Appearance="Appearance.Neutral" OnClick="OnCancelEdit">キャンセル</FluentButton>
-                    }
-                </div>
+
+                <div class="fade-in-stagger" style="--i:8; margin-top: 15px;"><button class="cyber-button-primary pulse-hover" style="width: 100%;" @onclick="OnSubmit"><span class="oi oi-check"></span> RESERVE</button></div>
             </FluentStack>
         </div>
     </div>
 </FluentStack>
 
 @code {
-    public class UserSelectionViewModel : UserModel
-    {
-        public bool IsSelected { get; set; }
-    }
-    private string currentTime = "";
-    private string currentDate = "";
-    private System.Threading.Timer? _timer;
-    private string reserveName = "";
-    private string selectedRoom = "大会議室";
-    private int numberOfPeople = 1;
-    private DateTime? reserveDate = DateTime.Today;
-    private DateTime? startTime = DateTime.Today.AddHours(9);
-    private DateTime? endTime = DateTime.Today.AddHours(10);
-    private string reserveType = "社内";
-    private string reservePurpose = "";
-    private string errorMessage = "";
-    private int editingId = 0;
-    private string repeatType = "しない";
-    private DateTime? repeatUntil = DateTime.Today.AddMonths(1);
-    private List<string> roomOptions = new() { "大会議室", "小会議室", "応接室" };
-    private List<string> typeOptions = new() { "社内", "来客" };
-    private List<string> repeatOptions = new() { "しない", "毎日", "毎週" };
+    public class UserViewModel : UserModel { public bool IsSelected { get; set; } }
+    private string currentTime = "", currentDate = "", reserveName = "", selectedRoom = "大会議室", reserveType = "社内", reservePurpose = "", errorMessage = "", repeatType = "しない";
+    private DateTime? reserveDate = DateTime.Today, startTime = DateTime.Today.AddHours(9), endTime = DateTime.Today.AddHours(10), repeatUntil = DateTime.Today.AddMonths(1);
+    private List<string> roomOptions = new() { "大会議室", "小会議室" }, typeOptions = new() { "社内", "来客" }, repeatOptions = new() { "しない", "毎日", "毎週" };
     private UserModel? currentUser;
-    private List<UserSelectionViewModel> allUsers = new();
+    private List<UserViewModel> allUsers = new();
+    private System.Threading.Timer? _timer;
 
     protected override async Task OnInitializedAsync()
     {
         currentUser = BookingService.GetCurrentUser();
-        var users = await BookingService.GetAllUsersAsync();
-        allUsers = users.Select(u => new UserSelectionViewModel
-        {
-            Id = u.Id,
-            Name = u.Name,
-            Email = u.Email,
-            AvatarColor = u.AvatarColor,
-            IsSelected = false
-        }).ToList();
-
         if (currentUser != null) reserveName = currentUser.Name;
-
+        try
+        {
+            var users = await BookingService.GetAllUsersAsync();
+            allUsers = users.Select(u => new UserViewModel { Id = u.Id, Name = u.Name, Email = u.Email, IsSelected = false }).ToList();
+        }
+        catch { }
         UpdateTime(null);
-        _timer = new System.Threading.Timer(UpdateTime, null, 0, 1000);
+        _timer = new System.Threading.Timer(UpdateTime, null, 1000, 1000);
     }
 
-    private void UpdateTime(object? state) { var now = DateTime.Now; currentTime = now.ToString("HH:mm:ss"); currentDate = now.ToString("yyyy/MM/dd dddd"); InvokeAsync(StateHasChanged); }
-    public void Dispose() { _timer?.Dispose(); }
-
-    private void OnCancelEdit()
+    private void OnStartTimeChanged(DateTime? newTime)
     {
-        editingId = 0;
-        reserveName = currentUser != null ? currentUser.Name : "";
-        numberOfPeople = 1; reservePurpose = ""; reserveType = "社内";
-        repeatType = "しない"; repeatUntil = DateTime.Today.AddMonths(1);
-        errorMessage = "";
-        foreach (var u in allUsers) u.IsSelected = false;
+        startTime = newTime;
+        if (startTime.HasValue)
+        {
+            endTime = startTime.Value.AddHours(1);
+        }
     }
+
+    private void UpdateTime(object? s)
+    {
+        var now = DateTime.Now;
+        currentTime = now.ToString("HH:mm:ss");
+        currentDate = now.ToString("yyyy/MM/dd dddd");
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose() => _timer?.Dispose();
 
     private async Task OnSubmit()
     {
         errorMessage = "";
         if (string.IsNullOrEmpty(reserveName) || reserveDate == null || startTime == null || endTime == null) { errorMessage = "必須項目を入力してください"; return; }
+
         DateTime baseStart = reserveDate.Value.Date + startTime.Value.TimeOfDay;
         DateTime baseEnd = reserveDate.Value.Date + endTime.Value.TimeOfDay;
-        if (baseEnd <= baseStart) { errorMessage = "終了時間は開始時間より後にしてください"; return; }
-        if (baseStart.Hour < 9 || baseEnd > new DateTime(baseEnd.Year, baseEnd.Month, baseEnd.Day, 22, 0, 0)) { errorMessage = "予約可能な時間は 09:00 ～ 22:00 です。"; return; }
-        var selectedParticipants = allUsers.Where(u => u.IsSelected).Select(u => u.Id).ToList();
-        var currentList = await BookingService.GetReservationsAsync();
-        List<DateTime> targetDates = new();
-        if (editingId != 0 || repeatType == "しない")
+        if (baseEnd <= baseStart) { errorMessage = "時間を正しく設定してください"; return; }
+
+        var targetDates = new List<DateTime> { reserveDate.Value.Date };
+        if (repeatType != "しない" && repeatUntil.HasValue && repeatUntil.Value.Date > reserveDate.Value.Date)
         {
-            targetDates.Add(reserveDate.Value.Date);
-        }
-        else
-        {
-            if (repeatUntil == null || repeatUntil < reserveDate.Value) { errorMessage = "繰り返し終了日を正しく設定してください"; return; }
-            var d = reserveDate.Value.Date;
-            while (d <= repeatUntil.Value.Date)
+            var nextDate = reserveDate.Value.Date;
+            if (repeatType == "毎日")
             {
-                targetDates.Add(d);
-                if (repeatType == "毎日") d = d.AddDays(1);
-                else if (repeatType == "毎週") d = d.AddDays(7);
+                nextDate = nextDate.AddDays(1);
+                while (nextDate.Date <= repeatUntil.Value.Date) { targetDates.Add(nextDate); nextDate = nextDate.AddDays(1); }
+            }
+            else if (repeatType == "毎週")
+            {
+                nextDate = nextDate.AddDays(7);
+                while (nextDate.Date <= repeatUntil.Value.Date) { targetDates.Add(nextDate); nextDate = nextDate.AddDays(7); }
             }
         }
 
-        var reservationsToAdd = new List<ReservationModel>();
-        List<ReservationModel> conflictList = new();
-
-        foreach (var date in targetDates)
+        try
         {
-            DateTime dtStart = date + startTime.Value.TimeOfDay;
-            DateTime dtEnd = date + endTime.Value.TimeOfDay;
-            var conflicts = currentList.Where(x => x.Id != editingId && x.Room == selectedRoom && x.StartTime < dtEnd && x.EndTime > dtStart).ToList();
+            var existing = await BookingService.GetReservationsAsync();
+            int successCount = 0;
+            int failCount = 0;
 
-            if (conflicts.Any())
+            foreach (var date in targetDates)
             {
-                conflictList.AddRange(conflicts);
-            }
+                DateTime currentStart = date.Date + startTime.Value.TimeOfDay;
+                DateTime currentEnd = date.Date + endTime.Value.TimeOfDay;
 
-            reservationsToAdd.Add(new ReservationModel
-            {
-                Id = (targetDates.Count == 1) ? editingId : 0,
-                Name = reserveName,
-                Room = selectedRoom,
-                NumberOfPeople = numberOfPeople,
-                Date = date,
-                StartTime = dtStart,
-                EndTime = dtEnd,
-                Type = reserveType,
-                Purpose = reservePurpose,
-                UserId = currentUser?.Id ?? 0,
-                ParticipantIds = new List<int>(selectedParticipants),
-                RepeatType = repeatType,
-                RepeatUntil = (repeatType == "しない") ? null : repeatUntil
-            });
-        }
+                var conflict = existing.Any(r => r.Room == selectedRoom && r.Date.Date == date.Date &&
+                    ((currentStart >= r.StartTime && currentStart < r.EndTime) || (currentEnd > r.StartTime && currentEnd <= r.EndTime) || (currentStart <= r.StartTime && currentEnd >= r.EndTime)));
 
-        if (conflictList.Any())
-        {
-            bool force = await JSRuntime.InvokeAsync<bool>("confirm", $"{conflictList.Count} 件の予約と時間が重複しています。\n\n【警告】\n既存の予約者に重複通知を送り、強制的に予約を入れますか？\n（既存の予約はそのまま残ります）");
-
-            if (!force) return;
-
-            foreach (var conflict in conflictList)
-            {
-                await BookingService.AddNotificationAsync(new NotificationModel
+                if (conflict)
                 {
-                    UserId = conflict.UserId,
-                    Message = $"【重要】あなたの予約 ({conflict.Date:MM/dd} {conflict.StartTime:HH:mm}~) に、{reserveName} さんが重複して予約を入れました。調整をお願いします。",
-                    Type = "Warning",
-                    TargetReservationId = conflict.Id,
-                    TargetDate = conflict.Date
-                });
+                    failCount++;
+                    continue;
+                }
+
+                var model = new ReservationModel
+                {
+                    Name = reserveName,
+                    Room = selectedRoom,
+                    NumberOfPeople = 1, 
+                    Date = date,
+                    StartTime = currentStart,
+                    EndTime = currentEnd,
+                    Type = reserveType,
+                    Purpose = reservePurpose,
+                    UserId = currentUser?.Id ?? 0,
+                    ParticipantIds = allUsers.Where(u => u.IsSelected).Select(u => u.Id).ToList(),
+                    RepeatType = "しない",
+                    RepeatUntil = null
+                };
+
+                await BookingService.AddReservationAsync(model);
+                successCount++;
             }
-        }
 
-        foreach (var model in reservationsToAdd)
-        {
-            if (model.Id == 0) await BookingService.AddReservationAsync(model);
-            else await BookingService.UpdateReservationAsync(model);
-        }
+            if (successCount > 0)
+            {
+                string msg = $"{successCount}件の予約を完了しました！";
+                if (failCount > 0) msg += $"\n（※重複のため{failCount}件スキップされました）";
 
-        OnCancelEdit();
+                await JSRuntime.InvokeVoidAsync("alert", msg);
+                Navigation.NavigateTo("/schedule");
+            }
+            else
+            {
+                errorMessage = "すべての予約日が重複しているため登録できませんでした。";
+            }
+
+        }
+        catch (Exception ex) { errorMessage = "保存失敗: " + ex.Message; }
     }
 }
-
-<style>
-    .participant-selector {
-        background: #0d1117;
-        border: 1px solid #30363d;
-        border-radius: 4px;
-        padding: 10px;
-        max-height: 100px;
-        overflow-y: auto;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-
-    .participant-item {
-        background: #161b22;
-        padding: 2px 8px;
-        border-radius: 4px;
-        border: 1px solid #30363d;
-    }
-</style>

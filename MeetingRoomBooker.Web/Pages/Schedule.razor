@@ -1,801 +1,552 @@
 ﻿@page "/schedule"
 @using MeetingRoomBooker.Shared.Models
 @using MeetingRoomBooker.Services
+@using System.Globalization
 @inject IBookingService BookingService
 @inject IJSRuntime JSRuntime
+@inject NavigationManager Navigation
 
-<FluentStack Orientation="Orientation.Vertical" VerticalGap="20" Style="width: 100%; padding-bottom: 50px;">
-    <h3 class="gradient-text">RESERVATION CALENDAR</h3>
+<div class="schedule-container">
+    <div class="sidebar-panel">
+        <h3 class="gradient-text title-text">CALENDAR</h3>
 
-    <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
-        <div class="cyber-card" style="padding: 15px; text-align: center; width: 300px;">
-            <FluentCalendar @bind-Value="selectedDate" @bind-Value:after="OnDateChanged" />
-        </div>
-
-        <div class="cyber-card" style="padding: 15px; width: 300px; display: flex; flex-direction: column; justify-content: space-between;">
-            <div>
-                <label style="color: #8b949e; font-size: 0.9em; display: block; margin-bottom: 5px;">View Mode</label>
-                <div class="view-switcher">
-                    <button class="@(currentView == ViewMode.Day ? "active" : "")" @onclick="() => ChangeView(ViewMode.Day)">Day</button>
-                    <button class="@(currentView == ViewMode.Week ? "active" : "")" @onclick="() => ChangeView(ViewMode.Week)">Week</button>
-                    <button class="@(currentView == ViewMode.Month ? "active" : "")" @onclick="() => ChangeView(ViewMode.Month)">Month</button>
-                </div>
-            </div>
-            <div style="margin-top: 15px;">
-                <label style="color: #8b949e; font-size: 0.9em;">Current Range</label>
-                <div style="font-weight: bold; color: #58a6ff; font-size: 1.1em;">
-                    @GetRangeLabel()
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="cyber-card" style="padding: 20px; overflow-x: auto; width: 100%; min-height: 500px;">
-        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px;">
-            <h4 style="margin: 0;">TIMELINE</h4>
-            <div style="display: flex; gap: 10px; align-items: center; font-size: 0.8em;">
-                <span style="color: #8b949e;">Legend:</span>
-                <span style="padding: 2px 8px; border-radius: 4px; background: #1b6ec2; color: white;">社内</span>
-                <span style="padding: 2px 8px; border-radius: 4px; background: #b32121; color: white;">来客</span>
-                <span style="padding: 2px 8px; border-radius: 4px; border: 1px solid #d29922; color: #d29922;">My Booking</span>
-                <span style="color: #ffbf00; font-weight: bold; margin-left: 5px;">⚠ Warning</span>
-            </div>
-        </div>
-
-        <div class="timeline-container">
-            <div class="timeline-header">
-                <div class="room-label-placeholder"></div>
-                <div class="time-scale">
-                    @foreach (var tick in GetTimeTicks())
-                    {
-                        <div class="time-mark" style="left: @tick.Position%">@tick.Label</div>
-                    }
-                </div>
+        <div class="cyber-card-enhanced control-card">
+            <div class="calendar-header">
+                <button class="nav-btn" @onclick="PrevMonth">◀</button>
+                <div class="current-month-label">@displayMonth.ToString("yyyy年 M月")</div>
+                <button class="nav-btn" @onclick="NextMonth">▶</button>
             </div>
 
-            @foreach (var room in roomList)
-            {
-                <div class="timeline-row">
-                    <div class="room-label" style="border-left: 4px solid @GetRoomColor(room)">@room</div>
-                    <div class="timeline-track">
-                        @foreach (var tick in GetTimeTicks())
-                        {
-                            <div class="grid-line" style="left: @tick.Position%"></div>
-                        }
-
-                        @foreach (var item in GetRenderItems(room))
-                        {
-                            @if (item.IsMoreButton)
-                            {
-                                <div class="booking-block more-btn"
-                                     style="@item.Style"
-                                     @onclick="() => ShowListModal(item.HiddenBookings)">
-                                    <span style="font-size: 0.8em; font-weight: bold;">+@item.Count More</span>
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="booking-block @(IsMyBooking(item.Booking!) ? "my-booking" : "")"
-                                     style="@item.Style"
-                                     @onclick="() => ShowDetail(item.Booking!)">
-
-                                    @if (item.HasConflict)
-                                    {
-                                        <div class="warning-icon" title="重複しています">⚠</div>
-                                    }
-
-                                    <div class="block-content">
-                                        <span class="block-text name">@item.Booking!.Name</span>
-                                        @if (currentView == ViewMode.Day)
-                                        {
-                                            <span class="block-text purpose">@(string.IsNullOrEmpty(item.Booking.Purpose) ? "-" : item.Booking.Purpose)</span>
-                                        }
-                                    </div>
-                                </div>
-                            }
-                        }
-                    </div>
-                </div>
-            }
-        </div>
-    </div>
-</FluentStack>
-
-@if (selectedList != null)
-{
-    <div class="modal-backdrop" @onclick="CloseListModal">
-        <div class="modal-content cyber-card" @onclick:stopPropagation="true" style="max-width: 400px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #30363d; padding-bottom: 10px;">
-                <h3 style="margin: 0; font-size: 1.2rem;">Events List</h3>
-                <button class="close-btn" @onclick="CloseListModal">×</button>
+            <div class="calendar-grid header-row">
+                <div class="week-day">日</div><div class="week-day">月</div><div class="week-day">火</div><div class="week-day">水</div><div class="week-day">木</div><div class="week-day">金</div><div class="week-day">土</div>
             </div>
-            <div style="max-height: 300px; overflow-y: auto;">
-                @foreach (var b in selectedList)
+
+            <div class="calendar-grid body-rows">
+                @foreach (var day in calendarDays)
                 {
-                    <div class="list-item" @onclick="() => { CloseListModal(); ShowDetail(b); }">
-                        <div style="display:flex; justify-content:space-between;">
-                            <span style="font-weight:bold; color: @GetRoomColor(b.Room)">@b.Room</span>
-                            <span style="font-size:0.8em; color:#8b949e">@b.StartTime.ToString("HH:mm")-@b.EndTime.ToString("HH:mm")</span>
-                        </div>
-                        <div style="font-weight:bold;">@b.Name</div>
-                        @if (HasConflict(b))
+                    var isSelected = (day.Date == selectedDateValue.Date);
+                    var isToday = (day.Date == DateTime.Today);
+                    var isOtherMonth = (day.Month != displayMonth.Month);
+                    var hasMyBooking = allReservations.Any(r => r.Date.Date == day.Date && IsMyBooking(r));
+
+                    <div class="calendar-cell
+                                        @(isSelected ? "selected" : "")
+                                        @(isOtherMonth ? "other-month" : "")
+                                        @(hasMyBooking ? "has-my-booking" : "")"
+                         @onclick="() => SelectDate(day)">
+
+                        <span class="day-number">@day.Day</span>
+                        @if (isToday)
                         {
-                            <div style="color: #ffbf00; font-size: 0.8em;">⚠ 重複あり</div>
+                            <div class="calendar-today-dot"></div>
                         }
                     </div>
                 }
             </div>
+
+            <div class="current-range-text">Selected: <span class="selected-date-highlight">@selectedDateValue.ToString("yyyy/MM/dd")</span></div>
+
+            <div class="legend-box">
+                <div class="legend-item"><span class="legend-color internal"></span>社内</div>
+                <div class="legend-item"><span class="legend-color visitor"></span>来客</div>
+                <div class="legend-item"><span class="legend-icon my-border-legend"></span>自分/参加</div>
+                <div class="legend-item"><span class="legend-icon today-dot-legend"></span>今日</div>
+            </div>
         </div>
     </div>
-}
+
+    <div class="main-list-area">
+        @if (isLoading)
+        {
+            <div class="loading-text">Loading...</div>
+        }
+        else
+        {
+            <div @key="selectedDateValue" class="fade-in-list">
+                @foreach (var date in GetDisplayDates())
+                {
+                    if (!HasAnyBooking(date)) continue;
+                    <div class="date-group">
+                        <div class="sticky-date-header">
+                            <div class="date-label-area"><span class="date-year">@date.Year.</span><span class="date-big">@date.ToString("MM/dd")</span><span class="date-week">(@date.ToString("ddd"))</span></div>
+                            <button class="timeline-btn" @onclick="() => OpenTimelineModal(date)"><span class="oi oi-bar-chart"></span> Timeline</button>
+                        </div>
+                        <div class="room-groups">
+                            @foreach (var room in roomList)
+                            {
+                                var bookings = GetBookings(date, room);
+                                if (!bookings.Any()) continue;
+
+                                <div class="room-row">
+                                    <div class="room-label" data-room="@room" style="border-left: 4px solid @GetRoomColor(room)">@room</div>
+                                    <div class="booking-cards">
+                                        @foreach (var b in bookings)
+                                        {
+                                            <div class="booking-card @(IsMyBooking(b) ? "my-booking" : "")"
+                                                 data-type="@b.Type"
+                                                 style="background: @GetTypeColor(b.Type, true);"
+                                                 @onclick="() => ShowDetail(b)">
+
+                                                <div class="type-icon-bg">
+                                                    @if (b.Type == "社内")
+                                                    {
+                                                        <span class="oi oi-briefcase"></span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="oi oi-people"></span>
+                                                    }
+                                                </div>
+
+                                                @if (HasConflict(b))
+                                                {
+                                                    <div class="warning-icon">⚠</div>
+                                                }
+
+                                                <div class="time-badge">@b.StartTime.ToString("HH:mm") - @b.EndTime.ToString("HH:mm")</div>
+                                                <div class="card-content">
+                                                    <div class="card-title">@b.Name</div>
+                                                    <div class="card-desc">@b.Purpose</div>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                }
+                <div class="end-of-list">End of list (No more future bookings)</div>
+            </div>
+        }
+    </div>
+</div>
 
 @if (selectedBooking != null)
 {
-    <div class="modal-backdrop" @onclick="CloseDetail">
-        <div class="modal-content cyber-card" @onclick:stopPropagation="true">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
-                <div>
-                    @if (!isEditing)
-                    {
-                        <span style="background: @GetTypeColor(selectedBooking.Type); padding: 4px 10px; border-radius: 4px; font-size: 0.8em; color: white;">
-                            @selectedBooking.Type
-                        </span>
-                        <h2 style="margin: 10px 0 5px 0;">@selectedBooking.Name</h2>
-                        @if (HasConflict(selectedBooking))
-                        {
-                            <div style="color: #ffbf00; margin-top: 5px; font-weight: bold;">
-                                ⚠ この予約は他の予約と時間が重複しています
-                            </div>
-                        }
-                    }
-                    else
-                    {
-                        <h3 class="gradient-text">EDIT MODE</h3>
-                    }
-                </div>
-                <button class="close-btn" @onclick="CloseDetail">×</button>
-            </div>
-
+    <div class="modal-backdrop" @onclick="CloseDetail" @ontouchmove:stopPropagation="true" style="z-index: 30000 !important;">
+        <div class="modal-content cyber-modal-animated" @onclick:stopPropagation="true">
             @if (!isEditing)
             {
-                <div class="detail-row">
-                    <label>日時</label>
-                    <div>
-                        @selectedBooking.Date.ToString("yyyy/MM/dd")<br />
-                        <span style="font-size: 1.2em; font-weight: bold;">
-                            @selectedBooking.StartTime.ToString("HH:mm") ～ @selectedBooking.EndTime.ToString("HH:mm")
-                        </span>
-                    </div>
+                <div class="modal-header">
+                    <h3 class="modal-title gradient-text-enhanced" style="background: none !important; -webkit-text-fill-color: transparent !important; background-image: linear-gradient(135deg, #00c6ff, #d53369) !important; -webkit-background-clip: text !important;">@selectedBooking.Name</h3>
+                    <button class="close-btn" @onclick="CloseDetail">×</button>
                 </div>
-                <div class="detail-row">
-                    <label>会議室</label>
-                    <div style="color: @GetRoomColor(selectedBooking.Room); font-weight: bold;">@selectedBooking.Room</div>
+                <div class="detail-body">
+                    <div class="cyber-detail-row slide-in-right" style="--i:1"><div class="label">日時</div><div class="value value-text">@selectedBooking.Date.ToString("yyyy/MM/dd")<br />@selectedBooking.StartTime.ToString("HH:mm") - @selectedBooking.EndTime.ToString("HH:mm")</div></div>
+                    <div class="cyber-detail-row slide-in-right" style="--i:2"><div class="label">会議室</div><div class="value value-text" style="border-left: 4px solid @GetRoomColor(selectedBooking.Room); padding-left: 10px;">@selectedBooking.Room</div></div>
+                    <div class="cyber-detail-row slide-in-right" style="--i:3"><div class="label">区分</div><div class="value value-text" style="border-left: 4px solid @GetTypeColor(selectedBooking.Type); padding-left: 10px;">@selectedBooking.Type</div></div>
+                    <div class="cyber-detail-row slide-in-right" style="--i:4"><div class="label">目的</div><div class="value value-text">@selectedBooking.Purpose</div></div>
+                    <div class="cyber-detail-row slide-in-right" style="--i:5"><div class="label">参加者</div><div class="value value-text">@GetParticipantNames(selectedBooking.ParticipantIds)</div></div>
                 </div>
-                <div class="detail-row">
-                    <label>利用人数</label>
-                    <div>@selectedBooking.NumberOfPeople 名</div>
-                </div>
-                <div class="detail-row">
-                    <label>参加メンバー</label>
-                    <div style="color: #d29922;">
-                        @GetParticipantNames(selectedBooking.ParticipantIds)
-                    </div>
-                </div>
-                <div class="detail-row">
-                    <label>利用目的</label>
-                    <div>@(string.IsNullOrEmpty(selectedBooking.Purpose) ? "(なし)" : selectedBooking.Purpose)</div>
-                </div>
-
-                <div style="margin-top: 20px; display:flex; justify-content: flex-end; gap: 10px;">
-                    @if (IsMyBooking(selectedBooking))
+                <div class="modal-footer fade-in" style="animation-delay: 0.3s;">
+                    @if (IsOwner(selectedBooking))
                     {
-                        <FluentButton IconStart="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.Edit())"
-                                      OnClick="StartEdit">Edit</FluentButton>
-                        <FluentButton IconStart="@(new Microsoft.FluentUI.AspNetCore.Components.Icons.Regular.Size16.Delete())"
-                                      class="cyber-button-danger" Appearance="Appearance.Outline"
-                                      OnClick="DeleteBooking">Del</FluentButton>
+                        <button class="cyber-button-primary" @onclick="StartEdit">編集</button>
+                        <button class="cyber-button-danger" @onclick="DeleteBooking">削除</button>
                     }
-                    <FluentButton Appearance="Appearance.Neutral" OnClick="CloseDetail">閉じる</FluentButton>
+                    <button class="cyber-button-secondary" @onclick="CloseDetail">閉じる</button>
                 </div>
             }
             else
             {
-                <FluentStack Orientation="Orientation.Vertical" VerticalGap="15">
-                    <FluentTextField @bind-Value="editName" Label="予約名" Style="width: 100%;" />
-                    <FluentSelect Items="@roomList" @bind-Value="editRoom" Label="会議室" Style="width: 100%;" />
-                    <FluentGrid Spacing="2">
-                        <FluentGridItem xs="6"><FluentTimePicker @bind-Value="editStart" Label="開始" Style="width:100%" /></FluentGridItem>
-                        <FluentGridItem xs="6"><FluentTimePicker @bind-Value="editEnd" Label="終了" Style="width:100%" /></FluentGridItem>
-                    </FluentGrid>
-                    <FluentTextField @bind-Value="editPurpose" Label="目的" Style="width: 100%;" />
+                <div class="modal-header">
+                    <h3 class="modal-title gradient-text-enhanced" style="background: none !important; -webkit-text-fill-color: transparent !important; background-image: linear-gradient(135deg, #00c6ff, #d53369) !important; -webkit-background-clip: text !important;">予約の編集</h3>
+                </div>
+                <div class="fluent-stack-scrollable">
+                    <FluentStack Orientation="Orientation.Vertical" VerticalGap="15" Style="padding: 10px;">
+                        <div class="fade-in-up" style="--i:1; position: relative; z-index: 80;"><label>予約名</label><FluentTextField @bind-Value="editName" Style="width: 100%;" /></div>
+                        <div class="fade-in-up" style="--i:2; position: relative; z-index: 70;"><label>利用日</label><FluentDatePicker @bind-Value="editDate" Style="width: 100%;" /></div>
 
-                    <div style="margin-top: 15px; display:flex; gap: 10px; justify-content: flex-end;">
-                        <button class="cyber-button-primary" style="padding: 5px 15px; border-radius: 4px;" @onclick="SaveEdit">Save</button>
-                        <FluentButton Appearance="Appearance.Neutral" OnClick="CancelEdit">Cancel</FluentButton>
-                    </div>
-                </FluentStack>
+                        <div class="fade-in-up" style="--i:3; position: relative; z-index: 60;">
+                            <label>会議室</label>
+                            <div class="selection-group">
+                                @foreach (var room in roomList)
+                                {
+                                    <div class="selection-chip @(editRoom == room ? "active" : "")" @onclick="() => editRoom = room">@room</div>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="fade-in-up" style="--i:4; position: relative; z-index: 50;">
+                            <label>区分</label>
+                            <div class="selection-group">
+                                @foreach (var type in typeList)
+                                {
+                                    <div class="selection-chip @(editType == type ? "active" : "")" @onclick="() => editType = type">@type</div>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="responsive-grid fade-in-up" style="--i:5; position: relative; z-index: 40;">
+                            <div>
+                                <label>開始</label>
+                                <FluentTimePicker @bind-Value="editStart" @bind-Value:after="OnEditStartChanged" Style="width:100%" />
+                            </div>
+                            <div>
+                                <label>終了</label>
+                                <FluentTimePicker @bind-Value="editEnd" Style="width:100%" />
+                            </div>
+                        </div>
+
+                        <div class="fade-in-up" style="--i:6; position: relative; z-index: 30;">
+                            <label>参加メンバー</label>
+                            <div class="member-select-box">
+                                @foreach (var user in allUsers)
+                                {
+                                    <div class="participant-item">
+                                        <input class="form-check-input" type="checkbox" id="edit_user_@user.Id" checked="@(editParticipantIds.Contains(user.Id))" @onchange="@(e => ToggleEditMember(user.Id, e.Value))">
+                                        <label class="form-check-label" for="edit_user_@user.Id" style="display:inline; margin-left:5px; cursor:pointer;">@user.Name</label>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="fade-in-up" style="--i:7; position: relative; z-index: 20;"><label>目的</label><FluentTextField @bind-Value="editPurpose" Style="width: 100%;" /></div>
+                        <div class="fade-in-up" style="--i:8; position: relative; z-index: 10; margin-top: 10px; border-top: 1px solid #30363d; padding-top: 10px;">
+                            <FluentCheckbox @bind-Value="sendNotification" Label="参加者に変更を通知する" Style="color: #d53369 !important; --neutral-foreground-rest: #d53369 !important;" />
+                        </div>
+                    </FluentStack>
+                </div>
+                <div class="modal-footer">
+                    <button class="cyber-button-primary" @onclick="SaveEdit">保存</button>
+                    <button class="cyber-button-secondary" @onclick="CancelEdit">キャンセル</button>
+                </div>
             }
+        </div>
+    </div>
+}
+
+@if (timelineDate != null)
+{
+    <div class="modal-backdrop" @onclick="CloseTimelineModal" @ontouchmove:stopPropagation="true" style="z-index: 20000 !important;">
+        <div class="modal-content cyber-modal-animated timeline-modal-wide zoom-in-enter" @onclick:stopPropagation="true" style="height: 90vh;">
+            <div class="modal-header">
+                <h3 class="modal-title gradient-text-enhanced" style="background: none !important; -webkit-text-fill-color: transparent !important; background-image: linear-gradient(135deg, #00c6ff, #d53369) !important; -webkit-background-clip: text !important;">@timelineDate.Value.ToString("yyyy/MM/dd (ddd)")</h3>
+                <button class="close-btn" @onclick="CloseTimelineModal">×</button>
+            </div>
+
+            <div class="legend-box" style="margin: 0 15px 10px; padding-top: 10px; border-top: none; border-bottom: 1px solid #30363d;">
+                <div class="legend-item"><span class="legend-color internal"></span>社内</div>
+                <div class="legend-item"><span class="legend-color visitor"></span>来客</div>
+                <div class="legend-item"><span class="legend-icon my-border-legend"></span>自分</div>
+                <div class="legend-item"><span class="legend-icon warning">⚠</span>重複</div>
+            </div>
+
+            <div class="detail-body" style="padding: 0; overflow: auto; flex-grow: 1;">
+                <div class="timeline-container">
+                    <div class="timeline-header">
+                        <div class="header-spacer sticky-element"></div>
+                        <div class="time-scale">
+                            @foreach (var tick in GetTimeTicks())
+                            {
+                                <div class="time-mark @(tick.IsFirst ? "first-tick" : "")" style="left: @tick.Position%">@tick.Label</div>
+                            }
+                        </div>
+                    </div>
+
+                    @foreach (var room in roomList)
+                    {
+                        var roomData = GetTimelineRoomData(room, timelineDate.Value);
+                        <div class="timeline-row" style="height: @(roomData.RowHeight)px;">
+                            <div class="room-label-tl sticky-element" style="border-left: 4px solid @GetRoomColor(room); height: @(roomData.RowHeight)px;">@room</div>
+                            <div class="timeline-track" style="height: @(roomData.RowHeight)px;">
+                                @foreach (var tick in GetTimeTicks())
+                                {
+                                    <div class="grid-line" style="left: @tick.Position%;"></div>
+                                }
+                                @foreach (var item in roomData.Items)
+                                {
+                                    <div class="booking-block @(IsMyBooking(item.Booking!) ? "my-booking" : "")"
+                                         data-type="@item.Booking!.Type"
+                                         style="@item.Style; background: @GetTypeColor(item.Booking!.Type);"
+                                         @onclick="() => ShowDetail(item.Booking!)">
+                                        @if (item.HasConflict)
+                                        {
+                                            <div class="warning-icon">⚠</div>
+                                        }
+                                        <div class="block-content">
+                                            <div class="block-text name">@item.Booking!.Name</div>
+                                            <div class="block-text purpose">@item.Booking!.Purpose</div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="cyber-button-secondary" @onclick="CloseTimelineModal">閉じる</button>
+            </div>
         </div>
     </div>
 }
 
 @code {
-    [SupplyParameterFromQuery] public string? Date { get; set; }
-    private List<ReservationModel> allReservations = new();
-    private List<UserModel> allUsers = new();
-    private List<string> roomList = new() { "大会議室", "小会議室", "応接室" };
-    private UserModel? currentUser;
+    [SupplyParameterFromQuery] public int? BookingId { get; set; }
     private DateTime selectedDateValue = DateTime.Today;
-    private DateTime? selectedDate
-    {
-        get => selectedDateValue;
-        set { if (value.HasValue) { selectedDateValue = value.Value; OnDateChanged(); } }
-    }
-    private enum ViewMode { Day, Week, Month }
-    private ViewMode currentView = ViewMode.Day;
-    private ReservationModel? selectedBooking = null;
-    private List<ReservationModel>? selectedList = null;
+    private DateTime displayMonth = DateTime.Today;
+    private List<DateTime> calendarDays = new();
+    private List<ReservationModel> allReservations = new();
+    private List<string> roomList = new() { "大会議室", "小会議室" };
+    private List<string> typeList = new() { "社内", "来客" };
+    private ReservationModel? selectedBooking;
+    private UserModel? currentUser;
+    private List<UserModel> allUsers = new();
     private bool isEditing = false;
-    private string editName = "";
-    private string editRoom = "";
-    private DateTime? editStart;
-    private DateTime? editEnd;
-    private string editPurpose = "";
+    private bool isLoading = true;
+    private string editName = "", editRoom = "", editType = "", editPurpose = "";
+    private DateTime? editDate, editStart, editEnd;
+    private List<int> editParticipantIds = new();
+    private bool sendNotification = true;
+    private DateTime? timelineDate;
+
     protected override async Task OnInitializedAsync()
     {
+        GenerateCalendar();
         await LoadData();
         BookingService.OnChange += async () => { await LoadData(); await InvokeAsync(StateHasChanged); };
     }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (BookingId.HasValue)
+        {
+            await LoadData();
+            var target = allReservations.FirstOrDefault(r => r.Id == BookingId.Value);
+            if (target != null)
+            {
+                selectedDateValue = target.Date;
+                displayMonth = target.Date;
+                GenerateCalendar();
+                ShowDetail(target);
+                BookingId = null;
+            }
+        }
+    }
+
+    private void OnEditStartChanged()
+    {
+        if (editStart.HasValue)
+        {
+            editEnd = editStart.Value.AddHours(1);
+        }
+    }
+
+    private void GenerateCalendar()
+    {
+        calendarDays.Clear();
+        var firstDayOfMonth = new DateTime(displayMonth.Year, displayMonth.Month, 1);
+        var startDay = firstDayOfMonth.AddDays(-(int)firstDayOfMonth.DayOfWeek);
+        for (int i = 0; i < 42; i++) { calendarDays.Add(startDay.AddDays(i)); }
+    }
+
+    private void PrevMonth() { displayMonth = displayMonth.AddMonths(-1); GenerateCalendar(); }
+    private void NextMonth() { displayMonth = displayMonth.AddMonths(1); GenerateCalendar(); }
+    private void SelectDate(DateTime date) { selectedDateValue = date; }
+
     private async Task LoadData()
     {
+        isLoading = true;
         allReservations = await BookingService.GetReservationsAsync();
         currentUser = BookingService.GetCurrentUser();
         try { allUsers = await BookingService.GetAllUsersAsync(); } catch { }
-    }
-    protected override void OnParametersSet()
-    {
-        if (!string.IsNullOrEmpty(Date) && DateTime.TryParse(Date, out DateTime parsedDate)) selectedDateValue = parsedDate;
-    }
-    private async Task OnDateChanged() => await InvokeAsync(StateHasChanged);
-    private void ChangeView(ViewMode mode) => currentView = mode;
-
-    private class RenderItem
-    {
-        public ReservationModel? Booking { get; set; }
-        public string Style { get; set; } = "";
-        public bool IsMoreButton { get; set; }
-        public int Count { get; set; }
-        public bool HasConflict { get; set; }
-        public List<ReservationModel> HiddenBookings { get; set; } = new();
+        isLoading = false;
+        StateHasChanged();
     }
 
-    private class OverflowBlock
+    private List<DateTime> GetDisplayDates()
     {
-        public DateTime Start { get; set; }
-        public DateTime End { get; set; }
-        public List<ReservationModel> Items { get; set; } = new();
-        public int Count => Items.Count;
+        var list = new List<DateTime>();
+        var maxDate = selectedDateValue.AddDays(30);
+        for (var d = selectedDateValue; d <= maxDate; d = d.AddDays(1)) list.Add(d);
+        return list;
     }
 
-    private IEnumerable<RenderItem> GetRenderItems(string room)
+    private List<ReservationModel> GetBookings(DateTime date, string room) =>
+        allReservations.Where(r => r.Date.Date == date.Date && r.Room == room).OrderBy(r => r.StartTime).ToList();
+
+    private bool HasAnyBooking(DateTime date) => roomList.Any(r => GetBookings(date, r).Any());
+    private string GetRoomColor(string r) => r == "大会議室" ? "#58a6ff" : "#3fb950";
+    private string GetTypeColor(string type, bool isCard = false) { if (type == "来客") return isCard ? "#00c853" : "#00e676"; return isCard ? "#7b1fa2" : "#d500f9"; }
+    private bool IsOwner(ReservationModel b) => currentUser != null && b.UserId == currentUser.Id;
+
+    private bool IsMyBooking(ReservationModel b)
     {
-        var start = GetViewStartDate();
-        var end = GetViewEndDate();
-        var bookings = allReservations.Where(x => x.Room == room && x.Date.Date >= start && x.Date.Date <= end).ToList();
-
-        if (currentView == ViewMode.Day)
-        {
-            var clusters = GetClusters(bookings);
-            foreach (var cluster in clusters)
-            {
-                var lanes = CalculateLanes(cluster);
-                int totalLanes = lanes.Count;
-                int maxRows = 3;
-                bool isOverflow = totalLanes > maxRows;
-                int displayRows = isOverflow ? maxRows : totalLanes;
-                double heightPercent = (displayRows > 0) ? (100.0 / displayRows) : 100;
-                double actualHeight = heightPercent - 2.0;
-                int normalLanes = isOverflow ? (maxRows - 1) : totalLanes;
-
-                for (int i = 0; i < normalLanes; i++)
-                {
-                    foreach (var booking in lanes[i])
-                    {
-                        yield return new RenderItem
-                        {
-                            Booking = booking,
-                            HasConflict = HasConflict(booking),
-                            Style = $"left: {GetTimePosition(booking.StartTime.Hour, booking.StartTime.Minute)}%; width: {GetDurationWidth(booking)}%; background: {GetTypeColor(booking.Type)}; top: {i * heightPercent}%; height: {actualHeight}%; position: absolute; box-sizing: border-box; border-top: 1px solid #161b22; opacity: 0.95;"
-                        };
-                    }
-                }
-
-                if (isOverflow)
-                {
-                    var overflowItems = new List<ReservationModel>();
-                    for (int i = normalLanes; i < lanes.Count; i++)
-                    {
-                        overflowItems.AddRange(lanes[i]);
-                    }
-
-                    foreach (var block in GetOverflowBlocks(overflowItems))
-                    {
-                        yield return new RenderItem
-                        {
-                            IsMoreButton = true,
-                            Count = block.Count,
-                            HiddenBookings = block.Items,
-                            Style = $"left: {GetTimePosition(block.Start.Hour, block.Start.Minute)}%; width: {GetDurationWidth(block.Start, block.End)}%; background: #30363d; border: 1px dashed #8b949e; top: {2 * heightPercent}%; height: {actualHeight}%; position: absolute; box-sizing: border-box; display: flex; align-items: center; justify-content: center;"
-                        };
-                    }
-                }
-            }
-        }
-        else
-        {
-            var grouped = bookings.GroupBy(b => b.Date.Date);
-            foreach (var group in grouped)
-            {
-                var sorted = group.OrderBy(b => b.StartTime).ToList();
-                int count = sorted.Count;
-                for (int i = 0; i < count; i++)
-                {
-                    if (i == 2 && count > 3)
-                    {
-                        var hidden = sorted.Skip(2).ToList();
-                        yield return new RenderItem
-                        {
-                            IsMoreButton = true,
-                            Count = hidden.Count,
-                            HiddenBookings = hidden,
-                            Style = GetGridStyle(group.Key, i, 3) + "background: #30363d; border: 1px dashed #8b949e;"
-                        };
-                        break;
-                    }
-                    yield return new RenderItem
-                    {
-                        Booking = sorted[i],
-                        HasConflict = HasConflict(sorted[i]),
-                        Style = GetGridStyle(group.Key, i, (count > 3 ? 3 : count)) + $"background: {GetTypeColor(sorted[i].Type)};"
-                    };
-                }
-            }
-        }
+        if (currentUser == null) return false;
+        if (b.UserId == currentUser.Id) return true;
+        if (b.ParticipantIds != null && b.ParticipantIds.Contains(currentUser.Id)) return true;
+        return false;
     }
 
-    private List<List<ReservationModel>> GetClusters(List<ReservationModel> bookings)
+    private bool HasConflict(ReservationModel t) =>
+        allReservations.Any(x => x.Id != t.Id && x.Room == t.Room && x.Date.Date == t.Date.Date && x.StartTime < t.EndTime && x.EndTime > t.StartTime);
+
+    private string GetParticipantNames(List<int> ids)
     {
-        var sorted = bookings.OrderBy(b => b.StartTime).ToList();
-        var clusters = new List<List<ReservationModel>>();
-        if (!sorted.Any()) return clusters;
-
-        var currentCluster = new List<ReservationModel> { sorted[0] };
-        var clusterEnd = sorted[0].EndTime;
-
-        for (int i = 1; i < sorted.Count; i++)
-        {
-            if (sorted[i].StartTime < clusterEnd)
-            {
-                currentCluster.Add(sorted[i]);
-                if (sorted[i].EndTime > clusterEnd) clusterEnd = sorted[i].EndTime;
-            }
-            else
-            {
-                clusters.Add(currentCluster);
-                currentCluster = new List<ReservationModel> { sorted[i] };
-                clusterEnd = sorted[i].EndTime;
-            }
-        }
-        clusters.Add(currentCluster);
-        return clusters;
-    }
-
-    private List<List<ReservationModel>> CalculateLanes(List<ReservationModel> cluster)
-    {
-        var lanes = new List<List<ReservationModel>>();
-        foreach (var booking in cluster)
-        {
-            bool placed = false;
-            foreach (var lane in lanes)
-            {
-                if (lane.Last().EndTime <= booking.StartTime)
-                {
-                    lane.Add(booking);
-                    placed = true;
-                    break;
-                }
-            }
-            if (!placed) lanes.Add(new List<ReservationModel> { booking });
-        }
-        return lanes;
-    }
-
-    private IEnumerable<OverflowBlock> GetOverflowBlocks(List<ReservationModel> items)
-    {
-        if (!items.Any()) yield break;
-
-        var sorted = items.OrderBy(b => b.StartTime).ToList();
-        var currentBlock = new OverflowBlock { Start = sorted[0].StartTime, End = sorted[0].EndTime };
-        currentBlock.Items.Add(sorted[0]);
-
-        for (int i = 1; i < sorted.Count; i++)
-        {
-            if (sorted[i].StartTime < currentBlock.End)
-            {
-                if (sorted[i].EndTime > currentBlock.End) currentBlock.End = sorted[i].EndTime;
-                currentBlock.Items.Add(sorted[i]);
-            }
-            else
-            {
-                yield return currentBlock;
-                currentBlock = new OverflowBlock { Start = sorted[i].StartTime, End = sorted[i].EndTime };
-                currentBlock.Items.Add(sorted[i]);
-            }
-        }
-        yield return currentBlock;
-    }
-
-    private bool HasConflict(ReservationModel target)
-    {
-        return allReservations.Any(x => x.Id != target.Id && x.Room == target.Room && x.Date.Date == target.Date.Date && x.StartTime < target.EndTime && x.EndTime > target.StartTime);
-    }
-
-    private string GetGridStyle(DateTime date, int index, int totalInStack)
-    {
-        var viewStart = GetViewStartDate();
-        var totalDays = (currentView == ViewMode.Week) ? 7.0 : DateTime.DaysInMonth(viewStart.Year, viewStart.Month);
-        var offsetDays = (date - viewStart).TotalDays;
-        double left = (offsetDays / totalDays) * 100.0;
-        double width = (1.0 / totalDays) * 100.0;
-        double height = 100.0 / totalInStack;
-        height -= 2;
-        double top = index * (100.0 / totalInStack);
-        return $"left: {left}%; width: {width}%; top: {top}%; height: {height}%; box-sizing: border-box; border-top: 1px solid #161b22; position: absolute; padding: 0 2px;";
+        if (ids == null) return "";
+        var names = ids.Select(id => allUsers.FirstOrDefault(u => u.Id == id)?.Name ?? "").Where(n => !string.IsNullOrEmpty(n));
+        return string.Join(", ", names);
     }
 
     private void ShowDetail(ReservationModel b) { selectedBooking = b; isEditing = false; }
     private void CloseDetail() { selectedBooking = null; isEditing = false; }
     private void StartEdit()
     {
-        editName = selectedBooking!.Name; editRoom = selectedBooking!.Room; editStart = selectedBooking!.StartTime; editEnd = selectedBooking!.EndTime; editPurpose = selectedBooking!.Purpose; isEditing = true;
+        if (selectedBooking == null) return;
+        editName = selectedBooking.Name;
+        editRoom = selectedBooking.Room;
+        editType = selectedBooking.Type;
+        editPurpose = selectedBooking.Purpose;
+        editDate = selectedBooking.Date;
+        editStart = selectedBooking.StartTime;
+        editEnd = selectedBooking.EndTime;
+        editParticipantIds = new List<int>(selectedBooking.ParticipantIds ?? new List<int>());
+        sendNotification = true;
+        isEditing = true;
     }
+
     private void CancelEdit() => isEditing = false;
+
+    private void ToggleEditMember(int userId, object? isChecked)
+    {
+        if ((bool)(isChecked ?? false))
+        {
+            if (!editParticipantIds.Contains(userId)) editParticipantIds.Add(userId);
+        }
+        else
+        {
+            editParticipantIds.Remove(userId);
+        }
+    }
+
     private async Task SaveEdit()
     {
-        if (selectedBooking == null) return;
-        selectedBooking.Name = editName; selectedBooking.Room = editRoom;
-        if (editStart.HasValue) selectedBooking.StartTime = selectedBooking.Date.Date + editStart.Value.TimeOfDay;
-        if (editEnd.HasValue) selectedBooking.EndTime = selectedBooking.Date.Date + editEnd.Value.TimeOfDay;
-        selectedBooking.Purpose = editPurpose;
-        await BookingService.UpdateReservationAsync(selectedBooking); await LoadData(); isEditing = false;
+        if (selectedBooking != null)
+        {
+            selectedBooking.Name = editName;
+            selectedBooking.Room = editRoom;
+            selectedBooking.Type = editType;
+            selectedBooking.Purpose = editPurpose;
+            if (editDate.HasValue) selectedBooking.Date = editDate.Value;
+            if (editStart.HasValue) selectedBooking.StartTime = selectedBooking.Date.Date + editStart.Value.TimeOfDay;
+            if (editEnd.HasValue) selectedBooking.EndTime = selectedBooking.Date.Date + editEnd.Value.TimeOfDay;
+            selectedBooking.ParticipantIds = editParticipantIds;
+
+            await BookingService.UpdateReservationAsync(selectedBooking, sendNotification);
+        }
+        isEditing = false;
     }
+
     private async Task DeleteBooking()
     {
-        if (await JSRuntime.InvokeAsync<bool>("confirm", "本当に削除しますか？")) { if (selectedBooking != null) await BookingService.RemoveReservationAsync(selectedBooking); CloseDetail(); await LoadData(); }
+        if (selectedBooking != null && await JSRuntime.InvokeAsync<bool>("confirm", "削除しますか？"))
+        {
+            await BookingService.RemoveReservationAsync(selectedBooking);
+            selectedBooking = null;
+            await LoadData();
+        }
     }
-    private void ShowListModal(List<ReservationModel> list) => selectedList = list;
-    private void CloseListModal() => selectedList = null;
-    private string GetParticipantNames(List<int> ids)
-    {
-        if (ids == null || !ids.Any()) return "(なし)";
-        var names = ids.Select(id => allUsers.FirstOrDefault(u => u.Id == id)?.Name ?? $"User:{id}");
-        return string.Join(", ", names);
-    }
-    private double GetTimePosition(int hour, int minute) { double total = 13 * 60; double cur = (hour - 9) * 60 + minute; return (Math.Max(0, Math.Min(cur, total)) / total) * 100.0; }
-    private double GetDurationWidth(ReservationModel b) => GetTimePosition(b.EndTime.Hour, b.EndTime.Minute) - GetTimePosition(b.StartTime.Hour, b.StartTime.Minute);
-    private double GetDurationWidth(DateTime start, DateTime end) => GetTimePosition(end.Hour, end.Minute) - GetTimePosition(start.Hour, start.Minute);
 
-    private string GetRangeLabel()
-    {
-        var s = GetViewStartDate(); var e = GetViewEndDate();
-        return currentView == ViewMode.Day ? s.ToString("yyyy/MM/dd (ddd)") : (currentView == ViewMode.Week ? $"{s:MM/dd} - {e:MM/dd}" : s.ToString("yyyy/MM"));
+    private void OpenTimelineModal(DateTime date) { timelineDate = date; }
+    private void CloseTimelineModal() { timelineDate = null; }
+
+    private class RenderItem 
+    { 
+        public ReservationModel? Booking { get; set; } 
+        public string Style { get; set; } = ""; 
+        public bool HasConflict { get; set; } 
     }
-    private DateTime GetViewStartDate()
-    {
-        if (currentView == ViewMode.Day) return selectedDateValue.Date;
-        if (currentView == ViewMode.Week) { var diff = (7 + (selectedDateValue.DayOfWeek - DayOfWeek.Monday)) % 7; return selectedDateValue.AddDays(-1 * diff).Date; }
-        return new DateTime(selectedDateValue.Year, selectedDateValue.Month, 1);
+
+    private class RoomTimelineData 
+    {   
+        public List<RenderItem> Items { get; set; } = new(); 
+        public double RowHeight { get; set; } 
     }
-    private DateTime GetViewEndDate()
+
+    private List<dynamic> GetTimeTicks()
     {
-        if (currentView == ViewMode.Day) return selectedDateValue.Date;
-        if (currentView == ViewMode.Week) return GetViewStartDate().AddDays(6);
-        return GetViewStartDate().AddMonths(1).AddDays(-1);
-    }
-    private List<TimeTick> GetTimeTicks()
-    {
-        var list = new List<TimeTick>();
-        if (currentView == ViewMode.Day) { for (int h = 9; h <= 22; h++) list.Add(new TimeTick { Label = $"{h}:00", Position = GetTimePosition(h, 0) }); }
-        else if (currentView == ViewMode.Week) { var s = GetViewStartDate(); for (int i = 0; i < 7; i++) list.Add(new TimeTick { Label = s.AddDays(i).ToString("dd(ddd)"), Position = (i / 7.0) * 100 }); }
-        else { var s = GetViewStartDate(); var d = DateTime.DaysInMonth(s.Year, s.Month); for (int i = 0; i < d; i += 5) list.Add(new TimeTick { Label = (i + 1).ToString(), Position = (i / (double)d) * 100 }); }
+        var list = new List<dynamic>();
+        for (int h = 9; h <= 22; h++) list.Add(new { Label = $"{h}:00", Position = GetTimePosition(h, 0), IsFirst = (h == 9) });
         return list;
     }
-    private struct TimeTick { public string Label; public double Position; }
-    private string GetRoomColor(string r) => r == "大会議室" ? "#58a6ff" : (r == "小会議室" ? "#3fb950" : "#a371f7");
-    private string GetTypeColor(string t) => t == "来客" ? "#b32121" : "#1b6ec2";
-    private bool IsMyBooking(ReservationModel b) => currentUser != null && (b.UserId == currentUser.Id || b.ParticipantIds.Contains(currentUser.Id));
+
+    private double GetTimePosition(int h, int m) => (double)((h - 9) * 60 + m) / (13 * 60) * 100.0;
+    private double GetDurationWidth(DateTime s, DateTime e) => GetTimePosition(e.Hour, e.Minute) - GetTimePosition(s.Hour, s.Minute);
+
+    private RoomTimelineData GetTimelineRoomData(string room, DateTime date)
+    {
+        var bookings = GetBookings(date, room);
+        var items = new List<RenderItem>();
+        if (!bookings.Any()) return new RoomTimelineData { Items = items, RowHeight = 100 };
+
+        var clusters = new List<List<ReservationModel>>();
+        if (bookings.Any())
+        {
+            var current = new List<ReservationModel> { bookings[0] };
+            var end = bookings[0].EndTime;
+
+            for (int i = 1; i < bookings.Count; i++)
+            {
+                if (bookings[i].StartTime < end)
+                {
+                    current.Add(bookings[i]);
+                    if (bookings[i].EndTime > end) end = bookings[i].EndTime;
+                }
+                else
+                {
+                    clusters.Add(current);
+                    current = new List<ReservationModel> { bookings[i] };
+                    end = bookings[i].EndTime;
+                }
+            }
+            clusters.Add(current);
+        }
+
+        int maxLanesInRoom = 0;
+        const int LANE_HEIGHT = 60;
+
+        foreach (var cluster in clusters)
+        {
+            var lanes = new List<List<ReservationModel>>();
+            foreach (var b in cluster)
+            {
+                bool placed = false;
+                for (int i = 0; i < lanes.Count; i++)
+                {
+                    if (lanes[i].Last().EndTime <= b.StartTime)
+                    {
+                        lanes[i].Add(b);
+                        placed = true;
+                        break;
+                    }
+                }
+                if (!placed) lanes.Add(new List<ReservationModel> { b });
+            }
+
+            if (lanes.Count > maxLanesInRoom) maxLanesInRoom = lanes.Count;
+
+            for (int i = 0; i < lanes.Count; i++)
+            {
+                foreach (var b in lanes[i])
+                {
+                    string style =
+                        $"left: {GetTimePosition(b.StartTime.Hour, b.StartTime.Minute)}%; " +
+                        $"width: {GetDurationWidth(b.StartTime, b.EndTime)}%; " +
+                        $"top: {i * LANE_HEIGHT + 5}px; height: {LANE_HEIGHT - 4}px; " +
+                        $"position: absolute; border-radius: 4px; padding: 4px 6px; color: white; " +
+                        $"overflow: hidden; cursor: pointer; " +
+                        $"border: {(IsMyBooking(b) ? "2px solid #d29922;" : "1px solid rgba(255,255,255,0.2)")}; " +
+                        $"z-index: 10; display: flex; flex-direction: column; justify-content: center;";
+
+                    items.Add(new RenderItem { Booking = b, HasConflict = HasConflict(b), Style = style });
+                }
+            }
+        }
+
+        double rowHeight = Math.Max(100, maxLanesInRoom * LANE_HEIGHT + 15);
+        return new RoomTimelineData { Items = items, RowHeight = rowHeight };
+    }
 }
-
-<style>
-    .cyber-card {
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: thin;
-    }
-
-    .cyber-card::-webkit-scrollbar {
-        height: 8px;
-        width: 8px;
-    }
-
-    .cyber-card::-webkit-scrollbar-track {
-        background: #0d1117;
-        border-radius: 4px;
-    }
-
-    .cyber-card::-webkit-scrollbar-thumb {
-        background: #30363d;
-        border-radius: 4px;
-    }
-
-    .cyber-card::-webkit-scrollbar-thumb:hover {
-        background: #58a6ff;
-    }
-
-    .warning-icon {
-        position: absolute;
-        top: 2px;
-        right: 2px;
-        font-size: 14px;
-        color: #ffbf00;
-        z-index: 10;
-        text-shadow: 0 0 3px rgba(0,0,0,0.8);
-        animation: pulse 2s infinite;
-    }
-
-    @@keyframes pulse {
-        0% {
-            transform: scale(1);
-        }
-
-        50% {
-            transform: scale(1.2);
-        }
-
-        100% {
-            transform: scale(1);
-        }
-    }
-
-    .timeline-row {
-        display: flex;
-        height: 120px;
-        margin-bottom: 15px;
-        align-items: center;
-    }
-
-    .more-btn {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
-        transition: background 0.2s;
-    }
-
-    .more-btn:hover {
-        background: #454d55 !important;
-    }
-
-    .list-item {
-        padding: 10px;
-        border-bottom: 1px solid #30363d;
-        cursor: pointer;
-    }
-
-    .list-item:hover {
-        background: rgba(255,255,255,0.05);
-    }
-
-    .view-switcher {
-        display: flex;
-        background: #0d1117;
-        border: 1px solid #30363d;
-        border-radius: 6px;
-        overflow: hidden;
-        margin-top: 5px;
-    }
-
-    .view-switcher button {
-        flex: 1;
-        background: transparent;
-        border: none;
-        color: #8b949e;
-        padding: 5px 10px;
-        cursor: pointer;
-        font-size: 0.9em;
-        transition: all 0.2s;
-    }
-
-    .view-switcher button.active {
-        background: #1b6ec2;
-        color: white;
-    }
-
-    .view-switcher button:hover:not(.active) {
-        background: rgba(255,255,255,0.05);
-        color: white;
-    }
-
-    .timeline-container {
-        position: relative;
-        min-width: 800px;
-        width: 100%;
-    }
-
-    .timeline-header {
-        display: flex;
-        height: 30px;
-        border-bottom: 1px solid #30363d;
-        margin-bottom: 10px;
-    }
-
-    .room-label-placeholder {
-        width: 100px;
-        flex-shrink: 0;
-    }
-
-    .time-scale {
-        flex-grow: 1;
-        position: relative;
-    }
-
-    .time-mark {
-        position: absolute;
-        transform: translateX(-50%);
-        font-size: 0.8em;
-        color: #8b949e;
-        white-space: nowrap;
-    }
-
-    .room-label {
-        width: 100px;
-        font-weight: bold;
-        flex-shrink: 0;
-        padding-left: 10px;
-        color: #e6edf3;
-        font-size: 0.9rem;
-    }
-
-    .timeline-track {
-        flex-grow: 1;
-        position: relative;
-        height: 100%;
-        background: rgba(255,255,255,0.03);
-        border-radius: 4px;
-    }
-
-    .grid-line {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        width: 1px;
-        background: rgba(255,255,255,0.08);
-    }
-
-    .booking-block {
-        border-radius: 2px;
-        color: white;
-        padding: 0 4px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.5);
-        transition: transform 0.1s;
-        z-index: 5;
-        overflow: hidden;
-        position: absolute;
-    }
-
-    .booking-block:hover {
-        z-index: 100;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.8);
-    }
-
-    .my-booking {
-        border: 2px solid #d29922 !important;
-        box-shadow: 0 0 10px rgba(210, 153, 34, 0.6) !important;
-        z-index: 6;
-    }
-
-    .block-content {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        height: 100%;
-    }
-
-    .block-text {
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        line-height: 1.2;
-        display: block;
-    }
-
-    .name {
-        font-weight: bold;
-        font-size: 0.85em;
-    }
-
-    .purpose {
-        font-size: 0.75em;
-        opacity: 0.9;
-    }
-
-    .modal-backdrop {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.7);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-        animation: fadeIn 0.2s;
-    }
-
-    .modal-content {
-        width: 90%;
-        max-width: 500px;
-        padding: 30px !important;
-        background: #161b22;
-        border: 1px solid #58a6ff;
-        box-shadow: 0 0 30px rgba(88, 166, 255, 0.2) !important;
-        animation: scaleIn 0.2s;
-        max-height: 90vh;
-        overflow-y: auto;
-    }
-
-    .close-btn {
-        background: none;
-        border: none;
-        color: #8b949e;
-        font-size: 1.5rem;
-        cursor: pointer;
-    }
-
-    .close-btn:hover {
-        color: white;
-    }
-
-    .detail-row {
-        margin-bottom: 15px;
-        border-bottom: 1px solid #30363d;
-        padding-bottom: 10px;
-    }
-
-    .detail-row label {
-        display: block;
-        font-size: 0.85em;
-        color: #8b949e;
-        margin-bottom: 4px;
-    }
-
-    @@keyframes fadeIn {
-        from {
-            opacity: 0;
-        }
-
-        to {
-            opacity: 1;
-        }
-    }
-
-    @@keyframes scaleIn {
-        from {
-            transform: scale(0.9);
-        }
-
-        to {
-            transform: scale(1);
-        }
-    }
-</style>

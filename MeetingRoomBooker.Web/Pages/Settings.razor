@@ -1,0 +1,43 @@
+﻿@page "/settings"
+@using MeetingRoomBooker.Services
+@inject ThemeService ThemeService
+
+<div class="settings-container fade-in">
+    <h3 class="page-title">設定 (SETTINGS)</h3>
+
+    <div class="setting-card">
+        <div class="setting-row">
+            <div class="setting-info">
+                <h4>外観テーマ</h4>
+                <p>画面の雰囲気を切り替えます。</p>
+            </div>
+
+            <div class="theme-switcher">
+                <button class="theme-btn @(currentTheme == "dark" ? "active" : "")" @onclick='() => ChangeTheme("dark")' type="button">
+                    <div class="preview dark"></div>
+                    <span>Cyber Dark</span>
+                </button>
+
+                <button class="theme-btn @(currentTheme == "light" ? "active" : "")" @onclick='() => ChangeTheme("light")' type="button">
+                    <div class="preview light"></div>
+                    <span>Colorful Pop</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private string currentTheme = "dark";
+
+    protected override void OnInitialized()
+    {
+        currentTheme = ThemeService.CurrentTheme;
+    }
+
+    private void ChangeTheme(string theme)
+    {
+        currentTheme = theme;
+        ThemeService.SetTheme(theme);
+    }
+}

@@ -1,48 +1,74 @@
 ﻿@page "/notifications"
-@using MeetingRoomBooker.Services
 @using MeetingRoomBooker.Shared.Models
+@using MeetingRoomBooker.Services
 @inject IBookingService BookingService
 @inject NavigationManager Navigation
 
-<FluentStack Orientation="Orientation.Vertical" VerticalGap="20">
-    <h3 class="gradient-text">NOTIFICATIONS</h3>
+<div class="notification-wrapper fade-in">
+    <div class="bg-decoration"></div>
 
-    @if (notifications.Count == 0)
-    {
-        <div class="cyber-card" style="padding: 30px; text-align: center; color: #8b949e;">
-            通知はありません。
+    <div class="notification-container">
+        <div class="header-area">
+            <h3 class="gradient-text-enhanced title-glow">NOTIFICATION CENTER</h3>
+            <button class="clear-btn" @onclick="MarkAllRead">
+                <span class="oi oi-check"></span> MARK ALL READ
+            </button>
         </div>
-    }
-    else
-    {
-        <div style="display: flex; flex-direction: column; gap: 15px;">
-            @foreach (var note in notifications)
-            {
-                <div class="cyber-card notification-item @(note.IsRead ? "read" : "unread")"
-                     @onclick="() => HandleClick(note)"
-                     style="cursor: pointer;">
 
-                    <div style="flex-grow: 1;">
-                        <div style="margin-bottom: 5px;">
-                            <span class="note-date">@note.CreatedAt.ToString("yyyy/MM/dd HH:mm")</span>
-                            @if (!note.IsRead)
-                            {
-                                <span class="new-badge">NEW</span>
-                            }
-                        </div>
-                        <div class="note-message">@note.Message</div>
-                    </div>
-                    @if (!note.IsRead)
-                    {
-                        <div style="margin-left: 10px;">
-                            <span style="color:#58a6ff; font-size:0.8rem;">確認画面へ ➜</span>
-                        </div>
-                    }
+        <div class="notification-list">
+            @if (!notifications.Any())
+            {
+                <div class="empty-state fade-in">
+                    <div class="empty-icon-wrapper"><span class="oi oi-inbox empty-icon"></span></div>
+                    <div class="empty-text">NO NEW SIGNALS</div>
                 </div>
             }
+            else
+            {
+                @foreach (var (n, index) in notifications.Select((x, i) => (x, i)))
+                {
+                    <div class="notif-item @(n.IsRead ? "read" : "unread") @(n.Type == "Warning" ? "warning-item" : "") slide-in-stagger"
+                         style="--i:@index"
+                         @onclick="() => NavigateToReservation(n)">
+
+                        <div class="icon-area">
+                            @if (n.Type == "Warning")
+                            {
+                                <span class="oi oi-warning text-warning warning-pulse"></span>
+                            }
+                            else
+                            {
+                                <span class="oi oi-bell text-info"></span>
+                            }
+                        </div>
+                        <div class="notif-content">
+                            <div class="notif-message">@n.Message</div>
+                            <div class="notif-meta">
+                                <span class="notif-time">@n.CreatedAt.ToString("yyyy/MM/dd HH:mm")</span>
+                                <span class="notif-id">ID: @n.Id.ToString("D4")</span>
+                            </div>
+                        </div>
+                        @if (!n.IsRead)
+                        {
+                            <div class="new-badge">NEW</div>
+                        }
+                        <div class="hover-arrow">→</div>
+
+                        <div class="action-area" @onclick:stopPropagation="true">
+                            <button class="delete-btn" @onclick="() => DeleteNotif(n.Id)">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="white" viewBox="0 0 16 16">
+                                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" />
+                                    <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z" />
+                                </svg>
+                            </button>
+                        </div>
+
+                    </div>
+                }
+            }
         </div>
-    }
-</FluentStack>
+    </div>
+</div>
 
 @code {
     private List<NotificationModel> notifications = new();
@@ -51,58 +77,47 @@
     protected override async Task OnInitializedAsync()
     {
         currentUser = BookingService.GetCurrentUser();
+        if (currentUser == null)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+        await LoadNotifications();
+    }
+
+    private async Task LoadNotifications()
+    {
         if (currentUser != null)
         {
             notifications = await BookingService.GetNotificationsAsync(currentUser.Id);
         }
     }
 
-    private async Task HandleClick(NotificationModel note)
+    private async Task MarkAllRead()
     {
-        if (!note.IsRead)
+        foreach (var n in notifications.Where(x => !x.IsRead))
         {
-            await BookingService.MarkNotificationAsReadAsync(note.Id);
+            await BookingService.MarkNotificationAsReadAsync(n.Id);
         }
-        string dateParam = note.TargetDate.ToString("yyyy-MM-dd");
-        Navigation.NavigateTo($"schedule?date={dateParam}");
+        await LoadNotifications();
+    }
+
+    private async Task DeleteNotif(int id)
+    {
+        await BookingService.DeleteNotificationAsync(id);
+        await LoadNotifications();
+    }
+
+    private async Task NavigateToReservation(NotificationModel n)
+    {
+        if (!n.IsRead)
+        {
+            await BookingService.MarkNotificationAsReadAsync(n.Id);
+        }
+
+        if (n.TargetReservationId.HasValue)
+        {
+            Navigation.NavigateTo($"/schedule?BookingId={n.TargetReservationId}");
+        }
     }
 }
-
-<style>
-    .notification-item {
-        padding: 15px 20px;
-        display: flex;
-        align-items: center;
-        border-left: 4px solid #30363d;
-        transition: background-color 0.2s;
-    }
-
-    .notification-item:hover {
-        background-color: rgba(255, 255, 255, 0.05) !important;
-    }
-
-    .notification-item.unread {
-        border-left-color: #58a6ff;
-        background: rgba(88, 166, 255, 0.05) !important;
-    }
-
-    .note-date {
-        font-size: 0.8rem;
-        color: #8b949e;
-        margin-right: 10px;
-    }
-
-    .new-badge {
-        background: #f85149;
-        color: white;
-        padding: 2px 6px;
-        border-radius: 4px;
-        font-size: 0.7rem;
-        font-weight: bold;
-    }
-
-    .note-message {
-        font-size: 1rem;
-        color: #e6edf3;
-    }
-</style>

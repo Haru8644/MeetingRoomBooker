@@ -1,0 +1,112 @@
+.cyber-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+    padding: 20px;
+    position: relative;
+    z-index: 100;
+}
+
+.cyber-container .login-card {
+    background: #0d1117;
+    border: 1px solid #1f6feb;
+    border-radius: 12px;
+    padding: 40px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 0 20px rgba(31, 111, 235, 0.2);
+    position: relative;
+    z-index: 2000 !important;
+}
+
+.cyber-container .gradient-text {
+    background: linear-gradient(90deg, #58a6ff, #bc8cff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 800;
+    margin-bottom: 20px;
+}
+
+.cyber-container .text-center {
+    text-align: center;
+}
+
+.cyber-container .form-group {
+    margin-bottom: 20px;
+    position: relative;
+    z-index: 2001;
+}
+
+.cyber-container label {
+    display: block;
+    color: #8b949e;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.cyber-container .cyber-input {
+    width: 100%;
+    background: #161b22;
+    border: 1px solid #30363d;
+    color: white;
+    padding: 12px;
+    border-radius: 6px;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 2002 !important;
+    -webkit-user-select: text;
+    user-select: text;
+}
+
+.cyber-container .cyber-input:focus {
+    border-color: #58a6ff;
+    outline: none;
+}
+
+.cyber-container .cyber-button-primary {
+    background: linear-gradient(90deg, #1f6feb, #238636);
+    border: none;
+    color: white;
+    padding: 12px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    width: 100%;
+    position: relative;
+    z-index: 2002;
+}
+
+.cyber-container .alert-error {
+    background: rgba(218, 54, 51, 0.2);
+    border: 1px solid #da3633;
+    color: #f85149;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+}
+
+.cyber-container .link-text {
+    color: #8b949e;
+    text-decoration: none;
+    font-size: 0.9rem;
+    position: relative;
+    z-index: 2002;
+}
+
+.cyber-container .link-text:hover {
+    color: #58a6ff;
+}
+
+[data-theme="light"] .cyber-container .gradient-text {
+    background: none !important;
+    -webkit-text-fill-color: white !important;
+    color: white !important;
+    text-shadow: 0 2px 5px rgba(0,0,0,0.2) !important;
+}
+
+[data-theme="light"] .cyber-container .link-text {
+    color: white !important;
+    text-decoration: underline !important;
+}
+

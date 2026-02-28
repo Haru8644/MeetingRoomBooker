@@ -37,14 +37,16 @@ namespace MeetingRoomBooker.Api.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<UserModel>> Login([FromBody] UserModel loginInfo)
+        public async Task<ActionResult<UserModel>> Login([FromBody] LoginRequest loginInfo)
         {
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.Email == loginInfo.Email && u.Password == loginInfo.Password);
+
             if (user == null)
             {
                 return Unauthorized("Invalid email or password");
             }
+
             return user;
         }
     }
