@@ -1,0 +1,93 @@
+﻿@page "/users"
+@using MeetingRoomBooker.Services
+@using MeetingRoomBooker.Shared.Models
+@inject IBookingService BookingService
+@inject NavigationManager Navigation
+
+<div class="cyber-container">
+    <div class="terminal-header fade-in">
+        <h3 class="gradient-text-enhanced">ADMIN CONSOLE // USER MANAGEMENT</h3>
+        <div class="terminal-line"></div>
+    </div>
+
+    <div class="cyber-card-enhanced add-user-card fade-in delay-1">
+        <h4 class="card-title"><span class="oi oi-plus"></span> REGISTER NEW PERSONNEL</h4>
+        <div class="form-column">
+            <input @bind="newName" class="cyber-input" placeholder="NAME" autocomplete="off" />
+            <input @bind="newEmail" class="cyber-input" placeholder="EMAIL IDENTITY" autocomplete="off" />
+            <input @bind="newPassword" type="password" class="cyber-input" placeholder="ACCESS KEY" autocomplete="new-password" />
+            <input @bind="newConfirmPassword" type="password" class="cyber-input" placeholder="CONFIRM KEY" autocomplete="new-password" />
+            <button class="cyber-button-primary" style="margin-top: 15px; width: 100%;" @onclick="AddUser">EXECUTE REGISTRATION</button>
+        </div>
+        @if (!string.IsNullOrEmpty(msg))
+        {
+            <div style="color: #00d2ff; margin-top: 10px; font-weight: bold; text-shadow: 0 0 5px #00d2ff;">> @msg</div>
+        }
+    </div>
+
+    <div class="user-list">
+        @foreach (var (u, index) in users.Select((x, i) => (x, i)))
+        {
+            <div class="user-row cyber-card-enhanced pop-in-stagger" style="--i:@index">
+                <div class="user-info">
+                    <span class="uid">ID_@u.Id.ToString("D3")</span>
+                    <span class="uname">@u.Name</span>
+                    <span class="uemail">@u.Email</span>
+                </div>
+                @if (u.Name != "Haru")
+                {
+                    <button class="cyber-button-danger" style="padding: 5px 15px; font-size: 0.8rem;" @onclick="() => DeleteUser(u.Id)">TERMINATE</button>
+                }
+                else
+                {
+                    <span class="admin-badge">ADMIN</span>
+                }
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private List<UserModel> users = new();
+    private string newName = "";
+    private string newEmail = "";
+    private string newPassword = "";
+    private string newConfirmPassword = "";
+    private string msg = "";
+    private UserModel? currentUser;
+
+    protected override async Task OnInitializedAsync()
+    {
+        currentUser = BookingService.GetCurrentUser();
+        if (currentUser == null || currentUser.Name != "Haru")
+        {
+            Navigation.NavigateTo("/");
+            return;
+        }
+        users = await BookingService.GetAllUsersAsync();
+    }
+
+    private async Task AddUser()
+    {
+        if (string.IsNullOrEmpty(newName) || string.IsNullOrEmpty(newEmail) || string.IsNullOrEmpty(newPassword))
+        {
+            msg = "ERROR: MISSING FIELDS";
+            return;
+        }
+        if (newPassword != newConfirmPassword)
+        {
+            msg = "ERROR: KEY MISMATCH";
+            return;
+        }
+        await BookingService.RegisterUserAsync(new UserModel { Name = newName, Email = newEmail, Password = newPassword, AvatarColor = "#a371f7" });
+        users = await BookingService.GetAllUsersAsync();
+        newName = ""; newEmail = ""; newPassword = ""; newConfirmPassword = "";
+        msg = "REGISTRATION SUCCESSFUL";
+    }
+
+    private async Task DeleteUser(int id)
+    {
+        await BookingService.DeleteUserAsync(id);
+        users = await BookingService.GetAllUsersAsync();
+    }
+}

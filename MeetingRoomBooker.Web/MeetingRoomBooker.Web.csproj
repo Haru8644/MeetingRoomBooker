@@ -14,10 +14,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Pages\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\MeetingRoomBooker.Shared\MeetingRoomBooker.Shared.csproj" />
   </ItemGroup>
 

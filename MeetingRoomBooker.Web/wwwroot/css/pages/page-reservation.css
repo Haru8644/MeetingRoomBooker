@@ -1,0 +1,237 @@
+.holo-card {
+    background: rgba(10, 15, 30, 0.7);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(88, 166, 255, 0.4);
+    border-radius: 8px;
+    box-shadow: 0 0 30px rgba(0, 88, 255, 0.2), inset 0 0 50px rgba(0, 88, 255, 0.05);
+    opacity: 0;
+    animation: holo-enter 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+@keyframes holo-enter {
+    0% {
+        opacity: 0;
+        transform: rotateX(10deg) translateY(50px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.holo-card .form-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    border-bottom: 1px solid #30363d;
+    padding-bottom: 15px;
+}
+
+.holo-card .date-text {
+    color: #8b949e;
+    margin-right: 10px;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.holo-card .cyber-clock {
+    font-family: 'Consolas', monospace;
+    color: #00d2ff;
+    background: rgba(0, 210, 255, 0.1);
+    padding: 5px 15px;
+    border-radius: 4px;
+    border: 1px solid #00d2ff;
+    box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+.holo-card .participant-selector,
+.holo-card .selection-group {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid #30363d;
+    border-radius: 4px;
+    padding: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.holo-card .participant-item,
+.holo-card .selection-chip {
+    background: #161b22;
+    padding: 5px 15px;
+    border-radius: 20px;
+    border: 1px solid #30363d;
+    transition: all 0.2s;
+    cursor: pointer;
+    color: #c9d1d9;
+    font-size: 0.9rem;
+    user-select: none;
+}
+
+.holo-card .participant-item:hover,
+.holo-card .selection-chip:hover {
+    border-color: #00d2ff;
+    background: rgba(0, 210, 255, 0.1);
+    transform: scale(1.05);
+}
+
+.holo-card .selection-chip.active {
+    background: rgba(0, 210, 255, 0.2);
+    border-color: #00d2ff;
+    color: #00d2ff;
+    box-shadow: 0 0 10px rgba(0, 210, 255, 0.3);
+    font-weight: bold;
+}
+
+.holo-card label {
+    display: block;
+    color: #00d2ff;
+    margin-bottom: 6px;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(0, 210, 255, 0.3);
+}
+
+.holo-card .pulse-hover:hover {
+    box-shadow: 0 0 30px rgba(0, 210, 255, 0.6);
+    transform: scale(1.02);
+}
+
+.holo-card .fade-in-stagger {
+    opacity: 0;
+    transform: translateX(-30px);
+    animation: slideIn 0.4s ease-out forwards;
+    animation-delay: calc(var(--i) * 0.06s);
+}
+
+@keyframes slideIn {
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.holo-card .alert-error {
+    background: rgba(218, 54, 51, 0.1);
+    border: 1px solid #da3633;
+    color: #ff4444;
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    font-weight: bold;
+    text-align: center;
+    box-shadow: 0 0 15px rgba(218, 54, 51, 0.2);
+}
+
+body:has(.holo-card) fluent-listbox,
+body:has(.holo-card) .fluent-listbox,
+body:has(.holo-card) fluent-anchored-region {
+    z-index: 2147483647 !important;
+    position: fixed !important;
+}
+
+[data-theme="light"] .holo-card {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border: 2px solid white !important;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15) !important;
+    opacity: 1 !important;
+    transform: none !important;
+    color: #333 !important;
+}
+
+[data-theme="light"] body:has(.holo-card) fluent-text-field,
+[data-theme="light"] body:has(.holo-card) fluent-number-field,
+[data-theme="light"] body:has(.holo-card) fluent-date-picker,
+[data-theme="light"] body:has(.holo-card) fluent-time-picker {
+    --neutral-foreground-rest: #333 !important;
+    --neutral-fill-input-rest: white !important;
+    --neutral-fill-input-hover: #f9f9f9 !important;
+    --neutral-fill-input-focus: white !important;
+    --neutral-stroke-input-rest: #ccc !important;
+    --neutral-stroke-input-focus: #d53369 !important;
+    color: #333 !important;
+    background-color: white !important;
+}
+
+[data-theme="light"] body:has(.holo-card) fluent-listbox,
+[data-theme="light"] body:has(.holo-card) fluent-option {
+    background-color: white !important;
+    color: #333 !important;
+}
+
+[data-theme="light"] .holo-card label {
+    color: #555 !important;
+    text-shadow: none !important;
+}
+
+[data-theme="light"] .holo-card .date-text {
+    color: #666 !important;
+}
+
+[data-theme="light"] .holo-card .cyber-clock {
+    color: #d53369 !important;
+    border-color: #d53369 !important;
+    background: white !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important;
+}
+
+[data-theme="light"] .holo-card .participant-selector,
+[data-theme="light"] .holo-card .selection-group {
+    background: white !important;
+    border: 1px solid #ccc !important;
+}
+
+[data-theme="light"] .holo-card .participant-item,
+[data-theme="light"] .holo-card .selection-chip {
+    background: white !important;
+    border: 2px solid #bbb !important;
+    color: #333 !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05) !important;
+}
+
+[data-theme="light"] .holo-card .participant-item:hover,
+[data-theme="light"] .holo-card .selection-chip:hover {
+    background: #e6f2ff !important;
+    color: #0072ff !important;
+    border-color: #0072ff !important;
+    transform: translateY(-2px) !important;
+}
+
+[data-theme="light"] .holo-card .participant-item:hover fluent-checkbox {
+    color: #0072ff !important;
+    --neutral-foreground-rest: #0072ff !important;
+}
+
+[data-theme="light"] .holo-card .selection-chip.active,
+[data-theme="light"] .holo-card .participant-item {
+    background: linear-gradient(135deg, #00c6ff, #d53369) !important;
+    border: none !important;
+    color: white !important;
+    font-weight: bold !important;
+    box-shadow: 0 4px 10px rgba(0, 114, 255, 0.3) !important;
+}
+
+[data-theme="light"] .holo-card .selection-chip.active:hover {
+    color: white !important;
+    background: linear-gradient(135deg, #00c6ff, #d53369) !important;
+}
+
+[data-theme="light"] body:has(.holo-card) fluent-checkbox {
+    --neutral-foreground-rest: white !important;
+    color: white !important;
+    text-shadow: none !important;
+}
+
+[data-theme="light"] body:has(.holo-card) .cyber-button-primary {
+    background: white !important;
+    color: #d53369 !important;
+    border: 2px solid white !important;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1) !important;
+    border-radius: 50px !important;
+}
+

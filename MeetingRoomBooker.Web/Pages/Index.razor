@@ -1,0 +1,55 @@
+﻿@page "/"
+@using MeetingRoomBooker.Services
+@using MeetingRoomBooker.Shared.Models
+@inject IBookingService BookingService
+@inject NavigationManager Navigation
+
+<PageTitle>MeetingRoomBooker - Home</PageTitle>
+
+<div class="hero-container">
+    <div class="cyber-circle-bg"></div>
+    <div class="hero-content">
+        <h2 class="welcome-text fade-in">
+            Welcome, <span class="gradient-text-enhanced">@(currentUser?.Name ?? "Guest")</span>.
+        </h2>
+
+        <h1 class="mega-cyber-title fade-in delay-1" data-text="RESERVATION START">
+            RESERVATION START
+        </h1>
+
+        <p class="cyber-subtitle fade-in delay-2">
+            Secure Your Space. Define The Future.
+        </p>
+
+        @if (currentUser != null)
+        {
+            <button class="cyber-start-button pulse-effect fade-in delay-3" @onclick="GoToReservation">
+                <span class="button-icon">▶</span> START RESERVATION
+            </button>
+        }
+        else
+        {
+            <button class="cyber-start-button login-mode fade-in delay-3" @onclick="GoToLogin">
+                LOGIN REQUIRED
+            </button>
+        }
+    </div>
+</div>
+
+@code {
+    private UserModel? currentUser;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUser();
+        BookingService.OnChange += async () => { await LoadUser(); await InvokeAsync(StateHasChanged); };
+    }
+
+    private async Task LoadUser()
+    {
+        currentUser = BookingService.GetCurrentUser();
+    }
+
+    private void GoToReservation() => Navigation.NavigateTo("/reservation");
+    private void GoToLogin() => Navigation.NavigateTo("/login");
+}

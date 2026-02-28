@@ -22,34 +22,60 @@ namespace MeetingRoomBooker.Api.Controllers
             return await _context.Reservations.ToListAsync();
         }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<ReservationModel>> GetReservation(int id)
-        {
-            var reservation = await _context.Reservations.FindAsync(id);
-
-            if (reservation == null)
-            {
-                return NotFound();
-            }
-
-            return reservation;
-        }
-
         [HttpPost]
         public async Task<ActionResult<ReservationModel>> PostReservation(ReservationModel reservation)
         {
             _context.Reservations.Add(reservation);
             await _context.SaveChangesAsync();
-            return CreatedAtAction("GetReservation", new { id = reservation.Id }, reservation);
+
+            if (reservation.ParticipantIds != null && reservation.ParticipantIds.Any())
+            {
+                var targetUsers = reservation.ParticipantIds
+                    .Where(id => id != reservation.UserId) 
+                    .Distinct()
+                    .ToList();
+
+                var notifications = new List<NotificationModel>();
+
+                foreach (var userId in targetUsers)
+                {
+                    notifications.Add(new NotificationModel
+                    {
+                        UserId = userId,
+                        Type = "Info",
+                        Message = $"{reservation.Name}さんが会議「{reservation.Purpose}」にあなたを招待しました。",
+                        TargetDate = reservation.Date,
+                        TargetReservationId = reservation.Id,
+                        CreatedAt = DateTime.Now,
+                        IsRead = false
+                    });
+                }
+
+                if (notifications.Any())
+                {
+                    _context.Notifications.AddRange(notifications);
+                    await _context.SaveChangesAsync();
+                }
+            }
+
+            return CreatedAtAction("GetReservations", new { id = reservation.Id }, reservation);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteReservation(int id)
+        {
+            var reservation = await _context.Reservations.FindAsync(id);
+            if (reservation == null) return NotFound();
+
+            _context.Reservations.Remove(reservation);
+            await _context.SaveChangesAsync();
+            return NoContent();
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> PutReservation(int id, ReservationModel reservation)
         {
-            if (id != reservation.Id)
-            {
-                return BadRequest();
-            }
+            if (id != reservation.Id) return BadRequest();
 
             _context.Entry(reservation).State = EntityState.Modified;
 
@@ -59,31 +85,9 @@ namespace MeetingRoomBooker.Api.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!_context.Reservations.Any(e => e.Id == id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                if (!_context.Reservations.Any(e => e.Id == id)) return NotFound();
+                else throw;
             }
-
-            return NoContent();
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteReservation(int id)
-        {
-            var reservation = await _context.Reservations.FindAsync(id);
-            if (reservation == null)
-            {
-                return NotFound();
-            }
-
-            _context.Reservations.Remove(reservation);
-            await _context.SaveChangesAsync();
-
             return NoContent();
         }
     }
