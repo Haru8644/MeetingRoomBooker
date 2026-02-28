@@ -1,0 +1,6 @@
+@MeetingRoomBooker.Api_HostAddress = http://localhost:5123
+
+GET {{MeetingRoomBooker.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
