@@ -1,0 +1,423 @@
+﻿@using MeetingRoomBooker.Services
+@using MeetingRoomBooker.Shared.Models
+@inject IBookingService BookingService
+@inject NavigationManager Navigation
+@implements IDisposable
+
+<div class="@(IsMobile ? "mobile-nav-container" : "desktop-nav-container")">
+    <nav class="@(IsMobile ? "mobile-nav" : "flex-column desktop-nav")">
+        <NavLink class="@NavLinkClass" href="" Match="NavLinkMatch.All">
+            <span class="oi oi-home icon"></span><span class="label">ホーム</span>
+        </NavLink>
+
+        @if (currentUser != null)
+        {
+            <NavLink class="@NavLinkClass" href="reservation">
+                <span class="oi oi-plus icon"></span><span class="label">予約</span>
+            </NavLink>
+            <NavLink class="@NavLinkClass" href="schedule">
+                <span class="oi oi-calendar icon"></span><span class="label">カレンダー</span>
+            </NavLink>
+
+            <div style="position: relative; width: 100%; display: flex; justify-content: center;" class="@(IsMobile ? "mobile-nav-item" : "")">
+                <NavLink class="@NavLinkClass" href="notifications">
+                    <span class="oi oi-bell icon"></span>
+                    <span class="label" style="display: inline-flex; align-items: center; gap: 6px;">
+                        通知
+                        @if (unreadCount > 0)
+                        {
+                            <span class="inline-badge">@unreadCount</span>
+                        }
+                    </span>
+                </NavLink>
+            </div>
+
+            @if (currentUser?.IsAdmin == true)
+            {
+                <NavLink class="@NavLinkClass" href="users">
+                    <span class="oi oi-people icon"></span><span class="label">管理</span>
+                </NavLink>
+            }
+
+            <NavLink class="@NavLinkClass" href="settings">
+                <span class="oi oi-cog icon"></span><span class="label">設定</span>
+            </NavLink>
+
+            @if (!IsMobile)
+            {
+                <div class="nav-separator"></div>
+            }
+
+            <div class="@(IsMobile ? "mobile-nav-item profile-tab" : "user-profile-item px-3")" @onclick="() => showMobileProfile = !showMobileProfile">
+                @if (IsMobile)
+                {
+                    <span class="oi oi-person icon @(showMobileProfile ? "active-profile" : "")"></span>
+                    <span class="label">マイページ</span>
+                }
+                else
+                {
+                    <div class="user-profile-content">
+                        <div class="user-avatar" style="background-color: @currentUser.AvatarColor">
+                            @currentUser.Name.Substring(0, 1).ToUpper()<span class="status-dot"></span>
+                        </div>
+                        <span class="user-name">@currentUser.Name</span>
+                    </div>
+                    <div class="logout-link" @onclick="Logout"><span>(Logout)</span></div>
+                }
+            </div>
+        }
+        else
+        {
+            <NavLink class="@NavLinkClass" href="settings">
+                <span class="oi oi-cog icon"></span><span class="label">設定</span>
+            </NavLink>
+            <NavLink class="@NavLinkClass" href="login">
+                <span class="oi oi-account-login icon"></span><span class="label">ログイン</span>
+            </NavLink>
+        }
+    </nav>
+</div>
+
+@if (IsMobile && showMobileProfile && currentUser != null)
+{
+    <div class="mobile-profile-menu cyber-card">
+        <div class="user-profile-content mb-3">
+            <div class="user-avatar" style="background-color: @currentUser.AvatarColor">
+                @currentUser.Name.Substring(0, 1).ToUpper()<span class="status-dot"></span>
+            </div>
+            <span class="user-name">@currentUser.Name</span>
+        </div>
+        <button class="cyber-button-primary w-100" style="background: #da3633;" @onclick="Logout">ログアウト</button>
+        <button class="close-btn-mobile" @onclick="() => showMobileProfile = false">×</button>
+    </div>
+    <div class="mobile-menu-backdrop" @onclick="() => showMobileProfile = false"></div>
+}
+
+@code {
+    [Parameter] public bool IsMobile { get; set; } = false;
+    private UserModel? currentUser;
+    private int unreadCount = 0;
+    private bool showMobileProfile = false;
+    private string NavLinkClass => IsMobile ? "mobile-nav-link" : "nav-link desktop-nav-link";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+        BookingService.OnChange += StateHasChangedWrapper;
+    }
+
+    private async void StateHasChangedWrapper()
+    {
+        await LoadData();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task LoadData()
+    {
+        currentUser = BookingService.GetCurrentUser();
+        if (currentUser != null)
+        {
+            try
+            {
+                var notes = await BookingService.GetNotificationsAsync(currentUser.Id);
+                unreadCount = notes.Count(n => !n.IsRead);
+            }
+            catch { }
+        }
+    }
+
+    public void Dispose() { BookingService.OnChange -= StateHasChangedWrapper; }
+    private void Logout() { BookingService.Logout(); Navigation.NavigateTo("/", forceLoad: false); }
+}
+
+<style>
+    .desktop-nav-container {
+        padding-top: 20px;
+        height: 100%;
+    }
+
+    .desktop-nav-link {
+        white-space: nowrap !important;
+        display: flex !important;
+        justify-content: center;
+        align-items: center;
+        padding: 10px 1rem;
+        color: #d7d7d7;
+        text-decoration: none !important;
+        width: 100%;
+        box-sizing: border-box;
+        transition: all 0.3s;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .desktop-nav-link .icon {
+        margin-right: 8px;
+        font-size: 1.1rem;
+        transition: transform 0.3s;
+    }
+
+    .desktop-nav-link.active {
+        color: #58a6ff;
+        background: rgba(255,255,255,0.05);
+        border-left: 3px solid #58a6ff;
+    }
+
+    .desktop-nav-link:hover {
+        color: #58a6ff;
+        text-decoration: none !important;
+    }
+
+    .nav-separator {
+        height: 1px;
+        background-color: rgba(255,255,255,0.1);
+        margin: 15px 2rem;
+    }
+
+    .user-profile-item {
+        padding: 10px 0;
+        color: #d7d7d7;
+        text-align: center;
+    }
+
+    .user-profile-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 4px;
+    }
+
+    .user-avatar {
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        color: white;
+        margin-right: 10px;
+        position: relative;
+        font-size: 1rem;
+    }
+
+    .status-dot {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 10px;
+        height: 10px;
+        background-color: #2ea043;
+        border: 2px solid #161b22;
+        border-radius: 50%;
+    }
+
+    .logout-link {
+        text-align: center;
+        margin-top: 5px;
+    }
+
+    .logout-link span {
+        font-size: 0.8rem;
+        cursor: pointer;
+        color: #8b949e;
+    }
+
+    .logout-link:hover span {
+        color: #ff7b72 !important;
+        text-decoration: underline;
+    }
+
+    .mobile-nav-container {
+        width: 100%;
+        height: 100%;
+        background: #0d1117;
+        border-top: 1px solid #30363d;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.5);
+    }
+
+    .mobile-nav {
+        display: flex;
+        width: 100%;
+        height: 100%;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 10px;
+    }
+
+    .mobile-nav-item {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+    }
+
+    .mobile-nav-link {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: #8b949e;
+        text-decoration: none !important;
+        font-size: 0.7rem;
+        flex: 1;
+        padding: 5px 0;
+    }
+
+    .mobile-nav-link .icon {
+        font-size: 1.4rem;
+        margin-bottom: 2px;
+    }
+
+    .mobile-nav-link.active, .active-profile {
+        color: #58a6ff !important;
+    }
+
+    .profile-tab {
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: #8b949e;
+        font-size: 0.7rem;
+        flex: 1;
+    }
+
+    .mobile-profile-menu {
+        position: fixed;
+        bottom: 70px;
+        right: 10px;
+        width: 200px;
+        padding: 20px;
+        z-index: 1100;
+        text-align: center;
+    }
+
+    .mobile-menu-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 1050;
+    }
+
+    .close-btn-mobile {
+        position: absolute;
+        top: 5px;
+        right: 10px;
+        background: none;
+        border: none;
+        color: #8b949e;
+        font-size: 1.2rem;
+    }
+
+    .cyber-card {
+        background: #0d1117;
+        border: 1px solid #30363d;
+        border-radius: 12px;
+        box-shadow: 0 0 30px rgba(0,0,0,0.5);
+    }
+
+    .cyber-button-primary {
+        background: linear-gradient(90deg, #1f6feb, #238636);
+        border: none;
+        color: white;
+        padding: 10px;
+        border-radius: 6px;
+        font-weight: bold;
+    }
+
+    .inline-badge {
+        background: #da3633 !important;
+        color: #ffffff !important;
+        border-radius: 50px;
+        min-width: 18px;
+        height: 18px;
+        padding: 0 5px;
+        font-size: 0.7rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        box-shadow: 0 0 8px rgba(218, 54, 51, 0.8);
+    }
+
+    [data-theme="light"] .desktop-nav-link {
+        color: rgba(255,255,255,0.9) !important;
+        margin-bottom: 8px;
+        border-radius: 0 50px 50px 0;
+        transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1) !important;
+    }
+
+    [data-theme="light"] .desktop-nav-link::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+        transition: left 0.5s;
+        transform: skewX(-20deg);
+        pointer-events: none;
+    }
+
+    [data-theme="light"] .desktop-nav-link:hover {
+        background: linear-gradient(90deg, rgba(255,255,255,0.2), rgba(255,255,255,0.1)) !important;
+        color: white !important;
+        padding-left: 35px !important;
+        text-shadow: 0 0 8px rgba(255,255,255,0.8) !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1) !important;
+    }
+
+    [data-theme="light"] .desktop-nav-link:hover::before {
+        left: 100%;
+    }
+
+    [data-theme="light"] .desktop-nav-link:hover .icon {
+        transform: rotate(15deg) scale(1.2);
+        filter: drop-shadow(0 0 5px white);
+    }
+
+    [data-theme="light"] .desktop-nav-link.active {
+        background: linear-gradient(90deg, rgba(255,255,255,0.4), rgba(255,255,255,0.1)) !important;
+        color: white !important;
+        border-left: 5px solid #fff !important;
+        font-weight: 900 !important;
+        box-shadow: 0 0 20px rgba(255,255,255,0.3) !important;
+    }
+
+    [data-theme="light"] .nav-separator {
+        background-color: rgba(255,255,255,0.3) !important;
+        box-shadow: 0 0 5px rgba(255,255,255,0.3) !important;
+    }
+
+    [data-theme="light"] .user-profile-item {
+        color: white !important;
+        text-shadow: 0 1px 3px rgba(0,0,0,0.2) !important;
+    }
+
+    [data-theme="light"] .user-avatar {
+        box-shadow: 0 0 10px rgba(255,255,255,0.5) !important;
+        border: 2px solid white !important;
+    }
+
+    [data-theme="light"] .logout-link span {
+        color: rgba(255,255,255,0.9) !important;
+    }
+
+    [data-theme="light"] .mobile-nav-container {
+        background: rgba(255,255,255,0.2) !important;
+        backdrop-filter: blur(20px) !important;
+        border-top: 1px solid rgba(255,255,255,0.4) !important;
+    }
+
+    [data-theme="light"] .mobile-nav-link {
+        color: rgba(255,255,255,0.8) !important;
+    }
+
+    [data-theme="light"] .mobile-nav-link.active {
+        color: white !important;
+    }
+</style>
