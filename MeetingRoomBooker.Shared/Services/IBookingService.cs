@@ -1,6 +1,9 @@
 ﻿using MeetingRoomBooker.Shared.Models;
+<<<<<<< HEAD:MeetingRoomBooker.Shared/Services/IBookingService.cs
 using System.Collections.Generic;
 using System.Threading.Tasks;
+=======
+>>>>>>> origin/master:MeetingRoomBooker/Services/IBookingService.cs
 
 namespace MeetingRoomBooker.Services
 {
