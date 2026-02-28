@@ -1,0 +1,226 @@
+.cyber-container {
+    padding: 30px;
+    max-width: 900px;
+    margin: 0 auto;
+    color: #e0e0e0;
+}
+
+.gradient-text-enhanced {
+    background: linear-gradient(135deg, #00d2ff, #3a7bd5, #bc8cff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+
+.terminal-header {
+    margin-bottom: 40px;
+}
+
+.terminal-line {
+    height: 2px;
+    background: linear-gradient(90deg, #00d2ff, transparent);
+    margin-top: 10px;
+    width: 100%;
+    box-shadow: 0 0 10px #00d2ff;
+}
+
+.cyber-card-enhanced {
+    background: rgba(13, 17, 23, 0.8);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(88, 166, 255, 0.2);
+    border-radius: 4px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+.add-user-card {
+    padding: 30px;
+    margin-bottom: 40px;
+    border-left: 4px solid #00d2ff;
+}
+
+.card-title {
+    margin-top: 0;
+    color: #00d2ff;
+    text-shadow: 0 0 5px #00d2ff;
+    letter-spacing: 1px;
+}
+
+.form-column {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.cyber-input {
+    background: rgba(0,0,0,0.3);
+    border: 1px solid #30363d;
+    color: white;
+    padding: 12px;
+    border-radius: 2px;
+    transition: all 0.3s;
+    font-family: 'Consolas', monospace;
+}
+
+.cyber-input:focus {
+    border-color: #00d2ff;
+    box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
+    outline: none;
+}
+
+.user-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.user-row {
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: transform 0.2s;
+    border-left: 4px solid #30363d;
+}
+
+.user-row:hover {
+    transform: translateX(10px);
+    border-left-color: #00d2ff;
+    background: rgba(20, 30, 50, 0.9);
+}
+
+.user-info {
+    display: flex;
+    gap: 30px;
+    align-items: center;
+}
+
+.uid {
+    color: #8b949e;
+    font-family: 'Consolas', monospace;
+    font-size: 0.9rem;
+}
+
+.uname {
+    font-weight: bold;
+    color: white;
+    font-size: 1.1rem;
+}
+
+.uemail {
+    color: #58a6ff;
+    font-family: 'Consolas', monospace;
+}
+
+.admin-badge {
+    background: #00d2ff;
+    color: black;
+    padding: 2px 8px;
+    border-radius: 2px;
+    font-weight: bold;
+    font-size: 0.7rem;
+    letter-spacing: 1px;
+}
+
+.cyber-container .fade-in {
+    opacity: 0;
+    animation: fadeIn 0.8s ease-out forwards;
+}
+
+.cyber-container .delay-1 {
+    animation-delay: 0.2s;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.cyber-container .pop-in-stagger {
+    opacity: 0;
+    transform: scale(0.95);
+    animation: popIn 0.3s ease-out forwards;
+    animation-delay: calc(var(--i) * 0.05s);
+}
+
+@keyframes popIn {
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+[data-theme="light"] .terminal-line {
+    background: rgba(255,255,255,0.5) !important;
+    box-shadow: none !important;
+}
+
+[data-theme="light"] .add-user-card {
+    background: rgba(255,255,255,0.8) !important;
+    border: 2px solid white !important;
+    color: #333 !important;
+    opacity: 1 !important;
+    animation: none !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1) !important;
+    border-radius: 20px !important;
+}
+
+[data-theme="light"] .card-title {
+    color: #333 !important;
+    text-shadow: none !important;
+}
+
+[data-theme="light"] .user-row {
+    border-left: 4px solid #d53369 !important;
+    background: rgba(255,255,255,0.85) !important;
+    color: #333 !important;
+    opacity: 1 !important;
+    animation: none !important;
+    transform: none !important;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05) !important;
+    border-radius: 15px !important;
+}
+
+[data-theme="light"] .user-row:hover {
+    background: white !important;
+    transform: translateY(-2px) !important;
+}
+
+[data-theme="light"] .uemail {
+    color: #0056b3 !important;
+}
+
+[data-theme="light"] .admin-badge {
+    background: #d53369 !important;
+    color: white !important;
+}
+
+[data-theme="light"] .uname {
+    color: #333 !important;
+    font-weight: 900;
+    font-size: 1.2rem;
+}
+
+[data-theme="light"] .uid {
+    color: #666 !important;
+}
+
+[data-theme="light"] .cyber-input {
+    background: white !important;
+    border: 2px solid #ddd !important;
+    color: #333 !important;
+    border-radius: 10px !important;
+}
+
+[data-theme="light"] .cyber-input::placeholder {
+    color: #999 !important;
+}
+

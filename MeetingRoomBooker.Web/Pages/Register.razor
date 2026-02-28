@@ -1,0 +1,50 @@
+﻿@page "/register"
+@using MeetingRoomBooker.Services
+@using MeetingRoomBooker.Shared.Models
+@inject IBookingService BookingService
+@inject NavigationManager Navigation
+
+<div class="cyber-container">
+    <div class="login-card">
+        <h2 class="gradient-text text-center">REGISTER</h2>
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert-error">@errorMessage</div>
+        }
+        <EditForm Model="@userModel" OnValidSubmit="HandleRegister">
+            <DataAnnotationsValidator />
+            <div class="form-group"><label>Name</label><InputText @bind-Value="userModel.Name" class="cyber-input" placeholder="Your Name" /></div>
+            <div class="form-group"><label>Email ID</label><InputText @bind-Value="userModel.Email" class="cyber-input" placeholder="email@example.com" /></div>
+            <div class="form-group"><label>Password</label><InputText @bind-Value="userModel.Password" type="password" class="cyber-input" placeholder="Password" /></div>
+            <div class="form-group"><label>Confirm Password</label><input @bind="confirmPassword" type="password" class="cyber-input" placeholder="Re-enter Password" /></div>
+            <button type="submit" class="cyber-button-primary w-100">REGISTER</button>
+        </EditForm>
+        <div class="text-center mt-3"><a href="login" class="link-text">Already have an account? Login</a></div>
+    </div>
+</div>
+
+@code {
+    private UserModel userModel = new UserModel { AvatarColor = "#58a6ff" };
+    private string confirmPassword = "";
+    private string errorMessage = "";
+
+    private async Task HandleRegister()
+    {
+        if (string.IsNullOrEmpty(userModel.Password) || userModel.Password != confirmPassword)
+        {
+            errorMessage = "パスワードが一致しないか、空です。";
+            return;
+        }
+
+        var allUsers = await BookingService.GetAllUsersAsync();
+        if (allUsers.Any(u => u.Email.Equals(userModel.Email, StringComparison.OrdinalIgnoreCase)))
+        {
+            errorMessage = "このメールアドレスは既に使用されています。";
+            return;
+        }
+
+        bool success = await BookingService.RegisterUserAsync(userModel);
+        if (success) { Navigation.NavigateTo("/"); }
+        else { errorMessage = "登録に失敗しました。"; }
+    }
+}

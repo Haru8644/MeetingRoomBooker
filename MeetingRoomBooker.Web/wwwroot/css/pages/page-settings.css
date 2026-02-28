@@ -1,0 +1,139 @@
+.settings-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    color: #e0e0e0;
+}
+
+.page-title {
+    margin-bottom: 30px;
+    font-weight: bold;
+    border-bottom: 2px solid #30363d;
+    padding-bottom: 10px;
+    font-size: 1.5rem;
+}
+
+.setting-card {
+    background: rgba(10, 15, 30, 0.7);
+    border: 1px solid rgba(88, 166, 255, 0.3);
+    border-radius: 12px;
+    padding: 30px;
+}
+
+.setting-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.setting-info h4 {
+    margin: 0 0 5px 0;
+    font-weight: bold;
+    color: white;
+}
+
+.setting-info p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #8b949e;
+}
+
+.theme-switcher {
+    display: flex;
+    gap: 20px;
+}
+
+.theme-btn {
+    background: transparent;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    padding: 10px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.theme-btn:hover {
+    background: rgba(255,255,255,0.05);
+}
+
+.theme-btn.active {
+    border-color: #00d2ff;
+    background: rgba(0, 210, 255, 0.1);
+}
+
+.theme-btn span {
+    color: #e0e0e0;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.preview {
+    width: 80px;
+    height: 50px;
+    border-radius: 6px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.preview.dark {
+    background: linear-gradient(135deg, #050505, #161b22);
+    border: 1px solid #58a6ff;
+}
+
+.preview.light {
+    background: linear-gradient(135deg, #00c6ff 0%, #0072ff 50%, #d53369 100%);
+    border: 2px solid white;
+}
+
+.fade-in {
+    opacity: 0;
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+[data-theme="light"] .page-title {
+    color: white !important;
+    border-bottom: 1px solid rgba(255,255,255,0.4) !important;
+    text-shadow: 0 2px 5px rgba(0,0,0,0.2) !important;
+}
+
+[data-theme="light"] .setting-card {
+    background: rgba(255,255,255,0.25) !important;
+    border: 1px solid rgba(255,255,255,0.4) !important;
+    backdrop-filter: blur(15px) !important;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15) !important;
+}
+
+[data-theme="light"] .setting-info p {
+    color: rgba(255,255,255,0.9) !important;
+}
+
+[data-theme="light"] .theme-btn span {
+    color: white !important;
+}
+
+[data-theme="light"] .theme-btn:hover {
+    background: rgba(255,255,255,0.2) !important;
+}
+
+[data-theme="light"] .theme-btn.active {
+    border-color: white !important;
+    background: rgba(255,255,255,0.3) !important;
+}

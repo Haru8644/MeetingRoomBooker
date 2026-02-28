@@ -1,0 +1,57 @@
+﻿@page "/login"
+@using MeetingRoomBooker.Services
+@using MeetingRoomBooker.Shared.Models
+@inject IBookingService BookingService
+@inject NavigationManager Navigation
+
+<div class="login-container">
+    <div class="login-card cyber-entrance">
+        <div class="scan-line"></div>
+        <h2 class="login-title" data-text="SYSTEM ACCESS">SYSTEM ACCESS</h2>
+
+        <div class="input-group fade-in-stagger" style="--i:1;">
+            <label>IDENTIFIER</label>
+            <input @bind="email" class="cyber-input" placeholder="Enter Email ID" autocomplete="off" />
+        </div>
+
+        <div class="input-group fade-in-stagger" style="--i:2;">
+            <label>PASSCODE</label>
+            <input @bind="password" type="password" class="cyber-input" placeholder="Enter Passcode" autocomplete="new-password" />
+        </div>
+
+        <button class="cyber-button-primary fade-in-stagger" style="--i:3; width: 100%; margin-top: 10px;" @onclick="HandleLogin">
+            <span class="oi oi-lock-locked"></span> AUTHENTICATE
+        </button>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="error-msg fade-in">@errorMessage</div>
+        }
+        <div class="demo-hint fade-in-stagger" style="--i:4;">Demo: haru@demo.com / password</div>
+    </div>
+</div>
+
+@code {
+    private string email = "";
+    private string password = "";
+    private string errorMessage = "";
+
+    private async Task HandleLogin()
+    {
+        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
+        {
+            errorMessage = "ACCESS DENIED: Please enter credentials.";
+            return;
+        }
+
+        var user = await BookingService.LoginAsync(email, password);
+        if (user != null)
+        {
+            Navigation.NavigateTo("/schedule");
+        }
+        else
+        {
+            errorMessage = "ACCESS DENIED: Invalid Credentials";
+        }
+    }
+}
