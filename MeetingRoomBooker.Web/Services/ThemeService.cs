@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MeetingRoomBooker.Services
+namespace MeetingRoomBooker.Web.Services
 {
     public class ThemeService
     {
