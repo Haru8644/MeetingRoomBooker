@@ -10,7 +10,7 @@
 > **A Modern SPA designed to eliminate double-bookings, streamline enterprise resource management, and drive true digital transformation (DX) on the front lines.**
 
 ## 📖 Overview
-MeetingRoomBooker is a comprehensive conference room reservation platform developed from scratch to solve real-world operational bottlenecks. Built entirely on the Microsoft C#/.NET ecosystem, it features a highly decoupled architecture utilizing **Blazor WebAssembly** for a rich, responsive frontend and **ASP.NET Core Web API** for a robust, secure backend. 
+MeetingRoomBooker is a comprehensive conference room reservation platform developed from scratch to solve real-world operational bottlenecks. Built entirely on the Microsoft C#/.NET ecosystem, it features a highly decoupled architecture utilizing **Blazor WebAssembly** for a rich, responsive frontend and **ASP.NET Core Web API** for a robust, secure backend.
 
 The UI features a modern, cyberpunk-inspired Glassmorphism design integrated with **Microsoft Fluent UI**, delivering an intuitive user experience that employees genuinely *want* to use.
 
@@ -44,6 +44,38 @@ In enterprise environments, technology must balance agility with governance. I c
 
 ## 🛠️ Getting Started (Local Development)
 
+## 🔐 Authentication & Demo Accounts (Important)
+This public repository runs in **Mock Mode by default** so you can try the UI immediately without provisioning accounts.
+
+### Why there is no “Register” page
+In the real company workflow, **only admin users can create/manage accounts** (governance + audit).  
+To keep the public version aligned with that policy, end-user self-registration UI is intentionally **not included**.
+
+### Demo credentials (Mock Mode)
+Use any of the following accounts:
+
+- `haru@demo.com` / `demo` (admin)
+- `demo@demo.com` / `demo`
+- `sato@demo.com` / `demo`
+
+> Note: Mock Mode persists demo data in the browser via `localStorage`.  
+> If credentials don’t work (e.g., after code changes), clear these keys and reload:
+> - `demo_users`
+> - `demo_reservations`
+> - `demo_notifications`  
+> Alternatively, use an incognito window.
+
+### Switching between Mock ↔ API
+In `MeetingRoomBooker.Web/Program.cs`, toggle the DI registration:
+
+```csharp
+// Mock mode (default for this public repo)
+builder.Services.AddScoped<MeetingRoomBooker.Shared.Services.IBookingService,
+    MeetingRoomBooker.Web.Services.MockBookingService>();
+
+// API mode (production-style integration)
+// builder.Services.AddScoped<MeetingRoomBooker.Shared.Services.IBookingService,
+//     MeetingRoomBooker.Web.Services.ApiBookingService>();
 ### Prerequisites
 - [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
 - Visual Studio 2022 / VS Code
