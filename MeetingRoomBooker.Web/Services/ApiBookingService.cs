@@ -1,10 +1,10 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Net.Http.Json;
 using System.Text.Json;
 using MeetingRoomBooker.Shared.Models;
 using MeetingRoomBooker.Shared.Services;
 
-namespace MeetingRoomBooker.Web.Services
+namespace MeetingRoomBooker.Services
 {
     public sealed class ApiBookingService : IBookingService
     {
@@ -12,19 +12,16 @@ namespace MeetingRoomBooker.Web.Services
         private UserModel? _currentUser;
 
         public event Action? OnChange;
-        private void NotifyStateChanged() => OnChange?.Invoke();
+        public UserModel? CurrentUser { get; private set; }
 
         private static readonly JsonSerializerOptions JsonOptions = new()
         {
             PropertyNameCaseInsensitive = true
         };
 
-        public ApiBookingService(HttpClient httpClient)
-        {
-            _httpClient = httpClient;
-        }
+        public UserModel? GetCurrentUser() => CurrentUser;
 
-        public async Task<UserModel?> LoginAsync(string email, string password)
+        public async Task<UserModel> LoginAsync(string email, string password)
         {
             try
             {
@@ -46,6 +43,7 @@ namespace MeetingRoomBooker.Web.Services
                 Debug.WriteLine($"[Login] Error: {ex.Message}");
                 return null;
             }
+            return null;
         }
 
         public async Task<bool> RegisterUserAsync(UserModel user)
@@ -121,9 +119,9 @@ namespace MeetingRoomBooker.Web.Services
                    ?? new List<NotificationModel>();
         }
 
-        public async Task AddNotificationAsync(NotificationModel notification)
+        public async Task MarkNotificationAsReadAsync(int notificationId)
         {
-            await _httpClient.PostAsJsonAsync("api/Notifications", notification);
+            await _http.PutAsync($"api/notifications/{notificationId}/read", null);
             NotifyStateChanged();
         }
 
@@ -135,8 +133,9 @@ namespace MeetingRoomBooker.Web.Services
 
         public async Task MarkNotificationAsReadAsync(int notificationId)
         {
-            await _httpClient.PutAsync($"api/Notifications/{notificationId}/read", null);
-            NotifyStateChanged();
+            await _http.PostAsJsonAsync("api/notifications", notification);
         }
+
+        private void NotifyStateChanged() => OnChange?.Invoke();
     }
 }

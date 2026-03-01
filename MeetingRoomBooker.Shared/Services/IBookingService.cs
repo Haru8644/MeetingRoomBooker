@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using MeetingRoomBooker.Shared.Models;
@@ -8,6 +8,14 @@ namespace MeetingRoomBooker.Shared.Services
     public interface IBookingService
     {
         Task<UserModel?> LoginAsync(string email, string password);
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace MeetingRoomBooker.Services
+{
+    public interface IBookingService
+    {
+        Task<UserModel> LoginAsync(string email, string password);
         Task<bool> RegisterUserAsync(UserModel user);
         Task DeleteUserAsync(int userId);
         void Logout();
