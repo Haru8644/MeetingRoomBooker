@@ -24,8 +24,8 @@ By redefining the root causes (mixed use cases, undefined exception handling, la
 - 🤝 **Seamless Adoption:** Established a "5-Step Framework" (Exception Categorization, Responsibility Demarcation, Authority/Audit, Migration Procedure, Adoption Metrics) to ensure the system didn't just end at "deployment" but achieved full-scale company adoption.
 
 ## ✨ Key Features
-- **Real-Time Conflict Prevention:** Backend validation ensures overlapping reservations are mathematically impossible.
-- **Modern UI/UX:** Cyberpunk aesthetics with Glassmorphism, powered by CSS animations and Fluent UI components for enterprise-grade accessibility.
+- **Strict Conflict Prevention:** Robust backend validation and database-level constraints ensure overlapping reservations are strictly prevented.
+- **Modern UI/UX:** Sleek, glassmorphism-inspired design powered by Fluent UI components, ensuring both visual appeal and enterprise-grade accessibility.
 - **Color-Coded Timeline:** Instantly distinguish between "Internal Meetings" (Purple) and "Client Visits" (Green) to maintain professionalism on the floor.
 - **RESTful API Architecture:** Strict adherence to REST principles (GET, POST, PUT, DELETE) using JSON payloads.
 - **End-to-End Type Safety:** Utilizing C# shared models across both frontend (WASM) and backend (API) eliminates data-mismatch bugs during compilation.
