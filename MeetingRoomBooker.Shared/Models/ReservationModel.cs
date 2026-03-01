@@ -19,8 +19,6 @@ namespace MeetingRoomBooker.Shared.Models
             get => Name;
             set => Name = value;
         }
-
-<<<<<<< HEAD
         public int UserId { get; set; }
         public string Name { get; set; } = string.Empty;
         public string UserName { get => Name; set => Name = value; } 
@@ -41,9 +39,6 @@ namespace MeetingRoomBooker.Shared.Models
     }
 }
         [Required]
-=======
-        [Required(ErrorMessage = "会議室は必須です。")]
->>>>>>> 9fc6a98 (fix(shared): repair broken models and service contract)
         public string Room { get; set; } = string.Empty;
 
         public string RoomName

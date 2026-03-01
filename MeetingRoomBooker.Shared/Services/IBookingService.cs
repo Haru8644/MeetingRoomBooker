@@ -26,9 +26,7 @@ namespace MeetingRoomBooker.Services
         Task AddReservationAsync(ReservationModel reservation);
         Task RemoveReservationAsync(ReservationModel reservation);
         Task UpdateReservationAsync(ReservationModel reservation, bool shouldNotify);
-
         Task<List<UserModel>> GetAllUsersAsync();
-
         Task<List<NotificationModel>> GetNotificationsAsync(int userId);
         Task AddNotificationAsync(NotificationModel notification);
         Task DeleteNotificationAsync(int notificationId);
