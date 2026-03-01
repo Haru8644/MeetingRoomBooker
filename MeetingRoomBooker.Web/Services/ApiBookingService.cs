@@ -1,114 +1,122 @@
-﻿using MeetingRoomBooker.Shared.Models;
+using System.Diagnostics;
 using System.Net.Http.Json;
-using System.Linq;
+using System.Text.Json;
+using MeetingRoomBooker.Shared.Models;
+using MeetingRoomBooker.Shared.Services;
 
 namespace MeetingRoomBooker.Services
 {
-    public class ApiBookingService : IBookingService
+    public sealed class ApiBookingService : IBookingService
     {
-        private readonly HttpClient _http;
+        private readonly HttpClient _httpClient;
+        private UserModel? _currentUser;
+
         public event Action? OnChange;
         public UserModel? CurrentUser { get; private set; }
 
-        public ApiBookingService(HttpClient http) { _http = http; }
+        private static readonly JsonSerializerOptions JsonOptions = new()
+        {
+            PropertyNameCaseInsensitive = true
+        };
 
         public UserModel? GetCurrentUser() => CurrentUser;
 
         public async Task<UserModel> LoginAsync(string email, string password)
         {
-            var response = await _http.PostAsJsonAsync("api/users/login", new { Email = email, Password = password });
-            if (response.IsSuccessStatusCode)
+            try
             {
-                CurrentUser = await response.Content.ReadFromJsonAsync<UserModel>();
+                var loginData = new { Email = email, Password = password };
+                var response = await _httpClient.PostAsJsonAsync("api/Users/login", loginData);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    Debug.WriteLine($"[Login] Failed: {response.StatusCode}");
+                    return null;
+                }
+
+                _currentUser = await response.Content.ReadFromJsonAsync<UserModel>(JsonOptions);
                 NotifyStateChanged();
-                return CurrentUser;
+                return _currentUser;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[Login] Error: {ex.Message}");
+                return null;
             }
             return null;
         }
 
-        public void Logout() { CurrentUser = null; NotifyStateChanged(); }
+        public async Task<bool> RegisterUserAsync(UserModel user)
+        {
+            var response = await _httpClient.PostAsJsonAsync("api/Users/register", user);
+            if (!response.IsSuccessStatusCode)
+            {
+                return false;
+            }
+
+            _currentUser = await response.Content.ReadFromJsonAsync<UserModel>(JsonOptions);
+            NotifyStateChanged();
+            return true;
+        }
+
+        public async Task DeleteUserAsync(int userId)
+        {
+            await _httpClient.DeleteAsync($"api/Users/{userId}");
+
+            if (_currentUser?.Id == userId)
+            {
+                _currentUser = null;
+                NotifyStateChanged();
+            }
+        }
+
+        public void Logout()
+        {
+            _currentUser = null;
+            NotifyStateChanged();
+        }
+
+        public UserModel? GetCurrentUser() => _currentUser;
+
+        public async Task<List<UserModel>> GetAllUsersAsync()
+        {
+            return await _httpClient.GetFromJsonAsync<List<UserModel>>("api/Users", JsonOptions)
+                   ?? new List<UserModel>();
+        }
 
         public async Task<List<ReservationModel>> GetReservationsAsync()
         {
-            return await _http.GetFromJsonAsync<List<ReservationModel>>("api/reservations") ?? new List<ReservationModel>();
+            return await _httpClient.GetFromJsonAsync<List<ReservationModel>>("api/Reservations", JsonOptions)
+                   ?? new List<ReservationModel>();
         }
 
         public async Task AddReservationAsync(ReservationModel reservation)
         {
-            await _http.PostAsJsonAsync("api/reservations", reservation);
+            if (_currentUser != null && reservation.UserId == 0)
+            {
+                reservation.UserId = _currentUser.Id;
+            }
+
+            await _httpClient.PostAsJsonAsync("api/Reservations", reservation);
             NotifyStateChanged();
         }
 
         public async Task RemoveReservationAsync(ReservationModel reservation)
         {
-            await _http.DeleteAsync($"api/reservations/{reservation.Id}");
+            await _httpClient.DeleteAsync($"api/Reservations/{reservation.Id}");
             NotifyStateChanged();
         }
 
         public async Task UpdateReservationAsync(ReservationModel reservation, bool shouldNotify)
         {
-            var all = await GetReservationsAsync();
-            var original = all.FirstOrDefault(x => x.Id == reservation.Id);
-
-            if (original != null && shouldNotify)
-            {
-                var oldIds = original.ParticipantIds ?? new List<int>();
-                var newIds = reservation.ParticipantIds ?? new List<int>();
-                var addedIds = newIds.Except(oldIds).ToList();
-                foreach (var pid in addedIds)
-                {
-                    if (CurrentUser != null && pid == CurrentUser.Id) continue;
-                    var notif = new NotificationModel { UserId = pid, Type = "Info", Message = $"予約「{reservation.Purpose}」の参加者に追加されました。", TargetDate = reservation.Date, TargetReservationId = reservation.Id, IsRead = false };
-                    await AddNotificationAsync(notif);
-                }
-
-                var removedIds = oldIds.Except(newIds).ToList();
-                foreach (var pid in removedIds)
-                {
-                    if (CurrentUser != null && pid == CurrentUser.Id) continue;
-                    var notif = new NotificationModel { UserId = pid, Type = "Warning", Message = $"予約「{reservation.Purpose}」の参加者から外されました。", TargetDate = reservation.Date, IsRead = false };
-                    await AddNotificationAsync(notif);
-                }
-
-                var remainingIds = newIds.Intersect(oldIds).ToList();
-                foreach (var pid in remainingIds)
-                {
-                    if (CurrentUser != null && pid == CurrentUser.Id) continue;
-                    var notif = new NotificationModel { UserId = pid, Type = "Info", Message = $"参加中の予約「{reservation.Purpose}」の内容が変更されました。", TargetDate = reservation.Date, TargetReservationId = reservation.Id, IsRead = false };
-                    await AddNotificationAsync(notif);
-                }
-            }
-
-            await _http.PutAsJsonAsync($"api/reservations/{reservation.Id}", reservation);
-            NotifyStateChanged();
-        }
-
-        public async Task DeleteNotificationAsync(int notificationId)
-        {
-            await _http.DeleteAsync($"api/notifications/{notificationId}");
-            NotifyStateChanged();
-        }
-
-        public async Task<List<UserModel>> GetAllUsersAsync()
-        {
-            return await _http.GetFromJsonAsync<List<UserModel>>("api/users") ?? new List<UserModel>();
-        }
-
-        public async Task<bool> RegisterUserAsync(UserModel user)
-        {
-            var response = await _http.PostAsJsonAsync("api/users/register", user);
-            return response.IsSuccessStatusCode;
-        }
-
-        public async Task DeleteUserAsync(int userId)
-        {
-            await _http.DeleteAsync($"api/users/{userId}");
+            await _httpClient.PutAsJsonAsync($"api/Reservations/{reservation.Id}", reservation);
             NotifyStateChanged();
         }
 
         public async Task<List<NotificationModel>> GetNotificationsAsync(int userId)
         {
-            return await _http.GetFromJsonAsync<List<NotificationModel>>($"api/notifications/user/{userId}") ?? new List<NotificationModel>();
+            return await _httpClient.GetFromJsonAsync<List<NotificationModel>>($"api/Notifications/user/{userId}", JsonOptions)
+                   ?? new List<NotificationModel>();
         }
 
         public async Task MarkNotificationAsReadAsync(int notificationId)
@@ -117,7 +125,13 @@ namespace MeetingRoomBooker.Services
             NotifyStateChanged();
         }
 
-        public async Task AddNotificationAsync(NotificationModel notification)
+        public async Task DeleteNotificationAsync(int notificationId)
+        {
+            await _httpClient.DeleteAsync($"api/Notifications/{notificationId}");
+            NotifyStateChanged();
+        }
+
+        public async Task MarkNotificationAsReadAsync(int notificationId)
         {
             await _http.PostAsJsonAsync("api/notifications", notification);
         }
