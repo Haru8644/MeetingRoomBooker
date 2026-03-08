@@ -4,6 +4,8 @@
 @inject IBookingService BookingService
 @inject IJSRuntime JSRuntime
 @inject NavigationManager Navigation
+@using Microsoft.Extensions.Logging
+@inject ILogger<Schedule> Logger
 
 <div class="schedule-container">
     <div class="sidebar-panel">
@@ -351,7 +353,12 @@
         isLoading = true;
         allReservations = await BookingService.GetReservationsAsync();
         currentUser = BookingService.GetCurrentUser();
-        try { allUsers = await BookingService.GetAllUsersAsync(); } catch { }
+        try { allUsers = await BookingService.GetAllUsersAsync(); } 
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Failed to load users in Schedule page. currentUserId={UserId}", currentUser?.Id);
+            allUsers = new List<UserModel>();
+        }
         isLoading = false;
         StateHasChanged();
     }
