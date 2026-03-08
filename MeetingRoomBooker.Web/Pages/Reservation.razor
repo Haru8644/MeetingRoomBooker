@@ -3,6 +3,8 @@
 @inject IBookingService BookingService
 @inject IJSRuntime JSRuntime
 @inject NavigationManager Navigation
+@using Microsoft.Extensions.Logging
+@inject ILogger<Reservation> Logger
 
 <FluentStack Orientation="Orientation.Vertical" VerticalGap="30">
     <div style="width: 100%; display: flex; justify-content: center; position: relative; z-index: 1;">
@@ -102,7 +104,11 @@
             var users = await BookingService.GetAllUsersAsync();
             allUsers = users.Select(u => new UserViewModel { Id = u.Id, Name = u.Name, Email = u.Email, IsSelected = false }).ToList();
         }
-        catch { }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Failed to load users in Reservation page. currentUserId={UserId}", currentUser?.Id);
+            allUsers = new List<UserViewModel>();
+        }
         UpdateTime(null);
         _timer = new System.Threading.Timer(UpdateTime, null, 1000, 1000);
     }
@@ -205,6 +211,10 @@
             }
 
         }
-        catch (Exception ex) { errorMessage = "保存失敗: " + ex.Message; }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to save reservation(s). currentUserId={UserId}", currentUser?.Id);
+            errorMessage = "Failed to save reservation. Please try again.";
+        }
     }
 }

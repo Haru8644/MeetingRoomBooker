@@ -1,6 +1,8 @@
 ﻿@using MeetingRoomBooker.Shared.Models
 @inject IBookingService BookingService
 @inject NavigationManager Navigation
+@using Microsoft.Extensions.Logging
+@inject ILogger<NavMenu> Logger
 @implements IDisposable
 
 <div class="@(IsMobile ? "mobile-nav-container" : "desktop-nav-container")">
@@ -121,7 +123,11 @@
                 var notes = await BookingService.GetNotificationsAsync(currentUser.Id);
                 unreadCount = notes.Count(n => !n.IsRead);
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Logger.LogWarning(ex, "Failed to load notifications for NavMenu. userId={UserId}", currentUser.Id);
+                unreadCount = 0;
+            }
         }
     }
 
