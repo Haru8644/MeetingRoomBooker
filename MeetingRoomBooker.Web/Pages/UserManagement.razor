@@ -3,84 +3,143 @@
 @inject IBookingService BookingService
 @inject NavigationManager Navigation
 
-<div class="cyber-container">
-    <div class="terminal-header fade-in">
-        <h3 class="gradient-text-enhanced">ADMIN CONSOLE // USER MANAGEMENT</h3>
-        <div class="terminal-line"></div>
+<div class="um-page">
+    <div class="um-header um-fade-in">
+        <h3 class="um-title">ADMIN CONSOLE // USER MANAGEMENT</h3>
+        <div class="um-title-line"></div>
     </div>
 
-    <div class="cyber-card-enhanced add-user-card fade-in delay-1">
-        <h4 class="card-title"><span class="oi oi-plus"></span> REGISTER NEW PERSONNEL</h4>
-        <div class="form-column">
-            <input @bind="newName" class="cyber-input" placeholder="NAME" autocomplete="off" />
-            <input @bind="newEmail" class="cyber-input" placeholder="EMAIL IDENTITY" autocomplete="off" />
-            <input @bind="newPassword" type="password" class="cyber-input" placeholder="ACCESS KEY" autocomplete="new-password" />
-            <input @bind="newConfirmPassword" type="password" class="cyber-input" placeholder="CONFIRM KEY" autocomplete="new-password" />
-            <button class="cyber-button-primary" style="margin-top: 15px; width: 100%;" @onclick="AddUser">EXECUTE REGISTRATION</button>
+    <section class="um-card um-form-card um-fade-in um-delay-1">
+        <h4 class="um-card-title">REGISTER NEW PERSONNEL</h4>
+
+        <div class="um-form">
+            <input @bind="newName"
+                   class="um-input"
+                   placeholder="NAME"
+                   autocomplete="off" />
+
+            <input @bind="newEmail"
+                   class="um-input"
+                   placeholder="EMAIL IDENTITY"
+                   autocomplete="off" />
+
+            <input @bind="newPassword"
+                   type="password"
+                   class="um-input"
+                   placeholder="ACCESS KEY"
+                   autocomplete="new-password" />
+
+            <input @bind="newConfirmPassword"
+                   type="password"
+                   class="um-input"
+                   placeholder="CONFIRM KEY"
+                   autocomplete="new-password" />
+
+            <button type="button"
+                    class="um-register-button"
+                    @onclick="AddUser">
+                EXECUTE REGISTRATION
+            </button>
         </div>
-        @if (!string.IsNullOrEmpty(msg))
-        {
-            <div style="color: #00d2ff; margin-top: 10px; font-weight: bold; text-shadow: 0 0 5px #00d2ff;">> @msg</div>
-        }
-    </div>
 
-    <div class="user-list">
-        @foreach (var (u, index) in users.Select((x, i) => (x, i)))
+        @if (!string.IsNullOrWhiteSpace(msg))
         {
-            <div class="user-row cyber-card-enhanced pop-in-stagger" style="--i:@index">
-                <div class="user-info">
-                    <span class="uid">ID_@u.Id.ToString("D3")</span>
-                    <span class="uname">@u.Name</span>
-                    <span class="uemail">@u.Email</span>
+            <div class="um-message">@msg</div>
+        }
+    </section>
+
+    <section class="um-list" aria-label="Registered personnel">
+        @foreach (var u in users)
+        {
+            <article class="um-row">
+                <div class="um-user">
+                    <span class="um-id">ID_@u.Id.ToString("D3")</span>
+                    <span class="um-name">@u.Name</span>
+                    <span class="um-email">@u.Email</span>
                 </div>
-                @if (u.Name != "Haru")
+
+                @if (u.IsAdmin)
                 {
-                    <button class="cyber-button-danger" style="padding: 5px 15px; font-size: 0.8rem;" @onclick="() => DeleteUser(u.Id)">TERMINATE</button>
+                    <span class="um-admin-badge">ADMIN</span>
                 }
                 else
                 {
-                    <span class="admin-badge">ADMIN</span>
+                    <button type="button"
+                            class="um-delete-button"
+                            @onclick="() => DeleteUser(u.Id)">
+                        TERMINATE
+                    </button>
                 }
-            </div>
+            </article>
         }
-    </div>
+    </section>
 </div>
 
 @code {
     private List<UserModel> users = new();
-    private string newName = "";
-    private string newEmail = "";
-    private string newPassword = "";
-    private string newConfirmPassword = "";
-    private string msg = "";
+    private string newName = string.Empty;
+    private string newEmail = string.Empty;
+    private string newPassword = string.Empty;
+    private string newConfirmPassword = string.Empty;
+    private string msg = string.Empty;
     private UserModel? currentUser;
 
     protected override async Task OnInitializedAsync()
     {
         currentUser = BookingService.GetCurrentUser();
-        if (currentUser == null || currentUser.Name != "Haru")
+
+        if (currentUser is null || currentUser.IsAdmin != true)
         {
             Navigation.NavigateTo("/");
             return;
         }
+
         users = await BookingService.GetAllUsersAsync();
     }
 
     private async Task AddUser()
     {
-        if (string.IsNullOrEmpty(newName) || string.IsNullOrEmpty(newEmail) || string.IsNullOrEmpty(newPassword))
+        if (string.IsNullOrWhiteSpace(newName) ||
+            string.IsNullOrWhiteSpace(newEmail) ||
+            string.IsNullOrWhiteSpace(newPassword))
         {
             msg = "ERROR: MISSING FIELDS";
             return;
         }
+
         if (newPassword != newConfirmPassword)
         {
             msg = "ERROR: KEY MISMATCH";
             return;
         }
-        await BookingService.RegisterUserAsync(new UserModel { Name = newName, Email = newEmail, Password = newPassword, AvatarColor = "#a371f7" });
+
+        if (users.Any(u => u.Email.Equals(newEmail, StringComparison.OrdinalIgnoreCase)))
+        {
+            msg = "ERROR: EMAIL ALREADY EXISTS";
+            return;
+        }
+
+        var success = await BookingService.RegisterUserAsync(new UserModel
+        {
+            Name = newName.Trim(),
+            Email = newEmail.Trim(),
+            Password = newPassword,
+            IsAdmin = false,
+            AvatarColor = "#a371f7"
+        });
+
+        if (!success)
+        {
+            msg = "ERROR: EMAIL ALREADY EXISTS";
+            return;
+        }
+
         users = await BookingService.GetAllUsersAsync();
-        newName = ""; newEmail = ""; newPassword = ""; newConfirmPassword = "";
+
+        newName = string.Empty;
+        newEmail = string.Empty;
+        newPassword = string.Empty;
+        newConfirmPassword = string.Empty;
         msg = "REGISTRATION SUCCESSFUL";
     }
 

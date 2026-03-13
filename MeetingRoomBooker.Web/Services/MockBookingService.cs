@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MeetingRoomBooker.Shared.Models;
 using MeetingRoomBooker.Shared.Services;
 using Microsoft.JSInterop;
+using Microsoft.Extensions.Logging;
 
 namespace MeetingRoomBooker.Web.Services
 {
@@ -19,11 +20,16 @@ namespace MeetingRoomBooker.Web.Services
         private static bool _isLoaded = false;
 
         private readonly IJSRuntime _js;
+        private readonly ILogger<MockBookingService> _logger;
 
         public UserModel? CurrentUser { get; private set; }
         public event Action? OnChange;
 
-        public MockBookingService(IJSRuntime js) => _js = js;
+        public MockBookingService(IJSRuntime js, ILogger<MockBookingService> logger)
+        {
+            _js = js;
+            _logger = logger;
+        }
 
         private void NotifyStateChanged() => OnChange?.Invoke();
 
@@ -34,43 +40,144 @@ namespace MeetingRoomBooker.Web.Services
             try
             {
                 var uJson = await _js.InvokeAsync<string>("localStorage.getItem", "demo_users");
-                if (!string.IsNullOrEmpty(uJson))
+                if (!string.IsNullOrWhiteSpace(uJson))
                 {
                     _users = JsonSerializer.Deserialize<List<UserModel>>(uJson) ?? new();
                 }
 
                 var rJson = await _js.InvokeAsync<string>("localStorage.getItem", "demo_reservations");
-                if (!string.IsNullOrEmpty(rJson))
+                if (!string.IsNullOrWhiteSpace(rJson))
                 {
                     _reservations = JsonSerializer.Deserialize<List<ReservationModel>>(rJson) ?? new();
                 }
 
                 var nJson = await _js.InvokeAsync<string>("localStorage.getItem", "demo_notifications");
-                if (!string.IsNullOrEmpty(nJson))
+                if (!string.IsNullOrWhiteSpace(nJson))
                 {
                     _notifications = JsonSerializer.Deserialize<List<NotificationModel>>(nJson) ?? new();
                 }
-
-                _nextId = _reservations.Count > 0 ? _reservations.Max(r => r.Id) + 1 : 1;
-                _notifId = _notifications.Count > 0 ? _notifications.Max(n => n.Id) + 1 : 1;
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogWarning(
+                    ex,
+                    "Failed to load demo data from localStorage. The service will continue with in-memory defaults.");
+
+                _users ??= new();
+                _reservations ??= new();
+                _notifications ??= new();
             }
 
-            if (!_users.Any())
-            {
-                _users.AddRange(new[]
-                {
-                    new UserModel { Id = 1, Name = "Haru", Email = "haru@demo.com", Password = "password", IsAdmin = true,  AvatarColor = "#58a6ff" },
-                    new UserModel { Id = 2, Name = "demo", Email = "demo@demo.com", Password = "password", IsAdmin = false, AvatarColor = "#3fb950" },
-                    new UserModel { Id = 3, Name = "Sato", Email = "sato@demo.com", Password = "password", IsAdmin = false, AvatarColor = "#d29922" },
-                });
+            var usersChanged = EnsureDemoUsers();
 
+            _nextId = _reservations.Any() ? _reservations.Max(r => r.Id) + 1 : 1;
+            _notifId = _notifications.Any() ? _notifications.Max(n => n.Id) + 1 : 1;
+
+            if (usersChanged)
+            {
                 await SaveData();
             }
 
             _isLoaded = true;
+        }
+
+        private bool EnsureDemoUsers()
+        {
+            var changed = false;
+
+            changed |= UpsertDemoUser(
+                email: "haru@demo.com",
+                name: "Haru",
+                password: "password",
+                isAdmin: true,
+                avatarColor: "#58a6ff");
+
+            changed |= UpsertDemoUser(
+                email: "demo@demo.com",
+                name: "demo",
+                password: "password",
+                isAdmin: false,
+                avatarColor: "#3fb950");
+
+            changed |= UpsertDemoUser(
+                email: "sato@demo.com",
+                name: "Sato",
+                password: "password",
+                isAdmin: false,
+                avatarColor: "#d29922");
+
+            return changed;
+        }
+
+        private bool UpsertDemoUser(
+            string email,
+            string name,
+            string password,
+            bool isAdmin,
+            string avatarColor)
+        {
+            var existing = _users.FirstOrDefault(u =>
+                string.Equals(u.Email, email, StringComparison.OrdinalIgnoreCase));
+
+            if (existing is null)
+            {
+                _users.Add(new UserModel
+                {
+                    Id = GetNextUserId(),
+                    Name = name,
+                    Email = email,
+                    Password = password,
+                    IsAdmin = isAdmin,
+                    AvatarColor = avatarColor
+                });
+
+                return true;
+            }
+
+            var changed = false;
+
+            if (!string.Equals(existing.Name, name, StringComparison.Ordinal))
+            {
+                existing.Name = name;
+                changed = true;
+            }
+
+            if (!string.Equals(existing.Email, email, StringComparison.OrdinalIgnoreCase))
+            {
+                existing.Email = email;
+                changed = true;
+            }
+
+            if (!string.Equals(existing.Password, password, StringComparison.Ordinal))
+            {
+                existing.Password = password;
+                changed = true;
+            }
+
+            if (existing.IsAdmin != isAdmin)
+            {
+                existing.IsAdmin = isAdmin;
+                changed = true;
+            }
+
+            if (string.IsNullOrWhiteSpace(existing.AvatarColor) || existing.AvatarColor != avatarColor)
+            {
+                existing.AvatarColor = avatarColor;
+                changed = true;
+            }
+
+            if (existing.Id <= 0)
+            {
+                existing.Id = GetNextUserId();
+                changed = true;
+            }
+
+            return changed;
+        }
+
+        private int GetNextUserId()
+        {
+            return _users.Any() ? _users.Max(u => u.Id) + 1 : 1;
         }
 
         private async Task SaveData()
@@ -81,8 +188,11 @@ namespace MeetingRoomBooker.Web.Services
                 await _js.InvokeVoidAsync("localStorage.setItem", "demo_reservations", JsonSerializer.Serialize(_reservations));
                 await _js.InvokeVoidAsync("localStorage.setItem", "demo_notifications", JsonSerializer.Serialize(_notifications));
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(
+                    ex,
+                    "Failed to save demo data to localStorage.");
             }
         }
 
@@ -90,7 +200,13 @@ namespace MeetingRoomBooker.Web.Services
         {
             await EnsureLoaded();
 
-            var user = _users.FirstOrDefault(u => u.Email == email && u.Password == password);
+            var normalizedEmail = email?.Trim() ?? string.Empty;
+            var normalizedPassword = password ?? string.Empty;
+
+            var user = _users.FirstOrDefault(u =>
+                string.Equals(u.Email, normalizedEmail, StringComparison.OrdinalIgnoreCase) &&
+                string.Equals(u.Password, normalizedPassword, StringComparison.Ordinal));
+
             if (user is null) return null;
 
             CurrentUser = user;
@@ -102,7 +218,19 @@ namespace MeetingRoomBooker.Web.Services
         {
             await EnsureLoaded();
 
-            user.Id = _users.Any() ? _users.Max(u => u.Id) + 1 : 1;
+            if (_users.Any(u => string.Equals(u.Email, user.Email, StringComparison.OrdinalIgnoreCase)))
+            {
+                return false;
+            }
+
+            user.Id = GetNextUserId();
+            user.IsAdmin = false;
+
+            if (string.IsNullOrWhiteSpace(user.AvatarColor))
+            {
+                user.AvatarColor = "#a371f7";
+            }
+
             _users.Add(user);
 
             await SaveData();
@@ -117,7 +245,9 @@ namespace MeetingRoomBooker.Web.Services
             var u = _users.FirstOrDefault(x => x.Id == userId);
             if (u is null) return;
             if (u.IsAdmin) return;
+
             _users.Remove(u);
+
             await SaveData();
             NotifyStateChanged();
         }
@@ -133,7 +263,7 @@ namespace MeetingRoomBooker.Web.Services
         public async Task<List<UserModel>> GetAllUsersAsync()
         {
             await EnsureLoaded();
-            return _users;
+            return _users.OrderBy(u => u.Id).ToList();
         }
 
         public async Task<List<ReservationModel>> GetReservationsAsync()
@@ -304,7 +434,10 @@ namespace MeetingRoomBooker.Web.Services
         public async Task<List<NotificationModel>> GetNotificationsAsync(int userId)
         {
             await EnsureLoaded();
-            return _notifications.Where(n => n.UserId == userId).OrderByDescending(n => n.CreatedAt).ToList();
+            return _notifications
+                .Where(n => n.UserId == userId)
+                .OrderByDescending(n => n.CreatedAt)
+                .ToList();
         }
 
         public async Task AddNotificationAsync(NotificationModel notification)
