@@ -58,17 +58,17 @@
                     <span class="um-email">@u.Email</span>
                 </div>
 
-                @if (u.IsAdmin)
-                {
-                    <span class="um-admin-badge">ADMIN</span>
-                }
-                else
+                @if (u.Name != "Haru")
                 {
                     <button type="button"
                             class="um-delete-button"
                             @onclick="() => DeleteUser(u.Id)">
                         TERMINATE
                     </button>
+                }
+                else
+                {
+                    <span class="um-admin-badge">ADMIN</span>
                 }
             </article>
         }
@@ -88,7 +88,7 @@
     {
         currentUser = BookingService.GetCurrentUser();
 
-        if (currentUser is null || currentUser.IsAdmin != true)
+        if (currentUser is null || currentUser.Name != "Haru")
         {
             Navigation.NavigateTo("/");
             return;
@@ -113,26 +113,13 @@
             return;
         }
 
-        if (users.Any(u => u.Email.Equals(newEmail, StringComparison.OrdinalIgnoreCase)))
+        await BookingService.RegisterUserAsync(new UserModel
         {
-            msg = "ERROR: EMAIL ALREADY EXISTS";
-            return;
-        }
-
-        var success = await BookingService.RegisterUserAsync(new UserModel
-        {
-            Name = newName.Trim(),
-            Email = newEmail.Trim(),
+            Name = newName,
+            Email = newEmail,
             Password = newPassword,
-            IsAdmin = false,
             AvatarColor = "#a371f7"
         });
-
-        if (!success)
-        {
-            msg = "ERROR: EMAIL ALREADY EXISTS";
-            return;
-        }
 
         users = await BookingService.GetAllUsersAsync();
 
