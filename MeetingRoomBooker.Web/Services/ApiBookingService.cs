@@ -99,13 +99,15 @@ namespace MeetingRoomBooker.Web.Services
                 reservation.UserId = _currentUser.Id;
             }
 
-            await _httpClient.PostAsJsonAsync("api/Reservations", reservation);
+            var response = await _httpClient.PostAsJsonAsync("api/Reservations", reservation);
+            response.EnsureSuccessStatusCode(); 
             NotifyStateChanged();
         }
 
         public async Task RemoveReservationAsync(ReservationModel reservation)
         {
-            await _httpClient.DeleteAsync($"api/Reservations/{reservation.Id}");
+            var response = await _httpClient.DeleteAsync($"api/Reservations/{reservation.Id}");
+            response.EnsureSuccessStatusCode(); 
             NotifyStateChanged();
         }
 

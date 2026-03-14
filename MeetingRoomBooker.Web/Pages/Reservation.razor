@@ -182,21 +182,28 @@
                 {
                     Name = reserveName,
                     Room = selectedRoom,
-
                     NumberOfPeople = 1,
                     Date = date,
                     StartTime = currentStart,
                     EndTime = currentEnd,
                     Type = reserveType,
-
                     Purpose = reservePurpose,
                     UserId = currentUser?.Id ?? 0,
                     ParticipantIds = allUsers.Where(u => u.IsSelected).Select(u => u.Id).ToList(),
-                    RepeatType = "しない",
-                    RepeatUntil = null
+                    RepeatType = repeatType,
+                    RepeatUntil = repeatType != "しない" ? repeatUntil : null
                 };
-                await BookingService.AddReservationAsync(model);
-                successCount++;
+                try
+                {
+                    await BookingService.AddReservationAsync(model);
+                    successCount++;
+                    if (targetDates.Count > 1) await Task.Delay(100);
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError(ex, "API Error: Failed to save reservation for {Date}", date);
+                    failCount++; 
+                }
             }
 
             if (successCount > 0)

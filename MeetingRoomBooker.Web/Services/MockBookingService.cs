@@ -276,92 +276,63 @@ namespace MeetingRoomBooker.Web.Services
         {
             await EnsureLoaded();
 
-            var targetDates = new List<DateTime> { original.Date };
-
-            if (original.RepeatUntil.HasValue && original.RepeatUntil.Value.Date > original.Date.Date)
+            var r = new ReservationModel
             {
-                var nextDate = original.Date;
+                Id = _nextId++,
+                Name = string.IsNullOrEmpty(original.Name) && CurrentUser != null ? CurrentUser.Name : original.Name,
+                Room = original.Room,
+                NumberOfPeople = original.NumberOfPeople,
+                Type = original.Type,
+                Purpose = original.Purpose,
+                UserId = original.UserId == 0 && CurrentUser != null ? CurrentUser.Id : original.UserId,
+                ParticipantIds = original.ParticipantIds != null ? new List<int>(original.ParticipantIds) : new List<int>(),
+                RepeatType = original.RepeatType,
+                RepeatUntil = original.RepeatUntil,
+                Date = original.Date,
+                StartTime = original.Date.Date + original.StartTime.TimeOfDay,
+                EndTime = original.Date.Date + original.EndTime.TimeOfDay
+            };
 
-                if (original.RepeatType == "毎日")
-                {
-                    nextDate = nextDate.AddDays(1);
-                    while (nextDate.Date <= original.RepeatUntil.Value.Date)
-                    {
-                        targetDates.Add(nextDate);
-                        nextDate = nextDate.AddDays(1);
-                    }
-                }
-                else if (original.RepeatType == "毎週")
-                {
-                    nextDate = nextDate.AddDays(7);
-                    while (nextDate.Date <= original.RepeatUntil.Value.Date)
-                    {
-                        targetDates.Add(nextDate);
-                        nextDate = nextDate.AddDays(7);
-                    }
-                }
-            }
+            var conflicts = _reservations
+                .Where(x => x.Room == r.Room && x.Date.Date == r.Date.Date && x.Id != r.Id &&
+                            ((r.StartTime >= x.StartTime && r.StartTime < x.EndTime) ||
+                             (r.EndTime > x.StartTime && r.EndTime <= x.EndTime) ||
+                             (r.StartTime <= x.StartTime && r.EndTime >= x.EndTime)))
+                .ToList();
 
-            foreach (var date in targetDates)
+            foreach (var c in conflicts)
             {
-                var r = new ReservationModel
+                if (c.UserId != r.UserId)
                 {
-                    Id = _nextId++,
-                    Name = string.IsNullOrEmpty(original.Name) && CurrentUser != null ? CurrentUser.Name : original.Name,
-                    Room = original.Room,
-                    NumberOfPeople = original.NumberOfPeople,
-                    Type = original.Type,
-                    Purpose = original.Purpose,
-                    UserId = original.UserId == 0 && CurrentUser != null ? CurrentUser.Id : original.UserId,
-                    ParticipantIds = original.ParticipantIds != null ? new List<int>(original.ParticipantIds) : new List<int>(),
-                    RepeatType = original.RepeatType,
-                    RepeatUntil = original.RepeatUntil,
-                    Date = date,
-                    StartTime = date.Date + original.StartTime.TimeOfDay,
-                    EndTime = date.Date + original.EndTime.TimeOfDay
-                };
-
-                var conflicts = _reservations
-                    .Where(x => x.Room == r.Room && x.Date.Date == r.Date.Date && x.Id != r.Id &&
-                                ((r.StartTime >= x.StartTime && r.StartTime < x.EndTime) ||
-                                 (r.EndTime > x.StartTime && r.EndTime <= x.EndTime) ||
-                                 (r.StartTime <= x.StartTime && r.EndTime >= x.EndTime)))
-                    .ToList();
-
-                foreach (var c in conflicts)
-                {
-                    if (c.UserId != r.UserId)
-                    {
-                        _notifications.Add(new NotificationModel
-                        {
-                            Id = _notifId++,
-                            UserId = c.UserId,
-                            Type = "Warning",
-                            Message = $"【警告】{r.Date:MM/dd}の「{c.Purpose}」と時間が重複しました。",
-                            TargetDate = r.Date,
-                            TargetReservationId = r.Id,
-                            IsRead = false
-                        });
-                    }
-                }
-
-                _reservations.Add(r);
-
-                foreach (var pid in r.ParticipantIds)
-                {
-                    if (CurrentUser != null && pid == CurrentUser.Id) continue;
-
                     _notifications.Add(new NotificationModel
                     {
                         Id = _notifId++,
-                        UserId = pid,
-                        Type = "Info",
-                        Message = $"{r.Name}さんが予約「{r.Purpose}」を追加しました。",
+                        UserId = c.UserId,
+                        Type = "Warning",
+                        Message = $"【警告】{r.Date:MM/dd}の「{c.Purpose}」と時間が重複しました。",
                         TargetDate = r.Date,
                         TargetReservationId = r.Id,
                         IsRead = false
                     });
                 }
+            }
+
+            _reservations.Add(r);
+
+            foreach (var pid in r.ParticipantIds)
+            {
+                if (CurrentUser != null && pid == CurrentUser.Id) continue;
+
+                _notifications.Add(new NotificationModel
+                {
+                    Id = _notifId++,
+                    UserId = pid,
+                    Type = "Info",
+                    Message = $"{r.Name}さんが予約「{r.Purpose}」を追加しました。",
+                    TargetDate = r.Date,
+                    TargetReservationId = r.Id,
+                    IsRead = false
+                });
             }
 
             await SaveData();

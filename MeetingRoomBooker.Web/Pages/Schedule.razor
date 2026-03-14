@@ -448,12 +448,57 @@
 
     private async Task DeleteBooking()
     {
-        if (selectedBooking != null && await JSRuntime.InvokeAsync<bool>("confirm", "削除しますか？"))
+        if (selectedBooking == null) return;
+
+        if (selectedBooking.RepeatType != "しない" && !string.IsNullOrEmpty(selectedBooking.RepeatType))
         {
-            await BookingService.RemoveReservationAsync(selectedBooking);
-            selectedBooking = null;
-            await LoadData();
+            bool deleteAll = await JSRuntime.InvokeAsync<bool>("confirm",
+                "この予約は繰り返し予約です。\n一括で関連するすべての予約を削除しますか？\n（[キャンセル] を押すと、この日のみ削除します）");
+
+            if (deleteAll)
+            {
+                var all = await BookingService.GetReservationsAsync();
+                var targets = all.Where(r =>
+                    r.Name == selectedBooking.Name &&
+                    r.Room == selectedBooking.Room &&
+                    r.Purpose == selectedBooking.Purpose &&
+                    r.RepeatType == selectedBooking.RepeatType &&
+                    r.StartTime.TimeOfDay == selectedBooking.StartTime.TimeOfDay
+                ).ToList();
+
+                foreach (var t in targets)
+                {
+                    try
+                    {
+                        await BookingService.RemoveReservationAsync(t);
+                        if (targets.Count > 1) await Task.Delay(100);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogWarning(ex, "Failed to delete recurring reservation ID: {Id}", t.Id);
+                    }
+                }
+            }
+            else
+            {
+                if (await JSRuntime.InvokeAsync<bool>("confirm", "この日の予約のみ削除しますか？"))
+                {
+                    await BookingService.RemoveReservationAsync(selectedBooking);
+                }
+                else return;
+            }
         }
+        else
+        {
+            if (await JSRuntime.InvokeAsync<bool>("confirm", "削除しますか？"))
+            {
+                await BookingService.RemoveReservationAsync(selectedBooking);
+            }
+            else return;
+        }
+
+        selectedBooking = null;
+        await LoadData();
     }
 
     private void OpenTimelineModal(DateTime date) { timelineDate = date; }
