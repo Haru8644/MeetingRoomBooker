@@ -1,6 +1,6 @@
 .schedule-container {
     display: flex;
-    height: calc(100vh - 80px);
+    height: calc(100vh - 100px);
     width: 100%;
     overflow: hidden;
 }
@@ -109,10 +109,14 @@
 
 .main-list-area {
     flex-grow: 1;
-    padding: 20px;
+    padding: 0 20px 20px 20px;
     overflow-y: auto;
     background: #0d1117;
     position: relative;
+}
+
+.date-group:first-child {
+    margin-top: 20px;
 }
 
 .date-group {
@@ -122,14 +126,22 @@
 .sticky-date-header {
     position: sticky;
     top: 0;
-    z-index: 50;
-    background: #0d1117;
+    z-index: 1000 !important;
+    background: #0d1117 !important;
     border-bottom: 1px solid #30363d;
-    margin-bottom: 15px;
-    padding: 10px 0;
+    margin: 0 -20px 15px -20px;
+    padding: 15px 20px 10px 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    box-shadow: 0 10px 10px -5px rgba(0,0,0,0.5);
+}
+
+.sticky-element {
+    position: sticky;
+    left: 0;
+    z-index: 60;
+    background: rgba(10, 15, 30, 0.95);
 }
 
 .date-label-area {
@@ -176,9 +188,9 @@
     font-weight: bold;
 }
 
-.timeline-btn:active {
-    transform: scale(0.95);
-}
+    .timeline-btn:active {
+        transform: scale(0.95);
+    }
 
 @media (hover: hover) {
     .timeline-btn:hover {
@@ -858,6 +870,10 @@ label {
     }
 }
 
+[data-theme="light"] .sticky-element {
+    background: rgba(255,255,255,0.95) !important;
+}
+
 [data-theme="light"] .sidebar-panel {
     background: rgba(255,255,255,0.2) !important;
     border-right: 1px solid rgba(255,255,255,0.4) !important;
@@ -903,9 +919,10 @@ label {
 }
 
 [data-theme="light"] .sticky-date-header {
-    background: rgba(255,255,255,0.3) !important;
-    border-bottom: 1px solid rgba(255,255,255,0.5) !important;
-    backdrop-filter: blur(10px) !important;
+    background: #ffffff !important;
+    border-bottom: 1px solid rgba(0,0,0,0.1) !important;
+    backdrop-filter: none !important;
+    box-shadow: 0 10px 10px -5px rgba(0,0,0,0.05) !important;
 }
 
 [data-theme="light"] .date-big {
@@ -1005,9 +1022,9 @@ label {
     border-left: 3px solid #d53369 !important;
 }
 
-    [data-theme="light"] .cyber-detail-row .label {
-        color: #666 !important;
-    }
+[data-theme="light"] .cyber-detail-row .label {
+    color: #666 !important;
+}
 
 [data-theme="light"] .value-text {
     color: #333 !important;

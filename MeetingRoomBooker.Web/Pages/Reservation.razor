@@ -1,5 +1,6 @@
 ﻿@page "/reservation"
 @using MeetingRoomBooker.Shared.Models
+@using System.Globalization
 @inject IBookingService BookingService
 @inject IJSRuntime JSRuntime
 @inject NavigationManager Navigation
@@ -19,7 +20,6 @@
             }
             <FluentStack Orientation="Orientation.Vertical" VerticalGap="20">
                 <div class="fade-in-stagger" style="--i:1"><label>予約者名</label><FluentTextField @bind-Value="reserveName" ReadOnly="@(currentUser != null)" Style="width: 100%;" /></div>
-
                 <div class="fade-in-stagger" style="--i:2">
                     <label>参加メンバー</label>
                     <div class="participant-selector">
@@ -30,7 +30,6 @@
                         }
                     </div>
                 </div>
-
                 <FluentGrid Spacing="2" Class="fade-in-stagger" Style="--i:3">
                     <FluentGridItem xs="12" sm="12">
                         <label>利用区分</label>
@@ -42,7 +41,6 @@
                         </div>
                     </FluentGridItem>
                 </FluentGrid>
-
                 <div class="fade-in-stagger" style="--i:4">
                     <label>会議室</label>
                     <div class="selection-group">
@@ -52,9 +50,7 @@
                         }
                     </div>
                 </div>
-
                 <div class="fade-in-stagger" style="--i:5"><label>利用目的</label><FluentTextField @bind-Value="reservePurpose" Style="width: 100%;" /></div>
-
                 <FluentGrid Spacing="2" Class="fade-in-stagger" Style="--i:6; position: relative; z-index: 10;">
                     <FluentGridItem xs="12" sm="6"><label>利用日</label><FluentDatePicker @bind-Value="reserveDate" Style="width: 100%;" /></FluentGridItem>
                     <FluentGridItem xs="12" sm="3">
@@ -68,7 +64,6 @@
                     </FluentGridItem>
                     <FluentGridItem xs="12" sm="3"><label>終了日</label><FluentDatePicker @bind-Value="repeatUntil" Style="width: 100%;" Disabled="@(repeatType == "しない")" /></FluentGridItem>
                 </FluentGrid>
-
                 <FluentGrid Spacing="2" Class="fade-in-stagger" Style="--i:7; position: relative; z-index: 9;">
                     <FluentGridItem xs="6">
                         <label>開始</label>
@@ -80,25 +75,117 @@
                     </FluentGridItem>
                 </FluentGrid>
 
-                <div class="fade-in-stagger" style="--i:8; margin-top: 15px;"><button class="cyber-button-primary pulse-hover" style="width: 100%;" @onclick="OnSubmit"><span class="oi oi-check"></span> RESERVE</button></div>
+                <div class="fade-in-stagger" style="--i:8; margin-top: 15px;">
+                    <button class="cyber-button-primary pulse-hover" style="width: 100%;" @onclick="OnSubmit"><span class="oi oi-check"></span> RESERVE</button>
+                </div>
+                <div class="fade-in-stagger" style="--i:9; margin-top: 10px; display: flex; justify-content: flex-end;">
+                    <button class="cyber-button-secondary pulse-hover" style="font-size: 0.85rem; padding: 6px 15px;" @onclick="GoToSchedule"><span class="oi oi-calendar"></span> カレンダーで空きを確認</button>
+                </div>
             </FluentStack>
+        </div>
+    </div>
+    <div style="width: 100%; display: flex; justify-content: center; position: relative; z-index: 1; padding-bottom: 30px;">
+        <div class="cyber-card-enhanced holo-card fade-in-up" style="padding: 25px; max-width: 800px; width: 100%; --i:10;">
+            <div class="form-header" style="display: flex; align-items: center; justify-content: space-between; border-bottom: none; margin-bottom: 15px; padding-bottom: 0;">
+                <h3 class="gradient-text-enhanced" style="font-size: 1.2rem; margin: 0;">予約状況</h3>
+                <div style="width: 150px;">
+                    <FluentDatePicker @bind-Value="previewDate" Style="width: 100%;" />
+                </div>
+            </div>
+
+            @if (dayReservations == null)
+            {
+                <div class="loading-text" style="color: #8b949e;">カレンダー情報を取得中...</div>
+            }
+            else if (!dayReservations.Any())
+            {
+                <div style="color: #00d2ff; text-align: center; padding: 15px; border: 1px dashed #30363d; border-radius: 4px;">
+                    この日の予約はまだありません
+                </div>
+            }
+            else
+            {
+                <FluentStack Orientation="Orientation.Vertical" VerticalGap="10">
+                    @foreach (var r in dayReservations)
+                    {
+                        <div style="display: flex; align-items: center; padding: 10px; background: rgba(0,0,0,0.3); border-left: 3px solid @(r.Room == "大会議室" ? "#58a6ff" : "#3fb950"); border-radius: 0 4px 4px 0;">
+                            <div style="font-family: 'Consolas', monospace; color: #58a6ff; font-weight: bold; width: 120px;">
+                                @r.StartTime.ToString("HH:mm") - @r.EndTime.ToString("HH:mm")
+                            </div>
+                            <div style="color: #e0e0e0; font-weight: bold; margin-right: 15px;">【@r.Room】</div>
+                            <div style="color: #c9d1d9; flex-grow: 1;">@r.Name <span style="font-size: 0.8em; color: #8b949e;">(@r.Type)</span></div>
+                        </div>
+                    }
+                </FluentStack>
+            }
         </div>
     </div>
 </FluentStack>
 
 @code {
     public class UserViewModel : UserModel { public bool IsSelected { get; set; } }
+
+    public class ReservationState
+    {
+        public string? Name { get; set; }
+        public string? Room { get; set; }
+        public string? Type { get; set; }
+        public string? Purpose { get; set; }
+        public DateTime? Date { get; set; }
+        public DateTime? Start { get; set; }
+        public DateTime? End { get; set; }
+        public string? Repeat { get; set; }
+        public DateTime? RepeatUntil { get; set; }
+        public List<int>? Participants { get; set; }
+    }
+
     private string currentTime = "", currentDate = "", reserveName = "", selectedRoom = "大会議室", reserveType = "社内", reservePurpose = "", errorMessage = "", repeatType = "しない";
-    private DateTime? reserveDate = DateTime.Today, startTime = DateTime.Today.AddHours(9), endTime = DateTime.Today.AddHours(10), repeatUntil = DateTime.Today.AddMonths(1);
+
+    private DateTime? _reserveDate = DateTime.Today;
+    private DateTime? reserveDate
+    {
+        get => _reserveDate;
+        set
+        {
+            if (_reserveDate != value)
+            {
+                _reserveDate = value;
+                previewDate = value;
+            }
+        }
+    }
+
+    private DateTime? _previewDate = DateTime.Today;
+    private DateTime? previewDate
+    {
+        get => _previewDate;
+        set
+        {
+            if (_previewDate != value)
+            {
+                _previewDate = value;
+                _ = LoadDayReservationsSafeAsync();
+            }
+        }
+    }
+
+    private DateTime? startTime = DateTime.Today.AddHours(9), endTime = DateTime.Today.AddHours(10), repeatUntil = DateTime.Today.AddMonths(1);
     private List<string> roomOptions = new() { "大会議室", "小会議室" }, typeOptions = new() { "社内", "来客" }, repeatOptions = new() { "しない", "毎日", "毎週" };
     private UserModel? currentUser;
     private List<UserViewModel> allUsers = new();
+    private List<ReservationModel> dayReservations = new();
     private System.Threading.Timer? _timer;
 
     protected override async Task OnInitializedAsync()
     {
+        var culture = new CultureInfo("ja-JP");
+        culture.DateTimeFormat.FirstDayOfWeek = DayOfWeek.Sunday;
+        CultureInfo.DefaultThreadCurrentCulture = culture;
+        CultureInfo.DefaultThreadCurrentUICulture = culture;
+
         currentUser = BookingService.GetCurrentUser();
         if (currentUser != null) reserveName = currentUser.Name;
+
         try
         {
             var users = await BookingService.GetAllUsersAsync();
@@ -109,8 +196,67 @@
             Logger.LogWarning(ex, "Failed to load users in Reservation page. currentUserId={UserId}", currentUser?.Id);
             allUsers = new List<UserViewModel>();
         }
+
+        await LoadDayReservationsSafeAsync();
+
         UpdateTime(null);
         _timer = new System.Threading.Timer(UpdateTime, null, 1000, 1000);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                var json = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "draftReservation");
+                if (!string.IsNullOrEmpty(json))
+                {
+                    var state = System.Text.Json.JsonSerializer.Deserialize<ReservationState>(json);
+                    if (state != null)
+                    {
+                        reserveName = state.Name ?? reserveName;
+                        selectedRoom = state.Room ?? selectedRoom;
+                        reserveType = state.Type ?? reserveType;
+                        reservePurpose = state.Purpose ?? reservePurpose;
+                        reserveDate = state.Date ?? reserveDate;
+                        previewDate = state.Date ?? previewDate;
+                        startTime = state.Start ?? startTime;
+                        endTime = state.End ?? endTime;
+                        repeatType = state.Repeat ?? repeatType;
+                        repeatUntil = state.RepeatUntil ?? repeatUntil;
+
+                        if (state.Participants != null)
+                        {
+                            foreach (var u in allUsers) u.IsSelected = state.Participants.Contains(u.Id);
+                        }
+                        StateHasChanged();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogWarning(ex, "Failed to restore reservation draft state.");
+            }
+        }
+    }
+
+    private async Task LoadDayReservationsSafeAsync()
+    {
+        if (!previewDate.HasValue) return;
+        try
+        {
+            var existing = await BookingService.GetReservationsAsync();
+            dayReservations = existing.Where(r => r.Date.Date == previewDate.Value.Date)
+                                      .OrderBy(r => r.StartTime)
+                                      .ToList();
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Failed to load day reservations for preview.");
+            dayReservations = new List<ReservationModel>();
+        }
     }
 
     private void OnStartTimeChanged(DateTime? newTime)
@@ -131,12 +277,34 @@
     }
 
     public void Dispose() => _timer?.Dispose();
+
+    private async Task GoToSchedule()
+    {
+        var state = new ReservationState
+        {
+            Name = reserveName,
+            Room = selectedRoom,
+            Type = reserveType,
+            Purpose = reservePurpose,
+            Date = reserveDate,
+            Start = startTime,
+            End = endTime,
+            Repeat = repeatType,
+            RepeatUntil = repeatUntil,
+            Participants = allUsers.Where(u => u.IsSelected).Select(u => u.Id).ToList()
+        };
+        var json = System.Text.Json.JsonSerializer.Serialize(state);
+        await JSRuntime.InvokeVoidAsync("sessionStorage.setItem", "draftReservation", json);
+        Navigation.NavigateTo("/schedule");
+    }
+
     private async Task OnSubmit()
     {
         errorMessage = "";
         if (string.IsNullOrEmpty(reserveName) || reserveDate == null || startTime == null || endTime == null)
         {
-            errorMessage = "必須項目を入力してください"; return;
+            errorMessage = "必須項目を入力してください";
+            return;
         }
 
         DateTime baseStart = reserveDate.Value.Date + startTime.Value.TimeOfDay;
@@ -202,12 +370,13 @@
                 catch (Exception ex)
                 {
                     Logger.LogError(ex, "API Error: Failed to save reservation for {Date}", date);
-                    failCount++; 
+                    failCount++;
                 }
             }
 
             if (successCount > 0)
             {
+                await JSRuntime.InvokeVoidAsync("sessionStorage.removeItem", "draftReservation");
                 string msg = $"{successCount}件の予約を完了しました！";
                 if (failCount > 0) msg += $"\n（※重複のため{failCount}件スキップされました）";
 

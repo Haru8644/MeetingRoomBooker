@@ -7,6 +7,20 @@
 @using Microsoft.Extensions.Logging
 @inject ILogger<Schedule> Logger
 
+<style>
+    @@media (min-width: 769px) {
+        .body-content {
+            overflow: hidden !important;
+            padding-bottom: 0 !important;
+        }
+
+        .content-wrapper {
+            padding-bottom: 0 !important;
+            height: 100%;
+        }
+    }
+</style>
+
 <div class="schedule-container">
     <div class="sidebar-panel">
         <h3 class="gradient-text title-text">CALENDAR</h3>
@@ -31,9 +45,9 @@
                     var hasMyBooking = allReservations.Any(r => r.Date.Date == day.Date && IsMyBooking(r));
 
                     <div class="calendar-cell
-                                        @(isSelected ? "selected" : "")
-                                        @(isOtherMonth ? "other-month" : "")
-                                        @(hasMyBooking ? "has-my-booking" : "")"
+                                            @(isSelected ? "selected" : "")
+                                            @(isOtherMonth ? "other-month" : "")
+                                            @(hasMyBooking ? "has-my-booking" : "")"
                          @onclick="() => SelectDate(day)">
 
                         <span class="day-number">@day.Day</span>
@@ -54,6 +68,10 @@
                 <div class="legend-item"><span class="legend-icon today-dot-legend"></span>今日</div>
             </div>
         </div>
+
+        <button class="cyber-button-primary pulse-hover" style="width: 100%; margin-top: 20px;" @onclick="GoToReservation">
+            <span class="oi oi-pencil"></span> 予約フォームに戻る
+        </button>
     </div>
 
     <div class="main-list-area">
@@ -67,6 +85,7 @@
                 @foreach (var date in GetDisplayDates())
                 {
                     if (!HasAnyBooking(date)) continue;
+
                     <div class="date-group">
                         <div class="sticky-date-header">
                             <div class="date-label-area"><span class="date-year">@date.Year.</span><span class="date-big">@date.ToString("MM/dd")</span><span class="date-week">(@date.ToString("ddd"))</span></div>
@@ -348,12 +367,17 @@
     private void NextMonth() { displayMonth = displayMonth.AddMonths(1); GenerateCalendar(); }
     private void SelectDate(DateTime date) { selectedDateValue = date; }
 
+    private void GoToReservation()
+    {
+        Navigation.NavigateTo("/reservation");
+    }
+
     private async Task LoadData()
     {
         isLoading = true;
         allReservations = await BookingService.GetReservationsAsync();
         currentUser = BookingService.GetCurrentUser();
-        try { allUsers = await BookingService.GetAllUsersAsync(); } 
+        try { allUsers = await BookingService.GetAllUsersAsync(); }
         catch (Exception ex)
         {
             Logger.LogWarning(ex, "Failed to load users in Schedule page. currentUserId={UserId}", currentUser?.Id);
@@ -399,6 +423,7 @@
 
     private void ShowDetail(ReservationModel b) { selectedBooking = b; isEditing = false; }
     private void CloseDetail() { selectedBooking = null; isEditing = false; }
+
     private void StartEdit()
     {
         if (selectedBooking == null) return;
@@ -449,7 +474,6 @@
     private async Task DeleteBooking()
     {
         if (selectedBooking == null) return;
-
         if (selectedBooking.RepeatType != "しない" && !string.IsNullOrEmpty(selectedBooking.RepeatType))
         {
             bool deleteAll = await JSRuntime.InvokeAsync<bool>("confirm",
@@ -504,17 +528,17 @@
     private void OpenTimelineModal(DateTime date) { timelineDate = date; }
     private void CloseTimelineModal() { timelineDate = null; }
 
-    private class RenderItem 
-    { 
-        public ReservationModel? Booking { get; set; } 
-        public string Style { get; set; } = ""; 
-        public bool HasConflict { get; set; } 
+    private class RenderItem
+    {
+        public ReservationModel? Booking { get; set; }
+        public string Style { get; set; } = "";
+        public bool HasConflict { get; set; }
     }
 
-    private class RoomTimelineData 
-    {   
-        public List<RenderItem> Items { get; set; } = new(); 
-        public double RowHeight { get; set; } 
+    private class RoomTimelineData
+    {
+        public List<RenderItem> Items { get; set; } = new();
+        public double RowHeight { get; set; }
     }
 
     private List<dynamic> GetTimeTicks()
