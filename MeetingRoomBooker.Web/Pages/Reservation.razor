@@ -55,7 +55,7 @@
 
                 <div class="fade-in-stagger" style="--i:5"><label>利用目的</label><FluentTextField @bind-Value="reservePurpose" Style="width: 100%;" /></div>
 
-                <FluentGrid Spacing="2" Class="fade-in-stagger" Style="--i:6">
+                <FluentGrid Spacing="2" Class="fade-in-stagger" Style="--i:6; position: relative; z-index: 10;">
                     <FluentGridItem xs="12" sm="6"><label>利用日</label><FluentDatePicker @bind-Value="reserveDate" Style="width: 100%;" /></FluentGridItem>
                     <FluentGridItem xs="12" sm="3">
                         <label>繰り返し</label>
@@ -69,7 +69,7 @@
                     <FluentGridItem xs="12" sm="3"><label>終了日</label><FluentDatePicker @bind-Value="repeatUntil" Style="width: 100%;" Disabled="@(repeatType == "しない")" /></FluentGridItem>
                 </FluentGrid>
 
-                <FluentGrid Spacing="2" Class="fade-in-stagger" Style="--i:7">
+                <FluentGrid Spacing="2" Class="fade-in-stagger" Style="--i:7; position: relative; z-index: 9;">
                     <FluentGridItem xs="6">
                         <label>開始</label>
                         <FluentTimePicker Value="startTime" ValueChanged="OnStartTimeChanged" Style="width: 100%;" />
@@ -131,11 +131,13 @@
     }
 
     public void Dispose() => _timer?.Dispose();
-
     private async Task OnSubmit()
     {
         errorMessage = "";
-        if (string.IsNullOrEmpty(reserveName) || reserveDate == null || startTime == null || endTime == null) { errorMessage = "必須項目を入力してください"; return; }
+        if (string.IsNullOrEmpty(reserveName) || reserveDate == null || startTime == null || endTime == null)
+        {
+            errorMessage = "必須項目を入力してください"; return;
+        }
 
         DateTime baseStart = reserveDate.Value.Date + startTime.Value.TimeOfDay;
         DateTime baseEnd = reserveDate.Value.Date + endTime.Value.TimeOfDay;
@@ -170,7 +172,6 @@
 
                 var conflict = existing.Any(r => r.Room == selectedRoom && r.Date.Date == date.Date &&
                     ((currentStart >= r.StartTime && currentStart < r.EndTime) || (currentEnd > r.StartTime && currentEnd <= r.EndTime) || (currentStart <= r.StartTime && currentEnd >= r.EndTime)));
-
                 if (conflict)
                 {
                     failCount++;
@@ -181,18 +182,19 @@
                 {
                     Name = reserveName,
                     Room = selectedRoom,
-                    NumberOfPeople = 1, 
+
+                    NumberOfPeople = 1,
                     Date = date,
                     StartTime = currentStart,
                     EndTime = currentEnd,
                     Type = reserveType,
+
                     Purpose = reservePurpose,
                     UserId = currentUser?.Id ?? 0,
                     ParticipantIds = allUsers.Where(u => u.IsSelected).Select(u => u.Id).ToList(),
                     RepeatType = "しない",
                     RepeatUntil = null
                 };
-
                 await BookingService.AddReservationAsync(model);
                 successCount++;
             }
