@@ -81,6 +81,13 @@
     margin: 0;
 }
 
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
 .clear-btn {
     background: rgba(88, 166, 255, 0.1);
     border: 1px solid #58a6ff;
@@ -94,11 +101,23 @@
     letter-spacing: 1px;
 }
 
-.clear-btn:hover {
-    background: #58a6ff;
-    color: white;
-    box-shadow: 0 0 15px rgba(88, 166, 255, 0.5);
+    .clear-btn:hover {
+        background: #58a6ff;
+        color: white;
+        box-shadow: 0 0 15px rgba(88, 166, 255, 0.5);
+    }
+
+.delete-all-btn {
+    background: rgba(218, 54, 51, 0.12);
+    border-color: #f85149;
+    color: #f85149;
 }
+
+    .delete-all-btn:hover {
+        background: #da3633;
+        color: white;
+        box-shadow: 0 0 15px rgba(218, 54, 51, 0.5);
+    }
 
 .notification-list {
     display: flex;
@@ -120,22 +139,22 @@
     position: relative;
 }
 
-.notif-item:hover {
-    transform: translateX(5px);
-    background: #1f242c;
-    border-color: #58a6ff;
-    box-shadow: 0 0 20px rgba(0, 88, 255, 0.1);
-}
+    .notif-item:hover {
+        transform: translateX(5px);
+        background: #1f242c;
+        border-color: #58a6ff;
+        box-shadow: 0 0 20px rgba(0, 88, 255, 0.1);
+    }
 
-.notif-item.unread {
-    border-left-color: #58a6ff;
-    background: linear-gradient(90deg, rgba(88, 166, 255, 0.1), transparent);
-}
+    .notif-item.unread {
+        border-left-color: #58a6ff;
+        background: linear-gradient(90deg, rgba(88, 166, 255, 0.1), transparent);
+    }
 
-.notif-item.warning-item {
-    border-left-color: #ff4444;
-    background: linear-gradient(90deg, rgba(255, 68, 68, 0.1), transparent);
-}
+    .notif-item.warning-item {
+        border-left-color: #ff4444;
+        background: linear-gradient(90deg, rgba(255, 68, 68, 0.1), transparent);
+    }
 
 .icon-area {
     font-size: 1.4rem;
@@ -211,10 +230,10 @@
     justify-content: center;
 }
 
-.delete-btn:hover {
-    transform: scale(1.05);
-    background: #b62324;
-}
+    .delete-btn:hover {
+        transform: scale(1.05);
+        background: #b62324;
+    }
 
 .empty-state {
     text-align: center;
@@ -272,10 +291,21 @@
     box-shadow: 0 4px 10px rgba(213, 51, 105, 0.2) !important;
 }
 
-[data-theme="light"] .clear-btn:hover {
-    background: #d53369 !important;
-    color: white !important;
+    [data-theme="light"] .clear-btn:hover {
+        background: #d53369 !important;
+        color: white !important;
+    }
+
+[data-theme="light"] .delete-all-btn {
+    color: #ff4757 !important;
+    border-color: #ff4757 !important;
+    box-shadow: 0 4px 10px rgba(255, 71, 87, 0.2) !important;
 }
+
+    [data-theme="light"] .delete-all-btn:hover {
+        background: #ff4757 !important;
+        color: white !important;
+    }
 
 [data-theme="light"] .notif-item {
     background: white !important;
@@ -286,21 +316,21 @@
     color: #333 !important;
 }
 
-[data-theme="light"] .notif-item:hover {
-    transform: translateY(-3px) !important;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
-    background: #fafafa !important;
-}
+    [data-theme="light"] .notif-item:hover {
+        transform: translateY(-3px) !important;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+        background: #fafafa !important;
+    }
 
-[data-theme="light"] .notif-item.unread {
-    border-left-color: #0072ff !important;
-    background: linear-gradient(90deg, rgba(0, 114, 255, 0.05), white) !important;
-}
+    [data-theme="light"] .notif-item.unread {
+        border-left-color: #0072ff !important;
+        background: linear-gradient(90deg, rgba(0, 114, 255, 0.05), white) !important;
+    }
 
-[data-theme="light"] .notif-item.warning-item {
-    border-left-color: #ff4757 !important;
-    background: linear-gradient(90deg, rgba(255, 71, 87, 0.05), white) !important;
-}
+    [data-theme="light"] .notif-item.warning-item {
+        border-left-color: #ff4757 !important;
+        background: linear-gradient(90deg, rgba(255, 71, 87, 0.05), white) !important;
+    }
 
 [data-theme="light"] .notif-message {
     color: #333 !important;
@@ -323,13 +353,12 @@
     border: 1px solid #ff6b81 !important;
 }
 
-[data-theme="light"] .delete-btn:hover {
-    background: #e03a49 !important;
-}
+    [data-theme="light"] .delete-btn:hover {
+        background: #e03a49 !important;
+    }
 
 [data-theme="light"] .new-badge {
     background: linear-gradient(135deg, #ff4757, #ff6b81) !important;
     box-shadow: 0 4px 10px rgba(255, 71, 87, 0.3) !important;
     color: white !important;
 }
-

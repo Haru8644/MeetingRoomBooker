@@ -323,6 +323,12 @@ namespace MeetingRoomBooker.Web.Services
             {
                 if (CurrentUser != null && pid == CurrentUser.Id) continue;
 
+                if (IsRecurringReservation(r))
+                {
+                    UpsertRecurringReservationNotification(pid, r);
+                    continue;
+                }
+
                 _notifications.Add(new NotificationModel
                 {
                     Id = _notifId++,
@@ -337,6 +343,66 @@ namespace MeetingRoomBooker.Web.Services
 
             await SaveData();
             NotifyStateChanged();
+        }
+
+        private bool IsRecurringReservation(ReservationModel reservation)
+        {
+            return !string.IsNullOrWhiteSpace(reservation.RepeatType) &&
+                   reservation.RepeatType != "しない" &&
+                   reservation.RepeatUntil.HasValue;
+        }
+
+        private List<ReservationModel> GetRecurringSeriesReservations(ReservationModel reservation)
+        {
+            return _reservations
+                .Where(x =>
+                    x.UserId == reservation.UserId &&
+                    x.Name == reservation.Name &&
+                    x.Room == reservation.Room &&
+                    x.Type == reservation.Type &&
+                    x.Purpose == reservation.Purpose &&
+                    x.RepeatType == reservation.RepeatType &&
+                    x.RepeatUntil?.Date == reservation.RepeatUntil?.Date &&
+                    x.StartTime.TimeOfDay == reservation.StartTime.TimeOfDay &&
+                    x.EndTime.TimeOfDay == reservation.EndTime.TimeOfDay)
+                .OrderBy(x => x.Date)
+                .ThenBy(x => x.Id)
+                .ToList();
+        }
+
+        private void UpsertRecurringReservationNotification(int participantId, ReservationModel reservation)
+        {
+            var seriesReservations = GetRecurringSeriesReservations(reservation);
+            var firstReservation = seriesReservations.FirstOrDefault();
+
+            if (firstReservation is null) return;
+
+            var count = seriesReservations.Count;
+            var existing = _notifications.FirstOrDefault(n =>
+                n.UserId == participantId &&
+                n.Type == "Info" &&
+                n.TargetReservationId == firstReservation.Id);
+
+            var message = $"{reservation.Name}さんが繰り返し予約「{reservation.Purpose}」を追加しました。({count}件)";
+
+            if (existing is null)
+            {
+                _notifications.Add(new NotificationModel
+                {
+                    Id = _notifId++,
+                    UserId = participantId,
+                    Type = "Info",
+                    Message = message,
+                    TargetDate = firstReservation.Date,
+                    TargetReservationId = firstReservation.Id,
+                    IsRead = false
+                });
+
+                return;
+            }
+
+            existing.Message = message;
+            existing.IsRead = false;
         }
 
         public async Task RemoveReservationAsync(ReservationModel r)

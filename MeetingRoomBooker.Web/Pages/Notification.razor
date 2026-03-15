@@ -9,9 +9,14 @@
     <div class="notification-container">
         <div class="header-area">
             <h3 class="gradient-text-enhanced title-glow">NOTIFICATION CENTER</h3>
-            <button class="clear-btn" @onclick="MarkAllRead">
-                <span class="oi oi-check"></span> MARK ALL READ
-            </button>
+            <div class="header-actions">
+                <button class="clear-btn" @onclick="MarkAllRead">
+                    <span class="oi oi-check"></span> MARK ALL READ
+                </button>
+                <button class="clear-btn delete-all-btn" @onclick="DeleteAllNotifs">
+                    <span class="oi oi-trash"></span> DELETE ALL
+                </button>
+            </div>
         </div>
 
         <div class="notification-list">
@@ -104,6 +109,15 @@
     private async Task DeleteNotif(int id)
     {
         await BookingService.DeleteNotificationAsync(id);
+        await LoadNotifications();
+    }
+
+    private async Task DeleteAllNotifs()
+    {
+        foreach (var id in notifications.Select(x => x.Id).ToList())
+        {
+            await BookingService.DeleteNotificationAsync(id);
+        }
         await LoadNotifications();
     }
 
