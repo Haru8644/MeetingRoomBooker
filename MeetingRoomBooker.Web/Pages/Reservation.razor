@@ -3,6 +3,7 @@
 @using System.Globalization
 @inject IBookingService BookingService
 @inject IJSRuntime JSRuntime
+@inject IJSRuntime JS
 @inject NavigationManager Navigation
 @using Microsoft.Extensions.Logging
 @inject ILogger<Reservation> Logger
@@ -340,10 +341,16 @@
 
                 var conflict = existing.Any(r => r.Room == selectedRoom && r.Date.Date == date.Date &&
                     ((currentStart >= r.StartTime && currentStart < r.EndTime) || (currentEnd > r.StartTime && currentEnd <= r.EndTime) || (currentStart <= r.StartTime && currentEnd >= r.EndTime)));
+
                 if (conflict)
                 {
-                    failCount++;
-                    continue;
+                    bool isOk = await JS.InvokeAsync<bool>("confirm", $"【警告】{date.ToString("MM/dd")} の {selectedRoom} で予約が重複しています。本当に予約しますか？");
+
+                    if (!isOk)
+                    {
+                        failCount++;
+                        continue;
+                    }
                 }
 
                 var model = new ReservationModel

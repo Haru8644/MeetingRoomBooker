@@ -401,3 +401,39 @@
         display: none;
     }
 }
+
+.cyber-side-decoration {
+    overflow: hidden; 
+}
+
+.cyber-side-decoration::after {
+    content: '';
+    position: absolute;
+    top: -150px;
+    left: 0;
+    width: 100%;
+    height: 150px;
+    background: linear-gradient(to bottom, transparent, #fff, transparent);
+    box-shadow: 0 0 10px #fff;
+    animation: light-stream 3s linear infinite;
+}
+
+.cyber-side-decoration.right::after {
+    animation-delay: 1.5s;
+}
+
+@keyframes light-stream {
+    0% {
+        top: -150px;
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 1;
+    }
+
+    100% {
+        top: 100vh;
+        opacity: 0;
+    }
+}
