@@ -252,12 +252,12 @@
     }
 }
 
-.booking-card[data-type="ŽÐ“à"] {
+.booking-card.booking-type-internal {
     background: rgba(157, 0, 255, 0.2) !important;
     border-color: #d500f9 !important;
 }
 
-.booking-card[data-type="—ˆ‹q"] {
+.booking-card.booking-type-visitor {
     background: rgba(0, 200, 83, 0.2) !important;
     border-color: #00e676 !important;
 }
@@ -633,12 +633,12 @@
     }
 }
 
-.booking-block[data-type="ŽÐ“à"] {
+.booking-block.booking-type-internal {
     background: rgba(157, 0, 255, 0.5) !important;
     border: 1px solid #d500f9 !important;
 }
 
-.booking-block[data-type="—ˆ‹q"] {
+.booking-block.booking-type-visitor {
     background: rgba(0, 200, 83, 0.5) !important;
     border: 1px solid #00e676 !important;
 }
@@ -949,11 +949,11 @@ label {
     box-shadow: 0 4px 10px rgba(0,0,0,0.05) !important;
 }
 
-[data-theme="light"] .booking-card[data-type="ŽÐ“à"] {
+[data-theme="light"] .booking-card.booking-type-internal {
     border: 2px solid #d500f9 !important;
 }
 
-[data-theme="light"] .booking-card[data-type="—ˆ‹q"] {
+[data-theme="light"] .booking-card.booking-type-visitor {
     border: 2px solid #00e676 !important;
 }
 
@@ -1052,12 +1052,12 @@ label {
     border: 1px solid rgba(0,0,0,0.1) !important;
 }
 
-[data-theme="light"] .booking-block[data-type="ŽÐ“à"] {
+[data-theme="light"] .booking-block.booking-type-internal {
     background: rgba(157, 0, 255, 0.2) !important;
     border: 2px solid #d500f9 !important;
 }
 
-[data-theme="light"] .booking-block[data-type="—ˆ‹q"] {
+[data-theme="light"] .booking-block.booking-type-visitor {
     background: rgba(0, 200, 83, 0.2) !important;
     border: 2px solid #00e676 !important;
 }

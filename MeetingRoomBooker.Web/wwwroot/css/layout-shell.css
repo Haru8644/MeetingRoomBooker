@@ -403,28 +403,45 @@
 }
 
 .cyber-side-decoration {
-    overflow: hidden; 
+    position: fixed;
+    top: 60px;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 5;
 }
 
-.cyber-side-decoration::after {
+.outer {
+    width: 1px;
+    background: rgba(88, 166, 255, 0.1);
+}
+
+.cyber-side-decoration.left.outer {
+    left: 15px;
+}
+
+.cyber-side-decoration.right.outer {
+    right: 15px;
+}
+
+.outer::after {
     content: '';
     position: absolute;
-    top: -150px;
+    top: -100px;
     left: 0;
-    width: 100%;
+    width: 2px;
     height: 150px;
-    background: linear-gradient(to bottom, transparent, #fff, transparent);
-    box-shadow: 0 0 10px #fff;
-    animation: light-stream 3s linear infinite;
+    background: linear-gradient(to bottom, transparent, #00d2ff, transparent);
+    box-shadow: 0 0 20px #00d2ff;
+    animation: data-stream 3s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
-.cyber-side-decoration.right::after {
+.cyber-side-decoration.right.outer::after {
     animation-delay: 1.5s;
 }
 
-@keyframes light-stream {
+@keyframes data-stream {
     0% {
-        top: -150px;
+        top: -20%;
         opacity: 0;
     }
 
@@ -433,7 +450,37 @@
     }
 
     100% {
-        top: 100vh;
+        top: 120%;
         opacity: 0;
+    }
+}
+
+.inner {
+    width: 40px;
+    background: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 0V40 M0 20H40' stroke='rgba(88, 166, 255, 0.1)' stroke-width='1'/%3E%3C/svg%3E");
+    opacity: 0.3;
+    mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
+}
+
+.cyber-side-decoration.left.inner {
+    left: 30px;
+    border-right: 1px solid rgba(0, 210, 255, 0.2);
+    animation: circuit-flash 2s infinite alternate;
+}
+
+.cyber-side-decoration.right.inner {
+    right: 30px;
+    border-left: 1px solid rgba(0, 210, 255, 0.2);
+    animation: circuit-flash 2s infinite alternate-reverse;
+}
+
+@keyframes circuit-flash {
+    0% {
+        opacity: 0.1;
+    }
+
+    100% {
+        opacity: 0.4;
+        text-shadow: 0 0 10px #00d2ff;
     }
 }

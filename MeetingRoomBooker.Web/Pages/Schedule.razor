@@ -45,9 +45,9 @@
                     var hasMyBooking = allReservations.Any(r => r.Date.Date == day.Date && IsMyBooking(r));
 
                     <div class="calendar-cell
-                                            @(isSelected ? "selected" : "")
-                                            @(isOtherMonth ? "other-month" : "")
-                                            @(hasMyBooking ? "has-my-booking" : "")"
+                                                @(isSelected ? "selected" : "")
+                                                @(isOtherMonth ? "other-month" : "")
+                                                @(hasMyBooking ? "has-my-booking" : "")"
                          @onclick="() => SelectDate(day)">
 
                         <span class="day-number">@day.Day</span>
@@ -102,9 +102,8 @@
                                     <div class="booking-cards">
                                         @foreach (var b in bookings)
                                         {
-                                            <div class="booking-card @(IsMyBooking(b) ? "my-booking" : "")"
+                                            <div class="booking-card @GetBookingTypeClass(b.Type) @(IsMyBooking(b) ? "my-booking" : "")"
                                                  data-type="@b.Type"
-                                                 style="background: @GetTypeColor(b.Type, true);"
                                                  @onclick="() => ShowDetail(b)">
 
                                                 <div class="type-icon-bg">
@@ -277,9 +276,9 @@
                                 }
                                 @foreach (var item in roomData.Items)
                                 {
-                                    <div class="booking-block @(IsMyBooking(item.Booking!) ? "my-booking" : "")"
+                                    <div class="booking-block @GetBookingTypeClass(item.Booking!.Type) @(IsMyBooking(item.Booking!) ? "my-booking" : "")"
                                          data-type="@item.Booking!.Type"
-                                         style="@item.Style; background: @GetTypeColor(item.Booking!.Type);"
+                                         style="@item.Style"
                                          @onclick="() => ShowDetail(item.Booking!)">
                                         @if (item.HasConflict)
                                         {
@@ -401,6 +400,7 @@
     private bool HasAnyBooking(DateTime date) => roomList.Any(r => GetBookings(date, r).Any());
     private string GetRoomColor(string r) => r == "大会議室" ? "#58a6ff" : "#3fb950";
     private string GetTypeColor(string type, bool isCard = false) { if (type == "来客") return isCard ? "#00c853" : "#00e676"; return isCard ? "#7b1fa2" : "#d500f9"; }
+    private string GetBookingTypeClass(string type) => type == "来客" ? "booking-type-visitor" : "booking-type-internal";
     private bool IsOwner(ReservationModel b) => currentUser != null && b.UserId == currentUser.Id;
 
     private bool IsMyBooking(ReservationModel b)
