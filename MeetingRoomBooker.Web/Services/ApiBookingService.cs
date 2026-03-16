@@ -63,7 +63,14 @@ namespace MeetingRoomBooker.Web.Services
 
         public async Task DeleteUserAsync(int userId)
         {
-            await _httpClient.DeleteAsync($"api/Users/{userId}");
+            var response = await _httpClient.DeleteAsync($"api/Users/{userId}");
+            if (!response.IsSuccessStatusCode)
+            {
+                var details = await response.Content.ReadAsStringAsync();
+                throw new InvalidOperationException(string.IsNullOrWhiteSpace(details)
+                    ? $"User deletion failed: {response.StatusCode}"
+                    : details);
+            }
 
             if (_currentUser?.Id == userId)
             {
@@ -100,14 +107,14 @@ namespace MeetingRoomBooker.Web.Services
             }
 
             var response = await _httpClient.PostAsJsonAsync("api/Reservations", reservation);
-            response.EnsureSuccessStatusCode(); 
+            response.EnsureSuccessStatusCode();
             NotifyStateChanged();
         }
 
         public async Task RemoveReservationAsync(ReservationModel reservation)
         {
             var response = await _httpClient.DeleteAsync($"api/Reservations/{reservation.Id}");
-            response.EnsureSuccessStatusCode(); 
+            response.EnsureSuccessStatusCode();
             NotifyStateChanged();
         }
 

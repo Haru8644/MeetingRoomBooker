@@ -113,13 +113,19 @@
             return;
         }
 
-        await BookingService.RegisterUserAsync(new UserModel
+        var registered = await BookingService.RegisterUserAsync(new UserModel
         {
             Name = newName,
             Email = newEmail,
             Password = newPassword,
             AvatarColor = "#a371f7"
         });
+
+        if (!registered)
+        {
+            msg = "ERROR: REGISTRATION FAILED";
+            return;
+        }
 
         users = await BookingService.GetAllUsersAsync();
 
@@ -132,7 +138,15 @@
 
     private async Task DeleteUser(int id)
     {
-        await BookingService.DeleteUserAsync(id);
-        users = await BookingService.GetAllUsersAsync();
+        try
+        {
+            await BookingService.DeleteUserAsync(id);
+            users = await BookingService.GetAllUsersAsync();
+            msg = "USER REMOVED";
+        }
+        catch (Exception ex)
+        {
+            msg = $"ERROR: {ex.Message}";
+        }
     }
 }
