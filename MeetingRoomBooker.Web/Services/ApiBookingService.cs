@@ -56,7 +56,6 @@ namespace MeetingRoomBooker.Web.Services
                 return false;
             }
 
-            _currentUser = await response.Content.ReadFromJsonAsync<UserModel>(JsonOptions);
             NotifyStateChanged();
             return true;
         }
