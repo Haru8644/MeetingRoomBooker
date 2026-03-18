@@ -46,14 +46,11 @@ namespace MeetingRoomBooker.Shared.Models
         }
 
         public string Purpose { get; set; } = string.Empty;
-
         public DateTime Date { get; set; } = DateTime.Today;
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
-
         public List<int> ParticipantIds { get; set; } = new();
         public string Participants { get; set; } = string.Empty;
-
         public string RepeatType { get; set; } = "しない";
         public DateTime? RepeatUntil { get; set; }
     }
