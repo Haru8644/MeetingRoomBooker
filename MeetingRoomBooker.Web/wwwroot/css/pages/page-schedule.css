@@ -48,6 +48,16 @@
     color: #58a6ff;
 }
 
+.calendar-quick-actions {
+    margin-top: 14px;
+    display: flex;
+    justify-content: center;
+}
+
+.today-return-btn {
+    min-width: 128px;
+}
+
 .legend-box {
     margin-top: 20px;
     border-top: 1px solid #30363d;
@@ -188,9 +198,9 @@
     font-weight: bold;
 }
 
-    .timeline-btn:active {
-        transform: scale(0.95);
-    }
+.timeline-btn:active {
+    transform: scale(0.95);
+}
 
 @media (hover: hover) {
     .timeline-btn:hover {

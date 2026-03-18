@@ -18,6 +18,7 @@ builder.Services.AddScoped(_ => new HttpClient
 
 builder.Services.AddFluentUIComponents();
 builder.Services.AddScoped<ThemeService>();
+builder.Services.AddScoped<ReservationDraftStore>();
 
 builder.Services.AddScoped<
     MeetingRoomBooker.Shared.Services.IBookingService,

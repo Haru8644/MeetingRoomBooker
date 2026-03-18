@@ -46,9 +46,9 @@
                     var hasMyBooking = allReservations.Any(r => r.Date.Date == day.Date && IsMyBooking(r));
 
                     <div class="calendar-cell
-                         @(isSelected ? "selected" : "")
-                         @(isOtherMonth ? "other-month" : "")
-                         @(hasMyBooking ? "has-my-booking" : "")"
+                             @(isSelected ? "selected" : "")
+                             @(isOtherMonth ? "other-month" : "")
+                             @(hasMyBooking ? "has-my-booking" : "")"
                          @onclick="() => SelectDate(day)">
                         <span class="day-number">@day.Day</span>
                         @if (isToday)
@@ -60,6 +60,12 @@
             </div>
 
             <div class="current-range-text">Selected: <span class="selected-date-highlight">@selectedDateValue.ToString("yyyy/MM/dd")</span></div>
+
+            <div class="calendar-quick-actions">
+                <button class="timeline-btn today-return-btn" @onclick="ReturnToToday">
+                    <span class="oi oi-reload"></span> 今日に戻る
+                </button>
+            </div>
 
             <div class="legend-box">
                 <div class="legend-item"><span class="legend-color internal"></span>社内</div>
@@ -368,7 +374,14 @@
 
     private void GoToReservation()
     {
-        Navigation.NavigateTo("/reservation");
+        Navigation.NavigateTo("/reservation?restoreDraft=1");
+    }
+
+    private void ReturnToToday()
+    {
+        selectedDateValue = DateTime.Today;
+        displayMonth = DateTime.Today;
+        GenerateCalendar();
     }
 
     private async Task LoadData()

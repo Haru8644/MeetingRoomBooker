@@ -1,12 +1,11 @@
 ﻿@page "/reservation"
-@using MeetingRoomBooker.Shared.Models
 @using System.Globalization
 @inject IBookingService BookingService
 @inject IJSRuntime JSRuntime
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
-@using Microsoft.Extensions.Logging
 @inject ILogger<Reservation> Logger
+@inject ReservationDraftStore DraftStore
 
 <FluentStack Orientation="Orientation.Vertical" VerticalGap="30">
     <div style="width: 100%; display: flex; justify-content: center; position: relative; z-index: 1;">
@@ -26,8 +25,12 @@
                     <div class="participant-selector">
                         @foreach (var user in allUsers)
                         {
-                            if (currentUser != null && user.Id == currentUser.Id) continue;
-                            <div class="participant-item"><FluentCheckbox @bind-Value="user.IsSelected" Label="@user.Name" /></div>
+                            if (currentUser != null && user.Id == currentUser.Id)
+                            {
+                                continue;
+                            }
+
+                            <div class="participant-item" @key="user.Id"><FluentCheckbox @bind-Value="user.IsSelected" Label="@user.Name" /></div>
                         }
                     </div>
                 </div>
@@ -124,23 +127,24 @@
 </FluentStack>
 
 @code {
-    public class UserViewModel : UserModel { public bool IsSelected { get; set; } }
-
-    public class ReservationState
+    public sealed class UserViewModel : UserModel
     {
-        public string? Name { get; set; }
-        public string? Room { get; set; }
-        public string? Type { get; set; }
-        public string? Purpose { get; set; }
-        public DateTime? Date { get; set; }
-        public DateTime? Start { get; set; }
-        public DateTime? End { get; set; }
-        public string? Repeat { get; set; }
-        public DateTime? RepeatUntil { get; set; }
-        public List<int>? Participants { get; set; }
+        public bool IsSelected { get; set; }
     }
 
-    private string currentTime = "", currentDate = "", reserveName = "", selectedRoom = "大会議室", reserveType = "社内", reservePurpose = "", errorMessage = "", repeatType = "しない";
+    [SupplyParameterFromQuery]
+    public int? RestoreDraft { get; set; }
+
+    private const string DraftStorageKey = "draftReservation";
+
+    private string currentTime = string.Empty;
+    private string currentDate = string.Empty;
+    private string reserveName = string.Empty;
+    private string selectedRoom = "大会議室";
+    private string reserveType = "社内";
+    private string reservePurpose = string.Empty;
+    private string errorMessage = string.Empty;
+    private string repeatType = "しない";
 
     private DateTime? _reserveDate = DateTime.Today;
     private DateTime? reserveDate
@@ -170,8 +174,12 @@
         }
     }
 
-    private DateTime? startTime = DateTime.Today.AddHours(9), endTime = DateTime.Today.AddHours(10), repeatUntil = DateTime.Today.AddMonths(1);
-    private List<string> roomOptions = new() { "大会議室", "小会議室" }, typeOptions = new() { "社内", "来客" }, repeatOptions = new() { "しない", "毎日", "毎週" };
+    private DateTime? startTime = DateTime.Today.AddHours(9);
+    private DateTime? endTime = DateTime.Today.AddHours(10);
+    private DateTime? repeatUntil = DateTime.Today.AddMonths(1);
+    private readonly List<string> roomOptions = new() { "大会議室", "小会議室" };
+    private readonly List<string> typeOptions = new() { "社内", "来客" };
+    private readonly List<string> repeatOptions = new() { "しない", "毎日", "毎週" };
     private UserModel? currentUser;
     private List<UserViewModel> allUsers = new();
     private List<ReservationModel> dayReservations = new();
@@ -185,12 +193,25 @@
         CultureInfo.DefaultThreadCurrentUICulture = culture;
 
         currentUser = BookingService.GetCurrentUser();
-        if (currentUser != null) reserveName = currentUser.Name;
+        if (currentUser != null)
+        {
+            reserveName = currentUser.Name;
+        }
 
         try
         {
             var users = await BookingService.GetAllUsersAsync();
-            allUsers = users.Select(u => new UserViewModel { Id = u.Id, Name = u.Name, Email = u.Email, IsSelected = false }).ToList();
+            allUsers = users
+                .Select(u => new UserViewModel
+                {
+                    Id = u.Id,
+                    Name = u.Name,
+                    Email = u.Email,
+                    Password = u.Password,
+                    AvatarColor = u.AvatarColor,
+                    IsAdmin = u.IsAdmin
+                })
+                .ToList();
         }
         catch (Exception ex)
         {
@@ -206,51 +227,125 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
+        if (!firstRender || RestoreDraft != 1)
         {
-            try
-            {
-                var json = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", "draftReservation");
-                if (!string.IsNullOrEmpty(json))
-                {
-                    var state = System.Text.Json.JsonSerializer.Deserialize<ReservationState>(json);
-                    if (state != null)
-                    {
-                        reserveName = state.Name ?? reserveName;
-                        selectedRoom = state.Room ?? selectedRoom;
-                        reserveType = state.Type ?? reserveType;
-                        reservePurpose = state.Purpose ?? reservePurpose;
-                        reserveDate = state.Date ?? reserveDate;
-                        previewDate = state.Date ?? previewDate;
-                        startTime = state.Start ?? startTime;
-                        endTime = state.End ?? endTime;
-                        repeatType = state.Repeat ?? repeatType;
-                        repeatUntil = state.RepeatUntil ?? repeatUntil;
-
-                        if (state.Participants != null)
-                        {
-                            foreach (var u in allUsers) u.IsSelected = state.Participants.Contains(u.Id);
-                        }
-                        StateHasChanged();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.LogWarning(ex, "Failed to restore reservation draft state.");
-            }
+            return;
         }
+
+        await RestoreDraftAsync();
+    }
+
+    private async Task RestoreDraftAsync()
+    {
+        try
+        {
+            var draft = DraftStore.Get() ?? await ReadDraftFromSessionStorageAsync();
+            if (draft == null)
+            {
+                return;
+            }
+
+            ApplyDraft(draft);
+            await LoadDayReservationsSafeAsync();
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Failed to restore reservation draft state.");
+        }
+    }
+
+    private void ApplyDraft(ReservationDraft draft)
+    {
+        reserveName = string.IsNullOrWhiteSpace(draft.Name)
+            ? currentUser?.Name ?? reserveName
+            : draft.Name;
+
+        selectedRoom = string.IsNullOrWhiteSpace(draft.Room) ? selectedRoom : draft.Room;
+        reserveType = string.IsNullOrWhiteSpace(draft.Type) ? reserveType : draft.Type;
+        reservePurpose = draft.Purpose ?? string.Empty;
+        reserveDate = draft.Date ?? reserveDate;
+        previewDate = draft.Date ?? previewDate;
+        startTime = draft.Start ?? startTime;
+        endTime = draft.End ?? endTime;
+        repeatType = string.IsNullOrWhiteSpace(draft.Repeat) ? repeatType : draft.Repeat;
+        repeatUntil = draft.RepeatUntil ?? repeatUntil;
+
+        ApplyParticipantSelection(draft.Participants);
+    }
+
+    private void ApplyParticipantSelection(IEnumerable<int>? participantIds)
+    {
+        var selectedIds = participantIds?.Distinct().ToHashSet() ?? new HashSet<int>();
+
+        foreach (var user in allUsers)
+        {
+            user.IsSelected = selectedIds.Contains(user.Id);
+        }
+    }
+
+    private async Task<ReservationDraft?> ReadDraftFromSessionStorageAsync()
+    {
+        var json = await JSRuntime.InvokeAsync<string>("sessionStorage.getItem", DraftStorageKey);
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            return null;
+        }
+
+        return System.Text.Json.JsonSerializer.Deserialize<ReservationDraft>(json);
+    }
+
+    private ReservationDraft CreateDraft()
+    {
+        return new ReservationDraft
+        {
+            Name = reserveName,
+            Room = selectedRoom,
+            Type = reserveType,
+            Purpose = reservePurpose,
+            Date = reserveDate,
+            Start = startTime,
+            End = endTime,
+            Repeat = repeatType,
+            RepeatUntil = repeatUntil,
+            Participants = allUsers
+                .Where(user => user.IsSelected)
+                .Select(user => user.Id)
+                .Distinct()
+                .ToList()
+        };
+    }
+
+    private async Task PersistDraftAsync()
+    {
+        var draft = CreateDraft();
+        DraftStore.Save(draft);
+
+        var json = System.Text.Json.JsonSerializer.Serialize(draft);
+        await JSRuntime.InvokeVoidAsync("sessionStorage.setItem", DraftStorageKey, json);
+    }
+
+    private async Task ClearDraftAsync()
+    {
+        DraftStore.Clear();
+        await JSRuntime.InvokeVoidAsync("sessionStorage.removeItem", DraftStorageKey);
     }
 
     private async Task LoadDayReservationsSafeAsync()
     {
-        if (!previewDate.HasValue) return;
+        if (!previewDate.HasValue)
+        {
+            return;
+        }
+
         try
         {
             var existing = await BookingService.GetReservationsAsync();
-            dayReservations = existing.Where(r => r.Date.Date == previewDate.Value.Date)
-                                      .OrderBy(r => r.StartTime)
-                                      .ToList();
+            dayReservations = existing
+                .Where(r => r.Date.Date == previewDate.Value.Date)
+                .OrderBy(r => r.StartTime)
+                .ToList();
+
             await InvokeAsync(StateHasChanged);
         }
         catch (Exception ex)
@@ -269,7 +364,7 @@
         }
     }
 
-    private void UpdateTime(object? s)
+    private void UpdateTime(object? _)
     {
         var now = DateTime.Now;
         currentTime = now.ToString("HH:mm:ss");
@@ -281,36 +376,28 @@
 
     private async Task GoToSchedule()
     {
-        var state = new ReservationState
-        {
-            Name = reserveName,
-            Room = selectedRoom,
-            Type = reserveType,
-            Purpose = reservePurpose,
-            Date = reserveDate,
-            Start = startTime,
-            End = endTime,
-            Repeat = repeatType,
-            RepeatUntil = repeatUntil,
-            Participants = allUsers.Where(u => u.IsSelected).Select(u => u.Id).ToList()
-        };
-        var json = System.Text.Json.JsonSerializer.Serialize(state);
-        await JSRuntime.InvokeVoidAsync("sessionStorage.setItem", "draftReservation", json);
+        await PersistDraftAsync();
         Navigation.NavigateTo("/schedule");
     }
 
     private async Task OnSubmit()
     {
-        errorMessage = "";
+        errorMessage = string.Empty;
+
         if (string.IsNullOrEmpty(reserveName) || reserveDate == null || startTime == null || endTime == null)
         {
             errorMessage = "必須項目を入力してください";
             return;
         }
 
-        DateTime baseStart = reserveDate.Value.Date + startTime.Value.TimeOfDay;
-        DateTime baseEnd = reserveDate.Value.Date + endTime.Value.TimeOfDay;
-        if (baseEnd <= baseStart) { errorMessage = "時間を正しく設定してください"; return; }
+        var baseStart = reserveDate.Value.Date + startTime.Value.TimeOfDay;
+        var baseEnd = reserveDate.Value.Date + endTime.Value.TimeOfDay;
+
+        if (baseEnd <= baseStart)
+        {
+            errorMessage = "時間を正しく設定してください";
+            return;
+        }
 
         var targetDates = new List<DateTime> { reserveDate.Value.Date };
         if (repeatType != "しない" && repeatUntil.HasValue && repeatUntil.Value.Date > reserveDate.Value.Date)
@@ -319,33 +406,49 @@
             if (repeatType == "毎日")
             {
                 nextDate = nextDate.AddDays(1);
-                while (nextDate.Date <= repeatUntil.Value.Date) { targetDates.Add(nextDate); nextDate = nextDate.AddDays(1); }
+                while (nextDate.Date <= repeatUntil.Value.Date)
+                {
+                    targetDates.Add(nextDate);
+                    nextDate = nextDate.AddDays(1);
+                }
             }
             else if (repeatType == "毎週")
             {
                 nextDate = nextDate.AddDays(7);
-                while (nextDate.Date <= repeatUntil.Value.Date) { targetDates.Add(nextDate); nextDate = nextDate.AddDays(7); }
+                while (nextDate.Date <= repeatUntil.Value.Date)
+                {
+                    targetDates.Add(nextDate);
+                    nextDate = nextDate.AddDays(7);
+                }
             }
         }
 
         try
         {
             var existing = await BookingService.GetReservationsAsync();
-            int successCount = 0;
-            int failCount = 0;
+            var successCount = 0;
+            var failCount = 0;
+            var selectedParticipantIds = allUsers
+                .Where(user => user.IsSelected)
+                .Select(user => user.Id)
+                .Distinct()
+                .ToList();
 
             foreach (var date in targetDates)
             {
-                DateTime currentStart = date.Date + startTime.Value.TimeOfDay;
-                DateTime currentEnd = date.Date + endTime.Value.TimeOfDay;
+                var currentStart = date.Date + startTime.Value.TimeOfDay;
+                var currentEnd = date.Date + endTime.Value.TimeOfDay;
 
-                var conflict = existing.Any(r => r.Room == selectedRoom && r.Date.Date == date.Date &&
-                    ((currentStart >= r.StartTime && currentStart < r.EndTime) || (currentEnd > r.StartTime && currentEnd <= r.EndTime) || (currentStart <= r.StartTime && currentEnd >= r.EndTime)));
+                var conflict = existing.Any(r =>
+                    r.Room == selectedRoom &&
+                    r.Date.Date == date.Date &&
+                    ((currentStart >= r.StartTime && currentStart < r.EndTime) ||
+                     (currentEnd > r.StartTime && currentEnd <= r.EndTime) ||
+                     (currentStart <= r.StartTime && currentEnd >= r.EndTime)));
 
                 if (conflict)
                 {
-                    bool isOk = await JS.InvokeAsync<bool>("confirm", $"【警告】{date.ToString("MM/dd")} の {selectedRoom} で予約が重複しています。本当に予約しますか？");
-
+                    var isOk = await JS.InvokeAsync<bool>("confirm", $"【警告】{date:MM/dd} の {selectedRoom} で予約が重複しています。本当に予約しますか？");
                     if (!isOk)
                     {
                         failCount++;
@@ -364,15 +467,20 @@
                     Type = reserveType,
                     Purpose = reservePurpose,
                     UserId = currentUser?.Id ?? 0,
-                    ParticipantIds = allUsers.Where(u => u.IsSelected).Select(u => u.Id).ToList(),
+                    ParticipantIds = selectedParticipantIds,
                     RepeatType = repeatType,
                     RepeatUntil = repeatType != "しない" ? repeatUntil : null
                 };
+
                 try
                 {
                     await BookingService.AddReservationAsync(model);
                     successCount++;
-                    if (targetDates.Count > 1) await Task.Delay(100);
+
+                    if (targetDates.Count > 1)
+                    {
+                        await Task.Delay(100);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -383,18 +491,20 @@
 
             if (successCount > 0)
             {
-                await JSRuntime.InvokeVoidAsync("sessionStorage.removeItem", "draftReservation");
-                string msg = $"{successCount}件の予約を完了しました！";
-                if (failCount > 0) msg += $"\n（※重複のため{failCount}件スキップされました）";
+                await ClearDraftAsync();
 
-                await JSRuntime.InvokeVoidAsync("alert", msg);
+                var message = $"{successCount}件の予約を完了しました！";
+                if (failCount > 0)
+                {
+                    message += $"\n（※重複のため{failCount}件スキップされました）";
+                }
+
+                await JSRuntime.InvokeVoidAsync("alert", message);
                 Navigation.NavigateTo("/schedule");
-            }
-            else
-            {
-                errorMessage = "すべての予約日が重複しているため登録できませんでした。";
+                return;
             }
 
+            errorMessage = "すべての予約日が重複しているため登録できませんでした。";
         }
         catch (Exception ex)
         {
