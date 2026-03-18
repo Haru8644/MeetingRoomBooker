@@ -12,6 +12,7 @@ namespace MeetingRoomBooker.Web.Services
         private UserModel? _currentUser;
 
         public event Action? OnChange;
+
         private void NotifyStateChanged() => OnChange?.Invoke();
 
         private static readonly JsonSerializerOptions JsonOptions = new()
@@ -63,13 +64,7 @@ namespace MeetingRoomBooker.Web.Services
         public async Task DeleteUserAsync(int userId)
         {
             var response = await _httpClient.DeleteAsync($"api/Users/{userId}");
-            if (!response.IsSuccessStatusCode)
-            {
-                var details = await response.Content.ReadAsStringAsync();
-                throw new InvalidOperationException(string.IsNullOrWhiteSpace(details)
-                    ? $"User deletion failed: {response.StatusCode}"
-                    : details);
-            }
+            await EnsureSuccessAsync(response, $"User deletion failed for id={userId}.");
 
             if (_currentUser?.Id == userId)
             {
@@ -106,20 +101,24 @@ namespace MeetingRoomBooker.Web.Services
             }
 
             var response = await _httpClient.PostAsJsonAsync("api/Reservations", reservation);
-            response.EnsureSuccessStatusCode();
+            await EnsureSuccessAsync(response, "Failed to add reservation.");
             NotifyStateChanged();
         }
 
         public async Task RemoveReservationAsync(ReservationModel reservation)
         {
             var response = await _httpClient.DeleteAsync($"api/Reservations/{reservation.Id}");
-            response.EnsureSuccessStatusCode();
+            await EnsureSuccessAsync(response, $"Failed to remove reservation id={reservation.Id}.");
             NotifyStateChanged();
         }
 
         public async Task UpdateReservationAsync(ReservationModel reservation, bool shouldNotify)
         {
-            await _httpClient.PutAsJsonAsync($"api/Reservations/{reservation.Id}", reservation);
+            var response = await _httpClient.PutAsJsonAsync(
+                $"api/Reservations/{reservation.Id}?notifyParticipants={shouldNotify.ToString().ToLowerInvariant()}",
+                reservation);
+
+            await EnsureSuccessAsync(response, $"Failed to update reservation id={reservation.Id}.");
             NotifyStateChanged();
         }
 
@@ -132,20 +131,36 @@ namespace MeetingRoomBooker.Web.Services
 
         public async Task AddNotificationAsync(NotificationModel notification)
         {
-            await _httpClient.PostAsJsonAsync("api/Notifications", notification);
+            var response = await _httpClient.PostAsJsonAsync("api/Notifications", notification);
+            await EnsureSuccessAsync(response, "Failed to add notification.");
             NotifyStateChanged();
         }
 
         public async Task DeleteNotificationAsync(int notificationId)
         {
-            await _httpClient.DeleteAsync($"api/Notifications/{notificationId}");
+            var response = await _httpClient.DeleteAsync($"api/Notifications/{notificationId}");
+            await EnsureSuccessAsync(response, $"Failed to delete notification id={notificationId}.");
             NotifyStateChanged();
         }
 
         public async Task MarkNotificationAsReadAsync(int notificationId)
         {
-            await _httpClient.PutAsync($"api/Notifications/{notificationId}/read", null);
+            var response = await _httpClient.PutAsync($"api/Notifications/{notificationId}/read", null);
+            await EnsureSuccessAsync(response, $"Failed to mark notification id={notificationId} as read.");
             NotifyStateChanged();
+        }
+
+        private static async Task EnsureSuccessAsync(HttpResponseMessage response, string fallbackMessage)
+        {
+            if (response.IsSuccessStatusCode)
+            {
+                return;
+            }
+
+            var details = await response.Content.ReadAsStringAsync();
+            throw new InvalidOperationException(string.IsNullOrWhiteSpace(details)
+                ? fallbackMessage
+                : details);
         }
     }
 }

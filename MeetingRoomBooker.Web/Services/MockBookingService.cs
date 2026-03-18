@@ -18,10 +18,8 @@ namespace MeetingRoomBooker.Web.Services
         private static int _nextId = 1;
         private static int _notifId = 1;
         private static bool _isLoaded = false;
-
         private readonly IJSRuntime _js;
         private readonly ILogger<MockBookingService> _logger;
-
         public UserModel? CurrentUser { get; private set; }
         public event Action? OnChange;
 
@@ -276,70 +274,11 @@ namespace MeetingRoomBooker.Web.Services
         {
             await EnsureLoaded();
 
-            var r = new ReservationModel
-            {
-                Id = _nextId++,
-                Name = string.IsNullOrEmpty(original.Name) && CurrentUser != null ? CurrentUser.Name : original.Name,
-                Room = original.Room,
-                NumberOfPeople = original.NumberOfPeople,
-                Type = original.Type,
-                Purpose = original.Purpose,
-                UserId = original.UserId == 0 && CurrentUser != null ? CurrentUser.Id : original.UserId,
-                ParticipantIds = original.ParticipantIds != null ? new List<int>(original.ParticipantIds) : new List<int>(),
-                RepeatType = original.RepeatType,
-                RepeatUntil = original.RepeatUntil,
-                Date = original.Date,
-                StartTime = original.Date.Date + original.StartTime.TimeOfDay,
-                EndTime = original.Date.Date + original.EndTime.TimeOfDay
-            };
+            var reservation = CreateReservationSnapshot(original);
+            _reservations.Add(reservation);
 
-            var conflicts = _reservations
-                .Where(x => x.Room == r.Room && x.Date.Date == r.Date.Date && x.Id != r.Id &&
-                            ((r.StartTime >= x.StartTime && r.StartTime < x.EndTime) ||
-                             (r.EndTime > x.StartTime && r.EndTime <= x.EndTime) ||
-                             (r.StartTime <= x.StartTime && r.EndTime >= x.EndTime)))
-                .ToList();
-
-            foreach (var c in conflicts)
-            {
-                if (c.UserId != r.UserId)
-                {
-                    _notifications.Add(new NotificationModel
-                    {
-                        Id = _notifId++,
-                        UserId = c.UserId,
-                        Type = "Warning",
-                        Message = $"【警告】{r.Date:MM/dd}の「{c.Purpose}」と時間が重複しました。",
-                        TargetDate = r.Date,
-                        TargetReservationId = r.Id,
-                        IsRead = false
-                    });
-                }
-            }
-
-            _reservations.Add(r);
-
-            foreach (var pid in r.ParticipantIds)
-            {
-                if (CurrentUser != null && pid == CurrentUser.Id) continue;
-
-                if (IsRecurringReservation(r))
-                {
-                    UpsertRecurringReservationNotification(pid, r);
-                    continue;
-                }
-
-                _notifications.Add(new NotificationModel
-                {
-                    Id = _notifId++,
-                    UserId = pid,
-                    Type = "Info",
-                    Message = $"{r.Name}さんが予約「{r.Purpose}」を追加しました。",
-                    TargetDate = r.Date,
-                    TargetReservationId = r.Id,
-                    IsRead = false
-                });
-            }
+            NotifyConflictOwners(reservation);
+            NotifyParticipantsForCreatedReservation(reservation);
 
             await SaveData();
             NotifyStateChanged();
@@ -375,26 +314,287 @@ namespace MeetingRoomBooker.Web.Services
             var seriesReservations = GetRecurringSeriesReservations(reservation);
             var firstReservation = seriesReservations.FirstOrDefault();
 
-            if (firstReservation is null) return;
+            if (firstReservation is null)
+            {
+                return;
+            }
 
             var count = seriesReservations.Count;
-            var existing = _notifications.FirstOrDefault(n =>
-                n.UserId == participantId &&
-                n.Type == "Info" &&
-                n.TargetReservationId == firstReservation.Id);
+            UpsertNotification(
+                participantId,
+                "Info",
+                $"{reservation.Name}さんが繰り返し予約「{GetReservationLabel(reservation)}」にあなたを追加しました。({count}件)",
+                firstReservation.Date,
+                firstReservation.Id,
+                GetRecurringNotificationPrefix(reservation));
+        }
 
-            var message = $"{reservation.Name}さんが繰り返し予約「{reservation.Purpose}」を追加しました。({count}件)";
+        private ReservationModel CreateReservationSnapshot(ReservationModel original)
+        {
+            var userId = original.UserId == 0 && CurrentUser != null ? CurrentUser.Id : original.UserId;
+
+            return new ReservationModel
+            {
+                Id = original.Id > 0 ? original.Id : _nextId++,
+                Name = string.IsNullOrEmpty(original.Name) && CurrentUser != null ? CurrentUser.Name : original.Name,
+                Room = original.Room,
+                NumberOfPeople = original.NumberOfPeople,
+                Type = original.Type,
+                Purpose = original.Purpose,
+                UserId = userId,
+                ParticipantIds = (original.ParticipantIds ?? new List<int>())
+                    .Where(id => id > 0)
+                    .Distinct()
+                    .ToList(),
+                RepeatType = string.IsNullOrWhiteSpace(original.RepeatType) ? "しない" : original.RepeatType,
+                RepeatUntil = string.IsNullOrWhiteSpace(original.RepeatType) || original.RepeatType == "しない"
+                    ? null
+                    : original.RepeatUntil,
+                Date = original.Date,
+                StartTime = original.Date.Date + original.StartTime.TimeOfDay,
+                EndTime = original.Date.Date + original.EndTime.TimeOfDay
+            };
+        }
+
+        private List<int> GetNotifiableParticipantIds(ReservationModel reservation)
+        {
+            return (reservation.ParticipantIds ?? new List<int>())
+                .Where(id => id > 0 && id != reservation.UserId)
+                .Distinct()
+                .ToList();
+        }
+
+        private List<ReservationModel> GetConflictingReservations(ReservationModel reservation)
+        {
+            return _reservations
+                .Where(x =>
+                    x.Id != reservation.Id &&
+                    x.Room == reservation.Room &&
+                    x.Date.Date == reservation.Date.Date &&
+                    x.StartTime < reservation.EndTime &&
+                    x.EndTime > reservation.StartTime)
+                .ToList();
+        }
+
+        private void NotifyConflictOwners(ReservationModel reservation)
+        {
+            foreach (var conflict in GetConflictingReservations(reservation))
+            {
+                if (conflict.UserId == reservation.UserId)
+                {
+                    continue;
+                }
+
+                UpsertNotification(
+                    conflict.UserId,
+                    "Warning",
+                    $"【警告】{reservation.Date:MM/dd}の「{conflict.Purpose}」と時間が重複しました。",
+                    reservation.Date,
+                    reservation.Id);
+            }
+        }
+
+        private void NotifyParticipantsForCreatedReservation(ReservationModel reservation)
+        {
+            var participantIds = GetNotifiableParticipantIds(reservation);
+            foreach (var participantId in participantIds)
+            {
+                if (IsRecurringReservation(reservation))
+                {
+                    UpsertRecurringReservationNotification(participantId, reservation);
+                    continue;
+                }
+
+                UpsertNotification(
+                    participantId,
+                    "Info",
+                    BuildAddedParticipantMessage(reservation),
+                    reservation.Date,
+                    reservation.Id);
+            }
+        }
+
+        private void NotifyParticipantsForUpdatedReservation(
+            ReservationModel previousReservation,
+            ReservationModel reservation,
+            IReadOnlyCollection<int> previousParticipantIds,
+            bool shouldNotify)
+        {
+            if (!shouldNotify)
+            {
+                return;
+            }
+
+            var currentParticipantIds = GetNotifiableParticipantIds(reservation);
+            var retainedParticipantIds = currentParticipantIds.Intersect(previousParticipantIds).ToList();
+            var addedParticipantIds = currentParticipantIds.Except(previousParticipantIds).ToList();
+            var removedParticipantIds = previousParticipantIds.Except(currentParticipantIds).ToList();
+            var detailedMessage = BuildReservationUpdatedMessage(previousReservation, reservation, addedParticipantIds, removedParticipantIds);
+
+            foreach (var participantId in addedParticipantIds)
+            {
+                UpsertNotification(
+                    participantId,
+                    "Info",
+                    BuildAddedParticipantMessage(reservation),
+                    reservation.Date,
+                    reservation.Id);
+            }
+
+            foreach (var participantId in removedParticipantIds)
+            {
+                UpsertNotification(
+                    participantId,
+                    "Info",
+                    BuildRemovedParticipantMessage(reservation),
+                    reservation.Date,
+                    reservation.Id);
+            }
+
+            if (string.IsNullOrWhiteSpace(detailedMessage))
+            {
+                return;
+            }
+
+            foreach (var participantId in retainedParticipantIds)
+            {
+                UpsertNotification(
+                    participantId,
+                    "Info",
+                    detailedMessage,
+                    reservation.Date,
+                    reservation.Id);
+            }
+        }
+
+        private string GetReservationLabel(ReservationModel reservation)
+        {
+            return string.IsNullOrWhiteSpace(reservation.Purpose)
+                ? reservation.Name
+                : reservation.Purpose;
+        }
+
+        private string GetTimeRangeText(ReservationModel reservation)
+        {
+            return $"{reservation.StartTime:HH:mm}〜{reservation.EndTime:HH:mm}";
+        }
+
+        private string BuildAddedParticipantMessage(ReservationModel reservation)
+        {
+            return $"{reservation.Name}さんが予約「{GetReservationLabel(reservation)}」の参加メンバーにあなたを追加しました。利用日: {reservation.Date:yyyy/MM/dd} / 会議室: {reservation.Room} / 時間: {GetTimeRangeText(reservation)}";
+        }
+
+        private string BuildRemovedParticipantMessage(ReservationModel reservation)
+        {
+            return $"{reservation.Name}さんが予約「{GetReservationLabel(reservation)}」の参加メンバーからあなたを削除しました。";
+        }
+
+        private string GetRecurringNotificationPrefix(ReservationModel reservation)
+        {
+            return $"{reservation.Name}さんが繰り返し予約「{GetReservationLabel(reservation)}」にあなたを追加しました。(";
+        }
+
+        private string BuildReservationUpdatedMessage(
+            ReservationModel previousReservation,
+            ReservationModel reservation,
+            IReadOnlyCollection<int> addedParticipantIds,
+            IReadOnlyCollection<int> removedParticipantIds)
+        {
+            var changes = new List<string>();
+
+            if (previousReservation.Date.Date != reservation.Date.Date)
+            {
+                changes.Add($"利用日が {previousReservation.Date:yyyy/MM/dd} から {reservation.Date:yyyy/MM/dd} に変更されました");
+            }
+
+            if (!string.Equals(previousReservation.Room, reservation.Room, StringComparison.Ordinal))
+            {
+                changes.Add($"会議室が {previousReservation.Room} から {reservation.Room} に変更されました");
+            }
+
+            if (!string.Equals(previousReservation.Type, reservation.Type, StringComparison.Ordinal))
+            {
+                changes.Add($"区分が {previousReservation.Type} から {reservation.Type} に変更されました");
+            }
+
+            if (previousReservation.StartTime.TimeOfDay != reservation.StartTime.TimeOfDay
+                || previousReservation.EndTime.TimeOfDay != reservation.EndTime.TimeOfDay)
+            {
+                changes.Add($"時間が {GetTimeRangeText(previousReservation)} から {GetTimeRangeText(reservation)} に変更されました");
+            }
+
+            var previousLabel = GetReservationLabel(previousReservation);
+            var currentLabel = GetReservationLabel(reservation);
+            if (!string.Equals(previousLabel, currentLabel, StringComparison.Ordinal))
+            {
+                changes.Add($"予約名が「{previousLabel}」から「{currentLabel}」に変更されました");
+            }
+
+            var addedNames = FormatUserNames(addedParticipantIds);
+            if (!string.IsNullOrWhiteSpace(addedNames))
+            {
+                changes.Add($"参加メンバーに {addedNames} が追加されました");
+            }
+
+            var removedNames = FormatUserNames(removedParticipantIds);
+            if (!string.IsNullOrWhiteSpace(removedNames))
+            {
+                changes.Add($"参加メンバーから {removedNames} が削除されました");
+            }
+
+            if (changes.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            var notificationLabel = !string.IsNullOrWhiteSpace(previousLabel) ? previousLabel : currentLabel;
+            return $"予約「{notificationLabel}」が更新されました。{string.Join(" ", changes.Select(change => $"{change}。"))}";
+        }
+
+        private string FormatUserNames(IEnumerable<int> userIds)
+        {
+            var names = userIds
+                .Distinct()
+                .Select(id => _users.FirstOrDefault(user => user.Id == id)?.Name ?? $"ユーザー{id}")
+                .Where(name => !string.IsNullOrWhiteSpace(name))
+                .ToList();
+
+            return string.Join("、", names);
+        }
+
+        private void UpsertNotification(
+            int userId,
+            string type,
+            string message,
+            DateTime targetDate,
+            int targetReservationId,
+            string? messagePrefix = null)
+        {
+            var candidates = _notifications
+                .Where(notification =>
+                    notification.UserId == userId &&
+                    notification.Type == type &&
+                    notification.TargetReservationId == targetReservationId)
+                .OrderByDescending(notification => notification.CreatedAt)
+                .ToList();
+
+            var matchingNotifications = string.IsNullOrWhiteSpace(messagePrefix)
+                ? candidates.Where(notification => notification.Message == message).ToList()
+                : candidates.Where(notification => notification.Message.StartsWith(messagePrefix, StringComparison.Ordinal)).ToList();
+
+            var existing = matchingNotifications.FirstOrDefault();
 
             if (existing is null)
             {
                 _notifications.Add(new NotificationModel
                 {
                     Id = _notifId++,
-                    UserId = participantId,
-                    Type = "Info",
+                    UserId = userId,
+                    Type = type,
                     Message = message,
-                    TargetDate = firstReservation.Date,
-                    TargetReservationId = firstReservation.Id,
+                    TargetDate = targetDate,
+                    TargetReservationId = targetReservationId,
+                    CreatedAt = DateTime.Now,
                     IsRead = false
                 });
 
@@ -402,7 +602,17 @@ namespace MeetingRoomBooker.Web.Services
             }
 
             existing.Message = message;
+            existing.TargetDate = targetDate;
+            existing.CreatedAt = DateTime.Now;
             existing.IsRead = false;
+
+            if (matchingNotifications.Count > 1)
+            {
+                foreach (var duplicate in matchingNotifications.Skip(1))
+                {
+                    _notifications.Remove(duplicate);
+                }
+            }
         }
 
         public async Task RemoveReservationAsync(ReservationModel r)
@@ -439,31 +649,23 @@ namespace MeetingRoomBooker.Web.Services
             await EnsureLoaded();
 
             var index = _reservations.FindIndex(x => x.Id == r.Id);
-            if (index == -1) return;
-
-            if (shouldNotify)
+            if (index == -1)
             {
-                foreach (var pid in r.ParticipantIds)
-                {
-                    if (CurrentUser != null && pid == CurrentUser.Id) continue;
-
-                    _notifications.Add(new NotificationModel
-                    {
-                        Id = _notifId++,
-                        UserId = pid,
-                        Type = "Info",
-                        Message = $"予約「{r.Purpose}」の内容が変更されました。",
-                        TargetDate = r.Date,
-                        TargetReservationId = r.Id,
-                        IsRead = false
-                    });
-                }
+                return;
             }
 
-            r.StartTime = r.Date.Date + r.StartTime.TimeOfDay;
-            r.EndTime = r.Date.Date + r.EndTime.TimeOfDay;
+            var previousReservation = _reservations[index];
+            var previousParticipantIds = GetNotifiableParticipantIds(previousReservation);
+            var previousReservationSnapshot = CreateReservationSnapshot(previousReservation);
+            var updatedReservation = CreateReservationSnapshot(r);
+            updatedReservation.Id = previousReservation.Id;
+            updatedReservation.UserId = previousReservation.UserId;
 
-            _reservations[index] = r;
+            _reservations[index] = updatedReservation;
+
+            NotifyParticipantsForUpdatedReservation(previousReservationSnapshot, updatedReservation, previousParticipantIds, shouldNotify);
+            NotifyConflictOwners(updatedReservation);
+
             await SaveData();
             NotifyStateChanged();
         }
