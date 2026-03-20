@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MeetingRoomBooker.Api.Data;
+using MeetingRoomBooker.Api.Services.Chatwork;
 using MeetingRoomBooker.Shared.Models;
 
 namespace MeetingRoomBooker.Api.Controllers
@@ -13,49 +14,70 @@ namespace MeetingRoomBooker.Api.Controllers
         private const string WarningNotificationType = "Warning";
 
         private readonly AppDbContext _context;
+        private readonly IReservationChatworkNotificationService _reservationChatworkNotificationService;
 
-        public ReservationsController(AppDbContext context)
+        public ReservationsController(
+            AppDbContext context,
+            IReservationChatworkNotificationService reservationChatworkNotificationService)
         {
             _context = context;
+            _reservationChatworkNotificationService = reservationChatworkNotificationService;
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ReservationModel>>> GetReservations()
+        public async Task<ActionResult<IEnumerable<ReservationModel>>> GetReservations(CancellationToken cancellationToken)
         {
-            return await _context.Reservations.ToListAsync();
+            return await _context.Reservations.ToListAsync(cancellationToken);
         }
 
         [HttpPost]
-        public async Task<ActionResult<ReservationModel>> PostReservation(ReservationModel reservation)
+        public async Task<ActionResult<ReservationModel>> PostReservation(
+            ReservationModel reservation,
+            CancellationToken cancellationToken)
         {
             NormalizeReservation(reservation);
 
             _context.Reservations.Add(reservation);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
 
             await NotifyParticipantsForCreatedReservationAsync(reservation);
             await NotifyConflictOwnersAsync(reservation);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
+
+            await _reservationChatworkNotificationService.SendReservationCreatedAsync(
+                reservation,
+                cancellationToken);
 
             return CreatedAtAction(nameof(GetReservations), new { id = reservation.Id }, reservation);
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteReservation(int id)
+        public async Task<IActionResult> DeleteReservation(int id, CancellationToken cancellationToken)
         {
-            var reservation = await _context.Reservations.FindAsync(id);
+            var reservation = await _context.Reservations
+                .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
             if (reservation == null)
             {
                 return NotFound();
             }
 
             _context.Reservations.Remove(reservation);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
+
+            await _reservationChatworkNotificationService.SendReservationCanceledAsync(
+                reservation,
+                cancellationToken);
+
             return NoContent();
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutReservation(int id, ReservationModel reservation, [FromQuery] bool notifyParticipants = true)
+        public async Task<IActionResult> PutReservation(
+            int id,
+            ReservationModel reservation,
+            [FromQuery] bool notifyParticipants = true,
+            CancellationToken cancellationToken = default)
         {
             if (id != reservation.Id)
             {
@@ -64,7 +86,7 @@ namespace MeetingRoomBooker.Api.Controllers
 
             var existingReservation = await _context.Reservations
                 .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.Id == id);
+                .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
             if (existingReservation == null)
             {
@@ -81,7 +103,7 @@ namespace MeetingRoomBooker.Api.Controllers
 
             try
             {
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync(cancellationToken);
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -103,7 +125,12 @@ namespace MeetingRoomBooker.Api.Controllers
             }
 
             await NotifyConflictOwnersAsync(reservation);
-            await _context.SaveChangesAsync();
+            await _context.SaveChangesAsync(cancellationToken);
+
+            await _reservationChatworkNotificationService.SendReservationUpdatedAsync(
+                existingReservation,
+                reservation,
+                cancellationToken);
 
             return NoContent();
         }

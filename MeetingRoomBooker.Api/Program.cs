@@ -10,7 +10,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite(connectionString));
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite(connectionString));
 
 builder.Services.Configure<ChatworkOptions>(
     builder.Configuration.GetSection("Chatwork"));
@@ -20,15 +21,16 @@ builder.Services.AddHttpClient<IChatworkClient, ChatworkClient>(client =>
     client.BaseAddress = new Uri("https://api.chatwork.com/v2/");
 });
 
+builder.Services.AddScoped<IReservationChatworkNotificationService, ReservationChatworkNotificationService>();
 builder.Services.AddHostedService<ChatworkReminderWorker>();
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin()  
-              .AllowAnyMethod()  
-              .AllowAnyHeader(); 
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
     });
 });
 
