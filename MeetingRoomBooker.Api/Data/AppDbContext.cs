@@ -1,7 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
-using MeetingRoomBooker.Shared.Models;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using System;
+using MeetingRoomBooker.Api.Models;
+using MeetingRoomBooker.Shared.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace MeetingRoomBooker.Api.Data
 {
@@ -15,6 +17,7 @@ namespace MeetingRoomBooker.Api.Data
         public DbSet<UserModel> Users { get; set; }
         public DbSet<ReservationModel> Reservations { get; set; }
         public DbSet<NotificationModel> Notifications { get; set; }
+        public DbSet<ChatworkDeliveryLog> ChatworkDeliveryLogs { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -24,9 +27,20 @@ namespace MeetingRoomBooker.Api.Data
                 .Property(e => e.ParticipantIds)
                 .HasConversion(
                     v => string.Join(',', v),
-                    v => v.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                          .Select(int.Parse)
-                          .ToList());
+                    v => string.IsNullOrWhiteSpace(v)
+                        ? new List<int>()
+                        : v.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                           .Select(int.Parse)
+                           .ToList());
+
+            modelBuilder.Entity<ChatworkDeliveryLog>(entity =>
+            {
+                entity.HasIndex(x => new { x.ReservationId, x.DeliveryType, x.ScheduledStartTime })
+                    .IsUnique();
+
+                entity.Property(x => x.DeliveryType)
+                    .HasMaxLength(100);
+            });
         }
     }
 }

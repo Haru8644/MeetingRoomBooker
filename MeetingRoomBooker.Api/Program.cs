@@ -20,6 +20,8 @@ builder.Services.AddHttpClient<IChatworkClient, ChatworkClient>(client =>
     client.BaseAddress = new Uri("https://api.chatwork.com/v2/");
 });
 
+builder.Services.AddHostedService<ChatworkReminderWorker>();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -35,11 +37,11 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    
+
     try
     {
         var context = services.GetRequiredService<AppDbContext>();
-        context.Database.EnsureCreated();
+        context.Database.Migrate();
     }
     catch (Exception ex)
     {
