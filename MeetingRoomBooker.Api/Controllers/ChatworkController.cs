@@ -33,9 +33,14 @@ namespace MeetingRoomBooker.Api.Controllers
 
             try
             {
-                await _chatworkClient.SendMessageAsync(
-                    request.Message,
-                    cancellationToken);
+                if (string.IsNullOrWhiteSpace(request.RoomId))
+                {
+                    await _chatworkClient.SendMessageAsync(request.Message, cancellationToken);
+                }
+                else
+                {
+                    await _chatworkClient.SendMessageAsync(request.RoomId, request.Message, cancellationToken);
+                }
 
                 return Ok(new
                 {
@@ -56,6 +61,7 @@ namespace MeetingRoomBooker.Api.Controllers
         public sealed class ChatworkTestRequest
         {
             public string Message { get; set; } = string.Empty;
+            public string? RoomId { get; set; }
         }
     }
 }

@@ -21,6 +21,7 @@ builder.Services.AddHttpClient<IChatworkClient, ChatworkClient>(client =>
     client.BaseAddress = new Uri("https://api.chatwork.com/v2/");
 });
 
+builder.Services.AddScoped<IChatworkRoomResolver, ChatworkRoomResolver>();
 builder.Services.AddScoped<IReservationChatworkNotificationService, ReservationChatworkNotificationService>();
 builder.Services.AddHostedService<ChatworkReminderWorker>();
 

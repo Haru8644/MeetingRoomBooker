@@ -1,16 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using MeetingRoomBooker.Api.Data;
+﻿using MeetingRoomBooker.Api.Data;
 using MeetingRoomBooker.Api.Models;
 using MeetingRoomBooker.Api.Options;
-using MeetingRoomBooker.Shared.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace MeetingRoomBooker.Api.Services.Chatwork
@@ -60,6 +51,7 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                 }
             }
         }
+
         private async Task SendUpcomingReservationRemindersAsync(CancellationToken cancellationToken)
         {
             if (!_options.Enabled)
@@ -69,7 +61,7 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
 
             using var scope = _serviceScopeFactory.CreateScope();
             var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            var chatworkClient = scope.ServiceProvider.GetRequiredService<IChatworkClient>();
+            var notificationService = scope.ServiceProvider.GetRequiredService<IReservationChatworkNotificationService>();
             var now = DateTime.Now;
             var reminderThreshold = now.AddMinutes(10);
 
@@ -90,9 +82,7 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
 
             var deliveryLogs = await context.ChatworkDeliveryLogs
                 .AsNoTracking()
-                .Where(x =>
-                    x.DeliveryType == ReminderDeliveryType &&
-                    reservationIds.Contains(x.ReservationId))
+                .Where(x => x.DeliveryType == ReminderDeliveryType && reservationIds.Contains(x.ReservationId))
                 .ToListAsync(cancellationToken);
 
             var deliveredKeys = deliveryLogs
@@ -107,11 +97,9 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                     continue;
                 }
 
-                var message = BuildReminderMessage(reservation);
-
                 try
                 {
-                    await chatworkClient.SendMessageAsync(message, cancellationToken);
+                    await notificationService.SendReservationReminderAsync(reservation, cancellationToken);
 
                     context.ChatworkDeliveryLogs.Add(new ChatworkDeliveryLog
                     {
@@ -119,12 +107,11 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                         DeliveryType = ReminderDeliveryType,
                         ScheduledStartTime = reservation.StartTime,
                         SentAt = DateTime.Now,
-                        Message = message,
+                        Message = $"Reminder sent for reservation {reservation.Id}.",
                         CreatedAt = DateTime.Now
                     });
 
                     await context.SaveChangesAsync(cancellationToken);
-
                     deliveredKeys.Add(deliveryKey);
 
                     _logger.LogInformation(
@@ -141,31 +128,10 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                 }
             }
         }
+
         private static string GetDeliveryKey(int reservationId, DateTime scheduledStartTime)
         {
             return $"{reservationId}:{scheduledStartTime:O}";
-        }
-        private static string BuildReminderMessage(ReservationModel reservation)
-        {
-            var reservationLabel = GetReservationLabel(reservation);
-
-            return "[info][title]会議室予約リマインド[/title]\n"
-                + $"10分後に予約「{reservationLabel}」が開始します。\n"
-                + $"利用日: {reservation.Date:yyyy/MM/dd}\n"
-                + $"会議室: {reservation.Room}\n"
-                + $"時間: {GetTimeRangeText(reservation)}\n"
-                + $"予約者: {reservation.Name}\n"
-                + "[/info]";
-        }
-        private static string GetReservationLabel(ReservationModel reservation)
-        {
-            return string.IsNullOrWhiteSpace(reservation.Purpose)
-                ? reservation.Name
-                : reservation.Purpose;
-        }
-        private static string GetTimeRangeText(ReservationModel reservation)
-        {
-            return $"{reservation.StartTime:HH:mm}〜{reservation.EndTime:HH:mm}";
         }
     }
 }

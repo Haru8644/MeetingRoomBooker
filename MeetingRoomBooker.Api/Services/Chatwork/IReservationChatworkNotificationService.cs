@@ -10,5 +10,6 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
             ReservationModel currentReservation,
             CancellationToken cancellationToken = default);
         Task SendReservationCanceledAsync(ReservationModel reservation, CancellationToken cancellationToken = default);
+        Task SendReservationReminderAsync(ReservationModel reservation, CancellationToken cancellationToken = default);
     }
 }
