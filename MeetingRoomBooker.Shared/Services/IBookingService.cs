@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using MeetingRoomBooker.Shared.Models;
 
 namespace MeetingRoomBooker.Shared.Services
@@ -10,6 +7,7 @@ namespace MeetingRoomBooker.Shared.Services
         Task<UserModel?> LoginAsync(string email, string password);
         Task<bool> RegisterUserAsync(UserModel user);
         Task DeleteUserAsync(int userId);
+        Task UpdateUserChatworkAccountIdAsync(int userId, string? chatworkAccountId);
         void Logout();
         UserModel? GetCurrentUser();
         Task<List<ReservationModel>> GetReservationsAsync();

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using MeetingRoomBooker.Api.Models;
+﻿using MeetingRoomBooker.Api.Models;
 using MeetingRoomBooker.Shared.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -32,6 +29,12 @@ namespace MeetingRoomBooker.Api.Data
                         : v.Split(',', StringSplitOptions.RemoveEmptyEntries)
                            .Select(int.Parse)
                            .ToList());
+
+            modelBuilder.Entity<UserModel>(entity =>
+            {
+                entity.Property(x => x.ChatworkAccountId)
+                    .HasMaxLength(100);
+            });
 
             modelBuilder.Entity<ChatworkDeliveryLog>(entity =>
             {

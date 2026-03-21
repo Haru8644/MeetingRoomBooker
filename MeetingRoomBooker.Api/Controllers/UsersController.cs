@@ -1,7 +1,7 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using MeetingRoomBooker.Api.Data;
 using MeetingRoomBooker.Shared.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace MeetingRoomBooker.Api.Controllers
 {
@@ -9,6 +9,7 @@ namespace MeetingRoomBooker.Api.Controllers
     [ApiController]
     public class UsersController : ControllerBase
     {
+        private const int ChatworkAccountIdMaxLength = 100;
         private static readonly string ProtectedAdminEmail = "haruki_sasuke@icloud.com";
         private readonly AppDbContext _context;
 
@@ -20,15 +21,39 @@ namespace MeetingRoomBooker.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserModel>>> GetUsers()
         {
-            return await _context.Users.ToListAsync();
+            return await _context.Users
+                .OrderBy(user => user.Id)
+                .ToListAsync();
         }
 
         [HttpPost("register")]
         public async Task<ActionResult<UserModel>> Register(UserModel user)
         {
+            user.Name = user.Name?.Trim() ?? string.Empty;
+            user.Email = user.Email?.Trim() ?? string.Empty;
+            user.Password = user.Password ?? string.Empty;
+            user.ChatworkAccountId = NormalizeChatworkAccountId(user.ChatworkAccountId);
+
+            if (string.IsNullOrWhiteSpace(user.Name)
+                || string.IsNullOrWhiteSpace(user.Email)
+                || string.IsNullOrWhiteSpace(user.Password))
+            {
+                return BadRequest("Name, email, and password are required.");
+            }
+
+            if (user.ChatworkAccountId?.Length > ChatworkAccountIdMaxLength)
+            {
+                return BadRequest($"Chatwork account ID must be {ChatworkAccountIdMaxLength} characters or less.");
+            }
+
             if (await _context.Users.AnyAsync(u => u.Email == user.Email))
             {
                 return Conflict("Email already exists");
+            }
+
+            if (string.IsNullOrWhiteSpace(user.AvatarColor))
+            {
+                user.AvatarColor = "#58a6ff";
             }
 
             _context.Users.Add(user);
@@ -40,8 +65,11 @@ namespace MeetingRoomBooker.Api.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<UserModel>> Login([FromBody] LoginRequest loginInfo)
         {
+            var email = loginInfo.Email?.Trim() ?? string.Empty;
+            var password = loginInfo.Password ?? string.Empty;
+
             var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.Email == loginInfo.Email && u.Password == loginInfo.Password);
+                .FirstOrDefaultAsync(u => u.Email == email && u.Password == password);
 
             if (user == null)
             {
@@ -49,6 +77,29 @@ namespace MeetingRoomBooker.Api.Controllers
             }
 
             return user;
+        }
+
+        [HttpPut("{id:int}/chatwork-account")]
+        public async Task<IActionResult> UpdateChatworkAccountId(
+            int id,
+            [FromBody] UpdateUserChatworkAccountRequest request)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var normalizedAccountId = NormalizeChatworkAccountId(request.ChatworkAccountId);
+            if (normalizedAccountId?.Length > ChatworkAccountIdMaxLength)
+            {
+                return BadRequest($"Chatwork account ID must be {ChatworkAccountIdMaxLength} characters or less.");
+            }
+
+            user.ChatworkAccountId = normalizedAccountId;
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
 
         [HttpDelete("{id:int}")]
@@ -130,17 +181,29 @@ namespace MeetingRoomBooker.Api.Controllers
             return NoContent();
         }
 
+        private static string? NormalizeChatworkAccountId(string? chatworkAccountId)
+        {
+            return string.IsNullOrWhiteSpace(chatworkAccountId)
+                ? null
+                : chatworkAccountId.Trim();
+        }
+
         private static bool IsProtectedAdmin(UserModel user)
         {
             return user.IsAdmin
                    || string.Equals(user.Email, ProtectedAdminEmail, StringComparison.OrdinalIgnoreCase)
                    || string.Equals(user.Name, "Haru", StringComparison.OrdinalIgnoreCase);
         }
-    }
 
-    public class LoginRequest
-    {
-        public string Email { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
+        public sealed class LoginRequest
+        {
+            public string Email { get; set; } = string.Empty;
+            public string Password { get; set; } = string.Empty;
+        }
+
+        public sealed class UpdateUserChatworkAccountRequest
+        {
+            public string? ChatworkAccountId { get; set; }
+        }
     }
 }
