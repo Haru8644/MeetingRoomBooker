@@ -1,12 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
-using System.Threading.Tasks;
 using MeetingRoomBooker.Shared.Models;
 using MeetingRoomBooker.Shared.Services;
 using Microsoft.JSInterop;
-using Microsoft.Extensions.Logging;
 
 namespace MeetingRoomBooker.Web.Services
 {
@@ -20,6 +15,7 @@ namespace MeetingRoomBooker.Web.Services
         private static bool _isLoaded = false;
         private readonly IJSRuntime _js;
         private readonly ILogger<MockBookingService> _logger;
+
         public UserModel? CurrentUser { get; private set; }
         public event Action? OnChange;
 
@@ -33,7 +29,10 @@ namespace MeetingRoomBooker.Web.Services
 
         private async Task EnsureLoaded()
         {
-            if (_isLoaded) return;
+            if (_isLoaded)
+            {
+                return;
+            }
 
             try
             {
@@ -205,7 +204,10 @@ namespace MeetingRoomBooker.Web.Services
                 string.Equals(u.Email, normalizedEmail, StringComparison.OrdinalIgnoreCase) &&
                 string.Equals(u.Password, normalizedPassword, StringComparison.Ordinal));
 
-            if (user is null) return null;
+            if (user is null)
+            {
+                return null;
+            }
 
             CurrentUser = user;
             NotifyStateChanged();
@@ -223,6 +225,9 @@ namespace MeetingRoomBooker.Web.Services
 
             user.Id = GetNextUserId();
             user.IsAdmin = false;
+            user.Name = user.Name?.Trim() ?? string.Empty;
+            user.Email = user.Email?.Trim() ?? string.Empty;
+            user.ChatworkAccountId = NormalizeChatworkAccountId(user.ChatworkAccountId);
 
             if (string.IsNullOrWhiteSpace(user.AvatarColor))
             {
@@ -240,11 +245,34 @@ namespace MeetingRoomBooker.Web.Services
         {
             await EnsureLoaded();
 
-            var u = _users.FirstOrDefault(x => x.Id == userId);
-            if (u is null) return;
-            if (u.IsAdmin) return;
+            var user = _users.FirstOrDefault(x => x.Id == userId);
+            if (user is null || user.IsAdmin)
+            {
+                return;
+            }
 
-            _users.Remove(u);
+            _users.Remove(user);
+
+            await SaveData();
+            NotifyStateChanged();
+        }
+
+        public async Task UpdateUserChatworkAccountIdAsync(int userId, string? chatworkAccountId)
+        {
+            await EnsureLoaded();
+
+            var user = _users.FirstOrDefault(x => x.Id == userId);
+            if (user is null)
+            {
+                return;
+            }
+
+            user.ChatworkAccountId = NormalizeChatworkAccountId(chatworkAccountId);
+
+            if (CurrentUser?.Id == userId)
+            {
+                CurrentUser.ChatworkAccountId = user.ChatworkAccountId;
+            }
 
             await SaveData();
             NotifyStateChanged();
@@ -286,9 +314,9 @@ namespace MeetingRoomBooker.Web.Services
 
         private bool IsRecurringReservation(ReservationModel reservation)
         {
-            return !string.IsNullOrWhiteSpace(reservation.RepeatType) &&
-                   reservation.RepeatType != "しない" &&
-                   reservation.RepeatUntil.HasValue;
+            return !string.IsNullOrWhiteSpace(reservation.RepeatType)
+                   && reservation.RepeatType != "しない"
+                   && reservation.RepeatUntil.HasValue;
         }
 
         private List<ReservationModel> GetRecurringSeriesReservations(ReservationModel reservation)
@@ -388,7 +416,7 @@ namespace MeetingRoomBooker.Web.Services
                 UpsertNotification(
                     conflict.UserId,
                     "Warning",
-                    $"【警告】{reservation.Date:MM/dd}の「{conflict.Purpose}」と時間が重複しました。",
+                    $"【警告】{reservation.Date:MM/dd}の「{reservation.Purpose}」と時間が重複しました。",
                     reservation.Date,
                     reservation.Id);
             }
@@ -615,27 +643,33 @@ namespace MeetingRoomBooker.Web.Services
             }
         }
 
-        public async Task RemoveReservationAsync(ReservationModel r)
+        public async Task RemoveReservationAsync(ReservationModel reservation)
         {
             await EnsureLoaded();
 
-            var target = _reservations.FirstOrDefault(x => x.Id == r.Id);
-            if (target is null) return;
+            var target = _reservations.FirstOrDefault(x => x.Id == reservation.Id);
+            if (target is null)
+            {
+                return;
+            }
 
             _reservations.Remove(target);
 
-            foreach (var pid in r.ParticipantIds)
+            foreach (var participantId in reservation.ParticipantIds)
             {
-                if (CurrentUser != null && pid == CurrentUser.Id) continue;
+                if (CurrentUser != null && participantId == CurrentUser.Id)
+                {
+                    continue;
+                }
 
                 _notifications.Add(new NotificationModel
                 {
                     Id = _notifId++,
-                    UserId = pid,
+                    UserId = participantId,
                     Type = "Info",
-                    Message = $"予約「{r.Purpose}」が削除されました。",
-                    TargetDate = r.Date,
-                    TargetReservationId = r.Id,
+                    Message = $"予約「{reservation.Purpose}」が削除されました。",
+                    TargetDate = reservation.Date,
+                    TargetReservationId = reservation.Id,
                     IsRead = false
                 });
             }
@@ -644,11 +678,11 @@ namespace MeetingRoomBooker.Web.Services
             NotifyStateChanged();
         }
 
-        public async Task UpdateReservationAsync(ReservationModel r, bool shouldNotify)
+        public async Task UpdateReservationAsync(ReservationModel reservation, bool shouldNotify)
         {
             await EnsureLoaded();
 
-            var index = _reservations.FindIndex(x => x.Id == r.Id);
+            var index = _reservations.FindIndex(x => x.Id == reservation.Id);
             if (index == -1)
             {
                 return;
@@ -657,7 +691,7 @@ namespace MeetingRoomBooker.Web.Services
             var previousReservation = _reservations[index];
             var previousParticipantIds = GetNotifiableParticipantIds(previousReservation);
             var previousReservationSnapshot = CreateReservationSnapshot(previousReservation);
-            var updatedReservation = CreateReservationSnapshot(r);
+            var updatedReservation = CreateReservationSnapshot(reservation);
             updatedReservation.Id = previousReservation.Id;
             updatedReservation.UserId = previousReservation.UserId;
 
@@ -694,10 +728,13 @@ namespace MeetingRoomBooker.Web.Services
         {
             await EnsureLoaded();
 
-            var n = _notifications.FirstOrDefault(x => x.Id == notificationId);
-            if (n is null) return;
+            var notification = _notifications.FirstOrDefault(x => x.Id == notificationId);
+            if (notification is null)
+            {
+                return;
+            }
 
-            _notifications.Remove(n);
+            _notifications.Remove(notification);
             await SaveData();
             NotifyStateChanged();
         }
@@ -706,12 +743,22 @@ namespace MeetingRoomBooker.Web.Services
         {
             await EnsureLoaded();
 
-            var n = _notifications.FirstOrDefault(x => x.Id == notificationId);
-            if (n is null) return;
+            var notification = _notifications.FirstOrDefault(x => x.Id == notificationId);
+            if (notification is null)
+            {
+                return;
+            }
 
-            n.IsRead = true;
+            notification.IsRead = true;
             await SaveData();
             NotifyStateChanged();
+        }
+
+        private static string? NormalizeChatworkAccountId(string? chatworkAccountId)
+        {
+            return string.IsNullOrWhiteSpace(chatworkAccountId)
+                ? null
+                : chatworkAccountId.Trim();
         }
     }
 }

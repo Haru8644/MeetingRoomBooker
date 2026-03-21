@@ -35,6 +35,11 @@
                    placeholder="CONFIRM KEY"
                    autocomplete="new-password" />
 
+            <input @bind="newChatworkAccountId"
+                   class="um-input"
+                   placeholder="CHATWORK ACCOUNT ID (OPTIONAL)"
+                   autocomplete="off" />
+
             <button type="button"
                     class="um-register-button"
                     @onclick="AddUser">
@@ -49,27 +54,44 @@
     </section>
 
     <section class="um-list" aria-label="Registered personnel">
-        @foreach (var u in users)
+        @foreach (var user in users)
         {
             <article class="um-row">
                 <div class="um-user">
-                    <span class="um-id">ID_@u.Id.ToString("D3")</span>
-                    <span class="um-name">@u.Name</span>
-                    <span class="um-email">@u.Email</span>
+                    <div class="um-user-main">
+                        <span class="um-id">ID_@user.Id.ToString("D3")</span>
+                        <span class="um-name">@user.Name</span>
+                        <span class="um-email">@user.Email</span>
+                    </div>
+
+                    <div class="um-chatwork-editor">
+                        <span class="um-chatwork-label">CW ACCOUNT ID</span>
+                        <input @bind="user.ChatworkAccountId"
+                               class="um-account-input"
+                               placeholder="NOT SET"
+                               autocomplete="off" />
+                        <button type="button"
+                                class="um-save-button"
+                                @onclick="() => SaveChatworkAccountIdAsync(user)">
+                            SAVE CW
+                        </button>
+                    </div>
                 </div>
 
-                @if (u.Name != "Haru")
-                {
-                    <button type="button"
-                            class="um-delete-button"
-                            @onclick="() => DeleteUser(u.Id)">
-                        TERMINATE
-                    </button>
-                }
-                else
-                {
-                    <span class="um-admin-badge">ADMIN</span>
-                }
+                <div class="um-row-actions">
+                    @if (user.Name != "Haru")
+                    {
+                        <button type="button"
+                                class="um-delete-button"
+                                @onclick="() => DeleteUser(user.Id)">
+                            TERMINATE
+                        </button>
+                    }
+                    else
+                    {
+                        <span class="um-admin-badge">ADMIN</span>
+                    }
+                </div>
             </article>
         }
     </section>
@@ -81,6 +103,7 @@
     private string newEmail = string.Empty;
     private string newPassword = string.Empty;
     private string newConfirmPassword = string.Empty;
+    private string newChatworkAccountId = string.Empty;
     private string msg = string.Empty;
     private UserModel? currentUser;
 
@@ -99,41 +122,66 @@
 
     private async Task AddUser()
     {
-        if (string.IsNullOrWhiteSpace(newName) ||
-            string.IsNullOrWhiteSpace(newEmail) ||
-            string.IsNullOrWhiteSpace(newPassword))
+        try
         {
-            msg = "ERROR: MISSING FIELDS";
-            return;
+            if (string.IsNullOrWhiteSpace(newName)
+                || string.IsNullOrWhiteSpace(newEmail)
+                || string.IsNullOrWhiteSpace(newPassword))
+            {
+                msg = "ERROR: MISSING FIELDS";
+                return;
+            }
+
+            if (newPassword != newConfirmPassword)
+            {
+                msg = "ERROR: KEY MISMATCH";
+                return;
+            }
+
+            var user = new UserModel
+            {
+                Name = newName.Trim(),
+                Email = newEmail.Trim(),
+                Password = newPassword,
+                AvatarColor = "#a371f7",
+                ChatworkAccountId = NormalizeChatworkAccountId(newChatworkAccountId)
+            };
+
+            var registered = await BookingService.RegisterUserAsync(user);
+
+            if (!registered)
+            {
+                msg = "ERROR: REGISTRATION FAILED";
+                return;
+            }
+
+            await ReloadUsersAsync();
+
+            newName = string.Empty;
+            newEmail = string.Empty;
+            newPassword = string.Empty;
+            newConfirmPassword = string.Empty;
+            newChatworkAccountId = string.Empty;
+            msg = "REGISTRATION SUCCESSFUL";
         }
-
-        if (newPassword != newConfirmPassword)
+        catch (Exception ex)
         {
-            msg = "ERROR: KEY MISMATCH";
-            return;
+            msg = $"ERROR: {ex.Message}";
         }
+    }
 
-        var registered = await BookingService.RegisterUserAsync(new UserModel
+    private async Task SaveChatworkAccountIdAsync(UserModel user)
+    {
+        try
         {
-            Name = newName,
-            Email = newEmail,
-            Password = newPassword,
-            AvatarColor = "#a371f7"
-        });
-
-        if (!registered)
-        {
-            msg = "ERROR: REGISTRATION FAILED";
-            return;
+            await BookingService.UpdateUserChatworkAccountIdAsync(user.Id, user.ChatworkAccountId);
+            await ReloadUsersAsync();
+            msg = $"CHATWORK ACCOUNT UPDATED: {user.Name}";
         }
-
-        users = await BookingService.GetAllUsersAsync();
-
-        newName = string.Empty;
-        newEmail = string.Empty;
-        newPassword = string.Empty;
-        newConfirmPassword = string.Empty;
-        msg = "REGISTRATION SUCCESSFUL";
+        catch (Exception ex)
+        {
+            msg = $"ERROR: {ex.Message}";
+        }
     }
 
     private async Task DeleteUser(int id)
@@ -141,12 +189,24 @@
         try
         {
             await BookingService.DeleteUserAsync(id);
-            users = await BookingService.GetAllUsersAsync();
+            await ReloadUsersAsync();
             msg = "USER REMOVED";
         }
         catch (Exception ex)
         {
             msg = $"ERROR: {ex.Message}";
         }
+    }
+
+    private async Task ReloadUsersAsync()
+    {
+        users = await BookingService.GetAllUsersAsync();
+    }
+
+    private static string? NormalizeChatworkAccountId(string value)
+    {
+        return string.IsNullOrWhiteSpace(value)
+            ? null
+            : value.Trim();
     }
 }

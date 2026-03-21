@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using MeetingRoomBooker.Shared.Models;
 using MeetingRoomBooker.Shared.Services;
 
@@ -12,6 +9,7 @@ namespace MeetingRoomBooker.Web.Services
         public Task<UserModel?> LoginAsync(string email, string password) => Task.FromResult<UserModel?>(null);
         public Task<bool> RegisterUserAsync(UserModel user) => Task.FromResult(false);
         public Task DeleteUserAsync(int userId) => Task.CompletedTask;
+        public Task UpdateUserChatworkAccountIdAsync(int userId, string? chatworkAccountId) => Task.CompletedTask;
         public void Logout() { }
         public UserModel? GetCurrentUser() => null;
         public Task<List<ReservationModel>> GetReservationsAsync() => Task.FromResult(new List<ReservationModel>());

@@ -51,16 +51,45 @@ namespace MeetingRoomBooker.Web.Services
 
         public async Task<bool> RegisterUserAsync(UserModel user)
         {
-            var response = await _httpClient.PostAsJsonAsync("api/Users/register", user);
-            if (!response.IsSuccessStatusCode)
+            var requestUrl = new Uri(_httpClient.BaseAddress!, "api/Users/register");
+
+            var requestJson = JsonSerializer.Serialize(user, new JsonSerializerOptions
             {
-                return false;
+                WriteIndented = true
+            });
+
+            Console.WriteLine("===== REGISTER REQUEST START =====");
+            Console.WriteLine($"POST {requestUrl}");
+            Console.WriteLine(requestJson);
+            Console.WriteLine("===== REGISTER REQUEST END =====");
+
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync("api/Users/register", user);
+                var responseBody = await response.Content.ReadAsStringAsync();
+
+                Console.WriteLine("===== REGISTER RESPONSE START =====");
+                Console.WriteLine($"Status: {(int)response.StatusCode} {response.StatusCode}");
+                Console.WriteLine(responseBody);
+                Console.WriteLine("===== REGISTER RESPONSE END =====");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new InvalidOperationException(
+                        $"Register failed. Status={(int)response.StatusCode} {response.StatusCode}. Body={responseBody}");
+                }
+
+                NotifyStateChanged();
+                return true;
             }
-
-            NotifyStateChanged();
-            return true;
+            catch (Exception ex)
+            {
+                Console.WriteLine("===== REGISTER EXCEPTION START =====");
+                Console.WriteLine(ex.ToString());
+                Console.WriteLine("===== REGISTER EXCEPTION END =====");
+                throw;
+            }
         }
-
         public async Task DeleteUserAsync(int userId)
         {
             var response = await _httpClient.DeleteAsync($"api/Users/{userId}");
@@ -71,6 +100,24 @@ namespace MeetingRoomBooker.Web.Services
                 _currentUser = null;
                 NotifyStateChanged();
             }
+        }
+
+        public async Task UpdateUserChatworkAccountIdAsync(int userId, string? chatworkAccountId)
+        {
+            var response = await _httpClient.PutAsJsonAsync(
+                $"api/Users/{userId}/chatwork-account",
+                new { ChatworkAccountId = chatworkAccountId });
+
+            await EnsureSuccessAsync(response, $"Failed to update Chatwork account id for user id={userId}.");
+
+            if (_currentUser?.Id == userId)
+            {
+                _currentUser.ChatworkAccountId = string.IsNullOrWhiteSpace(chatworkAccountId)
+                    ? null
+                    : chatworkAccountId.Trim();
+            }
+
+            NotifyStateChanged();
         }
 
         public void Logout()
