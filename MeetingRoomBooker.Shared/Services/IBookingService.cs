@@ -4,11 +4,18 @@ namespace MeetingRoomBooker.Shared.Services
 {
     public interface IBookingService
     {
+        Task InitializeAsync() => Task.CompletedTask;
         Task<UserModel?> LoginAsync(string email, string password);
+        Task<UserModel?> LoginAsync(string email, string password, bool rememberMe) => LoginAsync(email, password);
         Task<bool> RegisterUserAsync(UserModel user);
         Task DeleteUserAsync(int userId);
         Task UpdateUserChatworkAccountIdAsync(int userId, string? chatworkAccountId);
         void Logout();
+        Task LogoutAsync()
+        {
+            Logout();
+            return Task.CompletedTask;
+        }
         UserModel? GetCurrentUser();
         Task<List<ReservationModel>> GetReservationsAsync();
         Task AddReservationAsync(ReservationModel reservation);

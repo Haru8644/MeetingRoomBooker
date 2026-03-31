@@ -1,5 +1,7 @@
 using MeetingRoomBooker.Api.Data;
 using MeetingRoomBooker.Shared.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,6 +13,7 @@ namespace MeetingRoomBooker.Api.Controllers
     {
         private const int ChatworkAccountIdMaxLength = 100;
         private static readonly string ProtectedAdminEmail = "haruki_sasuke@icloud.com";
+        private static readonly PasswordHasher<UserModel> PasswordHasher = new();
         private readonly AppDbContext _context;
 
         public UsersController(AppDbContext context)
@@ -18,6 +21,7 @@ namespace MeetingRoomBooker.Api.Controllers
             _context = context;
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserModel>>> GetUsers()
         {
@@ -26,35 +30,49 @@ namespace MeetingRoomBooker.Api.Controllers
                 .ToListAsync();
         }
 
+        [AllowAnonymous]
         [HttpPost("register")]
-        public async Task<ActionResult<UserModel>> Register(UserModel user)
+        public async Task<ActionResult<UserModel>> Register(RegisterUserRequest request)
         {
-            user.Name = user.Name?.Trim() ?? string.Empty;
-            user.Email = user.Email?.Trim() ?? string.Empty;
-            user.Password = user.Password ?? string.Empty;
-            user.ChatworkAccountId = NormalizeChatworkAccountId(user.ChatworkAccountId);
+            var name = request.Name?.Trim() ?? string.Empty;
+            var email = request.Email?.Trim() ?? string.Empty;
+            var password = request.Password ?? string.Empty;
+            var chatworkAccountId = NormalizeChatworkAccountId(request.ChatworkAccountId);
+            var hasExistingUsers = await _context.Users.AnyAsync();
 
-            if (string.IsNullOrWhiteSpace(user.Name)
-                || string.IsNullOrWhiteSpace(user.Email)
-                || string.IsNullOrWhiteSpace(user.Password))
+            if (hasExistingUsers && (!User.Identity?.IsAuthenticated ?? true || !User.IsInRole("Admin")))
+            {
+                return Forbid();
+            }
+
+            if (string.IsNullOrWhiteSpace(name)
+                || string.IsNullOrWhiteSpace(email)
+                || string.IsNullOrWhiteSpace(password))
             {
                 return BadRequest("Name, email, and password are required.");
             }
 
-            if (user.ChatworkAccountId?.Length > ChatworkAccountIdMaxLength)
+            if (chatworkAccountId?.Length > ChatworkAccountIdMaxLength)
             {
                 return BadRequest($"Chatwork account ID must be {ChatworkAccountIdMaxLength} characters or less.");
             }
 
-            if (await _context.Users.AnyAsync(u => u.Email == user.Email))
+            if (await _context.Users.AnyAsync(u => u.Email == email))
             {
-                return Conflict("Email already exists");
+                return Conflict("Email already exists.");
             }
 
-            if (string.IsNullOrWhiteSpace(user.AvatarColor))
+            var user = new UserModel
             {
-                user.AvatarColor = "#58a6ff";
-            }
+                Name = name,
+                Email = email,
+                PasswordHash = string.Empty,
+                AvatarColor = string.IsNullOrWhiteSpace(request.AvatarColor) ? "#58a6ff" : request.AvatarColor,
+                ChatworkAccountId = chatworkAccountId,
+                IsAdmin = !hasExistingUsers
+            };
+
+            user.PasswordHash = PasswordHasher.HashPassword(user, password);
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
@@ -62,23 +80,7 @@ namespace MeetingRoomBooker.Api.Controllers
             return CreatedAtAction(nameof(GetUsers), new { id = user.Id }, user);
         }
 
-        [HttpPost("login")]
-        public async Task<ActionResult<UserModel>> Login([FromBody] LoginRequest loginInfo)
-        {
-            var email = loginInfo.Email?.Trim() ?? string.Empty;
-            var password = loginInfo.Password ?? string.Empty;
-
-            var user = await _context.Users
-                .FirstOrDefaultAsync(u => u.Email == email && u.Password == password);
-
-            if (user == null)
-            {
-                return Unauthorized("Invalid email or password");
-            }
-
-            return user;
-        }
-
+        [Authorize(Policy = "AdminOnly")]
         [HttpPut("{id:int}/chatwork-account")]
         public async Task<IActionResult> UpdateChatworkAccountId(
             int id,
@@ -102,6 +104,7 @@ namespace MeetingRoomBooker.Api.Controllers
             return NoContent();
         }
 
+        [Authorize(Policy = "AdminOnly")]
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
@@ -193,12 +196,6 @@ namespace MeetingRoomBooker.Api.Controllers
             return user.IsAdmin
                    || string.Equals(user.Email, ProtectedAdminEmail, StringComparison.OrdinalIgnoreCase)
                    || string.Equals(user.Name, "Haru", StringComparison.OrdinalIgnoreCase);
-        }
-
-        public sealed class LoginRequest
-        {
-            public string Email { get; set; } = string.Empty;
-            public string Password { get; set; } = string.Empty;
         }
 
         public sealed class UpdateUserChatworkAccountRequest
