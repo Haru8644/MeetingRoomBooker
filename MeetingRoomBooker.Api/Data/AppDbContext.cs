@@ -32,8 +32,12 @@ namespace MeetingRoomBooker.Api.Data
 
             modelBuilder.Entity<UserModel>(entity =>
             {
-                entity.Property(x => x.ChatworkAccountId)
-                    .HasMaxLength(100);
+                entity.Ignore(x => x.Password);
+                entity.HasIndex(x => x.Email).IsUnique();
+                entity.Property(x => x.Name).HasMaxLength(100);
+                entity.Property(x => x.Email).HasMaxLength(256);
+                entity.Property(x => x.PasswordHash).HasMaxLength(512);
+                entity.Property(x => x.ChatworkAccountId).HasMaxLength(100);
             });
 
             modelBuilder.Entity<ChatworkDeliveryLog>(entity =>

@@ -10,15 +10,22 @@
 
         <div class="input-group fade-in-stagger" style="--i:1;">
             <label>IDENTIFIER</label>
-            <input @bind="email" class="cyber-input" placeholder="Enter Email ID" autocomplete="off" />
+            <input @bind="email" class="cyber-input" placeholder="Enter Email ID" autocomplete="username" />
         </div>
 
         <div class="input-group fade-in-stagger" style="--i:2;">
             <label>PASSCODE</label>
-            <input @bind="password" type="password" class="cyber-input" placeholder="Enter Passcode" autocomplete="new-password" />
+            <input @bind="password" type="password" class="cyber-input" placeholder="Enter Passcode" autocomplete="current-password" />
         </div>
 
-        <button class="cyber-button-primary fade-in-stagger" style="--i:3; width: 100%; margin-top: 10px;" @onclick="HandleLogin">
+        <div class="input-group fade-in-stagger" style="--i:3; gap: 8px; align-items: center;">
+            <label style="margin: 0; display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input @bind="rememberMe" type="checkbox" />
+                <span>KEEP SIGNED IN</span>
+            </label>
+        </div>
+
+        <button class="cyber-button-primary fade-in-stagger" style="--i:4; width: 100%; margin-top: 10px;" @onclick="HandleLogin">
             <span class="oi oi-lock-locked"></span> AUTHENTICATE
         </button>
 
@@ -26,31 +33,32 @@
         {
             <div class="error-msg fade-in">@errorMessage</div>
         }
-        <div class="demo-hint fade-in-stagger" style="--i:4;">Demo: haru@demo.com / password</div>
     </div>
 </div>
 
 @code {
-    private string email = "";
-    private string password = "";
-    private string errorMessage = "";
+    private string email = string.Empty;
+    private string password = string.Empty;
+    private string errorMessage = string.Empty;
+    private bool rememberMe;
 
     private async Task HandleLogin()
     {
+        errorMessage = string.Empty;
+
         if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
         {
             errorMessage = "ACCESS DENIED: Please enter credentials.";
             return;
         }
 
-        var user = await BookingService.LoginAsync(email, password);
+        var user = await BookingService.LoginAsync(email, password, rememberMe);
         if (user != null)
         {
             Navigation.NavigateTo("/schedule");
+            return;
         }
-        else
-        {
-            errorMessage = "ACCESS DENIED: Invalid Credentials";
-        }
+
+        errorMessage = "ACCESS DENIED: Invalid Credentials";
     }
 }

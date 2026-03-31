@@ -1,8 +1,9 @@
-using System.Diagnostics;
+using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using MeetingRoomBooker.Shared.Models;
 using MeetingRoomBooker.Shared.Services;
+using Microsoft.AspNetCore.Components.WebAssembly.Http;
 
 namespace MeetingRoomBooker.Web.Services
 {
@@ -10,6 +11,7 @@ namespace MeetingRoomBooker.Web.Services
     {
         private readonly HttpClient _httpClient;
         private UserModel? _currentUser;
+        private bool _isInitialized;
 
         public event Action? OnChange;
 
@@ -25,74 +27,74 @@ namespace MeetingRoomBooker.Web.Services
             _httpClient = httpClient;
         }
 
-        public async Task<UserModel?> LoginAsync(string email, string password)
+        public async Task InitializeAsync()
         {
-            try
+            if (_isInitialized)
             {
-                var loginData = new { Email = email, Password = password };
-                var response = await _httpClient.PostAsJsonAsync("api/Users/login", loginData);
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    Debug.WriteLine($"[Login] Failed: {response.StatusCode}");
-                    return null;
-                }
-
-                _currentUser = await response.Content.ReadFromJsonAsync<UserModel>(JsonOptions);
-                NotifyStateChanged();
-                return _currentUser;
+                return;
             }
-            catch (Exception ex)
+
+            _currentUser = await GetSessionUserAsync();
+            _isInitialized = true;
+            NotifyStateChanged();
+        }
+
+        public Task<UserModel?> LoginAsync(string email, string password)
+        {
+            return LoginAsync(email, password, false);
+        }
+
+        public async Task<UserModel?> LoginAsync(string email, string password, bool rememberMe)
+        {
+            var response = await SendAsync(
+                HttpMethod.Post,
+                "api/Auth/login",
+                new LoginRequest
+                {
+                    Email = email,
+                    Password = password,
+                    RememberMe = rememberMe
+                });
+
+            if (!response.IsSuccessStatusCode)
             {
-                Debug.WriteLine($"[Login] Error: {ex.Message}");
                 return null;
             }
+
+            _currentUser = await ReadFromJsonAsync<UserModel>(response);
+            _isInitialized = true;
+            NotifyStateChanged();
+            return _currentUser;
         }
 
         public async Task<bool> RegisterUserAsync(UserModel user)
         {
-            var requestUrl = new Uri(_httpClient.BaseAddress!, "api/Users/register");
-
-            var requestJson = JsonSerializer.Serialize(user, new JsonSerializerOptions
-            {
-                WriteIndented = true
-            });
-
-            Console.WriteLine("===== REGISTER REQUEST START =====");
-            Console.WriteLine($"POST {requestUrl}");
-            Console.WriteLine(requestJson);
-            Console.WriteLine("===== REGISTER REQUEST END =====");
-
-            try
-            {
-                var response = await _httpClient.PostAsJsonAsync("api/Users/register", user);
-                var responseBody = await response.Content.ReadAsStringAsync();
-
-                Console.WriteLine("===== REGISTER RESPONSE START =====");
-                Console.WriteLine($"Status: {(int)response.StatusCode} {response.StatusCode}");
-                Console.WriteLine(responseBody);
-                Console.WriteLine("===== REGISTER RESPONSE END =====");
-
-                if (!response.IsSuccessStatusCode)
+            var response = await SendAsync(
+                HttpMethod.Post,
+                "api/Users/register",
+                new RegisterUserRequest
                 {
-                    throw new InvalidOperationException(
-                        $"Register failed. Status={(int)response.StatusCode} {response.StatusCode}. Body={responseBody}");
-                }
+                    Name = user.Name?.Trim() ?? string.Empty,
+                    Email = user.Email?.Trim() ?? string.Empty,
+                    Password = user.Password ?? string.Empty,
+                    AvatarColor = string.IsNullOrWhiteSpace(user.AvatarColor) ? "#a371f7" : user.AvatarColor,
+                    ChatworkAccountId = string.IsNullOrWhiteSpace(user.ChatworkAccountId)
+                        ? null
+                        : user.ChatworkAccountId.Trim()
+                });
 
-                NotifyStateChanged();
-                return true;
-            }
-            catch (Exception ex)
+            if (!response.IsSuccessStatusCode)
             {
-                Console.WriteLine("===== REGISTER EXCEPTION START =====");
-                Console.WriteLine(ex.ToString());
-                Console.WriteLine("===== REGISTER EXCEPTION END =====");
-                throw;
+                return false;
             }
+
+            NotifyStateChanged();
+            return true;
         }
+
         public async Task DeleteUserAsync(int userId)
         {
-            var response = await _httpClient.DeleteAsync($"api/Users/{userId}");
+            var response = await SendAsync(HttpMethod.Delete, $"api/Users/{userId}");
             await EnsureSuccessAsync(response, $"User deletion failed for id={userId}.");
 
             if (_currentUser?.Id == userId)
@@ -104,7 +106,8 @@ namespace MeetingRoomBooker.Web.Services
 
         public async Task UpdateUserChatworkAccountIdAsync(int userId, string? chatworkAccountId)
         {
-            var response = await _httpClient.PutAsJsonAsync(
+            var response = await SendAsync(
+                HttpMethod.Put,
                 $"api/Users/{userId}/chatwork-account",
                 new { ChatworkAccountId = chatworkAccountId });
 
@@ -122,22 +125,42 @@ namespace MeetingRoomBooker.Web.Services
 
         public void Logout()
         {
-            _currentUser = null;
-            NotifyStateChanged();
+            _ = LogoutAsync();
+        }
+
+        public async Task LogoutAsync()
+        {
+            try
+            {
+                var response = await SendAsync(HttpMethod.Post, "api/Auth/logout");
+
+                if (response.StatusCode != HttpStatusCode.Unauthorized)
+                {
+                    await EnsureSuccessAsync(response, "Failed to log out.");
+                }
+            }
+            finally
+            {
+                _currentUser = null;
+                _isInitialized = true;
+                NotifyStateChanged();
+            }
         }
 
         public UserModel? GetCurrentUser() => _currentUser;
 
         public async Task<List<UserModel>> GetAllUsersAsync()
         {
-            return await _httpClient.GetFromJsonAsync<List<UserModel>>("api/Users", JsonOptions)
-                   ?? new List<UserModel>();
+            var response = await SendAsync(HttpMethod.Get, "api/Users");
+            await EnsureSuccessAsync(response, "Failed to load users.");
+            return await ReadFromJsonAsync<List<UserModel>>(response) ?? new List<UserModel>();
         }
 
         public async Task<List<ReservationModel>> GetReservationsAsync()
         {
-            return await _httpClient.GetFromJsonAsync<List<ReservationModel>>("api/Reservations", JsonOptions)
-                   ?? new List<ReservationModel>();
+            var response = await SendAsync(HttpMethod.Get, "api/Reservations");
+            await EnsureSuccessAsync(response, "Failed to load reservations.");
+            return await ReadFromJsonAsync<List<ReservationModel>>(response) ?? new List<ReservationModel>();
         }
 
         public async Task AddReservationAsync(ReservationModel reservation)
@@ -147,21 +170,22 @@ namespace MeetingRoomBooker.Web.Services
                 reservation.UserId = _currentUser.Id;
             }
 
-            var response = await _httpClient.PostAsJsonAsync("api/Reservations", reservation);
+            var response = await SendAsync(HttpMethod.Post, "api/Reservations", reservation);
             await EnsureSuccessAsync(response, "Failed to add reservation.");
             NotifyStateChanged();
         }
 
         public async Task RemoveReservationAsync(ReservationModel reservation)
         {
-            var response = await _httpClient.DeleteAsync($"api/Reservations/{reservation.Id}");
+            var response = await SendAsync(HttpMethod.Delete, $"api/Reservations/{reservation.Id}");
             await EnsureSuccessAsync(response, $"Failed to remove reservation id={reservation.Id}.");
             NotifyStateChanged();
         }
 
         public async Task UpdateReservationAsync(ReservationModel reservation, bool shouldNotify)
         {
-            var response = await _httpClient.PutAsJsonAsync(
+            var response = await SendAsync(
+                HttpMethod.Put,
                 $"api/Reservations/{reservation.Id}?notifyParticipants={shouldNotify.ToString().ToLowerInvariant()}",
                 reservation);
 
@@ -171,30 +195,73 @@ namespace MeetingRoomBooker.Web.Services
 
         public async Task<List<NotificationModel>> GetNotificationsAsync(int userId)
         {
-            return await _httpClient.GetFromJsonAsync<List<NotificationModel>>(
-                       $"api/Notifications/user/{userId}", JsonOptions)
-                   ?? new List<NotificationModel>();
+            var response = await SendAsync(HttpMethod.Get, $"api/Notifications/user/{userId}");
+            await EnsureSuccessAsync(response, $"Failed to load notifications for user id={userId}.");
+            return await ReadFromJsonAsync<List<NotificationModel>>(response) ?? new List<NotificationModel>();
         }
 
         public async Task AddNotificationAsync(NotificationModel notification)
         {
-            var response = await _httpClient.PostAsJsonAsync("api/Notifications", notification);
+            var response = await SendAsync(HttpMethod.Post, "api/Notifications", notification);
             await EnsureSuccessAsync(response, "Failed to add notification.");
             NotifyStateChanged();
         }
 
         public async Task DeleteNotificationAsync(int notificationId)
         {
-            var response = await _httpClient.DeleteAsync($"api/Notifications/{notificationId}");
+            var response = await SendAsync(HttpMethod.Delete, $"api/Notifications/{notificationId}");
             await EnsureSuccessAsync(response, $"Failed to delete notification id={notificationId}.");
             NotifyStateChanged();
         }
 
         public async Task MarkNotificationAsReadAsync(int notificationId)
         {
-            var response = await _httpClient.PutAsync($"api/Notifications/{notificationId}/read", null);
+            var response = await SendAsync(HttpMethod.Put, $"api/Notifications/{notificationId}/read");
             await EnsureSuccessAsync(response, $"Failed to mark notification id={notificationId} as read.");
             NotifyStateChanged();
+        }
+
+        private async Task<UserModel?> GetSessionUserAsync()
+        {
+            try
+            {
+                var response = await SendAsync(HttpMethod.Get, "api/Auth/me");
+
+                if (response.StatusCode == HttpStatusCode.Unauthorized)
+                {
+                    return null;
+                }
+
+                await EnsureSuccessAsync(response, "Failed to restore the current session.");
+                return await ReadFromJsonAsync<UserModel>(response);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private async Task<HttpResponseMessage> SendAsync(HttpMethod method, string requestUri, object? body = null)
+        {
+            var request = new HttpRequestMessage(method, requestUri);
+            request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
+
+            if (body != null)
+            {
+                request.Content = JsonContent.Create(body);
+            }
+
+            return await _httpClient.SendAsync(request);
+        }
+
+        private static async Task<T?> ReadFromJsonAsync<T>(HttpResponseMessage response)
+        {
+            if (response.Content.Headers.ContentLength == 0)
+            {
+                return default;
+            }
+
+            return await response.Content.ReadFromJsonAsync<T>(JsonOptions);
         }
 
         private static async Task EnsureSuccessAsync(HttpResponseMessage response, string fallbackMessage)
