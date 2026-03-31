@@ -81,8 +81,11 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
+var applyMigrationsOnStartup = builder.Configuration.GetValue<bool>("Database:ApplyMigrationsOnStartup");
+
+if (applyMigrationsOnStartup)
 {
+    using var scope = app.Services.CreateScope();
     var services = scope.ServiceProvider;
 
     try
