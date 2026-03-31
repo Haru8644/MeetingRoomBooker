@@ -63,7 +63,7 @@
                         </div>
                         <span class="user-name">@currentUser.Name</span>
                     </div>
-                    <div class="logout-link" @onclick="Logout"><span>(Logout)</span></div>
+                    <div class="logout-link" @onclick="LogoutAsync"><span>(Logout)</span></div>
                 }
             </div>
         }
@@ -88,7 +88,7 @@
             </div>
             <span class="user-name">@currentUser.Name</span>
         </div>
-        <button class="cyber-button-primary w-100 mobile-logout" @onclick="Logout">ログアウト</button>
+        <button class="cyber-button-primary w-100 mobile-logout" @onclick="LogoutAsync">ログアウト</button>
         <button class="close-btn-mobile" @onclick="CloseProfileMenu">×</button>
     </div>
     <div class="mobile-menu-backdrop" @onclick="CloseProfileMenu"></div>
@@ -164,9 +164,9 @@
         showMobileProfile = false;
     }
 
-    private void Logout()
+    private async Task LogoutAsync()
     {
-        BookingService.Logout();
+        await BookingService.LogoutAsync();
         Navigation.NavigateTo("/", forceLoad: false);
     }
 

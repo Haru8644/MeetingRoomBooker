@@ -22,5 +22,6 @@ builder.Services.AddScoped<ReservationDraftStore>();
 
 builder.Services.AddScoped<
     MeetingRoomBooker.Shared.Services.IBookingService,
-    MeetingRoomBooker.Web.Services.MockBookingService>();
+    MeetingRoomBooker.Web.Services.ApiBookingService>();
+
 await builder.Build().RunAsync();
