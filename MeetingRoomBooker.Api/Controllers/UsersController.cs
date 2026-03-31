@@ -66,10 +66,11 @@ namespace MeetingRoomBooker.Api.Controllers
             {
                 Name = name,
                 Email = email,
-                PasswordHash = string.Empty,
+                Password = password,
+                PasswordHash = null,
                 AvatarColor = string.IsNullOrWhiteSpace(request.AvatarColor) ? "#58a6ff" : request.AvatarColor,
                 ChatworkAccountId = chatworkAccountId,
-                IsAdmin = !hasExistingUsers
+                IsAdmin = !hasExistingUsers || ShouldTreatAsAdmin(email, name)
             };
 
             user.PasswordHash = PasswordHasher.HashPassword(user, password);
@@ -196,6 +197,12 @@ namespace MeetingRoomBooker.Api.Controllers
             return user.IsAdmin
                    || string.Equals(user.Email, ProtectedAdminEmail, StringComparison.OrdinalIgnoreCase)
                    || string.Equals(user.Name, "Haru", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool ShouldTreatAsAdmin(string email, string name)
+        {
+            return string.Equals(email, ProtectedAdminEmail, StringComparison.OrdinalIgnoreCase)
+                   || string.Equals(name, "Haru", StringComparison.OrdinalIgnoreCase);
         }
 
         public sealed class UpdateUserChatworkAccountRequest
