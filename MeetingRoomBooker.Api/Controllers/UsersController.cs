@@ -82,6 +82,45 @@ namespace MeetingRoomBooker.Api.Controllers
         }
 
         [Authorize(Policy = "AdminOnly")]
+        [HttpPut("{id:int}/name")]
+        public async Task<IActionResult> UpdateUserName(
+            int id,
+            [FromBody] UpdateUserNameRequest request)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var normalizedName = request.Name?.Trim() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(normalizedName))
+            {
+                return BadRequest("Name is required.");
+            }
+
+            if (normalizedName.Length > 100)
+            {
+                return BadRequest("Name must be 100 characters or less.");
+            }
+
+            user.Name = normalizedName;
+
+            var ownedReservations = await _context.Reservations
+                .Where(r => r.UserId == id)
+                .ToListAsync();
+
+            foreach (var reservation in ownedReservations)
+            {
+                reservation.Name = normalizedName;
+            }
+
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        [Authorize(Policy = "AdminOnly")]
         [HttpPut("{id:int}/chatwork-account")]
         public async Task<IActionResult> UpdateChatworkAccountId(
             int id,
@@ -203,6 +242,11 @@ namespace MeetingRoomBooker.Api.Controllers
         {
             return string.Equals(email, ProtectedAdminEmail, StringComparison.OrdinalIgnoreCase)
                    || string.Equals(name, "Haru", StringComparison.OrdinalIgnoreCase);
+        }
+
+        public sealed class UpdateUserNameRequest
+        {
+            public string Name { get; set; } = string.Empty;
         }
 
         public sealed class UpdateUserChatworkAccountRequest

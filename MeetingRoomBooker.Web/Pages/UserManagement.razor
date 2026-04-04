@@ -60,8 +60,20 @@
                 <div class="um-user">
                     <div class="um-user-main">
                         <span class="um-id">ID_@user.Id.ToString("D3")</span>
-                        <span class="um-name">@user.Name</span>
                         <span class="um-email">@user.Email</span>
+                    </div>
+
+                    <div class="um-chatwork-editor">
+                        <span class="um-chatwork-label">NAME</span>
+                        <input @bind="user.Name"
+                               class="um-account-input"
+                               placeholder="USER NAME"
+                               autocomplete="off" />
+                        <button type="button"
+                                class="um-save-button"
+                                @onclick="() => SaveUserNameAsync(user)">
+                            SAVE NAME
+                        </button>
                     </div>
 
                     <div class="um-chatwork-editor">
@@ -163,6 +175,26 @@
             newConfirmPassword = string.Empty;
             newChatworkAccountId = string.Empty;
             msg = "REGISTRATION SUCCESSFUL";
+        }
+        catch (Exception ex)
+        {
+            msg = $"ERROR: {ex.Message}";
+        }
+    }
+
+    private async Task SaveUserNameAsync(UserModel user)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(user.Name))
+            {
+                msg = "ERROR: NAME IS REQUIRED";
+                return;
+            }
+
+            await BookingService.UpdateUserNameAsync(user.Id, user.Name);
+            await ReloadUsersAsync();
+            msg = $"USER NAME UPDATED: {user.Name}";
         }
         catch (Exception ex)
         {

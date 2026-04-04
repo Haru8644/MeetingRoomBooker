@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using MeetingRoomBooker.Api.Data;
 using MeetingRoomBooker.Api.Services.Chatwork;
 using MeetingRoomBooker.Shared.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace MeetingRoomBooker.Api.Controllers
 {
@@ -135,6 +137,203 @@ namespace MeetingRoomBooker.Api.Controllers
             return NoContent();
         }
 
+        [Authorize]
+        [HttpPost("{id}/join")]
+        public async Task<IActionResult> JoinReservation(int id, CancellationToken cancellationToken)
+        {
+            var reservation = await _context.Reservations.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+            if (reservation == null)
+            {
+                return NotFound();
+            }
+
+            if (!TryGetCurrentUserId(out var currentUserId))
+            {
+                return Unauthorized();
+            }
+
+            reservation.ParticipantIds ??= new List<int>();
+            if (reservation.ParticipantIds.Contains(currentUserId))
+            {
+                return NoContent();
+            }
+
+            reservation.ParticipantIds.Add(currentUserId);
+            NormalizeReservation(reservation);
+
+            await _context.SaveChangesAsync(cancellationToken);
+            await NotifyOrganizerForParticipationChangedAsync(reservation, currentUserId, true, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return NoContent();
+        }
+
+        [Authorize]
+        [HttpPost("{id}/leave")]
+        public async Task<IActionResult> LeaveReservation(int id, CancellationToken cancellationToken)
+        {
+            var reservation = await _context.Reservations.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+            if (reservation == null)
+            {
+                return NotFound();
+            }
+
+            if (!TryGetCurrentUserId(out var currentUserId))
+            {
+                return Unauthorized();
+            }
+
+            if (reservation.UserId == currentUserId)
+            {
+                return BadRequest("予約者本人は参加メンバーから外せません。");
+            }
+
+            if (reservation.ParticipantIds == null || !reservation.ParticipantIds.Remove(currentUserId))
+            {
+                return NoContent();
+            }
+
+            NormalizeReservation(reservation);
+
+            await _context.SaveChangesAsync(cancellationToken);
+            await NotifyOrganizerForParticipationChangedAsync(reservation, currentUserId, false, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return NoContent();
+        }
+
+        [Authorize]
+        [HttpPost("{id}/series-delete")]
+        public async Task<IActionResult> DeleteReservationSeries(
+            int id,
+            ReservationSeriesDeleteRequest request,
+            CancellationToken cancellationToken)
+        {
+            var baseReservation = await _context.Reservations
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
+            if (baseReservation == null)
+            {
+                return NotFound();
+            }
+
+            if (!TryGetCurrentUserId(out var currentUserId))
+            {
+                return Unauthorized();
+            }
+
+            if (baseReservation.UserId != currentUserId)
+            {
+                return Forbid();
+            }
+
+            var scope = NormalizeSeriesScope(request.Scope);
+            if (scope == ReservationSeriesScopes.Single || !IsRecurringReservation(baseReservation))
+            {
+                var single = await _context.Reservations.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+                if (single == null)
+                {
+                    return NotFound();
+                }
+
+                _context.Reservations.Remove(single);
+                await _context.SaveChangesAsync(cancellationToken);
+                return NoContent();
+            }
+
+            var targets = await GetRecurringSeriesReservationsAsync(baseReservation, scope, cancellationToken);
+            if (targets.Count == 0)
+            {
+                return NoContent();
+            }
+
+            _context.Reservations.RemoveRange(targets);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return NoContent();
+        }
+
+        [Authorize]
+        [HttpPost("{id}/series-update")]
+        public async Task<IActionResult> UpdateReservationSeries(
+            int id,
+            ReservationSeriesUpdateRequest request,
+            CancellationToken cancellationToken)
+        {
+            var baseReservation = await _context.Reservations
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
+            if (baseReservation == null)
+            {
+                return NotFound();
+            }
+
+            if (!TryGetCurrentUserId(out var currentUserId))
+            {
+                return Unauthorized();
+            }
+
+            if (baseReservation.UserId != currentUserId)
+            {
+                return Forbid();
+            }
+
+            var scope = NormalizeSeriesScope(request.Scope);
+            if (scope == ReservationSeriesScopes.Single || !IsRecurringReservation(baseReservation))
+            {
+                return await PutReservation(id, request.UpdatedReservation, request.NotifyParticipants, cancellationToken);
+            }
+
+            var updatedTemplate = request.UpdatedReservation ?? new ReservationModel();
+            NormalizeReservation(updatedTemplate);
+            updatedTemplate.UserId = baseReservation.UserId;
+
+            var targets = await GetRecurringSeriesReservationsAsync(baseReservation, scope, cancellationToken);
+            if (targets.Count == 0)
+            {
+                return NoContent();
+            }
+
+            var dayOffset = updatedTemplate.Date.Date - baseReservation.Date.Date;
+            var operations = new List<(ReservationModel Previous, ReservationModel Current, List<int> PreviousParticipantIds, List<int> CurrentParticipantIds)>();
+
+            foreach (var target in targets)
+            {
+                var nextDate = target.Date.Date.Add(dayOffset);
+                var updatedReservation = CreateRecurringUpdatedReservation(target, updatedTemplate, nextDate);
+                var previousParticipantIds = GetNotifiableParticipantIds(target);
+                var currentParticipantIds = GetNotifiableParticipantIds(updatedReservation);
+
+                _context.Entry(updatedReservation).State = EntityState.Modified;
+                operations.Add((target, updatedReservation, previousParticipantIds, currentParticipantIds));
+            }
+
+            await _context.SaveChangesAsync(cancellationToken);
+
+            if (request.NotifyParticipants)
+            {
+                foreach (var operation in operations)
+                {
+                    await NotifyParticipantsForUpdatedReservationAsync(
+                        operation.Previous,
+                        operation.Current,
+                        operation.PreviousParticipantIds,
+                        operation.CurrentParticipantIds);
+                }
+            }
+
+            foreach (var operation in operations)
+            {
+                await NotifyConflictOwnersAsync(operation.Current);
+            }
+
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return NoContent();
+        }
+
         private async Task NotifyParticipantsForCreatedReservationAsync(ReservationModel reservation)
         {
             var targetUsers = GetNotifiableParticipantIds(reservation);
@@ -239,6 +438,36 @@ namespace MeetingRoomBooker.Api.Controllers
             }
         }
 
+        private async Task NotifyOrganizerForParticipationChangedAsync(
+            ReservationModel reservation,
+            int actorUserId,
+            bool isJoin,
+            CancellationToken cancellationToken)
+        {
+            if (reservation.UserId == actorUserId)
+            {
+                return;
+            }
+
+            var actorName = await _context.Users
+                .Where(x => x.Id == actorUserId)
+                .Select(x => x.Name)
+                .FirstOrDefaultAsync(cancellationToken)
+                ?? $"ユーザー{actorUserId}";
+
+            var message = isJoin
+                ? $"{actorName}さんが予約「{GetReservationLabel(reservation)}」への参加を追加しました。利用日: {reservation.Date:yyyy/MM/dd} / 会議室: {reservation.Room} / 時間: {GetTimeRangeText(reservation)}"
+                : $"{actorName}さんが予約「{GetReservationLabel(reservation)}」への参加を取り消しました。利用日: {reservation.Date:yyyy/MM/dd} / 会議室: {reservation.Room} / 時間: {GetTimeRangeText(reservation)}";
+
+            await UpsertNotificationAsync(
+                reservation.UserId,
+                InfoNotificationType,
+                message,
+                reservation.Date,
+                reservation.Id,
+                $"{actorName}さんが予約「{GetReservationLabel(reservation)}」");
+        }
+
         private static bool IsRecurringReservation(ReservationModel reservation)
         {
             return !string.IsNullOrWhiteSpace(reservation.RepeatType)
@@ -246,9 +475,13 @@ namespace MeetingRoomBooker.Api.Controllers
                 && reservation.RepeatUntil.HasValue;
         }
 
-        private async Task<List<ReservationModel>> GetRecurringSeriesReservationsAsync(ReservationModel reservation)
+        private async Task<List<ReservationModel>> GetRecurringSeriesReservationsAsync(
+            ReservationModel reservation,
+            string scope,
+            CancellationToken cancellationToken)
         {
             var candidates = await _context.Reservations
+                .AsNoTracking()
                 .Where(x =>
                     x.UserId == reservation.UserId &&
                     x.Name == reservation.Name &&
@@ -256,9 +489,9 @@ namespace MeetingRoomBooker.Api.Controllers
                     x.Type == reservation.Type &&
                     x.Purpose == reservation.Purpose &&
                     x.RepeatType == reservation.RepeatType)
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
 
-            return candidates
+            var matches = candidates
                 .Where(x =>
                     x.RepeatUntil?.Date == reservation.RepeatUntil?.Date &&
                     x.StartTime.TimeOfDay == reservation.StartTime.TimeOfDay &&
@@ -266,13 +499,21 @@ namespace MeetingRoomBooker.Api.Controllers
                 .OrderBy(x => x.Date)
                 .ThenBy(x => x.Id)
                 .ToList();
+
+            return scope == ReservationSeriesScopes.Following
+                ? matches.Where(x => x.Date.Date >= reservation.Date.Date).ToList()
+                : matches;
         }
 
         private async Task UpsertRecurringReservationNotificationsAsync(
             ReservationModel reservation,
             IReadOnlyCollection<int> targetUsers)
         {
-            var seriesReservations = await GetRecurringSeriesReservationsAsync(reservation);
+            var seriesReservations = await GetRecurringSeriesReservationsAsync(
+                reservation,
+                ReservationSeriesScopes.All,
+                CancellationToken.None);
+
             var firstReservation = seriesReservations.FirstOrDefault();
 
             if (firstReservation == null)
@@ -473,6 +714,11 @@ namespace MeetingRoomBooker.Api.Controllers
                 .Distinct()
                 .ToList();
 
+            if (reservation.UserId > 0 && !reservation.ParticipantIds.Contains(reservation.UserId))
+            {
+                reservation.ParticipantIds.Insert(0, reservation.UserId);
+            }
+
             reservation.StartTime = reservation.Date.Date + reservation.StartTime.TimeOfDay;
             reservation.EndTime = reservation.Date.Date + reservation.EndTime.TimeOfDay;
 
@@ -485,6 +731,46 @@ namespace MeetingRoomBooker.Api.Controllers
             {
                 reservation.RepeatUntil = null;
             }
+        }
+
+        private bool TryGetCurrentUserId(out int userId)
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return int.TryParse(userIdClaim, out userId);
+        }
+
+        private static string NormalizeSeriesScope(string? scope)
+        {
+            return scope switch
+            {
+                ReservationSeriesScopes.All => ReservationSeriesScopes.All,
+                ReservationSeriesScopes.Following => ReservationSeriesScopes.Following,
+                _ => ReservationSeriesScopes.Single
+            };
+        }
+
+        private static ReservationModel CreateRecurringUpdatedReservation(
+            ReservationModel source,
+            ReservationModel updatedTemplate,
+            DateTime nextDate)
+        {
+            return new ReservationModel
+            {
+                Id = source.Id,
+                UserId = source.UserId,
+                Name = updatedTemplate.Name,
+                Room = updatedTemplate.Room,
+                NumberOfPeople = updatedTemplate.NumberOfPeople,
+                Type = updatedTemplate.Type,
+                Purpose = updatedTemplate.Purpose,
+                Date = nextDate,
+                StartTime = nextDate.Date + updatedTemplate.StartTime.TimeOfDay,
+                EndTime = nextDate.Date + updatedTemplate.EndTime.TimeOfDay,
+                ParticipantIds = (updatedTemplate.ParticipantIds ?? new List<int>()).Distinct().ToList(),
+                Participants = updatedTemplate.Participants,
+                RepeatType = source.RepeatType,
+                RepeatUntil = source.RepeatUntil
+            };
         }
     }
 }

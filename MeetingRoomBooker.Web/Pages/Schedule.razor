@@ -164,12 +164,31 @@
                     <div class="cyber-detail-row slide-in-right" style="--i:4"><div class="label">目的</div><div class="value value-text">@selectedBooking.Purpose</div></div>
                     <div class="cyber-detail-row slide-in-right" style="--i:5"><div class="label">参加者</div><div class="value value-text">@GetParticipantNames(selectedBooking.ParticipantIds)</div></div>
                 </div>
-                <div class="modal-footer fade-in" style="animation-delay: 0.3s;">
+                <div class="modal-footer fade-in" style="animation-delay: 0.3s; flex-wrap: wrap; gap: 10px;">
                     @if (IsOwner(selectedBooking))
                     {
                         <button class="cyber-button-primary" @onclick="StartEdit">編集</button>
-                        <button class="cyber-button-danger" @onclick="DeleteBooking">削除</button>
+
+                        @if (IsRecurringReservation(selectedBooking))
+                        {
+                            <button class="cyber-button-danger" @onclick="() => DeleteBooking(ReservationSeriesScopes.Single)">今回のみ削除</button>
+                            <button class="cyber-button-danger" @onclick="() => DeleteBooking(ReservationSeriesScopes.Following)">今回以降削除</button>
+                            <button class="cyber-button-danger" @onclick="() => DeleteBooking(ReservationSeriesScopes.All)">全て削除</button>
+                        }
+                        else
+                        {
+                            <button class="cyber-button-danger" @onclick="() => DeleteBooking(ReservationSeriesScopes.Single)">削除</button>
+                        }
                     }
+                    else if (CanJoinReservation(selectedBooking))
+                    {
+                        <button class="cyber-button-primary" @onclick="ToggleParticipationAsync">参加する</button>
+                    }
+                    else if (CanLeaveReservation(selectedBooking))
+                    {
+                        <button class="cyber-button-danger" @onclick="ToggleParticipationAsync">参加を取り消す</button>
+                    }
+
                     <button class="cyber-button-secondary" @onclick="CloseDetail">閉じる</button>
                 </div>
             }
@@ -217,8 +236,21 @@
                         <div class="fade-in-up" style="--i:6; position: relative; z-index: 30;">
                             <label>参加メンバー</label>
                             <div class="member-select-box">
+                                @if (currentUser != null)
+                                {
+                                    <div class="participant-item">
+                                        <input class="form-check-input" type="checkbox" checked="true" disabled>
+                                        <label class="form-check-label" style="display:inline; margin-left:5px;">@($"{currentUser.Name}（予約者本人・固定）")</label>
+                                    </div>
+                                }
+
                                 @foreach (var user in allUsers)
                                 {
+                                    if (currentUser != null && user.Id == currentUser.Id)
+                                    {
+                                        continue;
+                                    }
+
                                     <div class="participant-item">
                                         <input class="form-check-input" type="checkbox" id="edit_user_@user.Id" checked="@(editParticipantIds.Contains(user.Id))" @onchange="@(e => ToggleEditMember(user.Id, e.Value))">
                                         <label class="form-check-label" for="edit_user_@user.Id" style="display:inline; margin-left:5px; cursor:pointer;">@user.Name</label>
@@ -228,7 +260,18 @@
                         </div>
 
                         <div class="fade-in-up" style="--i:7; position: relative; z-index: 20;"><label>目的</label><FluentTextField @bind-Value="editPurpose" Style="width: 100%;" /></div>
-                        <div class="fade-in-up" style="--i:8; position: relative; z-index: 10; margin-top: 10px; border-top: 1px solid #30363d; padding-top: 10px;">
+                        @if (selectedBooking != null && IsRecurringReservation(selectedBooking))
+                        {
+                            <div class="fade-in-up" style="--i:8; position: relative; z-index: 15; margin-top: 10px; border-top: 1px solid #30363d; padding-top: 10px;">
+                                <label>反映範囲</label>
+                                <div class="selection-group">
+                                    <div class="selection-chip @(editSeriesScope == ReservationSeriesScopes.Single ? "active" : "")" @onclick="() => editSeriesScope = ReservationSeriesScopes.Single">今回のみ</div>
+                                    <div class="selection-chip @(editSeriesScope == ReservationSeriesScopes.Following ? "active" : "")" @onclick="() => editSeriesScope = ReservationSeriesScopes.Following">今回以降</div>
+                                    <div class="selection-chip @(editSeriesScope == ReservationSeriesScopes.All ? "active" : "")" @onclick="() => editSeriesScope = ReservationSeriesScopes.All">全て</div>
+                                </div>
+                            </div>
+                        }
+                        <div class="fade-in-up" style="--i:9; position: relative; z-index: 10; margin-top: 10px; border-top: 1px solid #30363d; padding-top: 10px;">
                             <FluentCheckbox @bind-Value="sendNotification" Label="参加者に変更を通知する" Style="color: #d53369 !important; --neutral-foreground-rest: #d53369 !important;" />
                         </div>
                     </FluentStack>
@@ -327,6 +370,8 @@
     private List<int> editParticipantIds = new();
     private bool sendNotification = true;
     private DateTime? timelineDate;
+    private string editSeriesScope = ReservationSeriesScopes.Single;
+    private ReservationModel? editingOriginalReservation;
 
     protected override async Task OnInitializedAsync()
     {
@@ -440,6 +485,7 @@
     private void StartEdit()
     {
         if (selectedBooking == null) return;
+        editingOriginalReservation = CloneReservation(selectedBooking);
         editName = selectedBooking.Name;
         editRoom = selectedBooking.Room;
         editType = selectedBooking.Type;
@@ -447,12 +493,18 @@
         editDate = selectedBooking.Date;
         editStart = selectedBooking.StartTime;
         editEnd = selectedBooking.EndTime;
-        editParticipantIds = new List<int>(selectedBooking.ParticipantIds ?? new List<int>());
+        editParticipantIds = new List<int>((selectedBooking.ParticipantIds ?? new List<int>()).Where(id => currentUser == null || id != currentUser.Id));
         sendNotification = true;
+        editSeriesScope = ReservationSeriesScopes.Single;
         isEditing = true;
     }
 
-    private void CancelEdit() => isEditing = false;
+    private void CancelEdit()
+    {
+        isEditing = false;
+        editingOriginalReservation = null;
+        editSeriesScope = ReservationSeriesScopes.Single;
+    }
 
     private void ToggleEditMember(int userId, object? isChecked)
     {
@@ -468,74 +520,160 @@
 
     private async Task SaveEdit()
     {
-        if (selectedBooking != null)
+        if (selectedBooking == null || editingOriginalReservation == null)
         {
-            selectedBooking.Name = editName;
-            selectedBooking.Room = editRoom;
-            selectedBooking.Type = editType;
-            selectedBooking.Purpose = editPurpose;
-            if (editDate.HasValue) selectedBooking.Date = editDate.Value;
-            if (editStart.HasValue) selectedBooking.StartTime = selectedBooking.Date.Date + editStart.Value.TimeOfDay;
-            if (editEnd.HasValue) selectedBooking.EndTime = selectedBooking.Date.Date + editEnd.Value.TimeOfDay;
-            selectedBooking.ParticipantIds = editParticipantIds;
-
-            await BookingService.UpdateReservationAsync(selectedBooking, sendNotification);
+            return;
         }
-        isEditing = false;
-    }
 
-    private async Task DeleteBooking()
-    {
-        if (selectedBooking == null) return;
-        if (selectedBooking.RepeatType != "しない" && !string.IsNullOrEmpty(selectedBooking.RepeatType))
+        var reservationId = selectedBooking.Id;
+        var updatedReservation = CloneReservation(selectedBooking);
+        updatedReservation.Name = editName;
+        updatedReservation.Room = editRoom;
+        updatedReservation.Type = editType;
+        updatedReservation.Purpose = editPurpose;
+        if (editDate.HasValue) updatedReservation.Date = editDate.Value.Date;
+        if (editStart.HasValue) updatedReservation.StartTime = updatedReservation.Date.Date + editStart.Value.TimeOfDay;
+        if (editEnd.HasValue) updatedReservation.EndTime = updatedReservation.Date.Date + editEnd.Value.TimeOfDay;
+        updatedReservation.ParticipantIds = BuildEditParticipantIds();
+
+        if (IsRecurringReservation(selectedBooking) && editSeriesScope != ReservationSeriesScopes.Single)
         {
-            bool deleteAll = await JSRuntime.InvokeAsync<bool>("confirm",
-                "この予約は繰り返し予約です。\n一括で関連するすべての予約を削除しますか？\n（[キャンセル] を押すと、この日のみ削除します）");
-
-            if (deleteAll)
-            {
-                var all = await BookingService.GetReservationsAsync();
-                var targets = all.Where(r =>
-                    r.Name == selectedBooking.Name &&
-                    r.Room == selectedBooking.Room &&
-                    r.Purpose == selectedBooking.Purpose &&
-                    r.RepeatType == selectedBooking.RepeatType &&
-                    r.StartTime.TimeOfDay == selectedBooking.StartTime.TimeOfDay
-                ).ToList();
-
-                foreach (var t in targets)
-                {
-                    try
-                    {
-                        await BookingService.RemoveReservationAsync(t);
-                        if (targets.Count > 1) await Task.Delay(100);
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.LogWarning(ex, "Failed to delete recurring reservation ID: {Id}", t.Id);
-                    }
-                }
-            }
-            else
-            {
-                if (await JSRuntime.InvokeAsync<bool>("confirm", "この日の予約のみ削除しますか？"))
-                {
-                    await BookingService.RemoveReservationAsync(selectedBooking);
-                }
-                else return;
-            }
+            await BookingService.UpdateRecurringReservationAsync(editingOriginalReservation, updatedReservation, sendNotification, editSeriesScope);
         }
         else
         {
-            if (await JSRuntime.InvokeAsync<bool>("confirm", "削除しますか？"))
-            {
-                await BookingService.RemoveReservationAsync(selectedBooking);
-            }
-            else return;
+            await BookingService.UpdateReservationAsync(updatedReservation, sendNotification);
+        }
+
+        isEditing = false;
+        editingOriginalReservation = null;
+        editSeriesScope = ReservationSeriesScopes.Single;
+        await LoadData();
+
+        selectedBooking = allReservations.FirstOrDefault(r => r.Id == reservationId);
+    }
+
+    private async Task DeleteBooking(string scope)
+    {
+        if (selectedBooking == null)
+        {
+            return;
+        }
+
+        var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", GetDeleteConfirmationMessage(scope, selectedBooking));
+        if (!confirmed)
+        {
+            return;
+        }
+
+        if (IsRecurringReservation(selectedBooking) && scope != ReservationSeriesScopes.Single)
+        {
+            await BookingService.RemoveRecurringReservationAsync(selectedBooking, scope);
+        }
+        else
+        {
+            await BookingService.RemoveReservationAsync(selectedBooking);
         }
 
         selectedBooking = null;
         await LoadData();
+    }
+
+    private async Task ToggleParticipationAsync()
+    {
+        if (selectedBooking == null)
+        {
+            return;
+        }
+
+        var reservationId = selectedBooking.Id;
+
+        if (CanJoinReservation(selectedBooking))
+        {
+            await BookingService.JoinReservationAsync(selectedBooking.Id);
+        }
+        else if (CanLeaveReservation(selectedBooking))
+        {
+            var confirmed = await JSRuntime.InvokeAsync<bool>("confirm", "この予約への参加を取り消しますか？");
+            if (!confirmed)
+            {
+                return;
+            }
+
+            await BookingService.LeaveReservationAsync(selectedBooking.Id);
+        }
+
+        await LoadData();
+        selectedBooking = allReservations.FirstOrDefault(r => r.Id == reservationId);
+    }
+
+    private bool CanJoinReservation(ReservationModel reservation)
+    {
+        return currentUser != null
+            && !IsOwner(reservation)
+            && !(reservation.ParticipantIds?.Contains(currentUser.Id) ?? false);
+    }
+
+    private bool CanLeaveReservation(ReservationModel reservation)
+    {
+        return currentUser != null
+            && !IsOwner(reservation)
+            && (reservation.ParticipantIds?.Contains(currentUser.Id) ?? false);
+    }
+
+    private static bool IsRecurringReservation(ReservationModel reservation)
+    {
+        return !string.IsNullOrWhiteSpace(reservation.RepeatType)
+            && reservation.RepeatType != "しない"
+            && reservation.RepeatUntil.HasValue;
+    }
+
+    private List<int> BuildEditParticipantIds()
+    {
+        var participantIds = editParticipantIds
+            .Where(id => id > 0)
+            .Distinct()
+            .ToHashSet();
+
+        if (currentUser != null)
+        {
+            participantIds.Add(currentUser.Id);
+        }
+
+        return participantIds.ToList();
+    }
+
+    private static string GetDeleteConfirmationMessage(string scope, ReservationModel reservation)
+    {
+        if (!IsRecurringReservation(reservation) || scope == ReservationSeriesScopes.Single)
+        {
+            return "削除しますか？";
+        }
+
+        return scope == ReservationSeriesScopes.Following
+            ? "この予約を今回以降まとめて削除しますか？"
+            : "この繰り返し予約をすべて削除しますか？";
+    }
+
+    private static ReservationModel CloneReservation(ReservationModel reservation)
+    {
+        return new ReservationModel
+        {
+            Id = reservation.Id,
+            UserId = reservation.UserId,
+            Name = reservation.Name,
+            Room = reservation.Room,
+            NumberOfPeople = reservation.NumberOfPeople,
+            Type = reservation.Type,
+            Purpose = reservation.Purpose,
+            Date = reservation.Date,
+            StartTime = reservation.StartTime,
+            EndTime = reservation.EndTime,
+            ParticipantIds = new List<int>(reservation.ParticipantIds ?? new List<int>()),
+            Participants = reservation.Participants,
+            RepeatType = reservation.RepeatType,
+            RepeatUntil = reservation.RepeatUntil
+        };
     }
 
     private void OpenTimelineModal(DateTime date)
