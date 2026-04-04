@@ -104,6 +104,25 @@ namespace MeetingRoomBooker.Web.Services
             }
         }
 
+        public async Task UpdateUserNameAsync(int userId, string name)
+        {
+            var normalizedName = name?.Trim() ?? string.Empty;
+
+            var response = await SendAsync(
+                HttpMethod.Put,
+                $"api/Users/{userId}/name",
+                new { Name = normalizedName });
+
+            await EnsureSuccessAsync(response, $"Failed to update user name for user id={userId}.");
+
+            if (_currentUser?.Id == userId)
+            {
+                _currentUser.Name = normalizedName;
+            }
+
+            NotifyStateChanged();
+        }
+
         public async Task UpdateUserChatworkAccountIdAsync(int userId, string? chatworkAccountId)
         {
             var response = await SendAsync(
@@ -182,6 +201,21 @@ namespace MeetingRoomBooker.Web.Services
             NotifyStateChanged();
         }
 
+        public async Task RemoveRecurringReservationAsync(ReservationModel reservation, string scope)
+        {
+            var response = await SendAsync(
+                HttpMethod.Post,
+                $"api/Reservations/{reservation.Id}/series-delete",
+                new ReservationSeriesDeleteRequest
+                {
+                    OriginalReservation = reservation,
+                    Scope = scope
+                });
+
+            await EnsureSuccessAsync(response, $"Failed to remove recurring reservation id={reservation.Id}.");
+            NotifyStateChanged();
+        }
+
         public async Task UpdateReservationAsync(ReservationModel reservation, bool shouldNotify)
         {
             var response = await SendAsync(
@@ -190,6 +224,37 @@ namespace MeetingRoomBooker.Web.Services
                 reservation);
 
             await EnsureSuccessAsync(response, $"Failed to update reservation id={reservation.Id}.");
+            NotifyStateChanged();
+        }
+
+        public async Task UpdateRecurringReservationAsync(ReservationModel originalReservation, ReservationModel updatedReservation, bool shouldNotify, string scope)
+        {
+            var response = await SendAsync(
+                HttpMethod.Post,
+                $"api/Reservations/{originalReservation.Id}/series-update",
+                new ReservationSeriesUpdateRequest
+                {
+                    OriginalReservation = originalReservation,
+                    UpdatedReservation = updatedReservation,
+                    NotifyParticipants = shouldNotify,
+                    Scope = scope
+                });
+
+            await EnsureSuccessAsync(response, $"Failed to update recurring reservation id={originalReservation.Id}.");
+            NotifyStateChanged();
+        }
+
+        public async Task JoinReservationAsync(int reservationId)
+        {
+            var response = await SendAsync(HttpMethod.Post, $"api/Reservations/{reservationId}/join");
+            await EnsureSuccessAsync(response, $"Failed to join reservation id={reservationId}.");
+            NotifyStateChanged();
+        }
+
+        public async Task LeaveReservationAsync(int reservationId)
+        {
+            var response = await SendAsync(HttpMethod.Post, $"api/Reservations/{reservationId}/leave");
+            await EnsureSuccessAsync(response, $"Failed to leave reservation id={reservationId}.");
             NotifyStateChanged();
         }
 

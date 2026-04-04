@@ -30,7 +30,7 @@
                                 continue;
                             }
 
-                            <div class="participant-item" @key="user.Id"><FluentCheckbox @bind-Value="user.IsSelected" Label="@user.Name" /></div>
+                            <div class="participant-item" @key="user.Id"><FluentCheckbox Value="@user.IsSelected" ValueChanged="@(value => OnParticipantSelectionChanged(user, value))" Label="@user.Name" /></div>
                         }
                     </div>
                 </div>
@@ -225,13 +225,16 @@
         _timer = new System.Threading.Timer(UpdateTime, null, 1000, 1000);
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    private bool draftRestored;
+
+    protected override async Task OnParametersSetAsync()
     {
-        if (!firstRender || RestoreDraft != 1)
+        if (RestoreDraft != 1 || draftRestored)
         {
             return;
         }
 
+        draftRestored = true;
         await RestoreDraftAsync();
     }
 
@@ -329,6 +332,11 @@
     {
         DraftStore.Clear();
         await JSRuntime.InvokeVoidAsync("sessionStorage.removeItem", DraftStorageKey);
+    }
+
+    private void OnParticipantSelectionChanged(UserViewModel user, bool isSelected)
+    {
+        user.IsSelected = isSelected;
     }
 
     private async Task LoadDayReservationsSafeAsync()
