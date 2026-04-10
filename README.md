@@ -1,101 +1,290 @@
-# 🏢 MeetingRoomBooker
+# MeetingRoomBooker
 
-![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
-![Blazor](https://img.shields.io/badge/Blazor-WASM-5C2D91?style=for-the-badge&logo=blazor&logoColor=white)
-![C#](https://img.shields.io/badge/c%23-%23239120.svg?style=for-the-badge&logo=csharp&logoColor=white)
-![SQLite](https://img.shields.io/badge/sqlite-%2307405e.svg?style=for-the-badge&logo=sqlite&logoColor=white)
-![Nginx](https://img.shields.io/badge/nginx-%23009639.svg?style=for-the-badge&logo=nginx&logoColor=white)
-![Linux](https://img.shields.io/badge/Linux-FCC624?style=for-the-badge&logo=linux&logoColor=black)
+MeetingRoomBooker is a meeting room booking system built with **Blazor WebAssembly** and **ASP.NET Core Web API** for small internal teams.
 
-> **A Modern SPA designed to eliminate double-bookings, streamline enterprise resource management, and drive true digital transformation (DX) on the front lines.**
+It was originally developed during my internship to improve day-to-day meeting room operations, including booking management, participant handling, notifications, and reminders.  
+This public version has been cleaned up and reorganized so the architecture, authentication model, and deployment assumptions are easier to understand as a portfolio project, without exposing company-specific data or secrets.
 
-## 📖 Overview
-MeetingRoomBooker is a comprehensive conference room reservation platform developed from scratch to solve real-world operational bottlenecks. Built entirely on the Microsoft C#/.NET ecosystem, it features a highly decoupled architecture utilizing **Blazor WebAssembly** for a rich, responsive frontend and **ASP.NET Core Web API** for a robust, secure backend.
+---
 
-The UI features a modern, cyberpunk-inspired Glassmorphism design integrated with **Microsoft Fluent UI**, delivering an intuitive user experience that employees genuinely *want* to use.
+## Overview
 
-## 🚀 The Challenge & Business Impact
-**The Problem:** Previously, reservations were managed via generic calendar apps (e.g., TimeTree). Due to poor visibility and lack of conflict-prevention mechanisms, **double-bookings occurred 5-6 times a month**, causing a constant monthly loss of 1-2 hours in coordination and delaying critical business decisions.
+Managing meeting rooms through chat tools and shared calendars alone often creates operational friction:
 
-**The Solution & Results:**
-By redefining the root causes (mixed use cases, undefined exception handling, lack of clear responsibility) and implementing this dedicated system:
-- 📉 **Double-bookings reduced to exactly ZERO.**
-- ⏱️ **Coordination time slashed by 100%**, reclaiming hours of lost productivity.
-- 🤝 **Seamless Adoption:** Established a "5-Step Framework" (Exception Categorization, Responsibility Demarcation, Authority/Audit, Migration Procedure, Adoption Metrics) to ensure the system didn't just end at "deployment" but achieved full-scale company adoption.
+- it is hard to see room availability at a glance
+- ownership and participant responsibility can become unclear
+- updates and cancellations are easy to miss
+- reminder and reception workflows often depend on manual coordination
+- overlapping reservations may be caught too late
 
-## ✨ Key Features
-- **Strict Conflict Prevention:** Robust backend validation and database-level constraints ensure overlapping reservations are strictly prevented.
-- **Modern UI/UX:** Sleek, glassmorphism-inspired design powered by Fluent UI components, ensuring both visual appeal and enterprise-grade accessibility.
-- **Color-Coded Timeline:** Instantly distinguish between "Internal Meetings" (Purple) and "Client Visits" (Green) to maintain professionalism on the floor.
-- **RESTful API Architecture:** Strict adherence to REST principles (GET, POST, PUT, DELETE) using JSON payloads.
-- **End-to-End Type Safety:** Utilizing C# shared models across both frontend (WASM) and backend (API) eliminates data-mismatch bugs during compilation.
+MeetingRoomBooker brings these concerns into a single workflow that covers **reservations, access control, notifications, and day-to-day operational visibility**.
 
-## 🏗️ Architecture & Infrastructure
-The application is currently deployed and maintained on a Linux VPS, demonstrating full-stack deployment and infrastructure management capabilities.
+---
 
-- **Frontend:** Blazor WebAssembly (SPA)
-- **Backend:** ASP.NET Core Web API, Entity Framework Core (EF Core)
-- **Database:** SQLite
-- **Web Server / Reverse Proxy:** Nginx handling internet traffic, routing to internal Kestrel servers.
-- **Process Management:** `systemd` daemonizing the API for 24/7 high availability and auto-healing.
+## Features
 
-## 💡 Why the Microsoft .NET Ecosystem?
-In enterprise environments, technology must balance agility with governance. I chose the .NET stack because it provides a unified, strongly-typed ecosystem. Sharing C# models between the client and server drastically speeds up development and reduces human error. Furthermore, deploying ASP.NET Core on Linux via Kestrel proves the cross-platform power of modern .NET, ensuring long-term maintainability (LTS) and enterprise-grade security.
+### Reservation management
+- Create reservations with date, time, room, category, and purpose
+- Add participants to a reservation
+- View schedules in calendar and timeline formats
+- Make organizers and participants easy to distinguish in the UI
 
-## 🛠️ Getting Started (Local Development)
+### Recurring reservations
+- Support daily and weekly recurring bookings
+- Delete recurring reservations with scope options:
+  - This occurrence only
+  - This and following
+  - Entire series
+- Update recurring reservations with scope options:
+  - Single occurrence
+  - This and following
+  - Entire series
+
+### Notifications
+- Notify users when participants are added or removed
+- Send detailed update notifications based on reservation changes
+- Notify organizers when someone joins or leaves a reservation
+- Send Chatwork notifications for create, update, delete, and reminder events
+- Separate notifications for shared room visibility, reception workflows, and stakeholders
+
+### Operational support
+- Cookie-based authentication with persistent sessions
+- Remember Me support
+- Admin user management
+- Self-join flow for existing reservations
+- Draft persistence while filling out reservation forms
+
+### Security and access control
+- Server-side authentication and authorization checks
+- Reservation updates and deletions restricted to the organizer or an admin
+- Notifications visible only to the relevant user or an admin
+- Admin-only protection for management APIs
+- Plaintext password storage removed for new registrations
+- Legacy plaintext passwords can be migrated to hashed storage after a successful login
+
+---
+
+## Tech Stack
+
+### Frontend
+- Blazor WebAssembly
+- Microsoft Fluent UI for Blazor
+- Shared C# models and contracts
+
+### Backend
+- ASP.NET Core Web API
+- Entity Framework Core
+- Cookie Authentication
+- Hosted Service for Chatwork reminders
+
+### Data / Infrastructure
+- SQLite
+- Nginx
+- Linux VPS
+- systemd
+
+---
+
+## Architecture
+
+```text
+MeetingRoomBooker.Web     ... Blazor WebAssembly frontend
+MeetingRoomBooker.Api     ... Authentication, reservation, notification, and Chatwork APIs
+MeetingRoomBooker.Shared  ... Shared models and service contracts
+```
+
+### Design principles
+- Keep frontend and backend responsibilities clearly separated
+- Share contracts between client and server to reduce mismatches
+- Enforce final authorization on the API side, not only in the UI
+- Handle external notification delivery on the backend rather than exposing Chatwork directly from the frontend
+
+---
+
+## Authentication and Authorization
+
+### Authentication
+- ASP.NET Core Cookie Authentication
+- Persistent sessions through Remember Me
+- HttpOnly authentication cookies
+
+### Authorization
+
+Regular users can:
+- view reservation schedules
+- create reservations
+- update or delete their own reservations
+- join or leave other users' reservations
+- view their own notifications
+
+Admins can:
+- list users
+- register users
+- update user names and Chatwork account IDs
+- delete users
+- access admin-only management APIs
+- manage reservations beyond normal ownership rules when necessary
+
+### Password handling
+- New passwords are stored as hashes
+- Legacy plaintext passwords can be migrated after a successful login
+- Plaintext values are cleared once migration is complete
+
+---
+
+## Reservation Integrity
+
+The API performs **server-side overlap validation** before saving reservations, so duplicate bookings are not prevented by the UI alone.
+
+This approach is suitable for a small internal deployment.  
+In a higher-concurrency environment, I would strengthen this further with stricter transactional handling or database-level guarantees.
+
+---
+
+## Chatwork Integration
+
+### Supported events
+- Reservation created
+- Reservation updated
+- Reservation canceled
+- Reminder sent 10 minutes before the meeting
+
+### Notification targets
+- Shared room notifications
+- Reception notifications for visitor meetings
+- Stakeholder notifications
+
+### User mapping
+Each user can store a `ChatworkAccountId`, allowing stakeholder notifications to include Chatwork mentions.
+
+---
+
+## Local Development
 
 ### Prerequisites
-- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
-- Visual Studio 2022 / VS Code
+- .NET 8 SDK
+- Visual Studio 2022 or VS Code
 
-### 1. Run the API (Backend)
-Open a terminal and run the following commands:
-
+### Run the API
 ```bash
 cd MeetingRoomBooker.Api
+dotnet restore
 dotnet run
 ```
 
-### 2. Run the Web App (Frontend)
-Open a new terminal window and run:
-
+### Run the Web app
 ```bash
 cd MeetingRoomBooker.Web
+dotnet restore
 dotnet run
 ```
 
-*In Mock Mode (default), the UI works without the API. If you switch to API Mode, the web app connects to the local API endpoint.*
+### Create the first admin user
+If the database is empty, the first registered user becomes the initial admin.
 
-## 🔐 Authentication & Demo Accounts (Important)
-This public repository runs in **Mock Mode by default** so you can try the UI immediately without provisioning accounts.
+There is no public self-signup screen in the UI.  
+For the first account only, create the user through:
 
-### Why there is no “Register” page
-In the real company workflow, **only admin users can create/manage accounts** (governance + audit).
-To keep the public version aligned with that policy, end-user self-registration UI is intentionally **not included**.
+- `POST /api/Users/register` in Swagger, or
+- any API client
 
-### Demo credentials (Mock Mode)
-Use any of the following accounts:
+After that, additional users should be created from the admin management screen.
 
-- `haru@demo.com` / `demo` (admin)
-- `demo@demo.com` / `demo`
-- `sato@demo.com` / `demo`
+---
 
-> Note: Mock Mode persists demo data in the browser via `localStorage`.
-> If credentials don’t work (e.g., after code changes), clear these keys and reload:
-> - `demo_users`
-> - `demo_reservations`
-> - `demo_notifications`
-> Alternatively, use an incognito window.
+## Configuration
 
-### Switching between Mock ↔ API
-In `MeetingRoomBooker.Web/Program.cs`, toggle the DI registration:
+### Web
+`MeetingRoomBooker.Web/wwwroot/appsettings.json`
 
-```csharp
-// Mock mode (default for this public repo)
-builder.Services.AddScoped<MeetingRoomBooker.Shared.Services.IBookingService,
-    MeetingRoomBooker.Web.Services.MockBookingService>();
-
-// API mode (production-style integration)
-// builder.Services.AddScoped<MeetingRoomBooker.Shared.Services.IBookingService,
-//     MeetingRoomBooker.Web.Services.ApiBookingService>();
+```json
+{
+  "ApiBaseUrl": "https://localhost:7005/"
+}
 ```
+
+### API
+`MeetingRoomBooker.Api/appsettings.json`
+
+Main settings include:
+
+- `ConnectionStrings:DefaultConnection`
+- `Cors:AllowedOrigins`
+- `Chatwork:Enabled`
+- `Chatwork:ApiToken`
+- `Chatwork:RoomId`
+- `Chatwork:StakeholderRoomId`
+- `Chatwork:ReceptionRoomId`
+- `Chatwork:RoomMappings`
+
+---
+
+## Deployment Assumptions
+
+This project is intended for a **small internal, single-node deployment**.
+
+A typical setup looks like this:
+
+- Web: static file hosting
+- API: long-running Kestrel process
+- Nginx: reverse proxy
+- systemd: API process management
+- SQLite: lightweight database for internal operational use
+
+The goal is to keep the system understandable and maintainable without introducing unnecessary infrastructure complexity.
+
+---
+
+## What This Project Demonstrates
+
+As a portfolio project, this repository is meant to highlight:
+
+- practical internal tool design rather than toy CRUD
+- API-side authorization instead of UI-only restrictions
+- cookie-based authentication with persistent sessions
+- recurring reservation workflows with scoped update and delete behavior
+- operational notifications and reminder handling
+- Chatwork integration and background processing
+- shared contracts between frontend and backend
+
+---
+
+## Possible Next Improvements
+
+Areas I would improve next include:
+
+- automated API tests and end-to-end tests
+- clearer separation between controllers and application services
+- stronger audit logging
+- a smoother migration path from SQLite to PostgreSQL
+- CI automation for build, test, format, and publish
+- a more explicit database initialization and admin bootstrap flow
+
+---
+
+## Security and Privacy Notes
+
+Before publishing or sharing a deployment based on this project, make sure to:
+
+- remove all real email addresses, tokens, and secrets
+- avoid committing local database files
+- avoid publishing screenshots that contain personal information
+- exclude production URLs, VPS details, and credentials
+
+---
+
+## Demo Materials
+
+The following assets help make the project easier to present:
+
+- login screen
+- calendar screen
+- reservation form
+- admin management screen
+- Chatwork notification examples
+
+---
+
+## Summary
+
+> A meeting room booking system designed around real internal operational needs, covering reservations, access control, notifications, and reminders end to end.
