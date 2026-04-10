@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using MeetingRoomBooker.Api.Data;
 using MeetingRoomBooker.Shared.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -9,10 +10,9 @@ namespace MeetingRoomBooker.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UsersController : ControllerBase
+    public sealed class UsersController : ControllerBase
     {
         private const int ChatworkAccountIdMaxLength = 100;
-        private static readonly string ProtectedAdminEmail = "haruki_sasuke@icloud.com";
         private static readonly PasswordHasher<UserModel> PasswordHasher = new();
         private readonly AppDbContext _context;
 
@@ -21,11 +21,12 @@ namespace MeetingRoomBooker.Api.Controllers
             _context = context;
         }
 
-        [Authorize]
+        [Authorize(Policy = "AdminOnly")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserModel>>> GetUsers()
         {
             return await _context.Users
+                .AsNoTracking()
                 .OrderBy(user => user.Id)
                 .ToListAsync();
         }
@@ -35,7 +36,7 @@ namespace MeetingRoomBooker.Api.Controllers
         public async Task<ActionResult<UserModel>> Register(RegisterUserRequest request)
         {
             var name = request.Name?.Trim() ?? string.Empty;
-            var email = request.Email?.Trim() ?? string.Empty;
+            var email = NormalizeEmail(request.Email);
             var password = request.Password ?? string.Empty;
             var chatworkAccountId = NormalizeChatworkAccountId(request.ChatworkAccountId);
             var hasExistingUsers = await _context.Users.AnyAsync();
@@ -66,11 +67,11 @@ namespace MeetingRoomBooker.Api.Controllers
             {
                 Name = name,
                 Email = email,
-                Password = password,
+                Password = string.Empty,
                 PasswordHash = null,
                 AvatarColor = string.IsNullOrWhiteSpace(request.AvatarColor) ? "#58a6ff" : request.AvatarColor,
                 ChatworkAccountId = chatworkAccountId,
-                IsAdmin = !hasExistingUsers || ShouldTreatAsAdmin(email, name)
+                IsAdmin = !hasExistingUsers
             };
 
             user.PasswordHash = PasswordHasher.HashPassword(user, password);
@@ -79,6 +80,45 @@ namespace MeetingRoomBooker.Api.Controllers
             await _context.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetUsers), new { id = user.Id }, user);
+        }
+
+        [Authorize(Policy = "AdminOnly")]
+        [HttpPut("{id:int}/name")]
+        public async Task<IActionResult> UpdateUserName(
+            int id,
+            [FromBody] UpdateUserNameRequest request)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var normalizedName = request.Name?.Trim() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(normalizedName))
+            {
+                return BadRequest("Name is required.");
+            }
+
+            if (normalizedName.Length > 100)
+            {
+                return BadRequest("Name must be 100 characters or less.");
+            }
+
+            user.Name = normalizedName;
+
+            var ownedReservations = await _context.Reservations
+                .Where(r => r.UserId == id)
+                .ToListAsync();
+
+            foreach (var reservation in ownedReservations)
+            {
+                reservation.Name = normalizedName;
+            }
+
+            await _context.SaveChangesAsync();
+
+            return NoContent();
         }
 
         [Authorize(Policy = "AdminOnly")]
@@ -115,9 +155,18 @@ namespace MeetingRoomBooker.Api.Controllers
                 return NotFound();
             }
 
-            if (IsProtectedAdmin(user))
+            if (user.IsAdmin)
             {
-                return BadRequest("The admin user cannot be deleted.");
+                return BadRequest("管理者ユーザーは削除できません。");
+            }
+
+            var currentUserId = TryGetCurrentUserId(out var parsedUserId)
+                ? parsedUserId
+                : 0;
+
+            if (currentUserId == id)
+            {
+                return BadRequest("自分自身は削除できません。");
             }
 
             await using var transaction = await _context.Database.BeginTransactionAsync();
@@ -185,6 +234,11 @@ namespace MeetingRoomBooker.Api.Controllers
             return NoContent();
         }
 
+        private static string NormalizeEmail(string? email)
+        {
+            return (email ?? string.Empty).Trim().ToLowerInvariant();
+        }
+
         private static string? NormalizeChatworkAccountId(string? chatworkAccountId)
         {
             return string.IsNullOrWhiteSpace(chatworkAccountId)
@@ -192,17 +246,15 @@ namespace MeetingRoomBooker.Api.Controllers
                 : chatworkAccountId.Trim();
         }
 
-        private static bool IsProtectedAdmin(UserModel user)
+        private bool TryGetCurrentUserId(out int userId)
         {
-            return user.IsAdmin
-                   || string.Equals(user.Email, ProtectedAdminEmail, StringComparison.OrdinalIgnoreCase)
-                   || string.Equals(user.Name, "Haru", StringComparison.OrdinalIgnoreCase);
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return int.TryParse(userIdClaim, out userId);
         }
 
-        private static bool ShouldTreatAsAdmin(string email, string name)
+        public sealed class UpdateUserNameRequest
         {
-            return string.Equals(email, ProtectedAdminEmail, StringComparison.OrdinalIgnoreCase)
-                   || string.Equals(name, "Haru", StringComparison.OrdinalIgnoreCase);
+            public string Name { get; set; } = string.Empty;
         }
 
         public sealed class UpdateUserChatworkAccountRequest

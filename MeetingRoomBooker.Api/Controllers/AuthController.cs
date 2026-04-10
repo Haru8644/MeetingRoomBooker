@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using MeetingRoomBooker.Api.Data;
 using MeetingRoomBooker.Shared.Models;
 using Microsoft.AspNetCore.Authentication;
@@ -15,7 +15,6 @@ namespace MeetingRoomBooker.Api.Controllers
     public sealed class AuthController : ControllerBase
     {
         private static readonly PasswordHasher<UserModel> PasswordHasher = new();
-        private static readonly string ProtectedAdminEmail = "haruki_sasuke@icloud.com";
         private readonly AppDbContext _context;
 
         public AuthController(AppDbContext context)
@@ -27,7 +26,7 @@ namespace MeetingRoomBooker.Api.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<UserModel>> Login([FromBody] LoginRequest request)
         {
-            var email = request.Email?.Trim() ?? string.Empty;
+            var email = NormalizeEmail(request.Email);
             var password = request.Password ?? string.Empty;
 
             if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
@@ -67,6 +66,7 @@ namespace MeetingRoomBooker.Api.Controllers
             {
                 isAuthenticated = true;
                 user.PasswordHash = PasswordHasher.HashPassword(user, password);
+                user.Password = string.Empty;
                 shouldSave = true;
             }
 
@@ -75,10 +75,9 @@ namespace MeetingRoomBooker.Api.Controllers
                 return Unauthorized("Invalid email or password.");
             }
 
-            var isAdmin = ShouldTreatAsAdmin(user);
-            if (isAdmin && !user.IsAdmin)
+            if (!string.IsNullOrWhiteSpace(user.Password))
             {
-                user.IsAdmin = true;
+                user.Password = string.Empty;
                 shouldSave = true;
             }
 
@@ -94,7 +93,7 @@ namespace MeetingRoomBooker.Api.Controllers
                 new(ClaimTypes.Email, user.Email)
             };
 
-            if (isAdmin)
+            if (user.IsAdmin)
             {
                 claims.Add(new Claim(ClaimTypes.Role, "Admin"));
             }
@@ -147,20 +146,18 @@ namespace MeetingRoomBooker.Api.Controllers
                 return Unauthorized();
             }
 
-            if (ShouldTreatAsAdmin(user) && !user.IsAdmin)
+            if (!string.IsNullOrWhiteSpace(user.Password))
             {
-                user.IsAdmin = true;
+                user.Password = string.Empty;
                 await _context.SaveChangesAsync();
             }
 
             return Ok(user);
         }
 
-        private static bool ShouldTreatAsAdmin(UserModel user)
+        private static string NormalizeEmail(string? email)
         {
-            return user.IsAdmin
-                   || string.Equals(user.Email, ProtectedAdminEmail, StringComparison.OrdinalIgnoreCase)
-                   || string.Equals(user.Name, "Haru", StringComparison.OrdinalIgnoreCase);
+            return (email ?? string.Empty).Trim().ToLowerInvariant();
         }
     }
 }
