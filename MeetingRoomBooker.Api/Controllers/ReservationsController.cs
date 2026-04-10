@@ -10,10 +10,10 @@ namespace MeetingRoomBooker.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ReservationsController : ControllerBase
+    [Authorize]
+    public sealed class ReservationsController : ControllerBase
     {
         private const string InfoNotificationType = "Info";
-        private const string WarningNotificationType = "Warning";
 
         private readonly AppDbContext _context;
         private readonly IReservationChatworkNotificationService _reservationChatworkNotificationService;
@@ -29,7 +29,9 @@ namespace MeetingRoomBooker.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ReservationModel>>> GetReservations(CancellationToken cancellationToken)
         {
-            return await _context.Reservations.ToListAsync(cancellationToken);
+            return await _context.Reservations
+                .AsNoTracking()
+                .ToListAsync(cancellationToken);
         }
 
         [HttpPost]
@@ -37,13 +39,35 @@ namespace MeetingRoomBooker.Api.Controllers
             ReservationModel reservation,
             CancellationToken cancellationToken)
         {
+            var currentUser = await GetCurrentUserAsync(cancellationToken);
+            if (currentUser == null)
+            {
+                return Unauthorized();
+            }
+
+            reservation.UserId = currentUser.Id;
+            reservation.Name = currentUser.Name;
             NormalizeReservation(reservation);
+
+            var validationError = ValidateReservation(reservation);
+            if (!string.IsNullOrWhiteSpace(validationError))
+            {
+                return BadRequest(validationError);
+            }
+
+            var conflict = await FindConflictingReservationAsync(
+                reservation,
+                cancellationToken: cancellationToken);
+
+            if (conflict != null)
+            {
+                return Conflict(BuildConflictMessage(conflict));
+            }
 
             _context.Reservations.Add(reservation);
             await _context.SaveChangesAsync(cancellationToken);
 
             await NotifyParticipantsForCreatedReservationAsync(reservation);
-            await NotifyConflictOwnersAsync(reservation);
             await _context.SaveChangesAsync(cancellationToken);
 
             await _reservationChatworkNotificationService.SendReservationCreatedAsync(
@@ -53,7 +77,7 @@ namespace MeetingRoomBooker.Api.Controllers
             return CreatedAtAction(nameof(GetReservations), new { id = reservation.Id }, reservation);
         }
 
-        [HttpDelete("{id}")]
+        [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteReservation(int id, CancellationToken cancellationToken)
         {
             var reservation = await _context.Reservations
@@ -62,6 +86,16 @@ namespace MeetingRoomBooker.Api.Controllers
             if (reservation == null)
             {
                 return NotFound();
+            }
+
+            if (!TryGetCurrentUserId(out var currentUserId))
+            {
+                return Unauthorized();
+            }
+
+            if (!CanManageReservation(reservation, currentUserId))
+            {
+                return Forbid();
             }
 
             _context.Reservations.Remove(reservation);
@@ -74,7 +108,7 @@ namespace MeetingRoomBooker.Api.Controllers
             return NoContent();
         }
 
-        [HttpPut("{id}")]
+        [HttpPut("{id:int}")]
         public async Task<IActionResult> PutReservation(
             int id,
             ReservationModel reservation,
@@ -95,8 +129,35 @@ namespace MeetingRoomBooker.Api.Controllers
                 return NotFound();
             }
 
+            if (!TryGetCurrentUserId(out var currentUserId))
+            {
+                return Unauthorized();
+            }
+
+            if (!CanManageReservation(existingReservation, currentUserId))
+            {
+                return Forbid();
+            }
+
             NormalizeReservation(reservation);
             reservation.UserId = existingReservation.UserId;
+            reservation.Name = existingReservation.Name;
+
+            var validationError = ValidateReservation(reservation);
+            if (!string.IsNullOrWhiteSpace(validationError))
+            {
+                return BadRequest(validationError);
+            }
+
+            var conflict = await FindConflictingReservationAsync(
+                reservation,
+                excludedReservationIds: new[] { reservation.Id },
+                cancellationToken: cancellationToken);
+
+            if (conflict != null)
+            {
+                return Conflict(BuildConflictMessage(conflict));
+            }
 
             var previousParticipantIds = GetNotifiableParticipantIds(existingReservation);
             var currentParticipantIds = GetNotifiableParticipantIds(reservation);
@@ -126,7 +187,6 @@ namespace MeetingRoomBooker.Api.Controllers
                     currentParticipantIds);
             }
 
-            await NotifyConflictOwnersAsync(reservation);
             await _context.SaveChangesAsync(cancellationToken);
 
             await _reservationChatworkNotificationService.SendReservationUpdatedAsync(
@@ -137,11 +197,12 @@ namespace MeetingRoomBooker.Api.Controllers
             return NoContent();
         }
 
-        [Authorize]
-        [HttpPost("{id}/join")]
+        [HttpPost("{id:int}/join")]
         public async Task<IActionResult> JoinReservation(int id, CancellationToken cancellationToken)
         {
-            var reservation = await _context.Reservations.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+            var reservation = await _context.Reservations
+                .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
             if (reservation == null)
             {
                 return NotFound();
@@ -168,11 +229,12 @@ namespace MeetingRoomBooker.Api.Controllers
             return NoContent();
         }
 
-        [Authorize]
-        [HttpPost("{id}/leave")]
+        [HttpPost("{id:int}/leave")]
         public async Task<IActionResult> LeaveReservation(int id, CancellationToken cancellationToken)
         {
-            var reservation = await _context.Reservations.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+            var reservation = await _context.Reservations
+                .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
             if (reservation == null)
             {
                 return NotFound();
@@ -202,8 +264,7 @@ namespace MeetingRoomBooker.Api.Controllers
             return NoContent();
         }
 
-        [Authorize]
-        [HttpPost("{id}/series-delete")]
+        [HttpPost("{id:int}/series-delete")]
         public async Task<IActionResult> DeleteReservationSeries(
             int id,
             ReservationSeriesDeleteRequest request,
@@ -223,7 +284,7 @@ namespace MeetingRoomBooker.Api.Controllers
                 return Unauthorized();
             }
 
-            if (baseReservation.UserId != currentUserId)
+            if (!CanManageReservation(baseReservation, currentUserId))
             {
                 return Forbid();
             }
@@ -231,7 +292,9 @@ namespace MeetingRoomBooker.Api.Controllers
             var scope = NormalizeSeriesScope(request.Scope);
             if (scope == ReservationSeriesScopes.Single || !IsRecurringReservation(baseReservation))
             {
-                var single = await _context.Reservations.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+                var single = await _context.Reservations
+                    .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
                 if (single == null)
                 {
                     return NotFound();
@@ -254,8 +317,7 @@ namespace MeetingRoomBooker.Api.Controllers
             return NoContent();
         }
 
-        [Authorize]
-        [HttpPost("{id}/series-update")]
+        [HttpPost("{id:int}/series-update")]
         public async Task<IActionResult> UpdateReservationSeries(
             int id,
             ReservationSeriesUpdateRequest request,
@@ -275,7 +337,7 @@ namespace MeetingRoomBooker.Api.Controllers
                 return Unauthorized();
             }
 
-            if (baseReservation.UserId != currentUserId)
+            if (!CanManageReservation(baseReservation, currentUserId))
             {
                 return Forbid();
             }
@@ -283,12 +345,23 @@ namespace MeetingRoomBooker.Api.Controllers
             var scope = NormalizeSeriesScope(request.Scope);
             if (scope == ReservationSeriesScopes.Single || !IsRecurringReservation(baseReservation))
             {
-                return await PutReservation(id, request.UpdatedReservation, request.NotifyParticipants, cancellationToken);
+                return await PutReservation(
+                    id,
+                    request.UpdatedReservation,
+                    request.NotifyParticipants,
+                    cancellationToken);
             }
 
             var updatedTemplate = request.UpdatedReservation ?? new ReservationModel();
             NormalizeReservation(updatedTemplate);
             updatedTemplate.UserId = baseReservation.UserId;
+            updatedTemplate.Name = baseReservation.Name;
+
+            var templateValidationError = ValidateReservation(updatedTemplate);
+            if (!string.IsNullOrWhiteSpace(templateValidationError))
+            {
+                return BadRequest(templateValidationError);
+            }
 
             var targets = await GetRecurringSeriesReservationsAsync(baseReservation, scope, cancellationToken);
             if (targets.Count == 0)
@@ -296,6 +369,7 @@ namespace MeetingRoomBooker.Api.Controllers
                 return NoContent();
             }
 
+            var targetIds = targets.Select(x => x.Id).ToHashSet();
             var dayOffset = updatedTemplate.Date.Date - baseReservation.Date.Date;
             var operations = new List<(ReservationModel Previous, ReservationModel Current, List<int> PreviousParticipantIds, List<int> CurrentParticipantIds)>();
 
@@ -303,6 +377,22 @@ namespace MeetingRoomBooker.Api.Controllers
             {
                 var nextDate = target.Date.Date.Add(dayOffset);
                 var updatedReservation = CreateRecurringUpdatedReservation(target, updatedTemplate, nextDate);
+                var updatedValidationError = ValidateReservation(updatedReservation);
+                if (!string.IsNullOrWhiteSpace(updatedValidationError))
+                {
+                    return BadRequest(updatedValidationError);
+                }
+
+                var conflict = await FindConflictingReservationAsync(
+                    updatedReservation,
+                    targetIds,
+                    cancellationToken);
+
+                if (conflict != null)
+                {
+                    return Conflict(BuildConflictMessage(conflict));
+                }
+
                 var previousParticipantIds = GetNotifiableParticipantIds(target);
                 var currentParticipantIds = GetNotifiableParticipantIds(updatedReservation);
 
@@ -322,11 +412,6 @@ namespace MeetingRoomBooker.Api.Controllers
                         operation.PreviousParticipantIds,
                         operation.CurrentParticipantIds);
                 }
-            }
-
-            foreach (var operation in operations)
-            {
-                await NotifyConflictOwnersAsync(operation.Current);
             }
 
             await _context.SaveChangesAsync(cancellationToken);
@@ -411,33 +496,6 @@ namespace MeetingRoomBooker.Api.Controllers
             }
         }
 
-        private async Task NotifyConflictOwnersAsync(ReservationModel reservation)
-        {
-            var conflicts = await _context.Reservations
-                .Where(x =>
-                    x.Id != reservation.Id &&
-                    x.Room == reservation.Room &&
-                    x.Date.Date == reservation.Date.Date &&
-                    x.StartTime < reservation.EndTime &&
-                    x.EndTime > reservation.StartTime)
-                .ToListAsync();
-
-            foreach (var conflict in conflicts)
-            {
-                if (conflict.UserId == reservation.UserId)
-                {
-                    continue;
-                }
-
-                await UpsertNotificationAsync(
-                    conflict.UserId,
-                    WarningNotificationType,
-                    $"【警告】{reservation.Date:MM/dd}の「{conflict.Purpose}」と時間が重複しました。",
-                    reservation.Date,
-                    reservation.Id);
-            }
-        }
-
         private async Task NotifyOrganizerForParticipationChangedAsync(
             ReservationModel reservation,
             int actorUserId,
@@ -515,7 +573,6 @@ namespace MeetingRoomBooker.Api.Controllers
                 CancellationToken.None);
 
             var firstReservation = seriesReservations.FirstOrDefault();
-
             if (firstReservation == null)
             {
                 return;
@@ -733,10 +790,80 @@ namespace MeetingRoomBooker.Api.Controllers
             }
         }
 
+        private static string? ValidateReservation(ReservationModel reservation)
+        {
+            if (string.IsNullOrWhiteSpace(reservation.Room))
+            {
+                return "会議室を選択してください。";
+            }
+
+            if (reservation.StartTime >= reservation.EndTime)
+            {
+                return "終了時刻は開始時刻より後にしてください。";
+            }
+
+            if (reservation.StartTime.Date != reservation.Date.Date || reservation.EndTime.Date != reservation.Date.Date)
+            {
+                return "予約日時の整合性が取れていません。";
+            }
+
+            if (IsRecurringReservation(reservation)
+                && reservation.RepeatUntil.HasValue
+                && reservation.RepeatUntil.Value.Date < reservation.Date.Date)
+            {
+                return "繰り返し終了日は予約日以降にしてください。";
+            }
+
+            return null;
+        }
+
+        private async Task<ReservationModel?> FindConflictingReservationAsync(
+            ReservationModel reservation,
+            IEnumerable<int>? excludedReservationIds = null,
+            CancellationToken cancellationToken = default)
+        {
+            var excludedIds = excludedReservationIds?
+                .Where(id => id > 0)
+                .Distinct()
+                .ToHashSet() ?? new HashSet<int>();
+
+            return await _context.Reservations
+                .AsNoTracking()
+                .Where(x =>
+                    !excludedIds.Contains(x.Id) &&
+                    x.Room == reservation.Room &&
+                    x.Date.Date == reservation.Date.Date &&
+                    x.StartTime < reservation.EndTime &&
+                    x.EndTime > reservation.StartTime)
+                .OrderBy(x => x.StartTime)
+                .FirstOrDefaultAsync(cancellationToken);
+        }
+
+        private static string BuildConflictMessage(ReservationModel conflict)
+        {
+            var label = string.IsNullOrWhiteSpace(conflict.Purpose) ? conflict.Name : conflict.Purpose;
+            return $"この時間帯には既に予約があります。会議室: {conflict.Room} / 利用日: {conflict.Date:yyyy/MM/dd} / 時間: {conflict.StartTime:HH:mm}〜{conflict.EndTime:HH:mm} / 予約: {label}";
+        }
+
+        private async Task<UserModel?> GetCurrentUserAsync(CancellationToken cancellationToken)
+        {
+            if (!TryGetCurrentUserId(out var currentUserId))
+            {
+                return null;
+            }
+
+            return await _context.Users.FirstOrDefaultAsync(user => user.Id == currentUserId, cancellationToken);
+        }
+
         private bool TryGetCurrentUserId(out int userId)
         {
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
             return int.TryParse(userIdClaim, out userId);
+        }
+
+        private bool CanManageReservation(ReservationModel reservation, int currentUserId)
+        {
+            return reservation.UserId == currentUserId || User.IsInRole("Admin");
         }
 
         private static string NormalizeSeriesScope(string? scope)
@@ -758,7 +885,7 @@ namespace MeetingRoomBooker.Api.Controllers
             {
                 Id = source.Id,
                 UserId = source.UserId,
-                Name = updatedTemplate.Name,
+                Name = source.Name,
                 Room = updatedTemplate.Room,
                 NumberOfPeople = updatedTemplate.NumberOfPeople,
                 Type = updatedTemplate.Type,

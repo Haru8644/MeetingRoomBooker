@@ -456,12 +456,8 @@
 
                 if (conflict)
                 {
-                    var isOk = await JS.InvokeAsync<bool>("confirm", $"【警告】{date:MM/dd} の {selectedRoom} で予約が重複しています。本当に予約しますか？");
-                    if (!isOk)
-                    {
-                        failCount++;
-                        continue;
-                    }
+                    failCount++;
+                    continue;
                 }
 
                 var model = new ReservationModel
@@ -512,7 +508,7 @@
                 return;
             }
 
-            errorMessage = "すべての予約日が重複しているため登録できませんでした。";
+            errorMessage = "重複する予約があるため登録できませんでした。";
         }
         catch (Exception ex)
         {

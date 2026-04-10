@@ -1,10 +1,12 @@
-﻿using MeetingRoomBooker.Api.Services.Chatwork;
+using MeetingRoomBooker.Api.Services.Chatwork;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MeetingRoomBooker.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Policy = "AdminOnly")]
     public sealed class ChatworkController : ControllerBase
     {
         private readonly IChatworkClient _chatworkClient;
