@@ -9,13 +9,18 @@ namespace MeetingRoomBooker.Web.Services
         public Task<UserModel?> LoginAsync(string email, string password) => Task.FromResult<UserModel?>(null);
         public Task<bool> RegisterUserAsync(UserModel user) => Task.FromResult(false);
         public Task DeleteUserAsync(int userId) => Task.CompletedTask;
+        public Task UpdateUserNameAsync(int userId, string name) => Task.CompletedTask;
         public Task UpdateUserChatworkAccountIdAsync(int userId, string? chatworkAccountId) => Task.CompletedTask;
         public void Logout() { }
         public UserModel? GetCurrentUser() => null;
         public Task<List<ReservationModel>> GetReservationsAsync() => Task.FromResult(new List<ReservationModel>());
         public Task AddReservationAsync(ReservationModel reservation) => Task.CompletedTask;
         public Task RemoveReservationAsync(ReservationModel reservation) => Task.CompletedTask;
+        public Task RemoveRecurringReservationAsync(ReservationModel reservation, string scope) => Task.CompletedTask;
         public Task UpdateReservationAsync(ReservationModel reservation, bool shouldNotify) => Task.CompletedTask;
+        public Task UpdateRecurringReservationAsync(ReservationModel originalReservation, ReservationModel updatedReservation, bool shouldNotify, string scope) => Task.CompletedTask;
+        public Task JoinReservationAsync(int reservationId) => Task.CompletedTask;
+        public Task LeaveReservationAsync(int reservationId) => Task.CompletedTask;
         public Task<List<UserModel>> GetAllUsersAsync() => Task.FromResult(new List<UserModel>());
         public Task<List<NotificationModel>> GetNotificationsAsync(int userId) => Task.FromResult(new List<NotificationModel>());
         public Task AddNotificationAsync(NotificationModel notification) => Task.CompletedTask;

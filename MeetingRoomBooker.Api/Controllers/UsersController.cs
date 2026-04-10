@@ -257,6 +257,11 @@ namespace MeetingRoomBooker.Api.Controllers
             public string Name { get; set; } = string.Empty;
         }
 
+        public sealed class UpdateUserNameRequest
+        {
+            public string Name { get; set; } = string.Empty;
+        }
+
         public sealed class UpdateUserChatworkAccountRequest
         {
             public string? ChatworkAccountId { get; set; }

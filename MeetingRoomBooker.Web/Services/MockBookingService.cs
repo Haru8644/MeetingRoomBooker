@@ -257,6 +257,38 @@ namespace MeetingRoomBooker.Web.Services
             NotifyStateChanged();
         }
 
+        public async Task UpdateUserNameAsync(int userId, string name)
+        {
+            await EnsureLoaded();
+
+            var user = _users.FirstOrDefault(x => x.Id == userId);
+            if (user is null)
+            {
+                return;
+            }
+
+            var normalizedName = name?.Trim() ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(normalizedName))
+            {
+                return;
+            }
+
+            user.Name = normalizedName;
+
+            foreach (var reservation in _reservations.Where(x => x.UserId == userId))
+            {
+                reservation.Name = normalizedName;
+            }
+
+            if (CurrentUser?.Id == userId)
+            {
+                CurrentUser.Name = normalizedName;
+            }
+
+            await SaveData();
+            NotifyStateChanged();
+        }
+
         public async Task UpdateUserChatworkAccountIdAsync(int userId, string? chatworkAccountId)
         {
             await EnsureLoaded();
@@ -646,7 +678,107 @@ namespace MeetingRoomBooker.Web.Services
         public async Task RemoveReservationAsync(ReservationModel reservation)
         {
             await EnsureLoaded();
+            RemoveReservationCore(reservation);
+            await SaveData();
+            NotifyStateChanged();
+        }
 
+        public async Task RemoveRecurringReservationAsync(ReservationModel reservation, string scope)
+        {
+            await EnsureLoaded();
+
+            var targets = GetRecurringTargets(reservation, scope);
+            foreach (var target in targets)
+            {
+                RemoveReservationCore(target);
+            }
+
+            await SaveData();
+            NotifyStateChanged();
+        }
+
+        public async Task UpdateReservationAsync(ReservationModel reservation, bool shouldNotify)
+        {
+            await EnsureLoaded();
+            UpdateReservationCore(reservation, shouldNotify);
+            await SaveData();
+            NotifyStateChanged();
+        }
+
+        public async Task UpdateRecurringReservationAsync(ReservationModel originalReservation, ReservationModel updatedReservation, bool shouldNotify, string scope)
+        {
+            await EnsureLoaded();
+
+            var targets = GetRecurringTargets(originalReservation, scope);
+            var dayOffset = updatedReservation.Date.Date - originalReservation.Date.Date;
+
+            foreach (var target in targets)
+            {
+                var nextDate = target.Date.Date.Add(dayOffset);
+                var nextReservation = CreateReservationSnapshot(target);
+                nextReservation.Name = updatedReservation.Name;
+                nextReservation.Room = updatedReservation.Room;
+                nextReservation.Type = updatedReservation.Type;
+                nextReservation.Purpose = updatedReservation.Purpose;
+                nextReservation.Date = nextDate;
+                nextReservation.StartTime = nextDate + updatedReservation.StartTime.TimeOfDay;
+                nextReservation.EndTime = nextDate + updatedReservation.EndTime.TimeOfDay;
+                nextReservation.ParticipantIds = (updatedReservation.ParticipantIds ?? new List<int>()).Distinct().ToList();
+
+                UpdateReservationCore(nextReservation, shouldNotify);
+            }
+
+            await SaveData();
+            NotifyStateChanged();
+        }
+
+        public async Task JoinReservationAsync(int reservationId)
+        {
+            await EnsureLoaded();
+
+            if (CurrentUser is null)
+            {
+                return;
+            }
+
+            var reservation = _reservations.FirstOrDefault(x => x.Id == reservationId);
+            if (reservation is null)
+            {
+                return;
+            }
+
+            reservation.ParticipantIds ??= new List<int>();
+            if (!reservation.ParticipantIds.Contains(CurrentUser.Id))
+            {
+                reservation.ParticipantIds.Add(CurrentUser.Id);
+            }
+
+            await SaveData();
+            NotifyStateChanged();
+        }
+
+        public async Task LeaveReservationAsync(int reservationId)
+        {
+            await EnsureLoaded();
+
+            if (CurrentUser is null)
+            {
+                return;
+            }
+
+            var reservation = _reservations.FirstOrDefault(x => x.Id == reservationId);
+            if (reservation is null || reservation.UserId == CurrentUser.Id)
+            {
+                return;
+            }
+
+            reservation.ParticipantIds?.Remove(CurrentUser.Id);
+            await SaveData();
+            NotifyStateChanged();
+        }
+
+        private void RemoveReservationCore(ReservationModel reservation)
+        {
             var target = _reservations.FirstOrDefault(x => x.Id == reservation.Id);
             if (target is null)
             {
@@ -673,15 +805,10 @@ namespace MeetingRoomBooker.Web.Services
                     IsRead = false
                 });
             }
-
-            await SaveData();
-            NotifyStateChanged();
         }
 
-        public async Task UpdateReservationAsync(ReservationModel reservation, bool shouldNotify)
+        private void UpdateReservationCore(ReservationModel reservation, bool shouldNotify)
         {
-            await EnsureLoaded();
-
             var index = _reservations.FindIndex(x => x.Id == reservation.Id);
             if (index == -1)
             {
@@ -691,17 +818,32 @@ namespace MeetingRoomBooker.Web.Services
             var previousReservation = _reservations[index];
             var previousParticipantIds = GetNotifiableParticipantIds(previousReservation);
             var previousReservationSnapshot = CreateReservationSnapshot(previousReservation);
-            var updatedReservation = CreateReservationSnapshot(reservation);
-            updatedReservation.Id = previousReservation.Id;
-            updatedReservation.UserId = previousReservation.UserId;
+            var nextReservation = CreateReservationSnapshot(reservation);
+            nextReservation.Id = previousReservation.Id;
+            nextReservation.UserId = previousReservation.UserId;
 
-            _reservations[index] = updatedReservation;
+            _reservations[index] = nextReservation;
 
-            NotifyParticipantsForUpdatedReservation(previousReservationSnapshot, updatedReservation, previousParticipantIds, shouldNotify);
-            NotifyConflictOwners(updatedReservation);
+            NotifyParticipantsForUpdatedReservation(previousReservationSnapshot, nextReservation, previousParticipantIds, shouldNotify);
+            NotifyConflictOwners(nextReservation);
+        }
 
-            await SaveData();
-            NotifyStateChanged();
+        private List<ReservationModel> GetRecurringTargets(ReservationModel reservation, string scope)
+        {
+            var matches = GetRecurringSeriesReservations(reservation);
+
+            if (scope == ReservationSeriesScopes.Following)
+            {
+                return matches
+                    .Where(x => x.Date.Date >= reservation.Date.Date)
+                    .OrderBy(x => x.Date)
+                    .ThenBy(x => x.Id)
+                    .ToList();
+            }
+
+            return scope == ReservationSeriesScopes.All
+                ? matches
+                : matches.Where(x => x.Id == reservation.Id).ToList();
         }
 
         public async Task<List<NotificationModel>> GetNotificationsAsync(int userId)

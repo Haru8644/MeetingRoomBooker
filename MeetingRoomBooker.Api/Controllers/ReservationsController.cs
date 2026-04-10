@@ -55,7 +55,10 @@ namespace MeetingRoomBooker.Api.Controllers
                 return BadRequest(validationError);
             }
 
-            var conflict = await FindConflictingReservationAsync(reservation, cancellationToken: cancellationToken);
+            var conflict = await FindConflictingReservationAsync(
+                reservation,
+                cancellationToken: cancellationToken);
+
             if (conflict != null)
             {
                 return Conflict(BuildConflictMessage(conflict));
@@ -197,7 +200,9 @@ namespace MeetingRoomBooker.Api.Controllers
         [HttpPost("{id:int}/join")]
         public async Task<IActionResult> JoinReservation(int id, CancellationToken cancellationToken)
         {
-            var reservation = await _context.Reservations.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+            var reservation = await _context.Reservations
+                .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
             if (reservation == null)
             {
                 return NotFound();
@@ -227,7 +232,9 @@ namespace MeetingRoomBooker.Api.Controllers
         [HttpPost("{id:int}/leave")]
         public async Task<IActionResult> LeaveReservation(int id, CancellationToken cancellationToken)
         {
-            var reservation = await _context.Reservations.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+            var reservation = await _context.Reservations
+                .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
             if (reservation == null)
             {
                 return NotFound();
@@ -285,7 +292,9 @@ namespace MeetingRoomBooker.Api.Controllers
             var scope = NormalizeSeriesScope(request.Scope);
             if (scope == ReservationSeriesScopes.Single || !IsRecurringReservation(baseReservation))
             {
-                var single = await _context.Reservations.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+                var single = await _context.Reservations
+                    .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
                 if (single == null)
                 {
                     return NotFound();
@@ -336,7 +345,11 @@ namespace MeetingRoomBooker.Api.Controllers
             var scope = NormalizeSeriesScope(request.Scope);
             if (scope == ReservationSeriesScopes.Single || !IsRecurringReservation(baseReservation))
             {
-                return await PutReservation(id, request.UpdatedReservation, request.NotifyParticipants, cancellationToken);
+                return await PutReservation(
+                    id,
+                    request.UpdatedReservation,
+                    request.NotifyParticipants,
+                    cancellationToken);
             }
 
             var updatedTemplate = request.UpdatedReservation ?? new ReservationModel();
@@ -560,7 +573,6 @@ namespace MeetingRoomBooker.Api.Controllers
                 CancellationToken.None);
 
             var firstReservation = seriesReservations.FirstOrDefault();
-
             if (firstReservation == null)
             {
                 return;
