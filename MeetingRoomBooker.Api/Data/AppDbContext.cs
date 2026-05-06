@@ -43,11 +43,24 @@ namespace MeetingRoomBooker.Api.Data
 
             modelBuilder.Entity<ChatworkDeliveryLog>(entity =>
             {
-                entity.HasIndex(x => new { x.ReservationId, x.DeliveryType, x.ScheduledStartTime })
+                entity.HasIndex(x => x.DeliveryKey)
                     .IsUnique();
 
                 entity.Property(x => x.DeliveryType)
                     .HasMaxLength(100);
+
+                entity.Property(x => x.DeliveryKey)
+                    .HasMaxLength(300)
+                    .IsRequired(false);
+
+                entity.Property(x => x.RoomId)
+                    .HasMaxLength(100);
+                
+                entity.Property(x => x.Status)
+                    .HasMaxLength(50);
+               
+                entity.Property(x => x.ErrorMessage)
+                    .HasMaxLength(1000);
             });
         }
     }
