@@ -7,6 +7,10 @@
              return $"{ChatworkDeliveryTypes.ReservationCreated}:reservation:{reservationId}:user:{targetUserId}";
         }
 
+        public static string ReservationUpdated(int reservationId, int targetUserId, string changeId)
+        {
+            return $"{ChatworkDeliveryTypes.ReservationUpdated}:reservation:{reservationId}:user:{targetUserId}:change:{changeId}";
+        }
 
         public static string Reminder10Minutes(int reservationId, DateTime scheduledStartTime)
         {

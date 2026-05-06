@@ -59,19 +59,19 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                 return;
             }
 
-            await SendFacilityNotificationAsync(
+            var stakeholderMessage = BuildStakeholderUpdatedMessage(
                 currentReservation,
-                BuildFacilityUpdatedMessage(currentReservation, usersById, changeLines),
-                cancellationToken);
-
-            await SendReceptionNotificationAsync(
-                currentReservation,
-                BuildReceptionUpdatedMessage(currentReservation, usersById, changeLines),
-                cancellationToken);
-
-            await SendStakeholderRoomNotificationAsync(
+                usersById,
                 stakeholderUsers,
-                BuildStakeholderUpdatedMessage(currentReservation, usersById, stakeholderUsers, changeLines),
+                changeLines);
+
+            var changeId = Guid.NewGuid().ToString("N");
+
+            await SendReservationUpdatedDirectNotificationsAsync(
+                currentReservation,
+                stakeholderUsers,
+                stakeholderMessage,
+                changeId,
                 cancellationToken);
         }
 
@@ -214,6 +214,22 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                 targetUsers,
                 ChatworkDeliveryTypes.ReservationCreated,
                 user => ChatworkDeliveryKeys.ReservationCreated(reservation.Id, user.Id),
+                message,
+                cancellationToken);
+        }
+
+        private async Task SendReservationUpdatedDirectNotificationsAsync(
+            ReservationModel reservation,
+            IReadOnlyCollection<UserModel> targetUsers,
+            string message,
+            string changeId,
+            CancellationToken cancellationToken)
+        {
+            await SendDirectNotificationsAsync(
+                reservation,
+                targetUsers,
+                ChatworkDeliveryTypes.ReservationUpdated,
+                user => ChatworkDeliveryKeys.ReservationUpdated(reservation.Id, user.Id, changeId),
                 message,
                 cancellationToken);
         }
