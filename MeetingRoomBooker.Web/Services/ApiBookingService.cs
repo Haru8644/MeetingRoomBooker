@@ -80,7 +80,10 @@ namespace MeetingRoomBooker.Web.Services
                     AvatarColor = string.IsNullOrWhiteSpace(user.AvatarColor) ? "#a371f7" : user.AvatarColor,
                     ChatworkAccountId = string.IsNullOrWhiteSpace(user.ChatworkAccountId)
                         ? null
-                        : user.ChatworkAccountId.Trim()
+                        : user.ChatworkAccountId.Trim(),
+                    ChatworkDirectRoomId = string.IsNullOrWhiteSpace(user.ChatworkDirectRoomId)
+                        ? null
+                        : user.ChatworkDirectRoomId.Trim()
                 });
 
             if (!response.IsSuccessStatusCode)
@@ -137,6 +140,25 @@ namespace MeetingRoomBooker.Web.Services
                 _currentUser.ChatworkAccountId = string.IsNullOrWhiteSpace(chatworkAccountId)
                     ? null
                     : chatworkAccountId.Trim();
+            }
+
+            NotifyStateChanged();
+        }
+
+        public async Task UpdateUserChatworkDirectRoomIdAsync(int userId, string? chatworkDirectRoomId)
+        {
+            var response = await SendAsync(
+                HttpMethod.Put,
+                $"api/Users/{userId}/chatwork-direct-room",
+                new { ChatworkDirectRoomId = chatworkDirectRoomId });
+
+            await EnsureSuccessAsync(response, $"Failed to update Chatwork direct room id for user id={userId}.");
+
+            if (_currentUser?.Id == userId)
+            {
+                _currentUser.ChatworkDirectRoomId = string.IsNullOrWhiteSpace(chatworkDirectRoomId)
+                    ? null
+                    : chatworkDirectRoomId.Trim();
             }
 
             NotifyStateChanged();

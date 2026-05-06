@@ -11,6 +11,7 @@ namespace MeetingRoomBooker.Shared.Services
         Task DeleteUserAsync(int userId);
         Task UpdateUserNameAsync(int userId, string name);
         Task UpdateUserChatworkAccountIdAsync(int userId, string? chatworkAccountId);
+        Task UpdateUserChatworkDirectRoomIdAsync(int userId, string? chatworkDirectRoomId);
         void Logout();
         Task LogoutAsync()
         {

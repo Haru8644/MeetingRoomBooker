@@ -1,7 +1,8 @@
-﻿using System.Text;
-using MeetingRoomBooker.Api.Data;
+﻿using MeetingRoomBooker.Api.Data;
+using MeetingRoomBooker.Api.Models;
 using MeetingRoomBooker.Shared.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Text;
 
 namespace MeetingRoomBooker.Api.Services.Chatwork
 {
@@ -28,22 +29,15 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
             ReservationModel reservation,
             CancellationToken cancellationToken = default)
         {
-            var usersById = await GetUsersByIdAsync(GetStakeholderUserIds(reservation), cancellationToken);
-            var stakeholderUsers = GetUsers(GetStakeholderUserIds(reservation), usersById);
+            var stakeholderIds = GetStakeholderUserIds(reservation);
+            var usersById = await GetUsersByIdAsync(stakeholderIds, cancellationToken);
+            var stakeholderUsers = GetUsers(stakeholderIds, usersById);
+            var stakeholderMessage = BuildStakeholderCreatedMessage(reservation, usersById, stakeholderUsers);
 
-            await SendFacilityNotificationAsync(
+            await SendReservationCreatedDirectNotificationsAsync(
                 reservation,
-                BuildFacilityCreatedMessage(reservation, usersById),
-                cancellationToken);
-
-            await SendReceptionNotificationAsync(
-                reservation,
-                BuildReceptionCreatedMessage(reservation, usersById),
-                cancellationToken);
-
-            await SendStakeholderNotificationAsync(
                 stakeholderUsers,
-                BuildStakeholderCreatedMessage(reservation, usersById, stakeholderUsers),
+                stakeholderMessage,
                 cancellationToken);
         }
 
@@ -65,19 +59,19 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                 return;
             }
 
-            await SendFacilityNotificationAsync(
+            var stakeholderMessage = BuildStakeholderUpdatedMessage(
                 currentReservation,
-                BuildFacilityUpdatedMessage(currentReservation, usersById, changeLines),
-                cancellationToken);
-
-            await SendReceptionNotificationAsync(
-                currentReservation,
-                BuildReceptionUpdatedMessage(currentReservation, usersById, changeLines),
-                cancellationToken);
-
-            await SendStakeholderNotificationAsync(
+                usersById,
                 stakeholderUsers,
-                BuildStakeholderUpdatedMessage(currentReservation, usersById, stakeholderUsers, changeLines),
+                changeLines);
+
+            var changeId = Guid.NewGuid().ToString("N");
+
+            await SendReservationUpdatedDirectNotificationsAsync(
+                currentReservation,
+                stakeholderUsers,
+                stakeholderMessage,
+                changeId,
                 cancellationToken);
         }
 
@@ -85,8 +79,9 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
             ReservationModel reservation,
             CancellationToken cancellationToken = default)
         {
-            var usersById = await GetUsersByIdAsync(GetStakeholderUserIds(reservation), cancellationToken);
-            var stakeholderUsers = GetUsers(GetStakeholderUserIds(reservation), usersById);
+            var stakeholderIds = GetStakeholderUserIds(reservation);
+            var usersById = await GetUsersByIdAsync(stakeholderIds, cancellationToken);
+            var stakeholderUsers = GetUsers(stakeholderIds, usersById);
 
             await SendFacilityNotificationAsync(
                 reservation,
@@ -98,7 +93,7 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                 BuildReceptionCanceledMessage(reservation, usersById),
                 cancellationToken);
 
-            await SendStakeholderNotificationAsync(
+            await SendStakeholderRoomNotificationAsync(
                 stakeholderUsers,
                 BuildStakeholderCanceledMessage(reservation, usersById, stakeholderUsers),
                 cancellationToken);
@@ -108,22 +103,15 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
             ReservationModel reservation,
             CancellationToken cancellationToken = default)
         {
-            var usersById = await GetUsersByIdAsync(GetStakeholderUserIds(reservation), cancellationToken);
-            var stakeholderUsers = GetUsers(GetStakeholderUserIds(reservation), usersById);
+            var stakeholderIds = GetStakeholderUserIds(reservation);
+            var usersById = await GetUsersByIdAsync(stakeholderIds, cancellationToken);
+            var stakeholderUsers = GetUsers(stakeholderIds, usersById);
+            var stakeholderMessage = BuildStakeholderReminderMessage(reservation, usersById, stakeholderUsers);
 
-            await SendFacilityNotificationAsync(
+            await SendReservationReminderDirectNotificationsAsync(
                 reservation,
-                BuildFacilityReminderMessage(reservation, usersById),
-                cancellationToken);
-
-            await SendReceptionNotificationAsync(
-                reservation,
-                BuildReceptionReminderMessage(reservation, usersById),
-                cancellationToken);
-
-            await SendStakeholderNotificationAsync(
                 stakeholderUsers,
-                BuildStakeholderReminderMessage(reservation, usersById, stakeholderUsers),
+                stakeholderMessage,
                 cancellationToken);
         }
 
@@ -183,7 +171,7 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
             }
         }
 
-        private async Task SendStakeholderNotificationAsync(
+        private async Task SendStakeholderRoomNotificationAsync(
             IReadOnlyCollection<UserModel> targetUsers,
             string message,
             CancellationToken cancellationToken)
@@ -204,6 +192,174 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                     ex,
                     "Failed to send stakeholder Chatwork notification. TargetUserIds: {TargetUserIds}",
                     string.Join(",", targetUsers.Select(user => user.Id)));
+            }
+        }
+
+        private async Task SendReservationCreatedDirectNotificationsAsync(
+            ReservationModel reservation,
+            IReadOnlyCollection<UserModel> targetUsers,
+            string message,
+            CancellationToken cancellationToken)
+        {
+            await SendDirectNotificationsAsync(
+                reservation,
+                targetUsers,
+                ChatworkDeliveryTypes.ReservationCreated,
+                user => ChatworkDeliveryKeys.ReservationCreated(reservation.Id, user.Id),
+                message,
+                cancellationToken);
+        }
+
+        private async Task SendReservationUpdatedDirectNotificationsAsync(
+            ReservationModel reservation,
+            IReadOnlyCollection<UserModel> targetUsers,
+            string message,
+            string changeId,
+            CancellationToken cancellationToken)
+        {
+            await SendDirectNotificationsAsync(
+                reservation,
+                targetUsers,
+                ChatworkDeliveryTypes.ReservationUpdated,
+                user => ChatworkDeliveryKeys.ReservationUpdated(reservation.Id, user.Id, changeId),
+                message,
+                cancellationToken);
+        }
+
+        private async Task SendReservationReminderDirectNotificationsAsync(
+            ReservationModel reservation,
+            IReadOnlyCollection<UserModel> targetUsers,
+            string message,
+            CancellationToken cancellationToken)
+        {
+            await SendDirectNotificationsAsync(
+                reservation,
+                targetUsers,
+                ChatworkDeliveryTypes.Reminder10Minutes,
+                user => ChatworkDeliveryKeys.Reminder10Minutes(reservation.Id, user.Id, reservation.StartTime),
+                message,
+                cancellationToken);
+        }
+
+        private async Task SendDirectNotificationsAsync(
+            ReservationModel reservation,
+            IReadOnlyCollection<UserModel> targetUsers,
+            string deliveryType,
+            Func<UserModel, string> buildDeliveryKey,
+            string message,
+            CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(message) || targetUsers.Count == 0)
+            {
+                return;
+            }
+
+            var uniqueTargetUsers = targetUsers
+                .Where(user => user.Id > 0)
+                .GroupBy(user => user.Id)
+                .Select(group => group.First())
+                .ToList();
+
+            var deliveryKeys = uniqueTargetUsers
+                .Select(buildDeliveryKey)
+                .ToList();
+
+            var existingDeliveryKeyList = await _context.ChatworkDeliveryLogs
+                .AsNoTracking()
+                .Where(log => log.DeliveryKey != null && deliveryKeys.Contains(log.DeliveryKey))
+                .Select(log => log.DeliveryKey!)
+                .ToListAsync(cancellationToken);
+
+            var existingDeliveryKeys = existingDeliveryKeyList.ToHashSet(StringComparer.Ordinal);
+
+            foreach (var targetUser in uniqueTargetUsers)
+            {
+                var deliveryKey = buildDeliveryKey(targetUser);
+
+                if (existingDeliveryKeys.Contains(deliveryKey))
+                {
+                    continue;
+                }
+
+                var attemptedAt = DateTime.Now;
+                var roomId = targetUser.ChatworkDirectRoomId?.Trim();
+
+                if (string.IsNullOrWhiteSpace(roomId))
+                {
+                    _context.ChatworkDeliveryLogs.Add(new ChatworkDeliveryLog
+                    {
+                        ReservationId = reservation.Id,
+                        DeliveryType = deliveryType,
+                        DeliveryKey = deliveryKey,
+                        TargetUserId = targetUser.Id,
+                        ScheduledStartTime = reservation.StartTime,
+                        RoomId = null,
+                        Status = ChatworkDeliveryStatuses.Skipped,
+                        ErrorMessage = "ChatworkDirectRoomId is not configured.",
+                        AttemptedAt = attemptedAt,
+                        SentAt = null,
+                        Message = message,
+                        CreatedAt = attemptedAt
+                    });
+
+                    await _context.SaveChangesAsync(cancellationToken);
+                    existingDeliveryKeys.Add(deliveryKey);
+                    continue;
+                }
+
+                try
+                {
+                    await _chatworkClient.SendMessageAsync(roomId, message, cancellationToken);
+
+                    var sentAt = DateTime.Now;
+
+                    _context.ChatworkDeliveryLogs.Add(new ChatworkDeliveryLog
+                    {
+                        ReservationId = reservation.Id,
+                        DeliveryType = deliveryType,
+                        DeliveryKey = deliveryKey,
+                        TargetUserId = targetUser.Id,
+                        ScheduledStartTime = reservation.StartTime,
+                        RoomId = roomId,
+                        Status = ChatworkDeliveryStatuses.Succeeded,
+                        ErrorMessage = null,
+                        AttemptedAt = attemptedAt,
+                        SentAt = sentAt,
+                        Message = message,
+                        CreatedAt = attemptedAt
+                    });
+
+                    await _context.SaveChangesAsync(cancellationToken);
+                    existingDeliveryKeys.Add(deliveryKey);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(
+                        ex,
+                        "Failed to send direct Chatwork notification. ReservationId: {ReservationId}, DeliveryType: {DeliveryType}, UserId: {UserId}.",
+                        reservation.Id,
+                        deliveryType,
+                        targetUser.Id);
+
+                    _context.ChatworkDeliveryLogs.Add(new ChatworkDeliveryLog
+                    {
+                        ReservationId = reservation.Id,
+                        DeliveryType = deliveryType,
+                        DeliveryKey = deliveryKey,
+                        TargetUserId = targetUser.Id,
+                        ScheduledStartTime = reservation.StartTime,
+                        RoomId = roomId,
+                        Status = ChatworkDeliveryStatuses.Failed,
+                        ErrorMessage = ex.Message,
+                        AttemptedAt = attemptedAt,
+                        SentAt = null,
+                        Message = message,
+                        CreatedAt = attemptedAt
+                    });
+
+                    await _context.SaveChangesAsync(cancellationToken);
+                    existingDeliveryKeys.Add(deliveryKey);
+                }
             }
         }
 
