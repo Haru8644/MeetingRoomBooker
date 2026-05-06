@@ -1,7 +1,8 @@
-﻿using System.Text;
-using MeetingRoomBooker.Api.Data;
+﻿using MeetingRoomBooker.Api.Data;
+using MeetingRoomBooker.Api.Models;
 using MeetingRoomBooker.Shared.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Text;
 
 namespace MeetingRoomBooker.Api.Services.Chatwork
 {
@@ -31,21 +32,13 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
             var stakeholderIds = GetStakeholderUserIds(reservation);
             var usersById = await GetUsersByIdAsync(stakeholderIds, cancellationToken);
             var stakeholderUsers = GetUsers(stakeholderIds, usersById);
+            var stakeholderMessage = BuildStakeholderCreatedMessage(reservation, usersById, stakeholderUsers);
 
-            await SendFacilityNotificationAsync(
+            await SendReservationCreatedDirectNotificationsAsync(
                 reservation,
-                BuildFacilityCreatedMessage(reservation, usersById),
+                stakeholderUsers,
+                stakeholderMessage,
                 cancellationToken);
-
-            await SendReceptionNotificationAsync(
-                reservation,
-                BuildReceptionCreatedMessage(reservation, usersById),
-                cancellationToken);
-
-            await SendStakeholderRoomNotificationAsync(
-              stakeholderUsers,
-              BuildStakeholderCreatedMessage(reservation, usersById, stakeholderUsers),
-              cancellationToken);
         }
 
         public async Task SendReservationUpdatedAsync(
@@ -210,6 +203,124 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
             }
         }
 
+        private async Task SendReservationCreatedDirectNotificationsAsync(
+            ReservationModel reservation,
+            IReadOnlyCollection<UserModel> targetUsers,
+            string message,
+            CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(message) || targetUsers.Count == 0)
+            {
+                return;
+            }
+
+            var uniqueTargetUsers = targetUsers
+                .Where(user => user.Id > 0)
+                .GroupBy(user => user.Id)
+                .Select(group => group.First())
+                .ToList();
+
+            var deliveryKeys = uniqueTargetUsers
+                .Select(user => ChatworkDeliveryKeys.ReservationCreated(reservation.Id, user.Id))
+                .ToList();
+
+            var existingDeliveryKeyList = await _context.ChatworkDeliveryLogs
+                .AsNoTracking()
+                .Where(log => log.DeliveryKey != null && deliveryKeys.Contains(log.DeliveryKey))
+                .Select(log => log.DeliveryKey!)
+                .ToListAsync(cancellationToken);
+
+            var existingDeliveryKeys = existingDeliveryKeyList.ToHashSet(StringComparer.Ordinal);
+
+            foreach (var targetUser in uniqueTargetUsers)
+            {
+                var deliveryKey = ChatworkDeliveryKeys.ReservationCreated(reservation.Id, targetUser.Id);
+
+                if (existingDeliveryKeys.Contains(deliveryKey))
+                {
+                    continue;
+                }
+
+                var attemptedAt = DateTime.Now;
+                var roomId = targetUser.ChatworkDirectRoomId?.Trim();
+
+                if (string.IsNullOrWhiteSpace(roomId))
+                {
+                    _context.ChatworkDeliveryLogs.Add(new ChatworkDeliveryLog
+                    {
+                        ReservationId = reservation.Id,
+                        DeliveryType = ChatworkDeliveryTypes.ReservationCreated,
+                        DeliveryKey = deliveryKey,
+                        TargetUserId = targetUser.Id,
+                        ScheduledStartTime = reservation.StartTime,
+                        RoomId = null,
+                        Status = ChatworkDeliveryStatuses.Skipped,
+                        ErrorMessage = "ChatworkDirectRoomId is not configured.",
+                        AttemptedAt = attemptedAt,
+                        SentAt = null,
+                        Message = message,
+                        CreatedAt = attemptedAt
+                    });
+
+                    await _context.SaveChangesAsync(cancellationToken);
+                    existingDeliveryKeys.Add(deliveryKey);
+                    continue;
+                }
+
+                try
+                {
+                    await _chatworkClient.SendMessageAsync(roomId, message, cancellationToken);
+
+                    var sentAt = DateTime.Now;
+
+                    _context.ChatworkDeliveryLogs.Add(new ChatworkDeliveryLog
+                    {
+                        ReservationId = reservation.Id,
+                        DeliveryType = ChatworkDeliveryTypes.ReservationCreated,
+                        DeliveryKey = deliveryKey,
+                        TargetUserId = targetUser.Id,
+                        ScheduledStartTime = reservation.StartTime,
+                        RoomId = roomId,
+                        Status = ChatworkDeliveryStatuses.Succeeded,
+                        ErrorMessage = null,
+                        AttemptedAt = attemptedAt,
+                        SentAt = sentAt,
+                        Message = message,
+                        CreatedAt = attemptedAt
+                    });
+
+                    await _context.SaveChangesAsync(cancellationToken);
+                    existingDeliveryKeys.Add(deliveryKey);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(
+                        ex,
+                        "Failed to send direct Chatwork creation notification for reservation {ReservationId} to user {UserId}.",
+                        reservation.Id,
+                        targetUser.Id);
+
+                    _context.ChatworkDeliveryLogs.Add(new ChatworkDeliveryLog
+                    {
+                        ReservationId = reservation.Id,
+                        DeliveryType = ChatworkDeliveryTypes.ReservationCreated,
+                        DeliveryKey = deliveryKey,
+                        TargetUserId = targetUser.Id,
+                        ScheduledStartTime = reservation.StartTime,
+                        RoomId = roomId,
+                        Status = ChatworkDeliveryStatuses.Failed,
+                        ErrorMessage = ex.Message,
+                        AttemptedAt = attemptedAt,
+                        SentAt = null,
+                        Message = message,
+                        CreatedAt = attemptedAt
+                    });
+
+                    await _context.SaveChangesAsync(cancellationToken);
+                    existingDeliveryKeys.Add(deliveryKey);
+                }
+            }
+        }
         private static List<int> GetStakeholderUserIds(ReservationModel reservation)
         {
             return GetParticipantIds(reservation)
