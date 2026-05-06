@@ -228,6 +228,7 @@ namespace MeetingRoomBooker.Web.Services
             user.Name = user.Name?.Trim() ?? string.Empty;
             user.Email = user.Email?.Trim() ?? string.Empty;
             user.ChatworkAccountId = NormalizeChatworkAccountId(user.ChatworkAccountId);
+            user.ChatworkDirectRoomId = NormalizeChatworkAccountId(user.ChatworkDirectRoomId);
 
             if (string.IsNullOrWhiteSpace(user.AvatarColor))
             {
@@ -304,6 +305,27 @@ namespace MeetingRoomBooker.Web.Services
             if (CurrentUser?.Id == userId)
             {
                 CurrentUser.ChatworkAccountId = user.ChatworkAccountId;
+            }
+
+            await SaveData();
+            NotifyStateChanged();
+        }
+
+        public async Task UpdateUserChatworkDirectRoomIdAsync(int userId, string? chatworkDirectRoomId)
+        {
+            await EnsureLoaded();
+
+            var user = _users.FirstOrDefault(x => x.Id == userId);
+            if (user is null)
+            {
+                return;
+            }
+
+            user.ChatworkDirectRoomId = NormalizeChatworkAccountId(chatworkDirectRoomId);
+
+            if (CurrentUser?.Id == userId)
+            {
+                CurrentUser.ChatworkDirectRoomId = user.ChatworkDirectRoomId;
             }
 
             await SaveData();

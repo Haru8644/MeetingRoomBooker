@@ -11,6 +11,7 @@ namespace MeetingRoomBooker.Web.Services
         public Task DeleteUserAsync(int userId) => Task.CompletedTask;
         public Task UpdateUserNameAsync(int userId, string name) => Task.CompletedTask;
         public Task UpdateUserChatworkAccountIdAsync(int userId, string? chatworkAccountId) => Task.CompletedTask;
+        public Task UpdateUserChatworkDirectRoomIdAsync(int userId, string? chatworkDirectRoomId) => Task.CompletedTask;
         public void Logout() { }
         public UserModel? GetCurrentUser() => null;
         public Task<List<ReservationModel>> GetReservationsAsync() => Task.FromResult(new List<ReservationModel>());

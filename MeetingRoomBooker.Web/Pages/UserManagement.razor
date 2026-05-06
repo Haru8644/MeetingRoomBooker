@@ -40,6 +40,11 @@
                    placeholder="CHATWORK ACCOUNT ID (OPTIONAL)"
                    autocomplete="off" />
 
+            <input @bind="newChatworkDirectRoomId"
+                   class="um-input"
+                   placeholder="CHATWORK DIRECT ROOM ID (OPTIONAL)"
+                   autocomplete="off" />
+
             <button type="button"
                     class="um-register-button"
                     @onclick="AddUser">
@@ -88,6 +93,19 @@
                             SAVE CW
                         </button>
                     </div>
+
+                    <div class="um-chatwork-editor">
+                        <span class="um-chatwork-label">CW DIRECT ROOM ID</span>
+                        <input @bind="user.ChatworkDirectRoomId"
+                               class="um-account-input"
+                               placeholder="NOT SET"
+                               autocomplete="off" />
+                        <button type="button"
+                                class="um-save-button"
+                                @onclick="() => SaveChatworkDirectRoomIdAsync(user)">
+                            SAVE ROOM
+                        </button>
+                    </div>
                 </div>
 
                 <div class="um-row-actions">
@@ -116,6 +134,7 @@
     private string newPassword = string.Empty;
     private string newConfirmPassword = string.Empty;
     private string newChatworkAccountId = string.Empty;
+    private string newChatworkDirectRoomId = string.Empty;
     private string msg = string.Empty;
     private UserModel? currentUser;
 
@@ -156,7 +175,8 @@
                 Email = newEmail.Trim(),
                 Password = newPassword,
                 AvatarColor = "#a371f7",
-                ChatworkAccountId = NormalizeChatworkAccountId(newChatworkAccountId)
+                ChatworkAccountId = NormalizeChatworkId(newChatworkAccountId),
+                ChatworkDirectRoomId = NormalizeChatworkId(newChatworkDirectRoomId)
             };
 
             var registered = await BookingService.RegisterUserAsync(user);
@@ -174,6 +194,7 @@
             newPassword = string.Empty;
             newConfirmPassword = string.Empty;
             newChatworkAccountId = string.Empty;
+            newChatworkDirectRoomId = string.Empty;
             msg = "REGISTRATION SUCCESSFUL";
         }
         catch (Exception ex)
@@ -216,6 +237,20 @@
         }
     }
 
+    private async Task SaveChatworkDirectRoomIdAsync(UserModel user)
+    {
+        try
+        {
+            await BookingService.UpdateUserChatworkDirectRoomIdAsync(user.Id, user.ChatworkDirectRoomId);
+            await ReloadUsersAsync();
+            msg = $"CHATWORK DIRECT ROOM UPDATED: {user.Name}";
+        }
+        catch (Exception ex)
+        {
+            msg = $"ERROR: {ex.Message}";
+        }
+    }
+
     private async Task DeleteUser(int id)
     {
         try
@@ -235,7 +270,7 @@
         users = await BookingService.GetAllUsersAsync();
     }
 
-    private static string? NormalizeChatworkAccountId(string value)
+    private static string? NormalizeChatworkId(string value)
     {
         return string.IsNullOrWhiteSpace(value)
             ? null
