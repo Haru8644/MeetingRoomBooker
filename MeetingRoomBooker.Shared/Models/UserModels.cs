@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
 
 namespace MeetingRoomBooker.Shared.Models
@@ -17,6 +18,7 @@ namespace MeetingRoomBooker.Shared.Models
         public string Email { get; set; } = string.Empty;
 
         [JsonIgnore]
+        [NotMapped]
         public string Password { get; set; } = string.Empty;
 
         [JsonIgnore]
@@ -28,5 +30,8 @@ namespace MeetingRoomBooker.Shared.Models
 
         [StringLength(100)]
         public string? ChatworkAccountId { get; set; }
+
+        [StringLength(100)]
+        public string? ChatworkDirectRoomId { get; set; }
     }
 }

@@ -20,5 +20,8 @@ namespace MeetingRoomBooker.Shared.Models
 
         [StringLength(100)]
         public string? ChatworkAccountId { get; set; }
+
+        [StringLength(100)]
+        public string? ChatworkDirectRoomId { get; set; }
     }
 }

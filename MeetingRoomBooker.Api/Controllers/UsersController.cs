@@ -12,7 +12,7 @@ namespace MeetingRoomBooker.Api.Controllers
     [ApiController]
     public sealed class UsersController : ControllerBase
     {
-        private const int ChatworkAccountIdMaxLength = 100;
+        private const int ChatworkIdMaxLength = 100;
         private static readonly PasswordHasher<UserModel> PasswordHasher = new();
         private readonly AppDbContext _context;
 
@@ -38,7 +38,8 @@ namespace MeetingRoomBooker.Api.Controllers
             var name = request.Name?.Trim() ?? string.Empty;
             var email = NormalizeEmail(request.Email);
             var password = request.Password ?? string.Empty;
-            var chatworkAccountId = NormalizeChatworkAccountId(request.ChatworkAccountId);
+            var chatworkAccountId = NormalizeChatworkId(request.ChatworkAccountId);
+            var chatworkDirectRoomId = NormalizeChatworkId(request.ChatworkDirectRoomId);
             var hasExistingUsers = await _context.Users.AnyAsync();
 
             if (hasExistingUsers && (!User.Identity?.IsAuthenticated ?? true || !User.IsInRole("Admin")))
@@ -53,9 +54,14 @@ namespace MeetingRoomBooker.Api.Controllers
                 return BadRequest("Name, email, and password are required.");
             }
 
-            if (chatworkAccountId?.Length > ChatworkAccountIdMaxLength)
+            if (chatworkAccountId?.Length > ChatworkIdMaxLength)
             {
-                return BadRequest($"Chatwork account ID must be {ChatworkAccountIdMaxLength} characters or less.");
+                return BadRequest($"Chatwork account ID must be {ChatworkIdMaxLength} characters or less.");
+            }
+
+            if (chatworkDirectRoomId?.Length > ChatworkIdMaxLength)
+            {
+                return BadRequest($"Chatwork direct room ID must be {ChatworkIdMaxLength} characters or less.");
             }
 
             if (await _context.Users.AnyAsync(u => u.Email == email))
@@ -71,6 +77,7 @@ namespace MeetingRoomBooker.Api.Controllers
                 PasswordHash = null,
                 AvatarColor = string.IsNullOrWhiteSpace(request.AvatarColor) ? "#58a6ff" : request.AvatarColor,
                 ChatworkAccountId = chatworkAccountId,
+                ChatworkDirectRoomId = chatworkDirectRoomId,
                 IsAdmin = !hasExistingUsers
             };
 
@@ -133,13 +140,37 @@ namespace MeetingRoomBooker.Api.Controllers
                 return NotFound();
             }
 
-            var normalizedAccountId = NormalizeChatworkAccountId(request.ChatworkAccountId);
-            if (normalizedAccountId?.Length > ChatworkAccountIdMaxLength)
+            var normalizedAccountId = NormalizeChatworkId(request.ChatworkAccountId);
+            if (normalizedAccountId?.Length > ChatworkIdMaxLength)
             {
-                return BadRequest($"Chatwork account ID must be {ChatworkAccountIdMaxLength} characters or less.");
+                return BadRequest($"Chatwork account ID must be {ChatworkIdMaxLength} characters or less.");
             }
 
             user.ChatworkAccountId = normalizedAccountId;
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        [Authorize(Policy = "AdminOnly")]
+        [HttpPut("{id:int}/chatwork-direct-room")]
+        public async Task<IActionResult> UpdateChatworkDirectRoomId(
+            int id,
+            [FromBody] UpdateUserChatworkDirectRoomRequest request)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            var normalizedDirectRoomId = NormalizeChatworkId(request.ChatworkDirectRoomId);
+            if (normalizedDirectRoomId?.Length > ChatworkIdMaxLength)
+            {
+                return BadRequest($"Chatwork direct room ID must be {ChatworkIdMaxLength} characters or less.");
+            }
+
+            user.ChatworkDirectRoomId = normalizedDirectRoomId;
             await _context.SaveChangesAsync();
 
             return NoContent();
@@ -239,11 +270,11 @@ namespace MeetingRoomBooker.Api.Controllers
             return (email ?? string.Empty).Trim().ToLowerInvariant();
         }
 
-        private static string? NormalizeChatworkAccountId(string? chatworkAccountId)
+        private static string? NormalizeChatworkId(string? chatworkId)
         {
-            return string.IsNullOrWhiteSpace(chatworkAccountId)
+            return string.IsNullOrWhiteSpace(chatworkId)
                 ? null
-                : chatworkAccountId.Trim();
+                : chatworkId.Trim();
         }
 
         private bool TryGetCurrentUserId(out int userId)
@@ -260,6 +291,11 @@ namespace MeetingRoomBooker.Api.Controllers
         public sealed class UpdateUserChatworkAccountRequest
         {
             public string? ChatworkAccountId { get; set; }
+        }
+
+        public sealed class UpdateUserChatworkDirectRoomRequest
+        {
+            public string? ChatworkDirectRoomId { get; set; }
         }
     }
 }
