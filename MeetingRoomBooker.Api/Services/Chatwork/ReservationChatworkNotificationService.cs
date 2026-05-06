@@ -209,6 +209,23 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
             string message,
             CancellationToken cancellationToken)
         {
+            await SendDirectNotificationsAsync(
+                reservation,
+                targetUsers,
+                ChatworkDeliveryTypes.ReservationCreated,
+                user => ChatworkDeliveryKeys.ReservationCreated(reservation.Id, user.Id),
+                message,
+                cancellationToken);
+        }
+
+        private async Task SendDirectNotificationsAsync(
+            ReservationModel reservation,
+            IReadOnlyCollection<UserModel> targetUsers,
+            string deliveryType,
+            Func<UserModel, string> buildDeliveryKey,
+            string message,
+            CancellationToken cancellationToken)
+        {
             if (string.IsNullOrWhiteSpace(message) || targetUsers.Count == 0)
             {
                 return;
@@ -221,7 +238,7 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                 .ToList();
 
             var deliveryKeys = uniqueTargetUsers
-                .Select(user => ChatworkDeliveryKeys.ReservationCreated(reservation.Id, user.Id))
+                .Select(buildDeliveryKey)
                 .ToList();
 
             var existingDeliveryKeyList = await _context.ChatworkDeliveryLogs
@@ -234,7 +251,7 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
 
             foreach (var targetUser in uniqueTargetUsers)
             {
-                var deliveryKey = ChatworkDeliveryKeys.ReservationCreated(reservation.Id, targetUser.Id);
+                var deliveryKey = buildDeliveryKey(targetUser);
 
                 if (existingDeliveryKeys.Contains(deliveryKey))
                 {
@@ -249,7 +266,7 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                     _context.ChatworkDeliveryLogs.Add(new ChatworkDeliveryLog
                     {
                         ReservationId = reservation.Id,
-                        DeliveryType = ChatworkDeliveryTypes.ReservationCreated,
+                        DeliveryType = deliveryType,
                         DeliveryKey = deliveryKey,
                         TargetUserId = targetUser.Id,
                         ScheduledStartTime = reservation.StartTime,
@@ -276,7 +293,7 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                     _context.ChatworkDeliveryLogs.Add(new ChatworkDeliveryLog
                     {
                         ReservationId = reservation.Id,
-                        DeliveryType = ChatworkDeliveryTypes.ReservationCreated,
+                        DeliveryType = deliveryType,
                         DeliveryKey = deliveryKey,
                         TargetUserId = targetUser.Id,
                         ScheduledStartTime = reservation.StartTime,
@@ -296,14 +313,15 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                 {
                     _logger.LogError(
                         ex,
-                        "Failed to send direct Chatwork creation notification for reservation {ReservationId} to user {UserId}.",
+                        "Failed to send direct Chatwork notification. ReservationId: {ReservationId}, DeliveryType: {DeliveryType}, UserId: {UserId}.",
                         reservation.Id,
+                        deliveryType,
                         targetUser.Id);
 
                     _context.ChatworkDeliveryLogs.Add(new ChatworkDeliveryLog
                     {
                         ReservationId = reservation.Id,
-                        DeliveryType = ChatworkDeliveryTypes.ReservationCreated,
+                        DeliveryType = deliveryType,
                         DeliveryKey = deliveryKey,
                         TargetUserId = targetUser.Id,
                         ScheduledStartTime = reservation.StartTime,
@@ -321,6 +339,7 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                 }
             }
         }
+
         private static List<int> GetStakeholderUserIds(ReservationModel reservation)
         {
             return GetParticipantIds(reservation)
