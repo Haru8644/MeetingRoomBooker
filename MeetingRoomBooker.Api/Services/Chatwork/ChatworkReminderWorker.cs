@@ -80,16 +80,19 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
 
             var deliveryLogs = await context.ChatworkDeliveryLogs
                 .AsNoTracking()
-                .Where(x => x.DeliveryType == ChatworkDeliveryTypes.Reminder10Minutes && reservationIds.Contains(x.ReservationId))
+                .Where(x =>
+                    x.DeliveryType == ChatworkDeliveryTypes.Reminder10Minutes &&
+                    x.Status == ChatworkDeliveryStatuses.Succeeded &&
+                    reservationIds.Contains(x.ReservationId))
                 .ToListAsync(cancellationToken);
 
             var deliveredKeys = deliveryLogs
-                .Select(x => GetDeliveryKey(x.ReservationId, x.ScheduledStartTime))
+                .Select(x => x.DeliveryKey ?? ChatworkDeliveryKeys.Reminder10Minutes(x.ReservationId, x.ScheduledStartTime))
                 .ToHashSet(StringComparer.Ordinal);
 
             foreach (var reservation in reservations)
             {
-                var deliveryKey = GetDeliveryKey(reservation.Id, reservation.StartTime);
+                var deliveryKey = ChatworkDeliveryKeys.Reminder10Minutes(reservation.Id, reservation.StartTime);
                 if (deliveredKeys.Contains(deliveryKey))
                 {
                     continue;
@@ -130,11 +133,6 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                         reservation.Id);
                 }
             }
-        }
-
-        private static string GetDeliveryKey(int reservationId, DateTime scheduledStartTime)
-        {
-            return $"{reservationId}:{scheduledStartTime:O}";
         }
     }
 }
