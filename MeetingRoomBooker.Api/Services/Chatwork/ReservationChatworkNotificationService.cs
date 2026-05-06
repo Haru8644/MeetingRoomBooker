@@ -28,8 +28,9 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
             ReservationModel reservation,
             CancellationToken cancellationToken = default)
         {
-            var usersById = await GetUsersByIdAsync(GetStakeholderUserIds(reservation), cancellationToken);
-            var stakeholderUsers = GetUsers(GetStakeholderUserIds(reservation), usersById);
+            var stakeholderIds = GetStakeholderUserIds(reservation);
+            var usersById = await GetUsersByIdAsync(stakeholderIds, cancellationToken);
+            var stakeholderUsers = GetUsers(stakeholderIds, usersById);
 
             await SendFacilityNotificationAsync(
                 reservation,
@@ -41,10 +42,10 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                 BuildReceptionCreatedMessage(reservation, usersById),
                 cancellationToken);
 
-            await SendStakeholderNotificationAsync(
-                stakeholderUsers,
-                BuildStakeholderCreatedMessage(reservation, usersById, stakeholderUsers),
-                cancellationToken);
+            await SendStakeholderRoomNotificationAsync(
+              stakeholderUsers,
+              BuildStakeholderCreatedMessage(reservation, usersById, stakeholderUsers),
+              cancellationToken);
         }
 
         public async Task SendReservationUpdatedAsync(
@@ -75,7 +76,7 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                 BuildReceptionUpdatedMessage(currentReservation, usersById, changeLines),
                 cancellationToken);
 
-            await SendStakeholderNotificationAsync(
+            await SendStakeholderRoomNotificationAsync(
                 stakeholderUsers,
                 BuildStakeholderUpdatedMessage(currentReservation, usersById, stakeholderUsers, changeLines),
                 cancellationToken);
@@ -85,8 +86,9 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
             ReservationModel reservation,
             CancellationToken cancellationToken = default)
         {
-            var usersById = await GetUsersByIdAsync(GetStakeholderUserIds(reservation), cancellationToken);
-            var stakeholderUsers = GetUsers(GetStakeholderUserIds(reservation), usersById);
+            var stakeholderIds = GetStakeholderUserIds(reservation);
+            var usersById = await GetUsersByIdAsync(stakeholderIds, cancellationToken);
+            var stakeholderUsers = GetUsers(stakeholderIds, usersById);
 
             await SendFacilityNotificationAsync(
                 reservation,
@@ -98,7 +100,7 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                 BuildReceptionCanceledMessage(reservation, usersById),
                 cancellationToken);
 
-            await SendStakeholderNotificationAsync(
+            await SendStakeholderRoomNotificationAsync(
                 stakeholderUsers,
                 BuildStakeholderCanceledMessage(reservation, usersById, stakeholderUsers),
                 cancellationToken);
@@ -108,8 +110,9 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
             ReservationModel reservation,
             CancellationToken cancellationToken = default)
         {
-            var usersById = await GetUsersByIdAsync(GetStakeholderUserIds(reservation), cancellationToken);
-            var stakeholderUsers = GetUsers(GetStakeholderUserIds(reservation), usersById);
+            var stakeholderIds = GetStakeholderUserIds(reservation);
+            var usersById = await GetUsersByIdAsync(stakeholderIds, cancellationToken);
+            var stakeholderUsers = GetUsers(stakeholderIds, usersById);
 
             await SendFacilityNotificationAsync(
                 reservation,
@@ -121,7 +124,7 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                 BuildReceptionReminderMessage(reservation, usersById),
                 cancellationToken);
 
-            await SendStakeholderNotificationAsync(
+            await SendStakeholderRoomNotificationAsync(
                 stakeholderUsers,
                 BuildStakeholderReminderMessage(reservation, usersById, stakeholderUsers),
                 cancellationToken);
@@ -183,7 +186,7 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
             }
         }
 
-        private async Task SendStakeholderNotificationAsync(
+        private async Task SendStakeholderRoomNotificationAsync(
             IReadOnlyCollection<UserModel> targetUsers,
             string message,
             CancellationToken cancellationToken)
