@@ -44,8 +44,9 @@ MeetingRoomBooker brings these concerns into a single workflow that covers **res
 - Notify users when participants are added or removed
 - Send detailed update notifications based on reservation changes
 - Notify organizers when someone joins or leaves a reservation
-- Send Chatwork notifications for create, update, delete, and reminder events
-- Separate notifications for shared room visibility, reception workflows, and stakeholders
+- Send direct Chatwork notifications to reservation owners and participants
+- Send reminder notifications 10 minutes before the meeting starts
+- Track Chatwork delivery results per target user for operational troubleshooting
 
 ### Operational support
 - Cookie-based authentication with persistent sessions
@@ -120,7 +121,7 @@ Regular users can:
 Admins can:
 - list users
 - register users
-- update user names and Chatwork account IDs
+- update user names, Chatwork account IDs, and direct Chatwork room IDs
 - delete users
 - access admin-only management APIs
 - manage reservations beyond normal ownership rules when necessary
@@ -143,19 +144,75 @@ In a higher-concurrency environment, I would strengthen this further with strict
 
 ## Chatwork Integration
 
+Chatwork integration is handled entirely on the backend.  
+The frontend never receives the Chatwork API token.
+
 ### Supported events
 - Reservation created
 - Reservation updated
-- Reservation canceled
 - Reminder sent 10 minutes before the meeting
 
-### Notification targets
-- Shared room notifications
-- Reception notifications for visitor meetings
-- Stakeholder notifications
+### Direct notification targets
+For direct Chatwork notifications, MeetingRoomBooker sends messages to:
+
+- the reservation owner
+- reservation participants
+- users who were removed from a reservation after an update
+
+This is designed so that users who are affected by a reservation change can still receive the update even if they are no longer part of the final participant list.
 
 ### User mapping
-Each user can store a `ChatworkAccountId`, allowing stakeholder notifications to include Chatwork mentions.
+Each user can store two Chatwork-related identifiers:
+
+- `ChatworkAccountId`: used for Chatwork mentions
+- `ChatworkDirectRoomId`: used as the destination room ID for direct Chatwork messages
+
+Admins can manage these values from the user management screen.
+
+### Delivery logging
+Chatwork delivery results are tracked per target user.
+
+Each delivery log can include:
+
+- `ReservationId`
+- `DeliveryType`
+- `DeliveryKey`
+- `TargetUserId`
+- `RoomId`
+- `Status`
+- `ErrorMessage`
+- `AttemptedAt`
+- `SentAt`
+
+The delivery status can be:
+
+- `Succeeded`: the message was sent successfully
+- `Failed`: the system attempted to send the message, but Chatwork delivery failed
+- `Skipped`: the target user did not have a direct Chatwork room ID configured
+
+### Duplicate delivery prevention
+Each direct notification uses a `DeliveryKey` to prevent duplicate delivery.
+
+Examples:
+
+```text
+ReservationCreated:reservation:{reservationId}:user:{targetUserId}
+ReservationUpdated:reservation:{reservationId}:user:{targetUserId}:change:{changeId}
+Reminder10Minutes:reservation:{reservationId}:user:{targetUserId}:start:{scheduledStartTime}
+```
+
+This makes duplicate prevention user-aware.  
+For example, the same reservation reminder can be sent once to each participant, while still preventing repeated delivery to the same user.
+
+### Failure handling
+Direct Chatwork delivery is processed user by user.
+
+If delivery to one user fails, the system records a failed delivery log and continues processing the remaining users.  
+This prevents a single Chatwork API failure or missing room setting from blocking notifications for everyone else.
+
+### Reminder worker
+The reminder worker is responsible for finding reservations that start soon.  
+The actual direct delivery and delivery logging are delegated to the Chatwork notification service, keeping scheduling and delivery responsibilities separate.
 
 ---
 
@@ -243,8 +300,8 @@ As a portfolio project, this repository is meant to highlight:
 - API-side authorization instead of UI-only restrictions
 - cookie-based authentication with persistent sessions
 - recurring reservation workflows with scoped update and delete behavior
-- operational notifications and reminder handling
-- Chatwork integration and background processing
+- operational notifications, reminder handling, and delivery logging
+- backend-only Chatwork integration with user-level delivery tracking
 - shared contracts between frontend and backend
 
 ---
