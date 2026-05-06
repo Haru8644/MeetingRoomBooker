@@ -8,8 +8,6 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
 {
     public sealed class ChatworkReminderWorker : BackgroundService
     {
-        private const string ReminderDeliveryType = "Reminder10Minutes";
-
         private readonly IServiceScopeFactory _serviceScopeFactory;
         private readonly ChatworkOptions _options;
         private readonly ILogger<ChatworkReminderWorker> _logger;
@@ -82,7 +80,7 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
 
             var deliveryLogs = await context.ChatworkDeliveryLogs
                 .AsNoTracking()
-                .Where(x => x.DeliveryType == ReminderDeliveryType && reservationIds.Contains(x.ReservationId))
+                .Where(x => x.DeliveryType == ChatworkDeliveryTypes.Reminder10Minutes && reservationIds.Contains(x.ReservationId))
                 .ToListAsync(cancellationToken);
 
             var deliveredKeys = deliveryLogs
@@ -104,7 +102,7 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                     context.ChatworkDeliveryLogs.Add(new ChatworkDeliveryLog
                     {
                         ReservationId = reservation.Id,
-                        DeliveryType = ReminderDeliveryType,
+                        DeliveryType = ChatworkDeliveryTypes.Reminder10Minutes,
                         ScheduledStartTime = reservation.StartTime,
                         SentAt = DateTime.Now,
                         Message = $"Reminder sent for reservation {reservation.Id}.",
