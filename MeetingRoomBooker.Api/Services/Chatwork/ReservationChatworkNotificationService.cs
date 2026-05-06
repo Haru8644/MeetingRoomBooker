@@ -106,20 +106,12 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
             var stakeholderIds = GetStakeholderUserIds(reservation);
             var usersById = await GetUsersByIdAsync(stakeholderIds, cancellationToken);
             var stakeholderUsers = GetUsers(stakeholderIds, usersById);
+            var stakeholderMessage = BuildStakeholderReminderMessage(reservation, usersById, stakeholderUsers);
 
-            await SendFacilityNotificationAsync(
+            await SendReservationReminderDirectNotificationsAsync(
                 reservation,
-                BuildFacilityReminderMessage(reservation, usersById),
-                cancellationToken);
-
-            await SendReceptionNotificationAsync(
-                reservation,
-                BuildReceptionReminderMessage(reservation, usersById),
-                cancellationToken);
-
-            await SendStakeholderRoomNotificationAsync(
                 stakeholderUsers,
-                BuildStakeholderReminderMessage(reservation, usersById, stakeholderUsers),
+                stakeholderMessage,
                 cancellationToken);
         }
 
@@ -230,6 +222,21 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                 targetUsers,
                 ChatworkDeliveryTypes.ReservationUpdated,
                 user => ChatworkDeliveryKeys.ReservationUpdated(reservation.Id, user.Id, changeId),
+                message,
+                cancellationToken);
+        }
+
+        private async Task SendReservationReminderDirectNotificationsAsync(
+            ReservationModel reservation,
+            IReadOnlyCollection<UserModel> targetUsers,
+            string message,
+            CancellationToken cancellationToken)
+        {
+            await SendDirectNotificationsAsync(
+                reservation,
+                targetUsers,
+                ChatworkDeliveryTypes.Reminder10Minutes,
+                user => ChatworkDeliveryKeys.Reminder10Minutes(reservation.Id, user.Id, reservation.StartTime),
                 message,
                 cancellationToken);
         }

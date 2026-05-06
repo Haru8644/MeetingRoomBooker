@@ -1,5 +1,4 @@
 ﻿using MeetingRoomBooker.Api.Data;
-using MeetingRoomBooker.Api.Models;
 using MeetingRoomBooker.Api.Options;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -74,54 +73,13 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                 return;
             }
 
-            var reservationIds = reservations
-                .Select(x => x.Id)
-                .ToList();
-
-            var deliveryLogs = await context.ChatworkDeliveryLogs
-                .AsNoTracking()
-                .Where(x =>
-                    x.DeliveryType == ChatworkDeliveryTypes.Reminder10Minutes &&
-                    x.Status == ChatworkDeliveryStatuses.Succeeded &&
-                    reservationIds.Contains(x.ReservationId))
-                .ToListAsync(cancellationToken);
-
-            var deliveredKeys = deliveryLogs
-                .Select(x => x.DeliveryKey ?? ChatworkDeliveryKeys.Reminder10Minutes(x.ReservationId, x.ScheduledStartTime))
-                .ToHashSet(StringComparer.Ordinal);
-
             foreach (var reservation in reservations)
             {
-                var deliveryKey = ChatworkDeliveryKeys.Reminder10Minutes(reservation.Id, reservation.StartTime);
-                if (deliveredKeys.Contains(deliveryKey))
-                {
-                    continue;
-                }
-
                 try
                 {
                     await notificationService.SendReservationReminderAsync(reservation, cancellationToken);
-
-                    var sentAt = DateTime.Now;
-
-                    context.ChatworkDeliveryLogs.Add(new ChatworkDeliveryLog
-                    {
-                        ReservationId = reservation.Id,
-                        DeliveryType = ChatworkDeliveryTypes.Reminder10Minutes,
-                        DeliveryKey = deliveryKey,
-                        ScheduledStartTime = reservation.StartTime,
-                        Status = ChatworkDeliveryStatuses.Succeeded,
-                        AttemptedAt = sentAt,
-                        SentAt = sentAt,
-                        Message = $"Reminder sent for reservation {reservation.Id}.",
-                        CreatedAt = sentAt
-                    });
-
-                    await context.SaveChangesAsync(cancellationToken);
-                    deliveredKeys.Add(deliveryKey);
-
                     _logger.LogInformation(
-                        "Sent Chatwork reminder for reservation {ReservationId} scheduled at {StartTime}.",
+                        "Processed Chatwork reminder for reservation {ReservationId} scheduled at {StartTime}.",
                         reservation.Id,
                         reservation.StartTime);
                 }
@@ -129,7 +87,7 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                 {
                     _logger.LogError(
                         ex,
-                        "Failed to send Chatwork reminder for reservation {ReservationId}.",
+                        "Failed to process Chatwork reminder for reservation {ReservationId}.",
                         reservation.Id);
                 }
             }
