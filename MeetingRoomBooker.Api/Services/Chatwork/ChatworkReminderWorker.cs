@@ -99,14 +99,19 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                 {
                     await notificationService.SendReservationReminderAsync(reservation, cancellationToken);
 
+                    var sentAt = DateTime.Now;
+
                     context.ChatworkDeliveryLogs.Add(new ChatworkDeliveryLog
                     {
                         ReservationId = reservation.Id,
                         DeliveryType = ChatworkDeliveryTypes.Reminder10Minutes,
+                        DeliveryKey = deliveryKey,
                         ScheduledStartTime = reservation.StartTime,
-                        SentAt = DateTime.Now,
+                        Status = ChatworkDeliveryStatuses.Succeeded,
+                        AttemptedAt = sentAt,
+                        SentAt = sentAt,
                         Message = $"Reminder sent for reservation {reservation.Id}.",
-                        CreatedAt = DateTime.Now
+                        CreatedAt = sentAt
                     });
 
                     await context.SaveChangesAsync(cancellationToken);
