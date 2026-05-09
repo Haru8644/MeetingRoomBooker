@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="MeetingRoomBooker.Api/MeetingRoomBooker.Api.csproj" />
   <Project Path="MeetingRoomBooker.Shared/MeetingRoomBooker.Shared.csproj" />
+  <Project Path="MeetingRoomBooker.Tests/MeetingRoomBooker.Tests.csproj" />
   <Project Path="MeetingRoomBooker.Web/MeetingRoomBooker.Web.csproj" />
 </Solution>
