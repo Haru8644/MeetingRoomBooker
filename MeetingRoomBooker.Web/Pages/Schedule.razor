@@ -362,7 +362,7 @@
     private List<string> typeList = new() { "社内", "来客" };
     private ReservationModel? selectedBooking;
     private UserModel? currentUser;
-    private List<UserModel> allUsers = new();
+    private List<ParticipantUserModel> allUsers = new();
     private bool isEditing = false;
     private bool isLoading = true;
     private string editName = "", editRoom = "", editType = "", editPurpose = "";
@@ -434,11 +434,11 @@
         isLoading = true;
         allReservations = await BookingService.GetReservationsAsync();
         currentUser = BookingService.GetCurrentUser();
-        try { allUsers = await BookingService.GetAllUsersAsync(); }
+        try { allUsers = await BookingService.GetParticipantUsersAsync(); }
         catch (Exception ex)
         {
-            Logger.LogWarning(ex, "Failed to load users in Schedule page. currentUserId={UserId}", currentUser?.Id);
-            allUsers = new List<UserModel>();
+            Logger.LogWarning(ex, "Failed to load participant users in Schedule page. currentUserId={UserId}", currentUser?.Id);
+            allUsers = new List<ParticipantUserModel>();
         }
         isLoading = false;
         await InvokeAsync(StateHasChanged);

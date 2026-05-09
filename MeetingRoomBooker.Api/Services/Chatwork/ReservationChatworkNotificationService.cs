@@ -1,8 +1,8 @@
-﻿using MeetingRoomBooker.Api.Data;
+﻿using System.Text;
+using MeetingRoomBooker.Api.Data;
 using MeetingRoomBooker.Api.Models;
 using MeetingRoomBooker.Shared.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Text;
 
 namespace MeetingRoomBooker.Api.Services.Chatwork
 {
@@ -75,27 +75,63 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                 cancellationToken);
         }
 
+        public async Task SendReservationSeriesUpdatedAsync(
+            ReservationModel representativePreviousReservation,
+            ReservationModel representativeCurrentReservation,
+            int updatedCount,
+            CancellationToken cancellationToken = default)
+        {
+            var stakeholderIds = GetStakeholderUserIds(representativePreviousReservation)
+                .Union(GetStakeholderUserIds(representativeCurrentReservation))
+                .ToList();
+
+            var usersById = await GetUsersByIdAsync(stakeholderIds, cancellationToken);
+            var stakeholderUsers = GetUsers(stakeholderIds, usersById);
+            var changeLines = BuildChangeLines(
+                representativePreviousReservation,
+                representativeCurrentReservation,
+                usersById);
+
+            if (changeLines.Count == 0)
+            {
+                return;
+            }
+
+            var stakeholderMessage = BuildStakeholderUpdatedMessage(
+                representativeCurrentReservation,
+                usersById,
+                stakeholderUsers,
+                changeLines,
+                updatedCount);
+
+            var changeId = Guid.NewGuid().ToString("N");
+
+            await SendReservationUpdatedDirectNotificationsAsync(
+                representativeCurrentReservation,
+                stakeholderUsers,
+                stakeholderMessage,
+                changeId,
+                cancellationToken);
+        }
+
         public async Task SendReservationCanceledAsync(
             ReservationModel reservation,
             CancellationToken cancellationToken = default)
         {
-            var stakeholderIds = GetStakeholderUserIds(reservation);
-            var usersById = await GetUsersByIdAsync(stakeholderIds, cancellationToken);
-            var stakeholderUsers = GetUsers(stakeholderIds, usersById);
-
-            await SendFacilityNotificationAsync(
+            await SendReservationCanceledDirectNotificationsAsync(
                 reservation,
-                BuildFacilityCanceledMessage(reservation, usersById),
+                canceledCount: 1,
                 cancellationToken);
+        }
 
-            await SendReceptionNotificationAsync(
-                reservation,
-                BuildReceptionCanceledMessage(reservation, usersById),
-                cancellationToken);
-
-            await SendStakeholderRoomNotificationAsync(
-                stakeholderUsers,
-                BuildStakeholderCanceledMessage(reservation, usersById, stakeholderUsers),
+        public async Task SendReservationSeriesCanceledAsync(
+            ReservationModel representativeReservation,
+            int canceledCount,
+            CancellationToken cancellationToken = default)
+        {
+            await SendReservationCanceledDirectNotificationsAsync(
+                representativeReservation,
+                canceledCount,
                 cancellationToken);
         }
 
@@ -146,7 +182,10 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to send facility Chatwork notification for reservation {ReservationId}.", reservation.Id);
+                _logger.LogError(
+                    ex,
+                    "Failed to send facility Chatwork notification for reservation {ReservationId}.",
+                    reservation.Id);
             }
         }
 
@@ -167,7 +206,10 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to send reception Chatwork notification for reservation {ReservationId}.", reservation.Id);
+                _logger.LogError(
+                    ex,
+                    "Failed to send reception Chatwork notification for reservation {ReservationId}.",
+                    reservation.Id);
             }
         }
 
@@ -223,6 +265,29 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                 ChatworkDeliveryTypes.ReservationUpdated,
                 user => ChatworkDeliveryKeys.ReservationUpdated(reservation.Id, user.Id, changeId),
                 message,
+                cancellationToken);
+        }
+
+        private async Task SendReservationCanceledDirectNotificationsAsync(
+            ReservationModel reservation,
+            int canceledCount,
+            CancellationToken cancellationToken)
+        {
+            var stakeholderIds = GetStakeholderUserIds(reservation);
+            var usersById = await GetUsersByIdAsync(stakeholderIds, cancellationToken);
+            var stakeholderUsers = GetUsers(stakeholderIds, usersById);
+            var stakeholderMessage = BuildStakeholderCanceledMessage(
+                reservation,
+                usersById,
+                stakeholderUsers,
+                canceledCount);
+
+            await SendDirectNotificationsAsync(
+                reservation,
+                stakeholderUsers,
+                ChatworkDeliveryTypes.ReservationCanceled,
+                user => ChatworkDeliveryKeys.ReservationCanceled(reservation.Id, user.Id),
+                stakeholderMessage,
                 cancellationToken);
         }
 
@@ -583,29 +648,52 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
             ReservationModel reservation,
             IReadOnlyDictionary<int, UserModel> usersById,
             IReadOnlyCollection<UserModel> targetUsers,
-            IReadOnlyCollection<string> changeLines)
+            IReadOnlyCollection<string> changeLines,
+            int updatedCount = 1)
         {
+            var extraLines = changeLines
+                .Select(change => $"- {change}")
+                .Prepend("変更点:")
+                .ToList();
+
+            if (updatedCount > 1)
+            {
+                extraLines.Add("[hr]");
+                extraLines.Add($"更新件数: {updatedCount}件");
+            }
+
             return BuildStakeholderSummaryMessage(
                 "会議予約が変更されました",
-                "変更内容を確認してください",
+                updatedCount <= 1
+                    ? "変更内容を確認してください"
+                    : "繰り返し予約がまとめて変更されました",
                 reservation,
                 usersById,
                 targetUsers,
-                changeLines.Select(change => $"- {change}").Prepend("変更点:"));
+                extraLines);
         }
 
         private static string BuildStakeholderCanceledMessage(
             ReservationModel reservation,
             IReadOnlyDictionary<int, UserModel> usersById,
-            IReadOnlyCollection<UserModel> targetUsers)
+            IReadOnlyCollection<UserModel> targetUsers,
+            int canceledCount = 1)
         {
+            var actionLabel = canceledCount <= 1
+                ? "この予約は無効です"
+                : "繰り返し予約がまとめて削除されました";
+
+            IEnumerable<string>? extraLines = canceledCount <= 1
+                ? null
+                : new[] { $"削除件数: {canceledCount}件" };
+
             return BuildStakeholderSummaryMessage(
                 "会議予約がキャンセルされました",
-                "この予約は無効です",
+                actionLabel,
                 reservation,
                 usersById,
                 targetUsers,
-                null);
+                extraLines);
         }
 
         private static string BuildStakeholderReminderMessage(

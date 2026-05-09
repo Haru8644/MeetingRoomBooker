@@ -346,6 +346,21 @@ namespace MeetingRoomBooker.Web.Services
             return _users.OrderBy(u => u.Id).ToList();
         }
 
+        public async Task<List<ParticipantUserModel>> GetParticipantUsersAsync()
+        {
+            await EnsureLoaded();
+
+            return _users
+                .OrderBy(user => user.Id)
+                .Select(user => new ParticipantUserModel
+                {
+                    Id = user.Id,
+                    Name = user.Name,
+                    AvatarColor = user.AvatarColor
+                })
+                .ToList();
+        }
+
         public async Task<List<ReservationModel>> GetReservationsAsync()
         {
             await EnsureLoaded();

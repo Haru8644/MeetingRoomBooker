@@ -12,6 +12,11 @@
             return $"{ChatworkDeliveryTypes.ReservationUpdated}:reservation:{reservationId}:user:{targetUserId}:change:{changeId}";
         }
 
+        public static string ReservationCanceled(int reservationId, int targetUserId)
+        {
+            return $"{ChatworkDeliveryTypes.ReservationCanceled}:reservation:{reservationId}:user:{targetUserId}";
+        }
+
         public static string Reminder10Minutes(int reservationId, int targetUserId, DateTime scheduledStartTime)
         {
             return $"{ChatworkDeliveryTypes.Reminder10Minutes}:reservation:{reservationId}:user:{targetUserId}:start:{scheduledStartTime:O}";

@@ -28,6 +28,7 @@ namespace MeetingRoomBooker.Shared.Services
         Task JoinReservationAsync(int reservationId);
         Task LeaveReservationAsync(int reservationId);
         Task<List<UserModel>> GetAllUsersAsync();
+        Task<List<ParticipantUserModel>> GetParticipantUsersAsync();
         Task<List<NotificationModel>> GetNotificationsAsync(int userId);
         Task AddNotificationAsync(NotificationModel notification);
         Task DeleteNotificationAsync(int notificationId);
