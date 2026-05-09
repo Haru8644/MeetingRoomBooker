@@ -220,6 +220,21 @@ namespace MeetingRoomBooker.Web.Services
             NotifyStateChanged();
         }
 
+        public async Task AddReservationsAsync(IReadOnlyCollection<ReservationModel> reservations)
+        {
+            if (_currentUser != null)
+            {
+                foreach (var reservation in reservations.Where(reservation => reservation.UserId == 0))
+                {
+                    reservation.UserId = _currentUser.Id;
+                }
+            }
+
+            var response = await SendAsync(HttpMethod.Post, "api/Reservations/series", reservations);
+            await EnsureSuccessAsync(response, "Failed to add recurring reservations.");
+            NotifyStateChanged();
+        }
+
         public async Task RemoveReservationAsync(ReservationModel reservation)
         {
             var response = await SendAsync(HttpMethod.Delete, $"api/Reservations/{reservation.Id}");

@@ -41,6 +41,27 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                 cancellationToken);
         }
 
+        public async Task SendReservationSeriesCreatedAsync(
+            ReservationModel representativeReservation,
+            int createdCount,
+            CancellationToken cancellationToken = default)
+        {
+            var stakeholderIds = GetStakeholderUserIds(representativeReservation);
+            var usersById = await GetUsersByIdAsync(stakeholderIds, cancellationToken);
+            var stakeholderUsers = GetUsers(stakeholderIds, usersById);
+            var stakeholderMessage = BuildStakeholderCreatedMessage(
+                representativeReservation,
+                usersById,
+                stakeholderUsers,
+                createdCount);
+
+            await SendReservationCreatedDirectNotificationsAsync(
+                representativeReservation,
+                stakeholderUsers,
+                stakeholderMessage,
+                cancellationToken);
+        }
+
         public async Task SendReservationUpdatedAsync(
             ReservationModel previousReservation,
             ReservationModel currentReservation,
@@ -633,15 +654,22 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
         private static string BuildStakeholderCreatedMessage(
             ReservationModel reservation,
             IReadOnlyDictionary<int, UserModel> usersById,
-            IReadOnlyCollection<UserModel> targetUsers)
+            IReadOnlyCollection<UserModel> targetUsers,
+            int createdCount = 1)
         {
+            IEnumerable<string>? extraLines = createdCount <= 1
+                ? null
+                : new[] { $"作成件数: {createdCount}件" };
+
             return BuildStakeholderSummaryMessage(
                 "会議予約を受け付けました",
-                "内容を確認してください",
+                createdCount <= 1
+                    ? "内容を確認してください"
+                    : "繰り返し予約がまとめて作成されました",
                 reservation,
                 usersById,
                 targetUsers,
-                null);
+                extraLines);
         }
 
         private static string BuildStakeholderUpdatedMessage(

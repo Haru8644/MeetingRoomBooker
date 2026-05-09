@@ -20,15 +20,23 @@ namespace MeetingRoomBooker.Api.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<ReservationModel>()
-                .Property(e => e.ParticipantIds)
-                .HasConversion(
-                    v => string.Join(',', v),
-                    v => string.IsNullOrWhiteSpace(v)
-                        ? new List<int>()
-                        : v.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                           .Select(int.Parse)
-                           .ToList());
+            modelBuilder.Entity<ReservationModel>(entity =>
+            {
+                entity.Property(e => e.ParticipantIds)
+                    .HasConversion(
+                        v => string.Join(',', v),
+                        v => string.IsNullOrWhiteSpace(v)
+                            ? new List<int>()
+                            : v.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                               .Select(int.Parse)
+                               .ToList());
+
+                entity.Property(e => e.SeriesId)
+                    .HasMaxLength(50)
+                    .IsRequired(false);
+
+                entity.HasIndex(e => e.SeriesId);
+            });
 
             modelBuilder.Entity<UserModel>(entity =>
             {
