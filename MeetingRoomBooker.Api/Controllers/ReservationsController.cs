@@ -37,6 +37,7 @@ namespace MeetingRoomBooker.Api.Controllers
         [HttpPost]
         public async Task<ActionResult<ReservationModel>> PostReservation(
             ReservationModel reservation,
+            [FromQuery] bool allowOverlap,
             CancellationToken cancellationToken)
         {
             var currentUser = await GetCurrentUserAsync(cancellationToken);
@@ -61,13 +62,16 @@ namespace MeetingRoomBooker.Api.Controllers
                 return BadRequest(validationError);
             }
 
-            var conflict = await FindConflictingReservationAsync(
-                reservation,
-                cancellationToken: cancellationToken);
-
-            if (conflict != null)
+            if (!allowOverlap)
             {
-                return Conflict(BuildConflictMessage(conflict));
+                var conflict = await FindConflictingReservationAsync(
+                    reservation,
+                    cancellationToken: cancellationToken);
+
+                if (conflict != null)
+                {
+                    return Conflict(BuildConflictMessage(conflict));
+                }
             }
 
             _context.Reservations.Add(reservation);
@@ -86,6 +90,7 @@ namespace MeetingRoomBooker.Api.Controllers
         [HttpPost("series")]
         public async Task<ActionResult<IEnumerable<ReservationModel>>> PostReservationSeries(
             List<ReservationModel>? reservations,
+            [FromQuery] bool allowOverlap,
             CancellationToken cancellationToken)
         {
             if (reservations is null || reservations.Count == 0)
@@ -120,19 +125,22 @@ namespace MeetingRoomBooker.Api.Controllers
                     return BadRequest(validationError);
                 }
 
-                var conflictInRequest = normalizedReservations.FirstOrDefault(existing => IsConflictingReservation(existing, reservation));
-                if (conflictInRequest != null)
+                if (!allowOverlap)
                 {
-                    return Conflict(BuildConflictMessage(conflictInRequest));
-                }
+                    var conflictInRequest = normalizedReservations.FirstOrDefault(existing => IsConflictingReservation(existing, reservation));
+                    if (conflictInRequest != null)
+                    {
+                        return Conflict(BuildConflictMessage(conflictInRequest));
+                    }
 
-                var conflict = await FindConflictingReservationAsync(
-                    reservation,
-                    cancellationToken: cancellationToken);
+                    var conflict = await FindConflictingReservationAsync(
+                        reservation,
+                        cancellationToken: cancellationToken);
 
-                if (conflict != null)
-                {
-                    return Conflict(BuildConflictMessage(conflict));
+                    if (conflict != null)
+                    {
+                        return Conflict(BuildConflictMessage(conflict));
+                    }
                 }
 
                 normalizedReservations.Add(reservation);
