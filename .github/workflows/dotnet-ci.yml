@@ -9,7 +9,7 @@ on:
       - master
 
 jobs:
-  build-and-test:
+  build-test-and-publish:
     runs-on: ubuntu-latest
 
     steps:
@@ -29,3 +29,17 @@ jobs:
 
       - name: Test
         run: dotnet test MeetingRoomBooker.slnx --configuration Release --no-build --verbosity normal
+
+      - name: Publish API
+        run: dotnet publish MeetingRoomBooker.Api/MeetingRoomBooker.Api.csproj --configuration Release --output publish/api --no-restore
+
+      - name: Publish Web
+        run: dotnet publish MeetingRoomBooker.Web/MeetingRoomBooker.Web.csproj --configuration Release --output publish/web --no-restore
+
+      - name: Verify publish outputs
+        shell: bash
+        run: |
+          test -f publish/api/MeetingRoomBooker.Api.dll
+          test -f publish/web/wwwroot/index.html
+          test -d publish/web/wwwroot/_framework
+          test -f publish/web/wwwroot/MeetingRoomBooker.Web.styles.css
