@@ -1,0 +1,64 @@
+﻿name: manual-publish
+
+on:
+  workflow_dispatch:
+
+jobs:
+  publish-artifacts:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore MeetingRoomBooker.slnx
+
+      - name: Build
+        run: dotnet build MeetingRoomBooker.slnx --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test MeetingRoomBooker.slnx --configuration Release --no-build --verbosity normal
+
+      - name: Publish API
+        run: dotnet publish MeetingRoomBooker.Api/MeetingRoomBooker.Api.csproj --configuration Release --output publish/api --no-restore
+
+      - name: Publish Web
+        run: dotnet publish MeetingRoomBooker.Web/MeetingRoomBooker.Web.csproj --configuration Release --output publish/web --no-restore
+
+      - name: Verify publish outputs
+        shell: bash
+        run: |
+          test -f publish/api/MeetingRoomBooker.Api.dll
+          test -f publish/web/wwwroot/index.html
+          test -d publish/web/wwwroot/_framework
+          test -f publish/web/wwwroot/MeetingRoomBooker.Web.styles.css
+
+      - name: Verify no database files in publish outputs
+        shell: bash
+        run: |
+          if find publish -type f \( -name "*.db" -o -name "*.db-shm" -o -name "*.db-wal" \) | grep -q .; then
+            echo "Database files must not be included in publish outputs."
+            exit 1
+          fi
+
+      - name: Upload API publish artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: meetingroombooker-api
+          path: publish/api
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload Web publish artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: meetingroombooker-web
+          path: publish/web/wwwroot
+          if-no-files-found: error
+          retention-days: 7
