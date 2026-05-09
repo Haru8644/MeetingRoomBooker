@@ -25,14 +25,30 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
             _logger = logger;
         }
 
+        public Task SendReservationCreatedAsync(
+            ReservationModel reservation,
+            CancellationToken cancellationToken = default)
+        {
+            return SendReservationCreatedAsync(
+                reservation,
+                Array.Empty<ReservationModel>(),
+                cancellationToken);
+        }
+
         public async Task SendReservationCreatedAsync(
             ReservationModel reservation,
+            IReadOnlyCollection<ReservationModel> overlappingReservations,
             CancellationToken cancellationToken = default)
         {
             var stakeholderIds = GetStakeholderUserIds(reservation);
             var usersById = await GetUsersByIdAsync(stakeholderIds, cancellationToken);
             var stakeholderUsers = GetUsers(stakeholderIds, usersById);
-            var stakeholderMessage = BuildStakeholderCreatedMessage(reservation, usersById, stakeholderUsers);
+            var stakeholderMessage = BuildStakeholderCreatedMessage(
+                reservation,
+                usersById,
+                stakeholderUsers,
+                1,
+                overlappingReservations);
 
             await SendReservationCreatedDirectNotificationsAsync(
                 reservation,
@@ -41,9 +57,22 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                 cancellationToken);
         }
 
+        public Task SendReservationSeriesCreatedAsync(
+            ReservationModel representativeReservation,
+            int createdCount,
+            CancellationToken cancellationToken = default)
+        {
+            return SendReservationSeriesCreatedAsync(
+                representativeReservation,
+                createdCount,
+                Array.Empty<ReservationModel>(),
+                cancellationToken);
+        }
+
         public async Task SendReservationSeriesCreatedAsync(
             ReservationModel representativeReservation,
             int createdCount,
+            IReadOnlyCollection<ReservationModel> overlappingReservations,
             CancellationToken cancellationToken = default)
         {
             var stakeholderIds = GetStakeholderUserIds(representativeReservation);
@@ -53,7 +82,8 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                 representativeReservation,
                 usersById,
                 stakeholderUsers,
-                createdCount);
+                createdCount,
+                overlappingReservations);
 
             await SendReservationCreatedDirectNotificationsAsync(
                 representativeReservation,
@@ -655,11 +685,10 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
             ReservationModel reservation,
             IReadOnlyDictionary<int, UserModel> usersById,
             IReadOnlyCollection<UserModel> targetUsers,
-            int createdCount = 1)
+            int createdCount = 1,
+            IReadOnlyCollection<ReservationModel>? overlappingReservations = null)
         {
-            IEnumerable<string>? extraLines = createdCount <= 1
-                ? null
-                : new[] { $"作成件数: {createdCount}件" };
+            var extraLines = BuildCreatedExtraLines(createdCount, overlappingReservations);
 
             return BuildStakeholderSummaryMessage(
                 "会議予約を受け付けました",
@@ -670,6 +699,50 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                 usersById,
                 targetUsers,
                 extraLines);
+        }
+
+        private static IReadOnlyCollection<string>? BuildCreatedExtraLines(
+            int createdCount,
+            IReadOnlyCollection<ReservationModel>? overlappingReservations)
+        {
+            var lines = new List<string>();
+
+            if (createdCount > 1)
+            {
+                lines.Add($"作成件数: {createdCount}件");
+            }
+
+            var overlaps = overlappingReservations?
+                .Where(reservation => reservation.Id > 0)
+                .GroupBy(reservation => reservation.Id)
+                .Select(group => group.First())
+                .OrderBy(reservation => reservation.Date)
+                .ThenBy(reservation => reservation.StartTime)
+                .ToList() ?? new List<ReservationModel>();
+
+            if (overlaps.Count > 0)
+            {
+                if (lines.Count > 0)
+                {
+                    lines.Add("[hr]");
+                }
+
+                lines.Add("注意: この予約は既存予約と重複しています");
+                lines.Add($"重複件数: {overlaps.Count}件");
+                lines.Add("重複している既存予約:");
+
+                foreach (var overlap in overlaps.Take(5))
+                {
+                    lines.Add($"- {overlap.Date:yyyy/MM/dd} {GetTimeRangeText(overlap)} {overlap.Room} / {GetReservationLabel(overlap)}");
+                }
+
+                if (overlaps.Count > 5)
+                {
+                    lines.Add($"- ほか {overlaps.Count - 5}件");
+                }
+            }
+
+            return lines.Count == 0 ? null : lines;
         }
 
         private static string BuildStakeholderUpdatedMessage(

@@ -62,16 +62,13 @@ namespace MeetingRoomBooker.Api.Controllers
                 return BadRequest(validationError);
             }
 
-            if (!allowOverlap)
-            {
-                var conflict = await FindConflictingReservationAsync(
-                    reservation,
-                    cancellationToken: cancellationToken);
+            var overlappingReservations = await FindConflictingReservationsAsync(
+                reservation,
+                cancellationToken: cancellationToken);
 
-                if (conflict != null)
-                {
-                    return Conflict(BuildConflictMessage(conflict));
-                }
+            if (overlappingReservations.Count > 0 && !allowOverlap)
+            {
+                return Conflict(BuildConflictMessage(overlappingReservations[0]));
             }
 
             _context.Reservations.Add(reservation);
@@ -82,6 +79,7 @@ namespace MeetingRoomBooker.Api.Controllers
 
             await _reservationChatworkNotificationService.SendReservationCreatedAsync(
                 reservation,
+                overlappingReservations,
                 cancellationToken);
 
             return CreatedAtAction(nameof(GetReservations), new { id = reservation.Id }, reservation);
@@ -106,6 +104,7 @@ namespace MeetingRoomBooker.Api.Controllers
 
             var seriesId = Guid.NewGuid().ToString("N");
             var normalizedReservations = new List<ReservationModel>();
+            var overlappingReservations = new List<ReservationModel>();
 
             foreach (var reservation in reservations.OrderBy(x => x.Date).ThenBy(x => x.StartTime))
             {
@@ -125,24 +124,22 @@ namespace MeetingRoomBooker.Api.Controllers
                     return BadRequest(validationError);
                 }
 
-                if (!allowOverlap)
+                var conflictInRequest = normalizedReservations.FirstOrDefault(existing => IsConflictingReservation(existing, reservation));
+                if (conflictInRequest != null && !allowOverlap)
                 {
-                    var conflictInRequest = normalizedReservations.FirstOrDefault(existing => IsConflictingReservation(existing, reservation));
-                    if (conflictInRequest != null)
-                    {
-                        return Conflict(BuildConflictMessage(conflictInRequest));
-                    }
-
-                    var conflict = await FindConflictingReservationAsync(
-                        reservation,
-                        cancellationToken: cancellationToken);
-
-                    if (conflict != null)
-                    {
-                        return Conflict(BuildConflictMessage(conflict));
-                    }
+                    return Conflict(BuildConflictMessage(conflictInRequest));
                 }
 
+                var conflicts = await FindConflictingReservationsAsync(
+                    reservation,
+                    cancellationToken: cancellationToken);
+
+                if (conflicts.Count > 0 && !allowOverlap)
+                {
+                    return Conflict(BuildConflictMessage(conflicts[0]));
+                }
+
+                overlappingReservations.AddRange(conflicts);
                 normalizedReservations.Add(reservation);
             }
 
@@ -154,9 +151,18 @@ namespace MeetingRoomBooker.Api.Controllers
             await NotifyParticipantsForCreatedReservationAsync(representativeReservation);
             await _context.SaveChangesAsync(cancellationToken);
 
+            var distinctOverlappingReservations = overlappingReservations
+                .Where(x => x.Id > 0)
+                .GroupBy(x => x.Id)
+                .Select(group => group.First())
+                .OrderBy(x => x.Date)
+                .ThenBy(x => x.StartTime)
+                .ToList();
+
             await _reservationChatworkNotificationService.SendReservationSeriesCreatedAsync(
                 representativeReservation,
                 normalizedReservations.Count,
+                distinctOverlappingReservations,
                 cancellationToken);
 
             return CreatedAtAction(nameof(GetReservations), routeValues: null, value: normalizedReservations);
@@ -976,6 +982,19 @@ namespace MeetingRoomBooker.Api.Controllers
             IEnumerable<int>? excludedReservationIds = null,
             CancellationToken cancellationToken = default)
         {
+            var conflicts = await FindConflictingReservationsAsync(
+                reservation,
+                excludedReservationIds,
+                cancellationToken);
+
+            return conflicts.FirstOrDefault();
+        }
+
+        private async Task<List<ReservationModel>> FindConflictingReservationsAsync(
+            ReservationModel reservation,
+            IEnumerable<int>? excludedReservationIds = null,
+            CancellationToken cancellationToken = default)
+        {
             var excludedIds = excludedReservationIds?
                 .Where(id => id > 0)
                 .Distinct()
@@ -989,8 +1008,9 @@ namespace MeetingRoomBooker.Api.Controllers
                     x.Date.Date == reservation.Date.Date &&
                     x.StartTime < reservation.EndTime &&
                     x.EndTime > reservation.StartTime)
-                .OrderBy(x => x.StartTime)
-                .FirstOrDefaultAsync(cancellationToken);
+                .OrderBy(x => x.Date)
+                .ThenBy(x => x.StartTime)
+                .ToListAsync(cancellationToken);
         }
 
         private static bool IsConflictingReservation(ReservationModel left, ReservationModel right)
