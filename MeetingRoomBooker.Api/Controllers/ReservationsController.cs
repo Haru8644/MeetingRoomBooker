@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using MeetingRoomBooker.Api.Data;
 using MeetingRoomBooker.Api.Services.Chatwork;
+using MeetingRoomBooker.Api.Services.Reservations;
 using MeetingRoomBooker.Shared.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -124,7 +125,8 @@ namespace MeetingRoomBooker.Api.Controllers
                     return BadRequest(validationError);
                 }
 
-                var conflictInRequest = normalizedReservations.FirstOrDefault(existing => IsConflictingReservation(existing, reservation));
+                var conflictInRequest = normalizedReservations.FirstOrDefault(existing =>
+                    ReservationOverlapChecker.IsConflicting(existing, reservation));
                 if (conflictInRequest != null && !allowOverlap)
                 {
                     return Conflict(BuildConflictMessage(conflictInRequest));
@@ -1011,14 +1013,6 @@ namespace MeetingRoomBooker.Api.Controllers
                 .OrderBy(x => x.Date)
                 .ThenBy(x => x.StartTime)
                 .ToListAsync(cancellationToken);
-        }
-
-        private static bool IsConflictingReservation(ReservationModel left, ReservationModel right)
-        {
-            return left.Room == right.Room
-                && left.Date.Date == right.Date.Date
-                && left.StartTime < right.EndTime
-                && left.EndTime > right.StartTime;
         }
 
         private static string BuildConflictMessage(ReservationModel conflict)
