@@ -86,10 +86,7 @@ namespace MeetingRoomBooker.Web.Services
                         : user.ChatworkDirectRoomId.Trim()
                 });
 
-            if (!response.IsSuccessStatusCode)
-            {
-                return false;
-            }
+            await EnsureSuccessAsync(response, "Registration failed.");
 
             NotifyStateChanged();
             return true;
@@ -195,6 +192,13 @@ namespace MeetingRoomBooker.Web.Services
             var response = await SendAsync(HttpMethod.Get, "api/Users");
             await EnsureSuccessAsync(response, "Failed to load users.");
             return await ReadFromJsonAsync<List<UserModel>>(response) ?? new List<UserModel>();
+        }
+
+        public async Task<List<ParticipantUserModel>> GetParticipantUsersAsync()
+        {
+            var response = await SendAsync(HttpMethod.Get, "api/Users/participants");
+            await EnsureSuccessAsync(response, "Failed to load participant users.");
+            return await ReadFromJsonAsync<List<ParticipantUserModel>>(response) ?? new List<ParticipantUserModel>();
         }
 
         public async Task<List<ReservationModel>> GetReservationsAsync()

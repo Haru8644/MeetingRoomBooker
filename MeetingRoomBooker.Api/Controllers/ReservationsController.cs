@@ -98,11 +98,13 @@ namespace MeetingRoomBooker.Api.Controllers
                 return Forbid();
             }
 
+            var canceledReservation = CloneReservation(reservation);
+
             _context.Reservations.Remove(reservation);
             await _context.SaveChangesAsync(cancellationToken);
 
             await _reservationChatworkNotificationService.SendReservationCanceledAsync(
-                reservation,
+                canceledReservation,
                 cancellationToken);
 
             return NoContent();
@@ -300,19 +302,37 @@ namespace MeetingRoomBooker.Api.Controllers
                     return NotFound();
                 }
 
+                var canceledReservation = CloneReservation(single);
+
                 _context.Reservations.Remove(single);
                 await _context.SaveChangesAsync(cancellationToken);
+
+                await _reservationChatworkNotificationService.SendReservationCanceledAsync(
+                    canceledReservation,
+                    cancellationToken);
+
                 return NoContent();
             }
 
-            var targets = await GetRecurringSeriesReservationsAsync(baseReservation, scope, cancellationToken);
+            var targets = await GetRecurringSeriesReservationsAsync(
+                baseReservation,
+                scope,
+                cancellationToken);
+
             if (targets.Count == 0)
             {
                 return NoContent();
             }
 
+            var representativeReservation = BuildCanceledSeriesRepresentativeReservation(baseReservation, targets);
+
             _context.Reservations.RemoveRange(targets);
             await _context.SaveChangesAsync(cancellationToken);
+
+            await _reservationChatworkNotificationService.SendReservationSeriesCanceledAsync(
+                representativeReservation,
+                targets.Count,
+                cancellationToken);
 
             return NoContent();
         }
@@ -363,7 +383,11 @@ namespace MeetingRoomBooker.Api.Controllers
                 return BadRequest(templateValidationError);
             }
 
-            var targets = await GetRecurringSeriesReservationsAsync(baseReservation, scope, cancellationToken);
+            var targets = await GetRecurringSeriesReservationsAsync(
+                baseReservation,
+                scope,
+                cancellationToken,
+                asNoTracking: false);
             if (targets.Count == 0)
             {
                 return NoContent();
@@ -393,11 +417,12 @@ namespace MeetingRoomBooker.Api.Controllers
                     return Conflict(BuildConflictMessage(conflict));
                 }
 
-                var previousParticipantIds = GetNotifiableParticipantIds(target);
+                var previousReservation = CloneReservation(target);
+                var previousParticipantIds = GetNotifiableParticipantIds(previousReservation);
                 var currentParticipantIds = GetNotifiableParticipantIds(updatedReservation);
 
-                _context.Entry(updatedReservation).State = EntityState.Modified;
-                operations.Add((target, updatedReservation, previousParticipantIds, currentParticipantIds));
+                ApplyReservationUpdate(target, updatedReservation);
+                operations.Add((previousReservation, CloneReservation(target), previousParticipantIds, currentParticipantIds));
             }
 
             await _context.SaveChangesAsync(cancellationToken);
@@ -415,6 +440,20 @@ namespace MeetingRoomBooker.Api.Controllers
             }
 
             await _context.SaveChangesAsync(cancellationToken);
+
+            if (operations.Count > 0)
+            {
+                var representativeOperation = operations
+                    .OrderBy(operation => operation.Current.Date)
+                    .ThenBy(operation => operation.Current.Id)
+                    .First();
+
+                await _reservationChatworkNotificationService.SendReservationSeriesUpdatedAsync(
+                    representativeOperation.Previous,
+                    representativeOperation.Current,
+                    operations.Count,
+                    cancellationToken);
+            }
 
             return NoContent();
         }
@@ -536,10 +575,17 @@ namespace MeetingRoomBooker.Api.Controllers
         private async Task<List<ReservationModel>> GetRecurringSeriesReservationsAsync(
             ReservationModel reservation,
             string scope,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            bool asNoTracking = true)
         {
-            var candidates = await _context.Reservations
-                .AsNoTracking()
+            IQueryable<ReservationModel> query = _context.Reservations;
+
+            if (asNoTracking)
+            {
+                query = query.AsNoTracking();
+            }
+
+            var candidates = await query
                 .Where(x =>
                     x.UserId == reservation.UserId &&
                     x.Name == reservation.Name &&
@@ -873,6 +919,67 @@ namespace MeetingRoomBooker.Api.Controllers
                 ReservationSeriesScopes.All => ReservationSeriesScopes.All,
                 ReservationSeriesScopes.Following => ReservationSeriesScopes.Following,
                 _ => ReservationSeriesScopes.Single
+            };
+        }
+
+        private static ReservationModel BuildCanceledSeriesRepresentativeReservation(
+            ReservationModel baseReservation,
+            IReadOnlyCollection<ReservationModel> targets)
+        {
+            var representative = CloneReservation(
+                targets
+                    .OrderBy(x => x.Date)
+                    .ThenBy(x => x.Id)
+                    .FirstOrDefault()
+                ?? baseReservation);
+
+            var stakeholderIds = targets
+                .SelectMany(target => (target.ParticipantIds ?? new List<int>()).Append(target.UserId))
+                .Where(id => id > 0)
+                .Distinct()
+                .ToList();
+
+            representative.ParticipantIds = stakeholderIds;
+            representative.ParticipantCount = stakeholderIds.Count;
+
+            return representative;
+        }
+
+        private static void ApplyReservationUpdate(
+            ReservationModel target,
+            ReservationModel source)
+        {
+            target.Room = source.Room;
+            target.NumberOfPeople = source.NumberOfPeople;
+            target.Type = source.Type;
+            target.Purpose = source.Purpose;
+            target.Date = source.Date;
+            target.StartTime = source.StartTime;
+            target.EndTime = source.EndTime;
+            target.ParticipantIds = new List<int>(source.ParticipantIds ?? new List<int>());
+            target.Participants = source.Participants;
+            target.RepeatType = source.RepeatType;
+            target.RepeatUntil = source.RepeatUntil;
+        }
+
+        private static ReservationModel CloneReservation(ReservationModel reservation)
+        {
+            return new ReservationModel
+            {
+                Id = reservation.Id,
+                UserId = reservation.UserId,
+                Name = reservation.Name,
+                Room = reservation.Room,
+                NumberOfPeople = reservation.NumberOfPeople,
+                Type = reservation.Type,
+                Purpose = reservation.Purpose,
+                Date = reservation.Date,
+                StartTime = reservation.StartTime,
+                EndTime = reservation.EndTime,
+                ParticipantIds = new List<int>(reservation.ParticipantIds ?? new List<int>()),
+                Participants = reservation.Participants,
+                RepeatType = reservation.RepeatType,
+                RepeatUntil = reservation.RepeatUntil
             };
         }
 

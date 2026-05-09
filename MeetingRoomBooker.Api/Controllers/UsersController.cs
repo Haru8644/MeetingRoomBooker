@@ -31,6 +31,22 @@ namespace MeetingRoomBooker.Api.Controllers
                 .ToListAsync();
         }
 
+        [Authorize]
+        [HttpGet("participants")]
+        public async Task<ActionResult<IEnumerable<ParticipantUserModel>>> GetParticipantUsers()
+        {
+            return await _context.Users
+                .AsNoTracking()
+                .OrderBy(user => user.Id)
+                .Select(user => new ParticipantUserModel
+                {
+                    Id = user.Id,
+                    Name = user.Name,
+                    AvatarColor = user.AvatarColor
+                })
+                .ToListAsync();
+        }
+
         [AllowAnonymous]
         [HttpPost("register")]
         public async Task<ActionResult<UserModel>> Register(RegisterUserRequest request)

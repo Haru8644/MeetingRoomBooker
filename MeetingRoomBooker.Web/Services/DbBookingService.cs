@@ -23,6 +23,8 @@ namespace MeetingRoomBooker.Web.Services
         public Task JoinReservationAsync(int reservationId) => Task.CompletedTask;
         public Task LeaveReservationAsync(int reservationId) => Task.CompletedTask;
         public Task<List<UserModel>> GetAllUsersAsync() => Task.FromResult(new List<UserModel>());
+        public Task<List<ParticipantUserModel>> GetParticipantUsersAsync() =>
+            Task.FromResult(new List<ParticipantUserModel>());
         public Task<List<NotificationModel>> GetNotificationsAsync(int userId) => Task.FromResult(new List<NotificationModel>());
         public Task AddNotificationAsync(NotificationModel notification) => Task.CompletedTask;
         public Task DeleteNotificationAsync(int notificationId) => Task.CompletedTask;
