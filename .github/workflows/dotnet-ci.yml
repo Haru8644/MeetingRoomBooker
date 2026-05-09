@@ -43,3 +43,27 @@ jobs:
           test -f publish/web/wwwroot/index.html
           test -d publish/web/wwwroot/_framework
           test -f publish/web/wwwroot/MeetingRoomBooker.Web.styles.css
+
+      - name: Verify no database files in publish outputs
+        shell: bash
+        run: |
+          if find publish -type f \( -name "*.db" -o -name "*.db-shm" -o -name "*.db-wal" \) | grep -q .; then
+            echo "Database files must not be included in publish outputs."
+            exit 1
+          fi
+
+      - name: Upload API publish artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: meetingroombooker-api
+          path: publish/api
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Upload Web publish artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: meetingroombooker-web
+          path: publish/web/wwwroot
+          if-no-files-found: error
+          retention-days: 7
