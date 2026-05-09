@@ -208,19 +208,33 @@ namespace MeetingRoomBooker.Web.Services
             return await ReadFromJsonAsync<List<ReservationModel>>(response) ?? new List<ReservationModel>();
         }
 
-        public async Task AddReservationAsync(ReservationModel reservation)
+        public Task AddReservationAsync(ReservationModel reservation)
+        {
+            return AddReservationAsync(reservation, allowOverlap: false);
+        }
+
+        public async Task AddReservationAsync(ReservationModel reservation, bool allowOverlap)
         {
             if (_currentUser != null && reservation.UserId == 0)
             {
                 reservation.UserId = _currentUser.Id;
             }
 
-            var response = await SendAsync(HttpMethod.Post, "api/Reservations", reservation);
+            var response = await SendAsync(
+                HttpMethod.Post,
+                $"api/Reservations{BuildAllowOverlapQuery(allowOverlap)}",
+                reservation);
+
             await EnsureSuccessAsync(response, "Failed to add reservation.");
             NotifyStateChanged();
         }
 
-        public async Task AddReservationsAsync(IReadOnlyCollection<ReservationModel> reservations)
+        public Task AddReservationsAsync(IReadOnlyCollection<ReservationModel> reservations)
+        {
+            return AddReservationsAsync(reservations, allowOverlap: false);
+        }
+
+        public async Task AddReservationsAsync(IReadOnlyCollection<ReservationModel> reservations, bool allowOverlap)
         {
             if (_currentUser != null)
             {
@@ -230,7 +244,11 @@ namespace MeetingRoomBooker.Web.Services
                 }
             }
 
-            var response = await SendAsync(HttpMethod.Post, "api/Reservations/series", reservations);
+            var response = await SendAsync(
+                HttpMethod.Post,
+                $"api/Reservations/series{BuildAllowOverlapQuery(allowOverlap)}",
+                reservations);
+
             await EnsureSuccessAsync(response, "Failed to add recurring reservations.");
             NotifyStateChanged();
         }
@@ -345,6 +363,11 @@ namespace MeetingRoomBooker.Web.Services
             {
                 return null;
             }
+        }
+
+        private static string BuildAllowOverlapQuery(bool allowOverlap)
+        {
+            return allowOverlap ? "?allowOverlap=true" : string.Empty;
         }
 
         private async Task<HttpResponseMessage> SendAsync(HttpMethod method, string requestUri, object? body = null)

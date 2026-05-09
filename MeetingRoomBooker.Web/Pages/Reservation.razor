@@ -441,6 +441,54 @@
         };
     }
 
+    private sealed record ReservationConflict(
+        ReservationModel RequestedReservation,
+        ReservationModel ExistingReservation);
+
+    private static ReservationModel? FindConflictingReservation(
+        IEnumerable<ReservationModel> existingReservations,
+        ReservationModel requestedReservation)
+    {
+        return existingReservations.FirstOrDefault(existing =>
+            existing.Room == requestedReservation.Room &&
+            existing.Date.Date == requestedReservation.Date.Date &&
+            requestedReservation.StartTime < existing.EndTime &&
+            requestedReservation.EndTime > existing.StartTime);
+    }
+
+    private static string BuildOverlapConfirmationMessage(IReadOnlyCollection<ReservationConflict> conflicts)
+    {
+        var lines = new List<string>
+        {
+            $"{conflicts.Count}件の予約が既存予約と重複しています。",
+            "それでも予約しますか？",
+            string.Empty,
+            "重複内容:"
+        };
+
+        foreach (var conflict in conflicts.Take(5))
+        {
+            var requested = conflict.RequestedReservation;
+            var existing = conflict.ExistingReservation;
+            var existingLabel = string.IsNullOrWhiteSpace(existing.Purpose)
+                ? existing.Name
+                : existing.Purpose;
+
+            lines.Add(
+                $"・{requested.Date:yyyy/MM/dd} {requested.StartTime:HH:mm}〜{requested.EndTime:HH:mm} {requested.Room} / 既存: {existingLabel} ({existing.StartTime:HH:mm}〜{existing.EndTime:HH:mm})");
+        }
+
+        if (conflicts.Count > 5)
+        {
+            lines.Add($"ほか {conflicts.Count - 5}件");
+        }
+
+        lines.Add(string.Empty);
+        lines.Add("登録後はスケジュール画面で重複警告マークが表示されます。");
+
+        return string.Join("\n", lines);
+    }
+
     private async Task OnSubmit()
     {
         errorMessage = string.Empty;
@@ -464,6 +512,7 @@
             reserveDate.Value.Date,
             repeatType,
             repeatUntil?.Date);
+
         if (targetDates.Count == 0)
         {
             errorMessage = "繰り返し予約の対象日がありません。土日は自動でスキップされます。";
@@ -473,8 +522,6 @@
         try
         {
             var existing = await BookingService.GetReservationsAsync();
-            var successCount = 0;
-            var failCount = 0;
             var selectedParticipantIds = allUsers
                 .Where(user => user.IsSelected)
                 .Select(user => user.Id)
@@ -482,69 +529,61 @@
                 .ToList();
 
             var reservationsToCreate = new List<ReservationModel>();
+            var conflicts = new List<ReservationConflict>();
 
             foreach (var date in targetDates)
             {
                 var currentStart = date.Date + startTime.Value.TimeOfDay;
                 var currentEnd = date.Date + endTime.Value.TimeOfDay;
-
-                var conflict = existing.Any(r =>
-                    r.Room == selectedRoom &&
-                    r.Date.Date == date.Date &&
-                    currentStart < r.EndTime &&
-                    currentEnd > r.StartTime);
-
-                if (conflict)
-                {
-                    failCount++;
-                    continue;
-                }
-
-                reservationsToCreate.Add(CreateReservationModel(
+                var reservation = CreateReservationModel(
                     date,
                     currentStart,
                     currentEnd,
-                    selectedParticipantIds));
+                    selectedParticipantIds);
+
+                var conflict = FindConflictingReservation(existing, reservation);
+                if (conflict != null)
+                {
+                    conflicts.Add(new ReservationConflict(reservation, conflict));
+                }
+
+                reservationsToCreate.Add(reservation);
             }
 
-            if (reservationsToCreate.Count > 0)
+            if (conflicts.Count > 0)
             {
-                try
-                {
-                    if (reservationsToCreate.Count == 1)
-                    {
-                        await BookingService.AddReservationAsync(reservationsToCreate[0]);
-                    }
-                    else
-                    {
-                        await BookingService.AddReservationsAsync(reservationsToCreate);
-                    }
+                var confirmed = await JSRuntime.InvokeAsync<bool>(
+                    "confirm",
+                    BuildOverlapConfirmationMessage(conflicts));
 
-                    successCount = reservationsToCreate.Count;
-                }
-                catch (Exception ex)
+                if (!confirmed)
                 {
-                    Logger.LogError(ex, "API Error: Failed to save reservations.");
-                    failCount += reservationsToCreate.Count;
+                    errorMessage = "重複予約のため登録をキャンセルしました。";
+                    return;
                 }
             }
 
-            if (successCount > 0)
+            var allowOverlap = conflicts.Count > 0;
+
+            if (reservationsToCreate.Count == 1)
             {
-                await ClearDraftAsync();
-
-                var message = $"{successCount}件の予約を完了しました！";
-                if (failCount > 0)
-                {
-                    message += $"\n（※重複のため{failCount}件スキップされました）";
-                }
-
-                await JSRuntime.InvokeVoidAsync("alert", message);
-                Navigation.NavigateTo("/schedule");
-                return;
+                await BookingService.AddReservationAsync(reservationsToCreate[0], allowOverlap);
+            }
+            else
+            {
+                await BookingService.AddReservationsAsync(reservationsToCreate, allowOverlap);
             }
 
-            errorMessage = "重複する予約があるため登録できませんでした。";
+            await ClearDraftAsync();
+
+            var message = $"{reservationsToCreate.Count}件の予約を完了しました！";
+            if (allowOverlap)
+            {
+                message += $"\n（※既存予約と重複する予約が{conflicts.Count}件あります）";
+            }
+
+            await JSRuntime.InvokeVoidAsync("alert", message);
+            Navigation.NavigateTo("/schedule");
         }
         catch (Exception ex)
         {

@@ -21,12 +21,20 @@ namespace MeetingRoomBooker.Shared.Services
         UserModel? GetCurrentUser();
         Task<List<ReservationModel>> GetReservationsAsync();
         Task AddReservationAsync(ReservationModel reservation);
+        Task AddReservationAsync(ReservationModel reservation, bool allowOverlap)
+        {
+            return AddReservationAsync(reservation);
+        }
         async Task AddReservationsAsync(IReadOnlyCollection<ReservationModel> reservations)
         {
             foreach (var reservation in reservations)
             {
                 await AddReservationAsync(reservation);
             }
+        }
+        Task AddReservationsAsync(IReadOnlyCollection<ReservationModel> reservations, bool allowOverlap)
+        {
+            return AddReservationsAsync(reservations);
         }
         Task RemoveReservationAsync(ReservationModel reservation);
         Task RemoveRecurringReservationAsync(ReservationModel reservation, string scope);
