@@ -8,9 +8,20 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
             ReservationModel reservation,
             CancellationToken cancellationToken = default);
 
+        Task SendReservationCreatedAsync(
+            ReservationModel reservation,
+            IReadOnlyCollection<ReservationModel> overlappingReservations,
+            CancellationToken cancellationToken = default);
+
         Task SendReservationSeriesCreatedAsync(
             ReservationModel representativeReservation,
             int createdCount,
+            CancellationToken cancellationToken = default);
+
+        Task SendReservationSeriesCreatedAsync(
+            ReservationModel representativeReservation,
+            int createdCount,
+            IReadOnlyCollection<ReservationModel> overlappingReservations,
             CancellationToken cancellationToken = default);
 
         Task SendReservationUpdatedAsync(
