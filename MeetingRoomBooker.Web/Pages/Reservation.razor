@@ -385,6 +385,62 @@
         Navigation.NavigateTo("/schedule");
     }
 
+    private static List<DateTime> BuildTargetDates(
+        DateTime startDate,
+        string repeatType,
+        DateTime? repeatEndDate)
+    {
+        if (repeatType == "しない")
+        {
+            return new List<DateTime> { startDate.Date };
+        }
+
+        var targetDates = new List<DateTime>();
+        var currentDate = startDate.Date;
+        var endDate = repeatEndDate?.Date ?? startDate.Date;
+        var dayStep = repeatType == "毎週" ? 7 : 1;
+
+        while (currentDate <= endDate)
+        {
+            if (!IsWeekend(currentDate))
+            {
+                targetDates.Add(currentDate);
+            }
+
+            currentDate = currentDate.AddDays(dayStep);
+        }
+
+        return targetDates;
+    }
+
+    private static bool IsWeekend(DateTime date)
+    {
+        return date.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday;
+    }
+
+    private ReservationModel CreateReservationModel(
+        DateTime date,
+        DateTime currentStart,
+        DateTime currentEnd,
+        List<int> selectedParticipantIds)
+    {
+        return new ReservationModel
+        {
+            Name = reserveName,
+            Room = selectedRoom,
+            NumberOfPeople = 1,
+            Date = date,
+            StartTime = currentStart,
+            EndTime = currentEnd,
+            Type = reserveType,
+            Purpose = reservePurpose,
+            UserId = currentUser?.Id ?? 0,
+            ParticipantIds = selectedParticipantIds,
+            RepeatType = repeatType,
+            RepeatUntil = repeatType != "しない" ? repeatUntil : null
+        };
+    }
+
     private async Task OnSubmit()
     {
         errorMessage = string.Empty;
@@ -404,28 +460,14 @@
             return;
         }
 
-        var targetDates = new List<DateTime> { reserveDate.Value.Date };
-        if (repeatType != "しない" && repeatUntil.HasValue && repeatUntil.Value.Date > reserveDate.Value.Date)
+        var targetDates = BuildTargetDates(
+            reserveDate.Value.Date,
+            repeatType,
+            repeatUntil?.Date);
+        if (targetDates.Count == 0)
         {
-            var nextDate = reserveDate.Value.Date;
-            if (repeatType == "毎日")
-            {
-                nextDate = nextDate.AddDays(1);
-                while (nextDate.Date <= repeatUntil.Value.Date)
-                {
-                    targetDates.Add(nextDate);
-                    nextDate = nextDate.AddDays(1);
-                }
-            }
-            else if (repeatType == "毎週")
-            {
-                nextDate = nextDate.AddDays(7);
-                while (nextDate.Date <= repeatUntil.Value.Date)
-                {
-                    targetDates.Add(nextDate);
-                    nextDate = nextDate.AddDays(7);
-                }
-            }
+            errorMessage = "繰り返し予約の対象日がありません。土日は自動でスキップされます。";
+            return;
         }
 
         try
@@ -439,6 +481,8 @@
                 .Distinct()
                 .ToList();
 
+            var reservationsToCreate = new List<ReservationModel>();
+
             foreach (var date in targetDates)
             {
                 var currentStart = date.Date + startTime.Value.TimeOfDay;
@@ -447,9 +491,8 @@
                 var conflict = existing.Any(r =>
                     r.Room == selectedRoom &&
                     r.Date.Date == date.Date &&
-                    ((currentStart >= r.StartTime && currentStart < r.EndTime) ||
-                     (currentEnd > r.StartTime && currentEnd <= r.EndTime) ||
-                     (currentStart <= r.StartTime && currentEnd >= r.EndTime)));
+                    currentStart < r.EndTime &&
+                    currentEnd > r.StartTime);
 
                 if (conflict)
                 {
@@ -457,36 +500,32 @@
                     continue;
                 }
 
-                var model = new ReservationModel
-                {
-                    Name = reserveName,
-                    Room = selectedRoom,
-                    NumberOfPeople = 1,
-                    Date = date,
-                    StartTime = currentStart,
-                    EndTime = currentEnd,
-                    Type = reserveType,
-                    Purpose = reservePurpose,
-                    UserId = currentUser?.Id ?? 0,
-                    ParticipantIds = selectedParticipantIds,
-                    RepeatType = repeatType,
-                    RepeatUntil = repeatType != "しない" ? repeatUntil : null
-                };
+                reservationsToCreate.Add(CreateReservationModel(
+                    date,
+                    currentStart,
+                    currentEnd,
+                    selectedParticipantIds));
+            }
 
+            if (reservationsToCreate.Count > 0)
+            {
                 try
                 {
-                    await BookingService.AddReservationAsync(model);
-                    successCount++;
-
-                    if (targetDates.Count > 1)
+                    if (reservationsToCreate.Count == 1)
                     {
-                        await Task.Delay(100);
+                        await BookingService.AddReservationAsync(reservationsToCreate[0]);
                     }
+                    else
+                    {
+                        await BookingService.AddReservationsAsync(reservationsToCreate);
+                    }
+
+                    successCount = reservationsToCreate.Count;
                 }
                 catch (Exception ex)
                 {
-                    Logger.LogError(ex, "API Error: Failed to save reservation for {Date}", date);
-                    failCount++;
+                    Logger.LogError(ex, "API Error: Failed to save reservations.");
+                    failCount += reservationsToCreate.Count;
                 }
             }
 

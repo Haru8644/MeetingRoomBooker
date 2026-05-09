@@ -21,6 +21,13 @@ namespace MeetingRoomBooker.Shared.Services
         UserModel? GetCurrentUser();
         Task<List<ReservationModel>> GetReservationsAsync();
         Task AddReservationAsync(ReservationModel reservation);
+        async Task AddReservationsAsync(IReadOnlyCollection<ReservationModel> reservations)
+        {
+            foreach (var reservation in reservations)
+            {
+                await AddReservationAsync(reservation);
+            }
+        }
         Task RemoveReservationAsync(ReservationModel reservation);
         Task RemoveRecurringReservationAsync(ReservationModel reservation, string scope);
         Task UpdateReservationAsync(ReservationModel reservation, bool shouldNotify);

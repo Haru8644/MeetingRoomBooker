@@ -46,6 +46,10 @@ namespace MeetingRoomBooker.Shared.Models
         }
 
         public string Purpose { get; set; } = string.Empty;
+        
+        [StringLength(50)]
+        public string? SeriesId { get; set; }
+        
         public DateTime Date { get; set; } = DateTime.Today;
         public DateTime StartTime { get; set; }
         public DateTime EndTime { get; set; }
