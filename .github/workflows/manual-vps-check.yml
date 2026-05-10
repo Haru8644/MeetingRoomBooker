@@ -1,0 +1,35 @@
+name: manual-vps-check
+
+on:
+  workflow_dispatch:
+
+jobs:
+  check-vps-connection:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup SSH
+        shell: bash
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.MRB_VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -p "${{ secrets.MRB_VPS_PORT }}" -H "${{ secrets.MRB_VPS_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Check VPS connection
+        shell: bash
+        run: |
+          ssh -i ~/.ssh/id_ed25519 -p "${{ secrets.MRB_VPS_PORT }}" "${{ secrets.MRB_VPS_USER }}@${{ secrets.MRB_VPS_HOST }}" << 'EOF'
+          set -e
+
+          echo "Connected to VPS."
+          echo "User: $(whoami)"
+          echo "Host: $(hostname)"
+          echo "Working directory: $(pwd)"
+
+          test -d /opt/meetingroombooker/api
+          test -d /var/www/meetingroombooker
+          test -f /root/deploy-mrb.sh
+
+          echo "VPS layout check completed."
+          EOF
