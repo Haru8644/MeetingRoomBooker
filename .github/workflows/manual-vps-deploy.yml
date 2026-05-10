@@ -1,0 +1,134 @@
+name: manual-vps-deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_deploy:
+        description: 'Type DEPLOY to deploy to production'
+        required: true
+        type: string
+      confirm_no_db_schema_change:
+        description: 'Type NO_DB_CHANGE if this deployment does not require database schema changes'
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate deployment confirmation
+        shell: bash
+        run: |
+          if [ "${{ inputs.confirm_deploy }}" != "DEPLOY" ]; then
+            echo "confirm_deploy must be DEPLOY."
+            exit 1
+          fi
+
+          if [ "${{ inputs.confirm_no_db_schema_change }}" != "NO_DB_CHANGE" ]; then
+            echo "confirm_no_db_schema_change must be NO_DB_CHANGE."
+            echo "Database schema changes require a separate migration procedure before deployment."
+            exit 1
+          fi
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore MeetingRoomBooker.slnx
+
+      - name: Build
+        run: dotnet build MeetingRoomBooker.slnx --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test MeetingRoomBooker.slnx --configuration Release --no-build --verbosity normal
+
+      - name: Publish API
+        run: dotnet publish MeetingRoomBooker.Api/MeetingRoomBooker.Api.csproj --configuration Release --output publish/api --no-restore
+
+      - name: Publish Web
+        run: dotnet publish MeetingRoomBooker.Web/MeetingRoomBooker.Web.csproj --configuration Release --output publish/web --no-restore
+
+      - name: Verify local publish outputs
+        shell: bash
+        run: |
+          test -f publish/api/MeetingRoomBooker.Api.dll
+          test -f publish/web/wwwroot/index.html
+          test -d publish/web/wwwroot/_framework
+          test -f publish/web/wwwroot/MeetingRoomBooker.Web.styles.css
+
+      - name: Verify no database files in local publish outputs
+        shell: bash
+        run: |
+          if find publish -type f \( -name "*.db" -o -name "*.db-shm" -o -name "*.db-wal" \) | grep -q .; then
+            echo "Database files must not be included in publish outputs."
+            exit 1
+          fi
+
+      - name: Setup SSH
+        shell: bash
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.MRB_VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -p "${{ secrets.MRB_VPS_PORT }}" -H "${{ secrets.MRB_VPS_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Prepare deploy upload directories on VPS
+        shell: bash
+        run: |
+          ssh -i ~/.ssh/id_ed25519 -p "${{ secrets.MRB_VPS_PORT }}" "${{ secrets.MRB_VPS_USER }}@${{ secrets.MRB_VPS_HOST }}" << 'EOF'
+          set -e
+
+          rm -rf /root/deploy/api/*
+          rm -rf /root/deploy/web/*
+
+          mkdir -p /root/deploy/api
+          mkdir -p /root/deploy/web
+
+          echo "Deploy upload directories prepared."
+          EOF
+
+      - name: Upload API publish output to deploy directory
+        shell: bash
+        run: |
+          scp -i ~/.ssh/id_ed25519 -P "${{ secrets.MRB_VPS_PORT }}" -r publish/api/. "${{ secrets.MRB_VPS_USER }}@${{ secrets.MRB_VPS_HOST }}:/root/deploy/api/"
+
+      - name: Upload Web publish output to deploy directory
+        shell: bash
+        run: |
+          scp -i ~/.ssh/id_ed25519 -P "${{ secrets.MRB_VPS_PORT }}" -r publish/web/wwwroot/. "${{ secrets.MRB_VPS_USER }}@${{ secrets.MRB_VPS_HOST }}:/root/deploy/web/"
+
+      - name: Verify deploy upload outputs on VPS
+        shell: bash
+        run: |
+          ssh -i ~/.ssh/id_ed25519 -p "${{ secrets.MRB_VPS_PORT }}" "${{ secrets.MRB_VPS_USER }}@${{ secrets.MRB_VPS_HOST }}" << 'EOF'
+          set -e
+
+          test -f /root/deploy/api/MeetingRoomBooker.Api.dll
+          test -f /root/deploy/web/index.html
+          test -d /root/deploy/web/_framework
+          test -f /root/deploy/web/MeetingRoomBooker.Web.styles.css
+
+          if find /root/deploy -type f \( -name "*.db" -o -name "*.db-shm" -o -name "*.db-wal" \) | grep -q .; then
+            echo "Database files must not be uploaded to deploy directories."
+            exit 1
+          fi
+
+          echo "Deploy upload check completed."
+          EOF
+
+      - name: Run VPS deploy script
+        shell: bash
+        run: |
+          ssh -i ~/.ssh/id_ed25519 -p "${{ secrets.MRB_VPS_PORT }}" "${{ secrets.MRB_VPS_USER }}@${{ secrets.MRB_VPS_HOST }}" << 'EOF'
+          set -e
+
+          bash /root/deploy-mrb.sh
+
+          echo "Manual VPS deployment completed."
+          EOF
