@@ -1,0 +1,96 @@
+name: manual-vps-upload-check
+
+on:
+  workflow_dispatch:
+
+jobs:
+  upload-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore MeetingRoomBooker.slnx
+
+      - name: Build
+        run: dotnet build MeetingRoomBooker.slnx --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test MeetingRoomBooker.slnx --configuration Release --no-build --verbosity normal
+
+      - name: Publish API
+        run: dotnet publish MeetingRoomBooker.Api/MeetingRoomBooker.Api.csproj --configuration Release --output publish/api --no-restore
+
+      - name: Publish Web
+        run: dotnet publish MeetingRoomBooker.Web/MeetingRoomBooker.Web.csproj --configuration Release --output publish/web --no-restore
+
+      - name: Verify local publish outputs
+        shell: bash
+        run: |
+          test -f publish/api/MeetingRoomBooker.Api.dll
+          test -f publish/web/wwwroot/index.html
+          test -d publish/web/wwwroot/_framework
+          test -f publish/web/wwwroot/MeetingRoomBooker.Web.styles.css
+
+      - name: Verify no database files in local publish outputs
+        shell: bash
+        run: |
+          if find publish -type f \( -name "*.db" -o -name "*.db-shm" -o -name "*.db-wal" \) | grep -q .; then
+            echo "Database files must not be included in publish outputs."
+            exit 1
+          fi
+
+      - name: Setup SSH
+        shell: bash
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.MRB_VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -p "${{ secrets.MRB_VPS_PORT }}" -H "${{ secrets.MRB_VPS_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Prepare temporary upload directories on VPS
+        shell: bash
+        run: |
+          ssh -i ~/.ssh/id_ed25519 -p "${{ secrets.MRB_VPS_PORT }}" "${{ secrets.MRB_VPS_USER }}@${{ secrets.MRB_VPS_HOST }}" << 'EOF'
+          set -e
+          rm -rf /root/mrb-artifact-upload-check
+          mkdir -p /root/mrb-artifact-upload-check/api
+          mkdir -p /root/mrb-artifact-upload-check/web
+          echo "Temporary upload directories prepared."
+          EOF
+
+      - name: Upload API publish output to temporary VPS directory
+        shell: bash
+        run: |
+          scp -i ~/.ssh/id_ed25519 -P "${{ secrets.MRB_VPS_PORT }}" -r publish/api/. "${{ secrets.MRB_VPS_USER }}@${{ secrets.MRB_VPS_HOST }}:/root/mrb-artifact-upload-check/api/"
+
+      - name: Upload Web publish output to temporary VPS directory
+        shell: bash
+        run: |
+          scp -i ~/.ssh/id_ed25519 -P "${{ secrets.MRB_VPS_PORT }}" -r publish/web/wwwroot/. "${{ secrets.MRB_VPS_USER }}@${{ secrets.MRB_VPS_HOST }}:/root/mrb-artifact-upload-check/web/"
+
+      - name: Verify temporary VPS upload outputs
+        shell: bash
+        run: |
+          ssh -i ~/.ssh/id_ed25519 -p "${{ secrets.MRB_VPS_PORT }}" "${{ secrets.MRB_VPS_USER }}@${{ secrets.MRB_VPS_HOST }}" << 'EOF'
+          set -e
+
+          test -f /root/mrb-artifact-upload-check/api/MeetingRoomBooker.Api.dll
+          test -f /root/mrb-artifact-upload-check/web/index.html
+          test -d /root/mrb-artifact-upload-check/web/_framework
+          test -f /root/mrb-artifact-upload-check/web/MeetingRoomBooker.Web.styles.css
+
+          if find /root/mrb-artifact-upload-check -type f \( -name "*.db" -o -name "*.db-shm" -o -name "*.db-wal" \) | grep -q .; then
+            echo "Database files must not be uploaded."
+            exit 1
+          fi
+
+          echo "Temporary VPS upload check completed."
+          EOF
