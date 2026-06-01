@@ -1,0 +1,232 @@
+name: manual-vps-deploy-with-migration
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_deploy:
+        description: 'Type DEPLOY to deploy to production'
+        required: true
+        type: string
+      confirm_schema_change:
+        description: 'Type APPLY_MIGRATION to apply EF Core migrations'
+        required: true
+        type: string
+      confirm_backup:
+        description: 'Type BACKUP_DB to confirm production DB backup before migration'
+        required: true
+        type: string
+      api_service_name:
+        description: 'systemd service name for the API'
+        required: true
+        default: 'meetingroombooker-api.service'
+        type: string
+
+jobs:
+  deploy-with-migration:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate deployment confirmations
+        shell: bash
+        run: |
+          if [ "${{ inputs.confirm_deploy }}" != "DEPLOY" ]; then
+            echo "confirm_deploy must be DEPLOY."
+            exit 1
+          fi
+
+          if [ "${{ inputs.confirm_schema_change }}" != "APPLY_MIGRATION" ]; then
+            echo "confirm_schema_change must be APPLY_MIGRATION."
+            exit 1
+          fi
+
+          if [ "${{ inputs.confirm_backup }}" != "BACKUP_DB" ]; then
+            echo "confirm_backup must be BACKUP_DB."
+            exit 1
+          fi
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Install dotnet-ef
+        run: dotnet tool install --global dotnet-ef --version 8.*
+
+      - name: Restore dependencies
+        run: dotnet restore MeetingRoomBooker.slnx
+
+      - name: Build
+        run: dotnet build MeetingRoomBooker.slnx --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test MeetingRoomBooker.slnx --configuration Release --no-build --verbosity normal
+
+      - name: Publish API
+        run: dotnet publish MeetingRoomBooker.Api/MeetingRoomBooker.Api.csproj --configuration Release --output publish/api --no-restore
+
+      - name: Publish Web
+        run: dotnet publish MeetingRoomBooker.Web/MeetingRoomBooker.Web.csproj --configuration Release --output publish/web --no-restore
+
+      - name: Build EF Core migration bundle
+        shell: bash
+        run: |
+          mkdir -p publish/migrations
+
+          dotnet ef migrations bundle \
+            --project MeetingRoomBooker.Api/MeetingRoomBooker.Api.csproj \
+            --startup-project MeetingRoomBooker.Api/MeetingRoomBooker.Api.csproj \
+            --configuration Release \
+            --runtime linux-x64 \
+            --self-contained \
+            --output publish/migrations/efbundle \
+            --force
+
+          chmod +x publish/migrations/efbundle
+
+      - name: Verify local publish outputs
+        shell: bash
+        run: |
+          test -f publish/api/MeetingRoomBooker.Api.dll
+          test -f publish/web/wwwroot/index.html
+          test -d publish/web/wwwroot/_framework
+          test -f publish/web/wwwroot/MeetingRoomBooker.Web.styles.css
+          test -f publish/migrations/efbundle
+
+      - name: Verify no database files in local publish outputs
+        shell: bash
+        run: |
+          if find publish -type f \( -name "*.db" -o -name "*.db-shm" -o -name "*.db-wal" \) | grep -q .; then
+            echo "Database files must not be included in publish outputs."
+            exit 1
+          fi
+
+      - name: Setup SSH
+        shell: bash
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.MRB_VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -p "${{ secrets.MRB_VPS_PORT }}" -H "${{ secrets.MRB_VPS_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Prepare deploy upload directories on VPS
+        shell: bash
+        run: |
+          ssh -i ~/.ssh/id_ed25519 -p "${{ secrets.MRB_VPS_PORT }}" "${{ secrets.MRB_VPS_USER }}@${{ secrets.MRB_VPS_HOST }}" << 'EOF'
+          set -e
+
+          rm -rf /root/deploy/api/*
+          rm -rf /root/deploy/web/*
+          rm -rf /root/deploy/migrations/*
+
+          mkdir -p /root/deploy/api
+          mkdir -p /root/deploy/web
+          mkdir -p /root/deploy/migrations
+
+          echo "Deploy upload directories prepared."
+          EOF
+
+      - name: Upload API publish output to deploy directory
+        shell: bash
+        run: |
+          scp -i ~/.ssh/id_ed25519 -P "${{ secrets.MRB_VPS_PORT }}" -r publish/api/. "${{ secrets.MRB_VPS_USER }}@${{ secrets.MRB_VPS_HOST }}:/root/deploy/api/"
+
+      - name: Upload Web publish output to deploy directory
+        shell: bash
+        run: |
+          scp -i ~/.ssh/id_ed25519 -P "${{ secrets.MRB_VPS_PORT }}" -r publish/web/wwwroot/. "${{ secrets.MRB_VPS_USER }}@${{ secrets.MRB_VPS_HOST }}:/root/deploy/web/"
+
+      - name: Upload migration bundle to deploy directory
+        shell: bash
+        run: |
+          scp -i ~/.ssh/id_ed25519 -P "${{ secrets.MRB_VPS_PORT }}" publish/migrations/efbundle "${{ secrets.MRB_VPS_USER }}@${{ secrets.MRB_VPS_HOST }}:/root/deploy/migrations/efbundle"
+
+      - name: Verify deploy upload outputs on VPS
+        shell: bash
+        run: |
+          ssh -i ~/.ssh/id_ed25519 -p "${{ secrets.MRB_VPS_PORT }}" "${{ secrets.MRB_VPS_USER }}@${{ secrets.MRB_VPS_HOST }}" << 'EOF'
+          set -e
+
+          test -f /root/deploy/api/MeetingRoomBooker.Api.dll
+          test -f /root/deploy/web/index.html
+          test -d /root/deploy/web/_framework
+          test -f /root/deploy/web/MeetingRoomBooker.Web.styles.css
+          test -f /root/deploy/migrations/efbundle
+
+          if find /root/deploy -type f \( -name "*.db" -o -name "*.db-shm" -o -name "*.db-wal" \) | grep -q .; then
+            echo "Database files must not be uploaded to deploy directories."
+            exit 1
+          fi
+
+          echo "Deploy upload check completed."
+          EOF
+
+      - name: Run schema-changing deployment on VPS
+        shell: bash
+        run: |
+          ssh -i ~/.ssh/id_ed25519 -p "${{ secrets.MRB_VPS_PORT }}" "${{ secrets.MRB_VPS_USER }}@${{ secrets.MRB_VPS_HOST }}" << EOF
+          set -euo pipefail
+
+          SERVICE_NAME="${{ inputs.api_service_name }}"
+          DB_PATH="${{ secrets.MRB_PRODUCTION_DB_PATH }}"
+          BACKUP_DIR="/root/mrb-backups/database"
+          TIMESTAMP="\$(date +%Y%m%d%H%M%S)"
+          SERVICE_STOPPED="false"
+
+          restart_service_on_failure() {
+            exit_code="\$?"
+
+            if [ "\$SERVICE_STOPPED" = "true" ]; then
+              echo "Deployment failed after stopping the API service. Starting API service again..."
+              systemctl start "\$SERVICE_NAME" || true
+            fi
+
+            exit "\$exit_code"
+          }
+
+          trap restart_service_on_failure ERR
+
+          if [ -z "\$DB_PATH" ]; then
+            echo "MRB_PRODUCTION_DB_PATH is not set."
+            exit 1
+          fi
+
+          if [ ! -f "\$DB_PATH" ]; then
+            echo "Production database file was not found: \$DB_PATH"
+            exit 1
+          fi
+
+          mkdir -p "\$BACKUP_DIR"
+
+          echo "Stopping API service..."
+          systemctl stop "\$SERVICE_NAME"
+          SERVICE_STOPPED="true"
+
+          echo "Backing up production database..."
+          cp "\$DB_PATH" "\$BACKUP_DIR/app-\$TIMESTAMP.db"
+
+          if [ -f "\$DB_PATH-wal" ]; then
+            cp "\$DB_PATH-wal" "\$BACKUP_DIR/app-\$TIMESTAMP.db-wal"
+          fi
+
+          if [ -f "\$DB_PATH-shm" ]; then
+            cp "\$DB_PATH-shm" "\$BACKUP_DIR/app-\$TIMESTAMP.db-shm"
+          fi
+
+          echo "Applying EF Core migrations..."
+          chmod +x /root/deploy/migrations/efbundle
+          /root/deploy/migrations/efbundle --connection "Data Source=\$DB_PATH"
+
+          echo "Running application deployment script..."
+          bash /root/deploy-mrb.sh
+
+          echo "Verifying API service status..."
+          systemctl is-active --quiet "\$SERVICE_NAME"
+
+          SERVICE_STOPPED="false"
+          trap - ERR
+
+          echo "Schema-changing deployment completed."
+          EOF

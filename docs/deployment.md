@@ -235,6 +235,106 @@ The normal deployment workflow should not be used blindly for schema-changing re
 
 ---
 
+## Schema-changing Production Deployment
+
+Deployments that include database schema changes must not use the normal `manual-vps-deploy` workflow directly.
+
+Schema-changing changes include:
+
+- adding a table
+- adding, removing, or renaming a column
+- changing indexes
+- adding or modifying EF Core migrations
+- changing entity mappings that affect the database schema
+
+For schema-changing deployments, use the dedicated manual workflow:
+
+```text
+manual-vps-deploy-with-migration
+```
+
+This workflow is intentionally manual and requires explicit confirmation inputs.
+
+Required confirmations:
+
+```text
+confirm_deploy = DEPLOY
+confirm_schema_change = APPLY_MIGRATION
+confirm_backup = BACKUP_DB
+```
+
+The schema-changing deployment flow is:
+
+1. restore dependencies
+2. build the solution in Release configuration
+3. run tests
+4. publish the API project
+5. publish the Web project
+6. build an EF Core migration bundle
+7. verify publish outputs
+8. verify that database files are not included in publish outputs
+9. upload API, Web, and migration bundle files to the VPS deploy directories
+10. stop the API systemd service
+11. back up the production SQLite database
+12. run the migration bundle against the production database
+13. run the VPS deployment script
+14. verify the application after deployment
+
+The production database path must be stored as a GitHub Actions secret.
+
+Required secret:
+
+```text
+MRB_PRODUCTION_DB_PATH
+```
+
+Example value:
+
+```text
+/opt/meetingroombooker/api/app.db
+```
+
+Do not commit the production database path, production URL, SSH keys, API tokens, or any real database files.
+
+### Why migration bundles are used
+
+EF Core migration bundles create a single executable that applies pending migrations to the target database. This makes database migration execution explicit and easier to include in a deployment process than running migrations automatically when the application starts.
+
+Application startup should not automatically apply production migrations in this project. Production database changes should be backed up, reviewed, and executed intentionally.
+
+### Production database path
+
+The current production database path must be confirmed before running the schema-changing deployment workflow.
+
+Possible database files may exist in old backup directories. Do not choose a path only because `app.db` exists there.
+
+Confirm the active database path by checking:
+
+- the systemd service configuration
+- the API working directory
+- the production connection string
+- the current runtime directory used by the deployment script
+
+Useful VPS commands:
+
+```bash
+systemctl cat meetingroombooker-api.service
+systemctl status meetingroombooker-api.service
+grep -R "Data Source" /opt/meetingroombooker/api /var/www/api /etc/systemd/system 2>/dev/null
+```
+
+The `MRB_PRODUCTION_DB_PATH` secret should point to the active production database only.
+
+### Rollback notes for schema-changing deployments
+
+Before applying a migration, the workflow backs up the production SQLite database.
+
+If the application deployment fails after the migration is applied, first check whether the application can run with the migrated schema. For additive migrations such as adding a new table, the previous application version will usually continue to work.
+
+Restoring a database backup should be treated as a last resort because it can remove reservations or operational data created after the backup.
+
+---
+
 ## Safety Checks
 
 The deployment process includes several safety checks:
