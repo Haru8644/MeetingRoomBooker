@@ -48,6 +48,9 @@ builder.Services.AddAuthorization(options =>
 builder.Services.Configure<ChatworkOptions>(
     builder.Configuration.GetSection("Chatwork"));
 
+builder.Services.Configure<RoomConflictDetectionOptions>(
+    builder.Configuration.GetSection("RoomConflictDetection"));
+
 builder.Services.AddHttpClient<IChatworkClient, ChatworkClient>(client =>
 {
     client.BaseAddress = new Uri("https://api.chatwork.com/v2/");
@@ -57,7 +60,9 @@ builder.Services.AddScoped<IChatworkRoomResolver, ChatworkRoomResolver>();
 builder.Services.AddScoped<IReservationChatworkNotificationService, ReservationChatworkNotificationService>();
 builder.Services.AddScoped<IRoomConflictRecordService, RoomConflictRecordService>();
 builder.Services.AddScoped<IRoomConflictDetectionService, RoomConflictDetectionService>();
+
 builder.Services.AddHostedService<ChatworkReminderWorker>();
+builder.Services.AddHostedService<RoomConflictDetectionWorker>();
 
 var allowedOrigins = builder.Configuration
     .GetSection("Cors:AllowedOrigins")
