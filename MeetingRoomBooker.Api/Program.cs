@@ -56,6 +56,7 @@ builder.Services.AddHttpClient<IChatworkClient, ChatworkClient>(client =>
 builder.Services.AddScoped<IChatworkRoomResolver, ChatworkRoomResolver>();
 builder.Services.AddScoped<IReservationChatworkNotificationService, ReservationChatworkNotificationService>();
 builder.Services.AddScoped<IRoomConflictRecordService, RoomConflictRecordService>();
+builder.Services.AddScoped<IRoomConflictDetectionService, RoomConflictDetectionService>();
 builder.Services.AddHostedService<ChatworkReminderWorker>();
 
 var allowedOrigins = builder.Configuration
