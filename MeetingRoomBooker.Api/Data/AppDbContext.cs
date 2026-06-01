@@ -15,6 +15,7 @@ namespace MeetingRoomBooker.Api.Data
         public DbSet<ReservationModel> Reservations { get; set; }
         public DbSet<NotificationModel> Notifications { get; set; }
         public DbSet<ChatworkDeliveryLog> ChatworkDeliveryLogs { get; set; }
+        public DbSet<RoomConflictRecord> RoomConflictRecords { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -69,6 +70,30 @@ namespace MeetingRoomBooker.Api.Data
                
                 entity.Property(x => x.ErrorMessage)
                     .HasMaxLength(1000);
+            });
+
+            modelBuilder.Entity<RoomConflictRecord>(entity =>
+            {
+                entity.HasIndex(x => x.DetectionKey)
+                    .IsUnique();
+
+                entity.HasIndex(x => x.OccurredAt);
+                entity.HasIndex(x => x.Status);
+                entity.HasIndex(x => x.Type);
+                entity.HasIndex(x => x.RoomName);
+
+                entity.Property(x => x.RoomName)
+                    .HasMaxLength(100);
+
+                entity.Property(x => x.Description)
+                    .HasMaxLength(1000);
+
+                entity.Property(x => x.Resolution)
+                    .HasMaxLength(1000);
+
+                entity.Property(x => x.DetectionKey)
+                    .HasMaxLength(300)
+                    .IsRequired(false);
             });
         }
     }
