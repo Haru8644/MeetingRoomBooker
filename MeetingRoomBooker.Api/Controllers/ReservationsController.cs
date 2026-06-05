@@ -19,15 +19,18 @@ namespace MeetingRoomBooker.Api.Controllers
         private readonly AppDbContext _context;
         private readonly IReservationChatworkNotificationService _reservationChatworkNotificationService;
         private readonly IReservationConflictService _reservationConflictService;
+        private readonly IReservationSeriesQueryService _reservationSeriesQueryService;
 
         public ReservationsController(
             AppDbContext context,
             IReservationChatworkNotificationService reservationChatworkNotificationService,
-            IReservationConflictService reservationConflictService)
+            IReservationConflictService reservationConflictService,
+            IReservationSeriesQueryService reservationSeriesQueryService)
         {
             _context = context;
             _reservationChatworkNotificationService = reservationChatworkNotificationService;
             _reservationConflictService = reservationConflictService;
+            _reservationSeriesQueryService = reservationSeriesQueryService;
         }
 
         [HttpGet]
@@ -411,7 +414,7 @@ namespace MeetingRoomBooker.Api.Controllers
                 return NoContent();
             }
 
-            var targets = await GetRecurringSeriesReservationsAsync(
+            var targets = await _reservationSeriesQueryService.GetSeriesReservationsAsync(
                 baseReservation,
                 scope,
                 cancellationToken);
@@ -481,7 +484,7 @@ namespace MeetingRoomBooker.Api.Controllers
                 return BadRequest(templateValidationError);
             }
 
-            var targets = await GetRecurringSeriesReservationsAsync(
+            var targets = await _reservationSeriesQueryService.GetSeriesReservationsAsync(
                 baseReservation,
                 scope,
                 cancellationToken,
@@ -663,64 +666,11 @@ namespace MeetingRoomBooker.Api.Controllers
                 $"{actorName}さんが予約「{GetReservationLabel(reservation)}」");
         }
 
-        private async Task<List<ReservationModel>> GetRecurringSeriesReservationsAsync(
-            ReservationModel reservation,
-            string scope,
-            CancellationToken cancellationToken,
-            bool asNoTracking = true)
-        {
-            IQueryable<ReservationModel> query = _context.Reservations;
-
-            if (asNoTracking)
-            {
-                query = query.AsNoTracking();
-            }
-
-            var normalizedSeriesId = reservation.SeriesId?.Trim();
-            List<ReservationModel> matches;
-
-            if (!string.IsNullOrWhiteSpace(normalizedSeriesId))
-            {
-                matches = await query
-                    .Where(x =>
-                        x.UserId == reservation.UserId &&
-                        x.SeriesId == normalizedSeriesId)
-                    .OrderBy(x => x.Date)
-                    .ThenBy(x => x.Id)
-                    .ToListAsync(cancellationToken);
-            }
-            else
-            {
-                var candidates = await query
-                    .Where(x =>
-                        x.UserId == reservation.UserId &&
-                        x.Name == reservation.Name &&
-                        x.Room == reservation.Room &&
-                        x.Type == reservation.Type &&
-                        x.Purpose == reservation.Purpose &&
-                        x.RepeatType == reservation.RepeatType)
-                    .ToListAsync(cancellationToken);
-
-                matches = candidates
-                    .Where(x =>
-                        x.RepeatUntil?.Date == reservation.RepeatUntil?.Date &&
-                        x.StartTime.TimeOfDay == reservation.StartTime.TimeOfDay &&
-                        x.EndTime.TimeOfDay == reservation.EndTime.TimeOfDay)
-                    .OrderBy(x => x.Date)
-                    .ThenBy(x => x.Id)
-                    .ToList();
-            }
-
-            return scope == ReservationSeriesScopes.Following
-                ? matches.Where(x => x.Date.Date >= reservation.Date.Date).ToList()
-                : matches;
-        }
-
         private async Task UpsertRecurringReservationNotificationsAsync(
             ReservationModel reservation,
             IReadOnlyCollection<int> targetUsers)
         {
-            var seriesReservations = await GetRecurringSeriesReservationsAsync(
+            var seriesReservations = await _reservationSeriesQueryService.GetSeriesReservationsAsync(
                 reservation,
                 ReservationSeriesScopes.All,
                 CancellationToken.None);
