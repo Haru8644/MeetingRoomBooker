@@ -59,6 +59,7 @@ builder.Services.AddHttpClient<IChatworkClient, ChatworkClient>(client =>
 
 builder.Services.AddScoped<IChatworkRoomResolver, ChatworkRoomResolver>();
 builder.Services.AddScoped<IReservationChatworkNotificationService, ReservationChatworkNotificationService>();
+builder.Services.AddScoped<IReservationAccessService, ReservationAccessService>();
 builder.Services.AddScoped<IReservationNotificationService, ReservationNotificationService>();
 builder.Services.AddScoped<IReservationConflictService, ReservationConflictService>();
 builder.Services.AddScoped<IReservationSeriesQueryService, ReservationSeriesQueryService>();

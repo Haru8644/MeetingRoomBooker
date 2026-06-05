@@ -1,4 +1,3 @@
-using System.Security.Claims;
 using MeetingRoomBooker.Api.Data;
 using MeetingRoomBooker.Api.Services.Chatwork;
 using MeetingRoomBooker.Api.Services.Reservations;
@@ -15,6 +14,7 @@ namespace MeetingRoomBooker.Api.Controllers
     public sealed class ReservationsController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IReservationAccessService _reservationAccessService;
         private readonly IReservationChatworkNotificationService _reservationChatworkNotificationService;
         private readonly IReservationNotificationService _reservationNotificationService;
         private readonly IReservationConflictService _reservationConflictService;
@@ -22,12 +22,14 @@ namespace MeetingRoomBooker.Api.Controllers
 
         public ReservationsController(
             AppDbContext context,
+            IReservationAccessService reservationAccessService,
             IReservationChatworkNotificationService reservationChatworkNotificationService,
             IReservationNotificationService reservationNotificationService,
             IReservationConflictService reservationConflictService,
             IReservationSeriesQueryService reservationSeriesQueryService)
         {
             _context = context;
+            _reservationAccessService = reservationAccessService;
             _reservationChatworkNotificationService = reservationChatworkNotificationService;
             _reservationNotificationService = reservationNotificationService;
             _reservationConflictService = reservationConflictService;
@@ -48,7 +50,7 @@ namespace MeetingRoomBooker.Api.Controllers
             [FromQuery] bool allowOverlap,
             CancellationToken cancellationToken)
         {
-            var currentUser = await GetCurrentUserAsync(cancellationToken);
+            var currentUser = await _reservationAccessService.GetCurrentUserAsync(User, cancellationToken);
             if (currentUser == null)
             {
                 return Unauthorized();
@@ -104,7 +106,7 @@ namespace MeetingRoomBooker.Api.Controllers
                 return BadRequest("登録する予約がありません。");
             }
 
-            var currentUser = await GetCurrentUserAsync(cancellationToken);
+            var currentUser = await _reservationAccessService.GetCurrentUserAsync(User, cancellationToken);
             if (currentUser == null)
             {
                 return Unauthorized();
@@ -188,12 +190,12 @@ namespace MeetingRoomBooker.Api.Controllers
                 return NotFound();
             }
 
-            if (!TryGetCurrentUserId(out var currentUserId))
+            if (!_reservationAccessService.TryGetCurrentUserId(User, out var currentUserId))
             {
                 return Unauthorized();
             }
 
-            if (!CanManageReservation(reservation, currentUserId))
+            if (!_reservationAccessService.CanManageReservation(User, reservation, currentUserId))
             {
                 return Forbid();
             }
@@ -231,12 +233,12 @@ namespace MeetingRoomBooker.Api.Controllers
                 return NotFound();
             }
 
-            if (!TryGetCurrentUserId(out var currentUserId))
+            if (!_reservationAccessService.TryGetCurrentUserId(User, out var currentUserId))
             {
                 return Unauthorized();
             }
 
-            if (!CanManageReservation(existingReservation, currentUserId))
+            if (!_reservationAccessService.CanManageReservation(User, existingReservation, currentUserId))
             {
                 return Forbid();
             }
@@ -311,7 +313,7 @@ namespace MeetingRoomBooker.Api.Controllers
                 return NotFound();
             }
 
-            if (!TryGetCurrentUserId(out var currentUserId))
+            if (!_reservationAccessService.TryGetCurrentUserId(User, out var currentUserId))
             {
                 return Unauthorized();
             }
@@ -343,7 +345,7 @@ namespace MeetingRoomBooker.Api.Controllers
                 return NotFound();
             }
 
-            if (!TryGetCurrentUserId(out var currentUserId))
+            if (!_reservationAccessService.TryGetCurrentUserId(User, out var currentUserId))
             {
                 return Unauthorized();
             }
@@ -382,12 +384,12 @@ namespace MeetingRoomBooker.Api.Controllers
                 return NotFound();
             }
 
-            if (!TryGetCurrentUserId(out var currentUserId))
+            if (!_reservationAccessService.TryGetCurrentUserId(User, out var currentUserId))
             {
                 return Unauthorized();
             }
 
-            if (!CanManageReservation(baseReservation, currentUserId))
+            if (!_reservationAccessService.CanManageReservation(User, baseReservation, currentUserId))
             {
                 return Forbid();
             }
@@ -453,12 +455,12 @@ namespace MeetingRoomBooker.Api.Controllers
                 return NotFound();
             }
 
-            if (!TryGetCurrentUserId(out var currentUserId))
+            if (!_reservationAccessService.TryGetCurrentUserId(User, out var currentUserId))
             {
                 return Unauthorized();
             }
 
-            if (!CanManageReservation(baseReservation, currentUserId))
+            if (!_reservationAccessService.CanManageReservation(User, baseReservation, currentUserId))
             {
                 return Forbid();
             }
@@ -560,25 +562,5 @@ namespace MeetingRoomBooker.Api.Controllers
             return NoContent();
         }
 
-        private async Task<UserModel?> GetCurrentUserAsync(CancellationToken cancellationToken)
-        {
-            if (!TryGetCurrentUserId(out var currentUserId))
-            {
-                return null;
-            }
-
-            return await _context.Users.FirstOrDefaultAsync(user => user.Id == currentUserId, cancellationToken);
-        }
-
-        private bool TryGetCurrentUserId(out int userId)
-        {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            return int.TryParse(userIdClaim, out userId);
-        }
-
-        private bool CanManageReservation(ReservationModel reservation, int currentUserId)
-        {
-            return reservation.UserId == currentUserId || User.IsInRole("Admin");
-        }
     }
 }
