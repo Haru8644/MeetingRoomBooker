@@ -18,13 +18,16 @@ namespace MeetingRoomBooker.Api.Controllers
 
         private readonly AppDbContext _context;
         private readonly IReservationChatworkNotificationService _reservationChatworkNotificationService;
+        private readonly IReservationConflictService _reservationConflictService;
 
         public ReservationsController(
             AppDbContext context,
-            IReservationChatworkNotificationService reservationChatworkNotificationService)
+            IReservationChatworkNotificationService reservationChatworkNotificationService,
+            IReservationConflictService reservationConflictService)
         {
             _context = context;
             _reservationChatworkNotificationService = reservationChatworkNotificationService;
+            _reservationConflictService = reservationConflictService;
         }
 
         [HttpGet]
@@ -63,13 +66,13 @@ namespace MeetingRoomBooker.Api.Controllers
                 return BadRequest(validationError);
             }
 
-            var overlappingReservations = await FindConflictingReservationsAsync(
+            var overlappingReservations = await _reservationConflictService.FindConflictsAsync(
                 reservation,
                 cancellationToken: cancellationToken);
 
             if (overlappingReservations.Count > 0 && !allowOverlap)
             {
-                return Conflict(BuildConflictMessage(overlappingReservations[0]));
+                return Conflict(_reservationConflictService.BuildConflictMessage(overlappingReservations[0]));
             }
 
             _context.Reservations.Add(reservation);
@@ -129,16 +132,16 @@ namespace MeetingRoomBooker.Api.Controllers
                     ReservationOverlapChecker.IsConflicting(existing, reservation));
                 if (conflictInRequest != null && !allowOverlap)
                 {
-                    return Conflict(BuildConflictMessage(conflictInRequest));
+                    return Conflict(_reservationConflictService.BuildConflictMessage(conflictInRequest));
                 }
 
-                var conflicts = await FindConflictingReservationsAsync(
+                var conflicts = await _reservationConflictService.FindConflictsAsync(
                     reservation,
                     cancellationToken: cancellationToken);
 
                 if (conflicts.Count > 0 && !allowOverlap)
                 {
-                    return Conflict(BuildConflictMessage(conflicts[0]));
+                    return Conflict(_reservationConflictService.BuildConflictMessage(conflicts[0]));
                 }
 
                 overlappingReservations.AddRange(conflicts);
@@ -245,14 +248,14 @@ namespace MeetingRoomBooker.Api.Controllers
                 return BadRequest(validationError);
             }
 
-            var conflict = await FindConflictingReservationAsync(
+            var conflict = await _reservationConflictService.FindFirstConflictAsync(
                 reservation,
                 excludedReservationIds: new[] { reservation.Id },
                 cancellationToken: cancellationToken);
 
             if (conflict != null)
             {
-                return Conflict(BuildConflictMessage(conflict));
+                return Conflict(_reservationConflictService.BuildConflictMessage(conflict));
             }
 
             var previousParticipantIds = ReservationRules.GetNotifiableParticipantIds(existingReservation);
@@ -502,14 +505,14 @@ namespace MeetingRoomBooker.Api.Controllers
                     return BadRequest(updatedValidationError);
                 }
 
-                var conflict = await FindConflictingReservationAsync(
+                var conflict = await _reservationConflictService.FindFirstConflictAsync(
                     updatedReservation,
                     targetIds,
                     cancellationToken);
 
                 if (conflict != null)
                 {
-                    return Conflict(BuildConflictMessage(conflict));
+                    return Conflict(_reservationConflictService.BuildConflictMessage(conflict));
                 }
 
                 var previousReservation = ReservationRules.Clone(target);
@@ -904,48 +907,6 @@ namespace MeetingRoomBooker.Api.Controllers
                 .ToList();
 
             return string.Join("、", names);
-        }
-
-        private async Task<ReservationModel?> FindConflictingReservationAsync(
-            ReservationModel reservation,
-            IEnumerable<int>? excludedReservationIds = null,
-            CancellationToken cancellationToken = default)
-        {
-            var conflicts = await FindConflictingReservationsAsync(
-                reservation,
-                excludedReservationIds,
-                cancellationToken);
-
-            return conflicts.FirstOrDefault();
-        }
-
-        private async Task<List<ReservationModel>> FindConflictingReservationsAsync(
-            ReservationModel reservation,
-            IEnumerable<int>? excludedReservationIds = null,
-            CancellationToken cancellationToken = default)
-        {
-            var excludedIds = excludedReservationIds?
-                .Where(id => id > 0)
-                .Distinct()
-                .ToHashSet() ?? new HashSet<int>();
-
-            return await _context.Reservations
-                .AsNoTracking()
-                .Where(x =>
-                    !excludedIds.Contains(x.Id) &&
-                    x.Room == reservation.Room &&
-                    x.Date.Date == reservation.Date.Date &&
-                    x.StartTime < reservation.EndTime &&
-                    x.EndTime > reservation.StartTime)
-                .OrderBy(x => x.Date)
-                .ThenBy(x => x.StartTime)
-                .ToListAsync(cancellationToken);
-        }
-
-        private static string BuildConflictMessage(ReservationModel conflict)
-        {
-            var label = string.IsNullOrWhiteSpace(conflict.Purpose) ? conflict.Name : conflict.Purpose;
-            return $"この時間帯には既に予約があります。会議室: {conflict.Room} / 利用日: {conflict.Date:yyyy/MM/dd} / 時間: {conflict.StartTime:HH:mm}〜{conflict.EndTime:HH:mm} / 予約: {label}";
         }
 
         private async Task<UserModel?> GetCurrentUserAsync(CancellationToken cancellationToken)
