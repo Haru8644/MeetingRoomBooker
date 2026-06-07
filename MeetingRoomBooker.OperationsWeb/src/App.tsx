@@ -8,103 +8,27 @@ import {
     fetchRoomConflictSummary,
     updateRoomConflictRecord,
 } from './features/roomConflicts/roomConflictApi'
-import {
-    getConflictCauseLabel,
-    getConflictImpactLabel,
-    getConflictStatusLabel,
-} from './features/roomConflicts/roomConflictLabels'
+import { ConflictRecordReviewForm } from './features/roomConflicts/ConflictRecordReviewForm'
+import type { ConflictRecordReviewFormValue } from './features/roomConflicts/ConflictRecordReviewForm'
 import { ConflictRecordTable } from './features/roomConflicts/ConflictRecordTable'
-import { formatDateTime } from './features/roomConflicts/roomConflictFormatters'
+import { ManualReportForm } from './features/roomConflicts/ManualReportForm'
+import type { ManualReportFormValue } from './features/roomConflicts/ManualReportForm'
+import { SummaryCards } from './features/roomConflicts/SummaryCards'
 import {
     conflictCause,
     conflictImpact,
     conflictStatus,
 } from './features/roomConflicts/types'
 import type {
-    ConflictCause,
-    ConflictImpact,
-    ConflictStatus,
     RoomConflictRecord,
     RoomConflictRecordSummary,
 } from './features/roomConflicts/types'
-
-type SummaryCard = {
-    label: string
-    value: number
-    description: string
-}
-
-type ManualReportForm = {
-    occurredAt: string
-    roomName: string
-    impact: ConflictImpact
-    cause: ConflictCause
-    description: string
-    resolution: string
-}
-
-type EditRecordForm = {
-    status: ConflictStatus
-    impact: ConflictImpact
-    cause: ConflictCause
-    description: string
-    resolution: string
-}
 
 const emptySummary: RoomConflictRecordSummary = {
     unresolvedOverlapsThisMonth: 0,
     confirmedCollisionsThisMonth: 0,
     highImpactConflictsThisMonth: 0,
     openDetectedRecords: 0,
-}
-
-const statusOptions: ConflictStatus[] = [
-    conflictStatus.detected,
-    conflictStatus.confirmed,
-    conflictStatus.falseAlarm,
-    conflictStatus.resolved,
-]
-
-const impactOptions: ConflictImpact[] = [
-    conflictImpact.low,
-    conflictImpact.medium,
-    conflictImpact.high,
-]
-
-const causeOptions: ConflictCause[] = [
-    conflictCause.existingReservationOverlooked,
-    conflictCause.externalCalendarConflict,
-    conflictCause.inputMistake,
-    conflictCause.notificationMissed,
-    conflictCause.lastMinuteChange,
-    conflictCause.verbalReservation,
-    conflictCause.unknown,
-    conflictCause.other,
-]
-
-function buildSummaryCards(summary: RoomConflictRecordSummary): SummaryCard[] {
-    return [
-        {
-            label: 'Detected overlaps',
-            value: summary.unresolvedOverlapsThisMonth,
-            description: 'Unresolved reservation overlaps detected by the worker.',
-        },
-        {
-            label: 'Confirmed collisions',
-            value: summary.confirmedCollisionsThisMonth,
-            description: 'Room conflicts confirmed as actual workplace collisions.',
-        },
-        {
-            label: 'High impact',
-            value: summary.highImpactConflictsThisMonth,
-            description: 'Conflicts that affected meetings or required urgent action.',
-        },
-        {
-            label: 'Open records',
-            value: summary.openDetectedRecords,
-            description: 'Detected records that still need review or classification.',
-        },
-    ]
 }
 
 function formatDateTimeInputValue(date: Date): string {
@@ -117,7 +41,7 @@ function formatDateTimeInputValue(date: Date): string {
     return `${year}-${month}-${day}T${hour}:${minute}`
 }
 
-function createDefaultManualReportForm(): ManualReportForm {
+function createDefaultManualReportForm(): ManualReportFormValue {
     return {
         occurredAt: formatDateTimeInputValue(new Date()),
         roomName: '',
@@ -128,7 +52,7 @@ function createDefaultManualReportForm(): ManualReportForm {
     }
 }
 
-function createEditForm(record: RoomConflictRecord): EditRecordForm {
+function createEditForm(record: RoomConflictRecord): ConflictRecordReviewFormValue {
     return {
         status: record.status,
         impact: record.impact,
@@ -169,11 +93,12 @@ function App() {
     const [records, setRecords] = useState<RoomConflictRecord[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [errorMessage, setErrorMessage] = useState<string | null>(null)
-    const [createForm, setCreateForm] = useState<ManualReportForm>(
+    const [createForm, setCreateForm] = useState<ManualReportFormValue>(
         createDefaultManualReportForm,
     )
     const [selectedRecordId, setSelectedRecordId] = useState<number | null>(null)
-    const [editForm, setEditForm] = useState<EditRecordForm | null>(null)
+    const [editForm, setEditForm] =
+        useState<ConflictRecordReviewFormValue | null>(null)
     const [isSaving, setIsSaving] = useState(false)
     const [saveMessage, setSaveMessage] = useState<string | null>(null)
 
@@ -215,8 +140,6 @@ function App() {
             isMounted = false
         }
     }, [])
-
-    const summaryCards = useMemo(() => buildSummaryCards(summary), [summary])
 
     const selectedRecord = useMemo(
         () => records.find((record) => record.id === selectedRecordId) ?? null,
@@ -324,264 +247,23 @@ function App() {
                 </div>
             </section>
 
-            <section className="status-grid" aria-label="Conflict tracking summary">
-                {summaryCards.map((card) => (
-                    <article className="summary-card" key={card.label}>
-                        <p className="summary-label">{card.label}</p>
-                        <strong className="summary-value">{card.value}</strong>
-                        <p className="summary-description">{card.description}</p>
-                    </article>
-                ))}
-            </section>
+            <SummaryCards summary={summary} />
 
             <section className="management-grid" aria-label="Conflict record management">
-                <article className="management-card">
-                    <p className="eyebrow">Manual report</p>
-                    <h2>Report actual collision</h2>
-                    <p className="management-description">
-                        Register a conflict that actually happened in the workplace.
-                    </p>
+                <ManualReportForm
+                    value={createForm}
+                    isSaving={isSaving}
+                    onValueChange={setCreateForm}
+                    onSubmit={handleCreateSubmit}
+                />
 
-                    <form className="form-stack" onSubmit={handleCreateSubmit}>
-                        <label className="field">
-                            <span>Occurred at</span>
-                            <input
-                                type="datetime-local"
-                                value={createForm.occurredAt}
-                                onChange={(event) =>
-                                    setCreateForm((current) => ({
-                                        ...current,
-                                        occurredAt: event.target.value,
-                                    }))
-                                }
-                            />
-                        </label>
-
-                        <label className="field">
-                            <span>Room name</span>
-                            <input
-                                type="text"
-                                value={createForm.roomName}
-                                placeholder="Large meeting room"
-                                onChange={(event) =>
-                                    setCreateForm((current) => ({
-                                        ...current,
-                                        roomName: event.target.value,
-                                    }))
-                                }
-                            />
-                        </label>
-
-                        <div className="form-grid">
-                            <label className="field">
-                                <span>Impact</span>
-                                <select
-                                    value={createForm.impact}
-                                    onChange={(event) =>
-                                        setCreateForm((current) => ({
-                                            ...current,
-                                            impact: Number(event.target.value) as ConflictImpact,
-                                        }))
-                                    }
-                                >
-                                    {impactOptions.map((impact) => (
-                                        <option key={impact} value={impact}>
-                                            {getConflictImpactLabel(impact)}
-                                        </option>
-                                    ))}
-                                </select>
-                            </label>
-
-                            <label className="field">
-                                <span>Cause</span>
-                                <select
-                                    value={createForm.cause}
-                                    onChange={(event) =>
-                                        setCreateForm((current) => ({
-                                            ...current,
-                                            cause: Number(event.target.value) as ConflictCause,
-                                        }))
-                                    }
-                                >
-                                    {causeOptions.map((cause) => (
-                                        <option key={cause} value={cause}>
-                                            {getConflictCauseLabel(cause)}
-                                        </option>
-                                    ))}
-                                </select>
-                            </label>
-                        </div>
-
-                        <label className="field">
-                            <span>Description</span>
-                            <textarea
-                                value={createForm.description}
-                                placeholder="What happened?"
-                                onChange={(event) =>
-                                    setCreateForm((current) => ({
-                                        ...current,
-                                        description: event.target.value,
-                                    }))
-                                }
-                            />
-                        </label>
-
-                        <label className="field">
-                            <span>Resolution</span>
-                            <textarea
-                                value={createForm.resolution}
-                                placeholder="How was it handled?"
-                                onChange={(event) =>
-                                    setCreateForm((current) => ({
-                                        ...current,
-                                        resolution: event.target.value,
-                                    }))
-                                }
-                            />
-                        </label>
-
-                        <button className="primary-action" type="submit" disabled={isSaving}>
-                            {isSaving ? 'Saving...' : 'Create report'}
-                        </button>
-                    </form>
-                </article>
-
-                <article className="management-card">
-                    <p className="eyebrow">Review</p>
-                    <h2>Classify selected record</h2>
-                    <p className="management-description">
-                        Select an editable record from the list, then update its review status.
-                    </p>
-
-                    {!selectedRecord || !editForm ? (
-                        <p className="empty-state">No conflict record selected.</p>
-                    ) : (
-                        <form className="form-stack" onSubmit={handleUpdateSubmit}>
-                            <div className="selected-record-summary">
-                                <span>{selectedRecord.roomName}</span>
-                                <strong>{formatDateTime(selectedRecord.occurredAt)}</strong>
-                            </div>
-
-                            <div className="form-grid">
-                                <label className="field">
-                                    <span>Status</span>
-                                    <select
-                                        value={editForm.status}
-                                        disabled={!selectedRecord.canEdit}
-                                        onChange={(event) =>
-                                            setEditForm((current) =>
-                                                current
-                                                    ? {
-                                                        ...current,
-                                                        status: Number(event.target.value) as ConflictStatus,
-                                                    }
-                                                    : current,
-                                            )
-                                        }
-                                    >
-                                        {statusOptions.map((status) => (
-                                            <option key={status} value={status}>
-                                                {getConflictStatusLabel(status)}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </label>
-
-                                <label className="field">
-                                    <span>Impact</span>
-                                    <select
-                                        value={editForm.impact}
-                                        disabled={!selectedRecord.canEdit}
-                                        onChange={(event) =>
-                                            setEditForm((current) =>
-                                                current
-                                                    ? {
-                                                        ...current,
-                                                        impact: Number(event.target.value) as ConflictImpact,
-                                                    }
-                                                    : current,
-                                            )
-                                        }
-                                    >
-                                        {impactOptions.map((impact) => (
-                                            <option key={impact} value={impact}>
-                                                {getConflictImpactLabel(impact)}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </label>
-                            </div>
-
-                            <label className="field">
-                                <span>Cause</span>
-                                <select
-                                    value={editForm.cause}
-                                    disabled={!selectedRecord.canEdit}
-                                    onChange={(event) =>
-                                        setEditForm((current) =>
-                                            current
-                                                ? {
-                                                    ...current,
-                                                    cause: Number(event.target.value) as ConflictCause,
-                                                }
-                                                : current,
-                                        )
-                                    }
-                                >
-                                    {causeOptions.map((cause) => (
-                                        <option key={cause} value={cause}>
-                                            {getConflictCauseLabel(cause)}
-                                        </option>
-                                    ))}
-                                </select>
-                            </label>
-
-                            <label className="field">
-                                <span>Description</span>
-                                <textarea
-                                    value={editForm.description}
-                                    disabled={!selectedRecord.canEdit}
-                                    onChange={(event) =>
-                                        setEditForm((current) =>
-                                            current
-                                                ? {
-                                                    ...current,
-                                                    description: event.target.value,
-                                                }
-                                                : current,
-                                        )
-                                    }
-                                />
-                            </label>
-
-                            <label className="field">
-                                <span>Resolution</span>
-                                <textarea
-                                    value={editForm.resolution}
-                                    disabled={!selectedRecord.canEdit}
-                                    onChange={(event) =>
-                                        setEditForm((current) =>
-                                            current
-                                                ? {
-                                                    ...current,
-                                                    resolution: event.target.value,
-                                                }
-                                                : current,
-                                        )
-                                    }
-                                />
-                            </label>
-
-                            <button
-                                className="primary-action"
-                                type="submit"
-                                disabled={isSaving || !selectedRecord.canEdit}
-                            >
-                                {isSaving ? 'Saving...' : 'Update record'}
-                            </button>
-                        </form>
-                    )}
-                </article>
+                <ConflictRecordReviewForm
+                    selectedRecord={selectedRecord}
+                    value={editForm}
+                    isSaving={isSaving}
+                    onValueChange={setEditForm}
+                    onSubmit={handleUpdateSubmit}
+                />
             </section>
 
             {saveMessage && (
