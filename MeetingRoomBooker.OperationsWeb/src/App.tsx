@@ -1,8 +1,21 @@
 import { useEffect, useMemo, useState } from 'react'
 import './App.css'
 import { ApiError } from './lib/apiClient'
-import { fetchRoomConflictSummary } from './features/roomConflicts/roomConflictApi'
-import type { RoomConflictRecordSummary } from './features/roomConflicts/types'
+import {
+    fetchRoomConflictRecords,
+    fetchRoomConflictSummary,
+} from './features/roomConflicts/roomConflictApi'
+import {
+    getConflictCauseLabel,
+    getConflictImpactLabel,
+    getConflictRecordTypeLabel,
+    getConflictStatusLabel,
+    getConflictStatusTone,
+} from './features/roomConflicts/roomConflictLabels'
+import type {
+    RoomConflictRecord,
+    RoomConflictRecordSummary,
+} from './features/roomConflicts/types'
 
 type SummaryCard = {
     label: string
@@ -16,6 +29,14 @@ const emptySummary: RoomConflictRecordSummary = {
     highImpactConflictsThisMonth: 0,
     openDetectedRecords: 0,
 }
+
+const dateTimeFormatter = new Intl.DateTimeFormat('ja-JP', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+})
 
 function buildSummaryCards(summary: RoomConflictRecordSummary): SummaryCard[] {
     return [
@@ -42,24 +63,39 @@ function buildSummaryCards(summary: RoomConflictRecordSummary): SummaryCard[] {
     ]
 }
 
+function formatDateTime(value: string): string {
+    const date = new Date(value)
+
+    if (Number.isNaN(date.getTime())) {
+        return value
+    }
+
+    return dateTimeFormatter.format(date)
+}
+
 function App() {
     const [summary, setSummary] =
         useState<RoomConflictRecordSummary>(emptySummary)
+    const [records, setRecords] = useState<RoomConflictRecord[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
     useEffect(() => {
         let isMounted = true
 
-        async function loadSummary() {
+        async function loadDashboardData() {
             try {
-                const result = await fetchRoomConflictSummary()
+                const [summaryResult, recordsResult] = await Promise.all([
+                    fetchRoomConflictSummary(),
+                    fetchRoomConflictRecords(),
+                ])
 
                 if (!isMounted) {
                     return
                 }
 
-                setSummary(result)
+                setSummary(summaryResult)
+                setRecords(recordsResult)
                 setErrorMessage(null)
             } catch (error) {
                 if (!isMounted) {
@@ -67,11 +103,11 @@ function App() {
                 }
 
                 if (error instanceof ApiError) {
-                    setErrorMessage(`Failed to load summary. Status: ${error.status}.`)
+                    setErrorMessage(`Failed to load dashboard data. Status: ${error.status}.`)
                     return
                 }
 
-                setErrorMessage('Failed to load summary.')
+                setErrorMessage('Failed to load dashboard data.')
             } finally {
                 if (isMounted) {
                     setIsLoading(false)
@@ -79,7 +115,7 @@ function App() {
             }
         }
 
-        loadSummary()
+        loadDashboardData()
 
         return () => {
             isMounted = false
@@ -99,8 +135,8 @@ function App() {
                 </p>
 
                 <div className="feedback-row" aria-live="polite">
-                    {isLoading && <span>Loading summary...</span>}
-                    {!isLoading && !errorMessage && <span>Summary loaded from API.</span>}
+                    {isLoading && <span>Loading dashboard data...</span>}
+                    {!isLoading && !errorMessage && <span>Dashboard data loaded from API.</span>}
                     {errorMessage && <span className="error-message">{errorMessage}</span>}
                 </div>
             </section>
@@ -115,14 +151,75 @@ function App() {
                 ))}
             </section>
 
+            <section className="records-panel" aria-labelledby="records-title">
+                <div className="records-header">
+                    <div>
+                        <p className="eyebrow">Conflict records</p>
+                        <h2 id="records-title">Latest room conflict records</h2>
+                    </div>
+                    <span className="record-count">{records.length} records</span>
+                </div>
+
+                {isLoading && <p className="empty-state">Loading conflict records...</p>}
+
+                {!isLoading && errorMessage && (
+                    <p className="empty-state">
+                        Conflict records could not be loaded. Check the API server and login state.
+                    </p>
+                )}
+
+                {!isLoading && !errorMessage && records.length === 0 && (
+                    <p className="empty-state">No conflict records found.</p>
+                )}
+
+                {!isLoading && !errorMessage && records.length > 0 && (
+                    <div className="records-table-wrap">
+                        <table className="records-table">
+                            <thead>
+                                <tr>
+                                    <th>Status</th>
+                                    <th>Occurred at</th>
+                                    <th>Room</th>
+                                    <th>Type</th>
+                                    <th>Impact</th>
+                                    <th>Cause</th>
+                                    <th>Permission</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {records.map((record) => (
+                                    <tr key={record.id}>
+                                        <td>
+                                            <span
+                                                className={`status-pill status-${getConflictStatusTone(
+                                                    record.status,
+                                                )}`}
+                                            >
+                                                {getConflictStatusLabel(record.status)}
+                                            </span>
+                                        </td>
+                                        <td>{formatDateTime(record.occurredAt)}</td>
+                                        <td>{record.roomName}</td>
+                                        <td>{getConflictRecordTypeLabel(record.type)}</td>
+                                        <td>{getConflictImpactLabel(record.impact)}</td>
+                                        <td>{getConflictCauseLabel(record.cause)}</td>
+                                        <td>{record.canEdit ? 'Editable' : 'View only'}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            </section>
+
             <section className="operations-panel" aria-labelledby="operations-title">
                 <div>
                     <p className="eyebrow">Current phase</p>
-                    <h2 id="operations-title">Summary API integration</h2>
+                    <h2 id="operations-title">Conflict record list</h2>
                     <p>
-                        The summary cards are now connected to the room conflict summary API.
-                        List views, filters, manual reporting, and review actions will be
-                        added in later pull requests.
+                        The operations UI now loads summary metrics and read-only conflict
+                        records from the API. Manual reporting, filtering, and review actions
+                        will be added in later pull requests.
                     </p>
                 </div>
 
@@ -133,11 +230,11 @@ function App() {
                     </div>
                     <div>
                         <span className="note-label">API</span>
-                        <span className="note-value">Summary connected</span>
+                        <span className="note-value">Summary and list connected</span>
                     </div>
                     <div>
-                        <span className="note-label">Deployment</span>
-                        <span className="note-value">Not connected yet</span>
+                        <span className="note-label">Mode</span>
+                        <span className="note-value">Read only</span>
                     </div>
                 </div>
             </section>
