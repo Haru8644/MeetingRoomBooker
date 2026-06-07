@@ -11,10 +11,10 @@ import {
 import {
     getConflictCauseLabel,
     getConflictImpactLabel,
-    getConflictRecordTypeLabel,
     getConflictStatusLabel,
-    getConflictStatusTone,
 } from './features/roomConflicts/roomConflictLabels'
+import { ConflictRecordTable } from './features/roomConflicts/ConflictRecordTable'
+import { formatDateTime } from './features/roomConflicts/roomConflictFormatters'
 import {
     conflictCause,
     conflictImpact,
@@ -82,14 +82,6 @@ const causeOptions: ConflictCause[] = [
     conflictCause.other,
 ]
 
-const dateTimeFormatter = new Intl.DateTimeFormat('ja-JP', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-})
-
 function buildSummaryCards(summary: RoomConflictRecordSummary): SummaryCard[] {
     return [
         {
@@ -113,16 +105,6 @@ function buildSummaryCards(summary: RoomConflictRecordSummary): SummaryCard[] {
             description: 'Detected records that still need review or classification.',
         },
     ]
-}
-
-function formatDateTime(value: string): string {
-    const date = new Date(value)
-
-    if (Number.isNaN(date.getTime())) {
-        return value
-    }
-
-    return dateTimeFormatter.format(date)
 }
 
 function formatDateTimeInputValue(date: Date): string {
@@ -630,57 +612,11 @@ function App() {
                 )}
 
                 {!isLoading && !errorMessage && records.length > 0 && (
-                    <div className="records-table-wrap">
-                        <table className="records-table">
-                            <thead>
-                                <tr>
-                                    <th>Status</th>
-                                    <th>Occurred at</th>
-                                    <th>Room</th>
-                                    <th>Type</th>
-                                    <th>Impact</th>
-                                    <th>Cause</th>
-                                    <th>Permission</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {records.map((record) => (
-                                    <tr
-                                        className={
-                                            record.id === selectedRecordId ? 'record-row-selected' : ''
-                                        }
-                                        key={record.id}
-                                    >
-                                        <td>
-                                            <span
-                                                className={`status-pill status-${getConflictStatusTone(
-                                                    record.status,
-                                                )}`}
-                                            >
-                                                {getConflictStatusLabel(record.status)}
-                                            </span>
-                                        </td>
-                                        <td>{formatDateTime(record.occurredAt)}</td>
-                                        <td>{record.roomName}</td>
-                                        <td>{getConflictRecordTypeLabel(record.type)}</td>
-                                        <td>{getConflictImpactLabel(record.impact)}</td>
-                                        <td>{getConflictCauseLabel(record.cause)}</td>
-                                        <td>{record.canEdit ? 'Editable' : 'View only'}</td>
-                                        <td>
-                                            <button
-                                                className="table-action"
-                                                type="button"
-                                                onClick={() => handleSelectRecord(record)}
-                                            >
-                                                Select
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                    <ConflictRecordTable
+                        records={records}
+                        selectedRecordId={selectedRecordId}
+                        onSelectRecord={handleSelectRecord}
+                    />
                 )}
             </section>
 
