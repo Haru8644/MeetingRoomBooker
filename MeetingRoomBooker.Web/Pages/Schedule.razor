@@ -182,7 +182,8 @@
                                         {
                                             <div class="booking-card @(IsMyWorkSchedule(entry) ? "my-booking" : "")"
                                                  data-type="@scheduleSection.Label"
-                                                 style="@BuildWorkScheduleListCardStyle(scheduleSection.Color)">
+                                                 style="@BuildWorkScheduleListCardStyle(scheduleSection.Color)"
+                                                 @onclick="() => ShowWorkScheduleDetail(entry)">
 
                                                 <div class="type-icon-bg" style="@BuildColorStyle(scheduleSection.Color)">
                                                     <span class="@scheduleSection.IconClass"></span>
@@ -383,6 +384,164 @@
     </div>
 }
 
+@if (selectedWorkSchedule != null)
+{
+    var workScheduleSection = GetWorkScheduleSection(selectedWorkSchedule.Type);
+
+    <div class="modal-backdrop" @onclick="CloseWorkScheduleDetail" @ontouchmove:stopPropagation="true" style="z-index: 31000 !important;">
+        <div class="modal-content cyber-modal-animated" @onclick:stopPropagation="true">
+            @if (!isEditingWorkSchedule)
+            {
+                <div class="modal-header">
+                    <h3 class="modal-title gradient-text-enhanced" style="background: none !important; -webkit-text-fill-color: transparent !important; background-image: linear-gradient(135deg, #00c6ff, #d53369) !important; -webkit-background-clip: text !important;">
+                        @selectedWorkSchedule.Title
+                    </h3>
+                    <button class="close-btn" @onclick="CloseWorkScheduleDetail">×</button>
+                </div>
+
+                <div class="detail-body">
+                    <div class="cyber-detail-row slide-in-right" style="--i:1">
+                        <div class="label">種別</div>
+                        <div class="value value-text" style="@BuildModalAccentStyle(workScheduleSection.Color)">@workScheduleSection.Label</div>
+                    </div>
+
+                    <div class="cyber-detail-row slide-in-right" style="--i:2">
+                        <div class="label">日時</div>
+                        <div class="value value-text">@selectedWorkSchedule.Date.ToString("yyyy/MM/dd")<br />@GetWorkScheduleTimeLabel(selectedWorkSchedule)</div>
+                    </div>
+
+                    <div class="cyber-detail-row slide-in-right" style="--i:3">
+                        <div class="label">内容</div>
+                        <div class="value value-text">@selectedWorkSchedule.Title</div>
+                    </div>
+
+                    @if (selectedWorkSchedule.Type == WorkScheduleEntryType.Leave)
+                    {
+                        <div class="cyber-detail-row slide-in-right" style="--i:4">
+                            <div class="label">休暇区分</div>
+                            <div class="value value-text">@GetLeavePeriodLabel(selectedWorkSchedule.LeavePeriod)</div>
+                        </div>
+                    }
+
+                    <div class="cyber-detail-row slide-in-right" style="--i:5">
+                        <div class="label">参加者 / 対象者</div>
+                        <div class="value value-text">@GetWorkScheduleDetails(selectedWorkSchedule)</div>
+                    </div>
+                </div>
+
+                <div class="modal-footer fade-in" style="animation-delay: 0.3s; flex-wrap: wrap; gap: 10px;">
+                    @if (CanManageWorkSchedule(selectedWorkSchedule))
+                    {
+                        <button class="cyber-button-primary" @onclick="StartWorkScheduleEdit">編集</button>
+                        <button class="cyber-button-danger" @onclick="DeleteWorkScheduleAsync">削除</button>
+                    }
+
+                    <button class="cyber-button-secondary" @onclick="CloseWorkScheduleDetail">閉じる</button>
+                </div>
+            }
+            else
+            {
+                <div class="modal-header">
+                    <h3 class="modal-title gradient-text-enhanced" style="background: none !important; -webkit-text-fill-color: transparent !important; background-image: linear-gradient(135deg, #00c6ff, #d53369) !important; -webkit-background-clip: text !important;">
+                        @workScheduleSection.Label の編集
+                    </h3>
+                </div>
+
+                <div class="fluent-stack-scrollable">
+                    <FluentStack Orientation="Orientation.Vertical" VerticalGap="15" Style="padding: 10px;">
+                        <div class="fade-in-up" style="--i:1; position: relative; z-index: 80;">
+                            <label>種別</label>
+                            <div style="@BuildModalAccentStyle(workScheduleSection.Color)" class="value-text">@workScheduleSection.Label</div>
+                        </div>
+
+                        @if (selectedWorkSchedule.Type == WorkScheduleEntryType.ExternalAppointment)
+                        {
+                            <div class="fade-in-up" style="--i:2; position: relative; z-index: 70;">
+                                <label>内容</label>
+                                <FluentTextField @bind-Value="workScheduleEditTitle" Style="width: 100%;" />
+                            </div>
+
+                            <div class="fade-in-up" style="--i:3; position: relative; z-index: 60;">
+                                <label>日付</label>
+                                <FluentDatePicker @bind-Value="workScheduleEditDate" Style="width: 100%;" />
+                            </div>
+
+                            <div class="responsive-grid fade-in-up" style="--i:4; position: relative; z-index: 50;">
+                                <div>
+                                    <label>開始</label>
+                                    <FluentTimePicker Value="workScheduleEditStart" ValueChanged="OnWorkScheduleEditStartChanged" Style="width:100%" />
+                                </div>
+                                <div>
+                                    <label>終了</label>
+                                    <FluentTimePicker @bind-Value="workScheduleEditEnd" Style="width:100%" />
+                                </div>
+                            </div>
+
+                            <div class="fade-in-up" style="--i:5; position: relative; z-index: 40;">
+                                <label>参加メンバー</label>
+                                <div class="member-select-box">
+                                    @if (currentUser != null)
+                                    {
+                                        <div class="participant-item">
+                                            <input class="form-check-input" type="checkbox" checked="true" disabled>
+                                            <label class="form-check-label" style="display:inline; margin-left:5px;">@($"{currentUser.Name}（自分・固定）")</label>
+                                        </div>
+                                    }
+
+                                    @foreach (var user in allUsers)
+                                    {
+                                        if (currentUser != null && user.Id == currentUser.Id)
+                                        {
+                                            continue;
+                                        }
+
+                                        <div class="participant-item">
+                                            <input class="form-check-input" type="checkbox" id="work_edit_user_@user.Id" checked="@(workScheduleEditParticipantIds.Contains(user.Id))" @onchange="@(e => ToggleWorkScheduleEditParticipant(user.Id, e.Value))">
+                                            <label class="form-check-label" for="work_edit_user_@user.Id" style="display:inline; margin-left:5px; cursor:pointer;">@user.Name</label>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="fade-in-up" style="--i:2; position: relative; z-index: 70;">
+                                <label>日付</label>
+                                <FluentDatePicker @bind-Value="workScheduleEditDate" Style="width: 100%;" />
+                            </div>
+
+                            @if (selectedWorkSchedule.Type == WorkScheduleEntryType.Leave)
+                            {
+                                <div class="fade-in-up" style="--i:3; position: relative; z-index: 60;">
+                                    <label>休暇区分</label>
+                                    <div class="selection-group">
+                                        @foreach (var option in leavePeriodOptions)
+                                        {
+                                            <div class="selection-chip @(workScheduleEditLeavePeriod == option.Value ? "active" : "")" @onclick="() => workScheduleEditLeavePeriod = option.Value">@option.Label</div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+
+                            <div class="fade-in-up" style="--i:4; position: relative; z-index: 50;">
+                                <label>登録対象</label>
+                                <div class="value-text" style="padding: 10px 12px; border: 1px solid rgba(48,54,61,0.85); border-radius: 8px; background: rgba(0,0,0,0.18); width: fit-content;">
+                                    @(currentUser?.Name ?? "ログインユーザー")
+                                </div>
+                            </div>
+                        }
+                    </FluentStack>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="cyber-button-primary" @onclick="SaveWorkScheduleEditAsync">保存</button>
+                    <button class="cyber-button-secondary" @onclick="CancelWorkScheduleEdit">キャンセル</button>
+                </div>
+            }
+        </div>
+    </div>
+}
+
 @if (timelineDate != null)
 {
     <div class="modal-backdrop" @onclick="CloseTimelineModal" @ontouchmove:stopPropagation="true" style="z-index: 20000 !important;">
@@ -468,7 +627,8 @@
                                 {
                                     <div class="booking-block @(IsMyWorkSchedule(item.Entry!) ? "my-booking" : "")"
                                          data-type="@scheduleSection.Label"
-                                         style="@item.Style">
+                                         style="@item.Style"
+                                         @onclick="() => ShowWorkScheduleDetail(item.Entry!)">
                                         <div class="block-content">
                                             <div class="block-text name">@item.Entry!.Title</div>
                                             <div class="block-text purpose">@GetWorkScheduleDetails(item.Entry!)</div>
@@ -500,9 +660,11 @@
     private List<string> roomList = new() { "大会議室", "小会議室" };
     private List<string> typeList = new() { "社内", "来客" };
     private ReservationModel? selectedBooking;
+    private WorkScheduleEntryModel? selectedWorkSchedule;
     private UserModel? currentUser;
     private List<ParticipantUserModel> allUsers = new();
     private bool isEditing;
+    private bool isEditingWorkSchedule;
     private bool isLoading = true;
     private string editName = string.Empty;
     private string editRoom = string.Empty;
@@ -517,17 +679,35 @@
     private string editSeriesScope = ReservationSeriesScopes.Single;
     private ReservationModel? editingOriginalReservation;
 
+    private string workScheduleEditTitle = string.Empty;
+    private DateTime? workScheduleEditDate;
+    private DateTime? workScheduleEditStart;
+    private DateTime? workScheduleEditEnd;
+    private LeavePeriod workScheduleEditLeavePeriod = LeavePeriod.FullDay;
+    private HashSet<int> workScheduleEditParticipantIds = new();
+
     private sealed record WorkScheduleSection(
         WorkScheduleEntryType Type,
         string Label,
         string Color,
         string IconClass);
 
+    private sealed record LeavePeriodOption(
+        LeavePeriod Value,
+        string Label);
+
     private readonly List<WorkScheduleSection> workScheduleSections = new()
     {
         new(WorkScheduleEntryType.ExternalAppointment, "社外予定", "#f0883e", "oi oi-briefcase"),
         new(WorkScheduleEntryType.WorkFromHome, "在宅", "#a371f7", "oi oi-home"),
         new(WorkScheduleEntryType.Leave, "休暇", "#f85149", "oi oi-calendar")
+    };
+
+    private readonly List<LeavePeriodOption> leavePeriodOptions = new()
+    {
+        new(LeavePeriod.Morning, "午前休"),
+        new(LeavePeriod.Afternoon, "午後休"),
+        new(LeavePeriod.FullDay, "休み")
     };
 
     protected override async Task OnInitializedAsync()
@@ -743,6 +923,11 @@
         return entry.ParticipantIds != null && entry.ParticipantIds.Contains(currentUser.Id);
     }
 
+    private bool CanManageWorkSchedule(WorkScheduleEntryModel entry)
+    {
+        return currentUser != null && entry.CreatedByUserId == currentUser.Id;
+    }
+
     private bool HasConflict(ReservationModel target)
     {
         return allReservations.Any(existing =>
@@ -765,6 +950,12 @@
             .Where(name => !string.IsNullOrWhiteSpace(name));
 
         return string.Join(", ", names);
+    }
+
+    private WorkScheduleSection GetWorkScheduleSection(WorkScheduleEntryType type)
+    {
+        return workScheduleSections.FirstOrDefault(section => section.Type == type)
+            ?? workScheduleSections[0];
     }
 
     private static string GetWorkScheduleTimeLabel(WorkScheduleEntryModel entry)
@@ -822,7 +1013,7 @@
 
     private static string BuildWorkScheduleListCardStyle(string color)
     {
-        return $"border-color: {color}; box-shadow: 0 0 18px rgba(255,255,255,0.08);";
+        return $"border-color: {color}; box-shadow: 0 0 18px rgba(255,255,255,0.08); cursor: pointer;";
     }
 
     private static string BuildColorStyle(string color)
@@ -847,6 +1038,8 @@
 
     private void ShowDetail(ReservationModel booking)
     {
+        selectedWorkSchedule = null;
+        isEditingWorkSchedule = false;
         selectedBooking = booking;
         isEditing = false;
     }
@@ -855,6 +1048,219 @@
     {
         selectedBooking = null;
         isEditing = false;
+    }
+
+    private void ShowWorkScheduleDetail(WorkScheduleEntryModel entry)
+    {
+        selectedBooking = null;
+        isEditing = false;
+        selectedWorkSchedule = entry;
+        isEditingWorkSchedule = false;
+    }
+
+    private void CloseWorkScheduleDetail()
+    {
+        selectedWorkSchedule = null;
+        isEditingWorkSchedule = false;
+        ResetWorkScheduleEditState();
+    }
+
+    private void StartWorkScheduleEdit()
+    {
+        if (selectedWorkSchedule == null)
+        {
+            return;
+        }
+
+        workScheduleEditTitle = selectedWorkSchedule.Title;
+        workScheduleEditDate = selectedWorkSchedule.Date;
+        workScheduleEditStart = selectedWorkSchedule.StartTime ?? selectedWorkSchedule.Date.Date.AddHours(10);
+        workScheduleEditEnd = selectedWorkSchedule.EndTime ?? selectedWorkSchedule.Date.Date.AddHours(11);
+        workScheduleEditLeavePeriod = selectedWorkSchedule.LeavePeriod == LeavePeriod.None
+            ? LeavePeriod.FullDay
+            : selectedWorkSchedule.LeavePeriod;
+
+        workScheduleEditParticipantIds = (selectedWorkSchedule.ParticipantIds ?? new List<int>())
+            .Where(id => currentUser == null || id != currentUser.Id)
+            .ToHashSet();
+
+        isEditingWorkSchedule = true;
+    }
+
+    private void CancelWorkScheduleEdit()
+    {
+        isEditingWorkSchedule = false;
+        ResetWorkScheduleEditState();
+    }
+
+    private void ResetWorkScheduleEditState()
+    {
+        workScheduleEditTitle = string.Empty;
+        workScheduleEditDate = null;
+        workScheduleEditStart = null;
+        workScheduleEditEnd = null;
+        workScheduleEditLeavePeriod = LeavePeriod.FullDay;
+        workScheduleEditParticipantIds = new HashSet<int>();
+    }
+
+    private void OnWorkScheduleEditStartChanged(DateTime? newTime)
+    {
+        workScheduleEditStart = newTime;
+
+        if (workScheduleEditStart.HasValue)
+        {
+            workScheduleEditEnd = workScheduleEditStart.Value.AddHours(1);
+        }
+    }
+
+    private void ToggleWorkScheduleEditParticipant(int userId, object? isChecked)
+    {
+        if ((bool)(isChecked ?? false))
+        {
+            workScheduleEditParticipantIds.Add(userId);
+        }
+        else
+        {
+            workScheduleEditParticipantIds.Remove(userId);
+        }
+    }
+
+    private async Task SaveWorkScheduleEditAsync()
+    {
+        if (selectedWorkSchedule == null)
+        {
+            return;
+        }
+
+        if (workScheduleEditDate == null)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "日付を入力してください。");
+            return;
+        }
+
+        var request = new UpdateWorkScheduleEntryRequest
+        {
+            Type = selectedWorkSchedule.Type,
+            Date = workScheduleEditDate.Value.Date,
+            ParticipantIds = selectedWorkSchedule.Type == WorkScheduleEntryType.ExternalAppointment
+                ? BuildWorkScheduleEditParticipantIds()
+                : BuildCurrentUserOnlyParticipantIds()
+        };
+
+        if (selectedWorkSchedule.Type == WorkScheduleEntryType.ExternalAppointment)
+        {
+            if (string.IsNullOrWhiteSpace(workScheduleEditTitle))
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "社外予定の内容を入力してください。");
+                return;
+            }
+
+            if (workScheduleEditStart == null || workScheduleEditEnd == null)
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "開始時刻と終了時刻を入力してください。");
+                return;
+            }
+
+            var start = workScheduleEditDate.Value.Date + workScheduleEditStart.Value.TimeOfDay;
+            var end = workScheduleEditDate.Value.Date + workScheduleEditEnd.Value.TimeOfDay;
+
+            if (end <= start)
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "終了時刻は開始時刻より後にしてください。");
+                return;
+            }
+
+            request.Title = workScheduleEditTitle;
+            request.StartTime = start;
+            request.EndTime = end;
+            request.LeavePeriod = LeavePeriod.None;
+        }
+        else if (selectedWorkSchedule.Type == WorkScheduleEntryType.WorkFromHome)
+        {
+            request.Title = "在宅";
+            request.StartTime = null;
+            request.EndTime = null;
+            request.LeavePeriod = LeavePeriod.None;
+        }
+        else
+        {
+            request.Title = "休暇";
+            request.StartTime = null;
+            request.EndTime = null;
+            request.LeavePeriod = workScheduleEditLeavePeriod;
+        }
+
+        try
+        {
+            var scheduleId = selectedWorkSchedule.Id;
+            await WorkScheduleService.UpdateEntryAsync(scheduleId, request);
+
+            isEditingWorkSchedule = false;
+            ResetWorkScheduleEditState();
+
+            await LoadData();
+
+            selectedWorkSchedule = allWorkSchedules.FirstOrDefault(entry => entry.Id == scheduleId);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to update work schedule entry. entryId={EntryId}", selectedWorkSchedule.Id);
+            await JSRuntime.InvokeVoidAsync("alert", "勤務予定の更新に失敗しました。時間をおいて再度お試しください。");
+        }
+    }
+
+    private async Task DeleteWorkScheduleAsync()
+    {
+        if (selectedWorkSchedule == null)
+        {
+            return;
+        }
+
+        var confirmed = await JSRuntime.InvokeAsync<bool>(
+            "confirm",
+            $"{GetWorkScheduleSection(selectedWorkSchedule.Type).Label}を削除しますか？");
+
+        if (!confirmed)
+        {
+            return;
+        }
+
+        try
+        {
+            await WorkScheduleService.DeleteEntryAsync(selectedWorkSchedule.Id);
+            selectedWorkSchedule = null;
+            isEditingWorkSchedule = false;
+            ResetWorkScheduleEditState();
+
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to delete work schedule entry. entryId={EntryId}", selectedWorkSchedule.Id);
+            await JSRuntime.InvokeVoidAsync("alert", "勤務予定の削除に失敗しました。時間をおいて再度お試しください。");
+        }
+    }
+
+    private List<int> BuildWorkScheduleEditParticipantIds()
+    {
+        var participantIds = workScheduleEditParticipantIds
+            .Where(id => id > 0)
+            .Distinct()
+            .ToHashSet();
+
+        if (currentUser != null)
+        {
+            participantIds.Add(currentUser.Id);
+        }
+
+        return participantIds.ToList();
+    }
+
+    private List<int> BuildCurrentUserOnlyParticipantIds()
+    {
+        return currentUser == null
+            ? new List<int>()
+            : new List<int> { currentUser.Id };
     }
 
     private void StartEdit()
@@ -1078,7 +1484,9 @@
     private void OpenTimelineModal(DateTime date)
     {
         selectedBooking = null;
+        selectedWorkSchedule = null;
         isEditing = false;
+        isEditingWorkSchedule = false;
         timelineDate = date.Date;
     }
 
@@ -1306,7 +1714,7 @@
             var style =
                 $"left: {left}%; width: {width}%; top: {i * LaneHeight + 5}px; height: {LaneHeight - 4}px; " +
                 "position: absolute; border-radius: 4px; padding: 4px 6px; color: white; " +
-                $"overflow: hidden; cursor: default; background: linear-gradient(135deg, rgba(0,0,0,0.72), {section.Color}55); " +
+                $"overflow: hidden; cursor: pointer; background: linear-gradient(135deg, rgba(0,0,0,0.72), {section.Color}55); " +
                 $"border: {(IsMyWorkSchedule(entry) ? "2px solid #d29922;" : $"1px solid {section.Color};")} " +
                 $"box-shadow: 0 0 16px {section.Color}44; " +
                 "z-index: 10; display: flex; flex-direction: column; justify-content: center;";
