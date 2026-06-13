@@ -149,7 +149,7 @@
                                                     }
                                                 </div>
 
-                                                @if (HasConflict(b))
+                                                @if (HasReservationWarning(b))
                                                 {
                                                     <div class="warning-icon">⚠</div>
                                                 }
@@ -188,6 +188,11 @@
                                                 <div class="type-icon-bg" style="@BuildColorStyle(scheduleSection.Color)">
                                                     <span class="@scheduleSection.IconClass"></span>
                                                 </div>
+
+                                                @if (HasWorkScheduleWarning(entry))
+                                                {
+                                                    <div class="warning-icon">⚠</div>
+                                                }
 
                                                 <div class="time-badge" style="@BuildColorStyle(scheduleSection.Color)">
                                                     @GetWorkScheduleTimeLabel(entry)
@@ -627,6 +632,11 @@
                                          data-type="@scheduleSection.Label"
                                          style="@item.Style"
                                          @onclick="() => ShowWorkScheduleDetail(item.Entry!)">
+                                        @if (HasWorkScheduleWarning(item.Entry!))
+                                        {
+                                            <div class="warning-icon">⚠</div>
+                                        }
+
                                         <div class="block-content">
                                             <div class="block-text name">@item.Entry!.Title</div>
                                             <div class="block-text purpose">@GetWorkScheduleDetails(item.Entry!)</div>
@@ -937,7 +947,12 @@
         return currentUser != null && entry.CreatedByUserId == currentUser.Id;
     }
 
-    private bool HasConflict(ReservationModel target)
+    private bool HasReservationWarning(ReservationModel target)
+    {
+        return HasRoomConflict(target) || HasReservationExternalAppointmentParticipantConflict(target);
+    }
+
+    private bool HasRoomConflict(ReservationModel target)
     {
         return allReservations.Any(existing =>
             existing.Id != target.Id &&
@@ -945,6 +960,71 @@
             existing.Date.Date == target.Date.Date &&
             existing.StartTime < target.EndTime &&
             existing.EndTime > target.StartTime);
+    }
+
+    private bool HasReservationExternalAppointmentParticipantConflict(ReservationModel target)
+    {
+        var targetParticipantIds = GetReservationParticipantIds(target);
+
+        if (targetParticipantIds.Count == 0)
+        {
+            return false;
+        }
+
+        return allWorkSchedules.Any(existingSchedule =>
+            existingSchedule.Type == WorkScheduleEntryType.ExternalAppointment &&
+            existingSchedule.StartTime.HasValue &&
+            existingSchedule.EndTime.HasValue &&
+            existingSchedule.Date.Date == target.Date.Date &&
+            TimesOverlap(target.StartTime, target.EndTime, existingSchedule.StartTime.Value, existingSchedule.EndTime.Value) &&
+            targetParticipantIds.Overlaps(GetWorkScheduleParticipantIds(existingSchedule)));
+    }
+
+    private bool HasWorkScheduleWarning(WorkScheduleEntryModel target)
+    {
+        if (target.Type != WorkScheduleEntryType.ExternalAppointment ||
+            !target.StartTime.HasValue ||
+            !target.EndTime.HasValue)
+        {
+            return false;
+        }
+
+        return HasExternalAppointmentReservationParticipantConflict(target) ||
+               HasExternalAppointmentScheduleParticipantConflict(target);
+    }
+
+    private bool HasExternalAppointmentReservationParticipantConflict(WorkScheduleEntryModel target)
+    {
+        var targetParticipantIds = GetWorkScheduleParticipantIds(target);
+
+        if (targetParticipantIds.Count == 0)
+        {
+            return false;
+        }
+
+        return allReservations.Any(existingReservation =>
+            existingReservation.Date.Date == target.Date.Date &&
+            TimesOverlap(target.StartTime!.Value, target.EndTime!.Value, existingReservation.StartTime, existingReservation.EndTime) &&
+            targetParticipantIds.Overlaps(GetReservationParticipantIds(existingReservation)));
+    }
+
+    private bool HasExternalAppointmentScheduleParticipantConflict(WorkScheduleEntryModel target)
+    {
+        var targetParticipantIds = GetWorkScheduleParticipantIds(target);
+
+        if (targetParticipantIds.Count == 0)
+        {
+            return false;
+        }
+
+        return allWorkSchedules.Any(existingSchedule =>
+            existingSchedule.Id != target.Id &&
+            existingSchedule.Type == WorkScheduleEntryType.ExternalAppointment &&
+            existingSchedule.StartTime.HasValue &&
+            existingSchedule.EndTime.HasValue &&
+            existingSchedule.Date.Date == target.Date.Date &&
+            TimesOverlap(target.StartTime!.Value, target.EndTime!.Value, existingSchedule.StartTime.Value, existingSchedule.EndTime.Value) &&
+            targetParticipantIds.Overlaps(GetWorkScheduleParticipantIds(existingSchedule)));
     }
 
     private string GetParticipantNames(List<int> ids)
@@ -1367,6 +1447,112 @@
         return result;
     }
 
+    private ReservationModel? FindRoomConflictForEdit(ReservationModel requestedReservation)
+    {
+        return allReservations.FirstOrDefault(existing =>
+            existing.Id != requestedReservation.Id &&
+            existing.Room == requestedReservation.Room &&
+            existing.Date.Date == requestedReservation.Date.Date &&
+            TimesOverlap(
+                requestedReservation.StartTime,
+                requestedReservation.EndTime,
+                existing.StartTime,
+                existing.EndTime));
+    }
+
+    private List<ParticipantScheduleConflict> FindReservationExternalAppointmentParticipantConflicts(ReservationModel requestedReservation)
+    {
+        var result = new List<ParticipantScheduleConflict>();
+        var requestedParticipantIds = GetReservationParticipantIds(requestedReservation);
+
+        if (requestedParticipantIds.Count == 0)
+        {
+            return result;
+        }
+
+        var requestedTitle = GetReservationTitle(requestedReservation);
+
+        foreach (var existingSchedule in allWorkSchedules)
+        {
+            if (existingSchedule.Type != WorkScheduleEntryType.ExternalAppointment ||
+                !existingSchedule.StartTime.HasValue ||
+                !existingSchedule.EndTime.HasValue ||
+                existingSchedule.Date.Date != requestedReservation.Date.Date ||
+                !TimesOverlap(
+                    requestedReservation.StartTime,
+                    requestedReservation.EndTime,
+                    existingSchedule.StartTime.Value,
+                    existingSchedule.EndTime.Value))
+            {
+                continue;
+            }
+
+            var existingParticipantIds = GetWorkScheduleParticipantIds(existingSchedule);
+            var duplicatedParticipantIds = requestedParticipantIds
+                .Intersect(existingParticipantIds)
+                .Distinct();
+
+            foreach (var participantId in duplicatedParticipantIds)
+            {
+                result.Add(new ParticipantScheduleConflict(
+                    requestedReservation.Date.Date,
+                    requestedReservation.StartTime,
+                    requestedReservation.EndTime,
+                    GetParticipantName(participantId),
+                    requestedTitle,
+                    "社外予定",
+                    existingSchedule.Title,
+                    existingSchedule.StartTime.Value,
+                    existingSchedule.EndTime.Value));
+            }
+        }
+
+        return result;
+    }
+
+    private static string BuildEditRoomConflictMessage(ReservationModel requestedReservation, ReservationModel existingReservation)
+    {
+        var existingTitle = GetReservationTitle(existingReservation);
+
+        return string.Join("\n", new[]
+        {
+            "会議室の予約時間が重複しています。",
+            "重複しているため、この内容では保存できません。",
+            string.Empty,
+            "重複内容:",
+            $"・{requestedReservation.Date:yyyy/MM/dd} {requestedReservation.Room}",
+            $"・変更後: {requestedReservation.StartTime:HH:mm}〜{requestedReservation.EndTime:HH:mm} / {GetReservationTitle(requestedReservation)}",
+            $"・既存予約: {existingReservation.StartTime:HH:mm}〜{existingReservation.EndTime:HH:mm} / {existingTitle}",
+            string.Empty,
+            "時間または会議室を変更してから、もう一度保存してください。"
+        });
+    }
+
+    private static string BuildReservationParticipantConflictConfirmationMessage(
+        IReadOnlyCollection<ParticipantScheduleConflict> participantConflicts)
+    {
+        var lines = new List<string>
+        {
+            $"{participantConflicts.Count}件の参加者予定が重複しています。",
+            "それでも保存しますか？",
+            string.Empty,
+            "重複内容:"
+        };
+
+        foreach (var conflict in participantConflicts.Take(8))
+        {
+            lines.Add(
+                $"・{conflict.Date:yyyy/MM/dd} {conflict.ParticipantName}さん: {conflict.RequestedTitle} ({conflict.RequestedStart:HH:mm}〜{conflict.RequestedEnd:HH:mm}) / 既存{conflict.ExistingKind}: {conflict.ExistingTitle} ({conflict.ExistingStart:HH:mm}〜{conflict.ExistingEnd:HH:mm})");
+        }
+
+        if (participantConflicts.Count > 8)
+        {
+            lines.Add($"ほか {participantConflicts.Count - 8}件");
+        }
+
+        return string.Join("\n", lines);
+    }
+
     private HashSet<int> GetReservationParticipantIds(ReservationModel reservation)
     {
         var participantIds = new HashSet<int>();
@@ -1524,24 +1710,61 @@
             updatedReservation.EndTime = updatedReservation.Date.Date + editEnd.Value.TimeOfDay;
         }
 
+        if (updatedReservation.EndTime <= updatedReservation.StartTime)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "終了時刻は開始時刻より後にしてください。");
+            return;
+        }
+
         updatedReservation.ParticipantIds = BuildEditParticipantIds();
 
-        if (IsRecurringReservation(selectedBooking) && editSeriesScope != ReservationSeriesScopes.Single)
+        var roomConflict = FindRoomConflictForEdit(updatedReservation);
+        if (roomConflict != null)
         {
-            await BookingService.UpdateRecurringReservationAsync(editingOriginalReservation, updatedReservation, sendNotification, editSeriesScope);
+            await JSRuntime.InvokeVoidAsync(
+                "alert",
+                BuildEditRoomConflictMessage(updatedReservation, roomConflict));
+
+            return;
         }
-        else
+
+        var participantConflicts = FindReservationExternalAppointmentParticipantConflicts(updatedReservation);
+        if (participantConflicts.Count > 0)
         {
-            await BookingService.UpdateReservationAsync(updatedReservation, sendNotification);
+            var confirmed = await JSRuntime.InvokeAsync<bool>(
+                "confirm",
+                BuildReservationParticipantConflictConfirmationMessage(participantConflicts));
+
+            if (!confirmed)
+            {
+                return;
+            }
         }
 
-        isEditing = false;
-        editingOriginalReservation = null;
-        editSeriesScope = ReservationSeriesScopes.Single;
+        try
+        {
+            if (IsRecurringReservation(selectedBooking) && editSeriesScope != ReservationSeriesScopes.Single)
+            {
+                await BookingService.UpdateRecurringReservationAsync(editingOriginalReservation, updatedReservation, sendNotification, editSeriesScope);
+            }
+            else
+            {
+                await BookingService.UpdateReservationAsync(updatedReservation, sendNotification);
+            }
 
-        await LoadData();
+            isEditing = false;
+            editingOriginalReservation = null;
+            editSeriesScope = ReservationSeriesScopes.Single;
 
-        selectedBooking = allReservations.FirstOrDefault(r => r.Id == reservationId);
+            await LoadData();
+
+            selectedBooking = allReservations.FirstOrDefault(r => r.Id == reservationId);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to update reservation. reservationId={ReservationId}, currentUserId={UserId}", reservationId, currentUser?.Id);
+            await JSRuntime.InvokeVoidAsync("alert", "予約の更新に失敗しました。会議室や参加者の予定が重複していないか確認してください。");
+        }
     }
 
     private async Task DeleteBooking(string scope)
@@ -1852,7 +2075,7 @@
                     items.Add(new RenderItem
                     {
                         Booking = booking,
-                        HasConflict = HasConflict(booking),
+                        HasConflict = HasReservationWarning(booking),
                         Style = style
                     });
                 }
