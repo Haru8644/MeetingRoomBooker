@@ -45,14 +45,14 @@ button {
     min-height: 100vh;
 }
 
-    #root > div,
-    .operations-page,
-    .page-shell,
-    .app-shell {
-        width: min(100%, 1440px);
-        margin: 0 auto;
-        padding: 40px 28px 72px;
-    }
+#root > div,
+.operations-page,
+.page-shell,
+.app-shell {
+    width: min(100%, 1440px);
+    margin: 0 auto;
+    padding: 40px 28px 72px;
+}
 
 h1,
 h2,
@@ -194,11 +194,11 @@ tbody tr {
     backdrop-filter: blur(18px);
 }
 
-    .management-card h2 {
-        margin: 0 0 12px;
-        color: #ffffff;
-        font-size: 1.6rem;
-    }
+.management-card h2 {
+    margin: 0 0 12px;
+    color: #ffffff;
+    font-size: 1.6rem;
+}
 
 .management-description {
     margin: 0 0 24px;
@@ -222,55 +222,55 @@ tbody tr {
     gap: 8px;
 }
 
-    .field span {
-        color: #94a3b8;
-        font-size: 0.82rem;
-        font-weight: 800;
-        letter-spacing: 0.06em;
-        text-transform: uppercase;
-    }
+.field span {
+    color: #94a3b8;
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
 
-    .field input,
-    .field select,
-    .field textarea {
-        width: 100%;
-        border: 1px solid rgba(148, 163, 184, 0.22);
-        border-radius: 14px;
-        background: rgba(15, 23, 42, 0.76);
-        color: #ffffff;
-        outline: none;
-    }
+.field input,
+.field select,
+.field textarea {
+    width: 100%;
+    border: 1px solid rgba(148, 163, 184, 0.22);
+    border-radius: 14px;
+    background: rgba(15, 23, 42, 0.76);
+    color: #ffffff;
+    outline: none;
+}
 
-    .field input,
-    .field select {
-        min-height: 44px;
-        padding: 0 12px;
-    }
+.field input,
+.field select {
+    min-height: 44px;
+    padding: 0 12px;
+}
 
-    .field textarea {
-        min-height: 92px;
-        padding: 12px;
-        resize: vertical;
-    }
+.field textarea {
+    min-height: 92px;
+    padding: 12px;
+    resize: vertical;
+}
 
-        .field input::placeholder,
-        .field textarea::placeholder {
-            color: rgba(148, 163, 184, 0.64);
-        }
+.field input::placeholder,
+.field textarea::placeholder {
+    color: rgba(148, 163, 184, 0.64);
+}
 
-        .field input:focus,
-        .field select:focus,
-        .field textarea:focus {
-            border-color: rgba(147, 197, 253, 0.68);
-            box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.12);
-        }
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+    border-color: rgba(147, 197, 253, 0.68);
+    box-shadow: 0 0 0 3px rgba(147, 197, 253, 0.12);
+}
 
-        .field input:disabled,
-        .field select:disabled,
-        .field textarea:disabled {
-            cursor: not-allowed;
-            opacity: 0.62;
-        }
+.field input:disabled,
+.field select:disabled,
+.field textarea:disabled {
+    cursor: not-allowed;
+    opacity: 0.62;
+}
 
 .primary-action,
 .table-action {
@@ -295,11 +295,11 @@ tbody tr {
     color: #bfdbfe;
 }
 
-    .primary-action:disabled,
-    .table-action:disabled {
-        cursor: not-allowed;
-        opacity: 0.6;
-    }
+.primary-action:disabled,
+.table-action:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
 
 .selected-record-summary {
     display: grid;
@@ -310,14 +310,14 @@ tbody tr {
     background: rgba(30, 41, 59, 0.72);
 }
 
-    .selected-record-summary span {
-        color: #94a3b8;
-        font-size: 0.86rem;
-    }
+.selected-record-summary span {
+    color: #94a3b8;
+    font-size: 0.86rem;
+}
 
-    .selected-record-summary strong {
-        color: #ffffff;
-    }
+.selected-record-summary strong {
+    color: #ffffff;
+}
 
 .save-message {
     margin-bottom: 24px;
