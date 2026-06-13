@@ -89,8 +89,154 @@
             </FluentStack>
         </div>
     </div>
-    <div style="width: 100%; display: flex; justify-content: center; position: relative; z-index: 1; padding-bottom: 30px;">
+
+    <div style="width: 100%; display: flex; justify-content: center; position: relative; z-index: 1;">
         <div class="cyber-card-enhanced holo-card fade-in-up" style="padding: 25px; max-width: 800px; width: 100%; --i:10;">
+            <div class="form-header" style="display: flex; align-items: center; justify-content: space-between; border-bottom: none; margin-bottom: 18px; padding-bottom: 0;">
+                <h3 class="gradient-text-enhanced" style="font-size: 1.2rem; margin: 0;">社外予定・在宅・休暇</h3>
+                <span style="color: #8b949e; font-size: 0.8rem;">WORK SCHEDULE</span>
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(workScheduleErrorMessage))
+            {
+                <div class="alert-error fade-in">@workScheduleErrorMessage</div>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(workScheduleSuccessMessage))
+            {
+                <div style="margin-bottom: 16px; padding: 10px 12px; border: 1px solid rgba(63,185,80,0.35); border-radius: 8px; background: rgba(63,185,80,0.08); color: #7ee787;">
+                    @workScheduleSuccessMessage
+                </div>
+            }
+
+            <div style="display: grid; grid-template-columns: minmax(0, 1fr); gap: 18px;">
+                <div style="padding: 16px; background: rgba(0,0,0,0.18); border: 1px solid rgba(48,54,61,0.9); border-radius: 10px;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px;">
+                        <span style="display: inline-block; width: 8px; height: 8px; border-radius: 999px; background: #f0883e; box-shadow: 0 0 10px #f0883e;"></span>
+                        <span style="color: #e0e0e0; font-weight: 800;">社外予定</span>
+                    </div>
+
+                    <FluentStack Orientation="Orientation.Vertical" VerticalGap="14">
+                        <div>
+                            <label>内容</label>
+                            <FluentTextField @bind-Value="externalAppointmentTitle" Placeholder="例：顧客訪問、外部打ち合わせ" Style="width: 100%;" />
+                        </div>
+
+                        <FluentGrid Spacing="2" Style="position: relative; z-index: 12;">
+                            <FluentGridItem xs="12" sm="4">
+                                <label>日付</label>
+                                <FluentDatePicker @bind-Value="externalAppointmentDate" Style="width: 100%;" />
+                            </FluentGridItem>
+                            <FluentGridItem xs="6" sm="4">
+                                <label>開始</label>
+                                <FluentTimePicker @bind-Value="externalAppointmentStartTime" Style="width: 100%;" />
+                            </FluentGridItem>
+                            <FluentGridItem xs="6" sm="4">
+                                <label>終了</label>
+                                <FluentTimePicker @bind-Value="externalAppointmentEndTime" Style="width: 100%;" />
+                            </FluentGridItem>
+                        </FluentGrid>
+
+                        <div>
+                            <label>参加者</label>
+                            <div style="color: #8b949e; font-size: 0.78rem; margin-bottom: 8px;">
+                                自分（@currentUser?.Name）は自動で含まれます
+                            </div>
+                            <div class="participant-selector">
+                                @foreach (var user in allUsers)
+                                {
+                                    if (currentUser != null && user.Id == currentUser.Id)
+                                    {
+                                        continue;
+                                    }
+
+                                    <div class="participant-item" @key="user.Id">
+                                        <FluentCheckbox
+                                            Value="@externalAppointmentParticipantIds.Contains(user.Id)"
+                                            ValueChanged="@(value => OnExternalAppointmentParticipantSelectionChanged(user.Id, value))"
+                                            Label="@user.Name" />
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <button class="cyber-button-secondary pulse-hover" style="width: 100%;" @onclick="OnSubmitExternalAppointmentAsync">
+                            <span class="oi oi-calendar"></span> 社外予定を登録
+                        </button>
+                    </FluentStack>
+                </div>
+
+                <div style="padding: 16px; background: rgba(0,0,0,0.18); border: 1px solid rgba(48,54,61,0.9); border-radius: 10px;">
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 14px;">
+                        <span style="display: inline-block; width: 8px; height: 8px; border-radius: 999px; background: @(attendanceScheduleType == "在宅" ? "#a371f7" : "#f85149"); box-shadow: 0 0 10px @(attendanceScheduleType == "在宅" ? "#a371f7" : "#f85149");"></span>
+                        <span style="color: #e0e0e0; font-weight: 800;">在宅・休暇</span>
+                    </div>
+
+                    <FluentStack Orientation="Orientation.Vertical" VerticalGap="14">
+                        <div>
+                            <label>種別</label>
+                            <div class="selection-group">
+                                @foreach (var type in attendanceScheduleTypes)
+                                {
+                                    <div class="selection-chip @(attendanceScheduleType == type ? "active" : "")" @onclick="() => attendanceScheduleType = type">@type</div>
+                                }
+                            </div>
+                        </div>
+
+                        <FluentGrid Spacing="2" Style="position: relative; z-index: 11;">
+                            <FluentGridItem xs="12" sm="6">
+                                <label>日付</label>
+                                <FluentDatePicker @bind-Value="attendanceScheduleDate" Style="width: 100%;" />
+                            </FluentGridItem>
+
+                            @if (attendanceScheduleType == "休暇")
+                            {
+                                <FluentGridItem xs="12" sm="6">
+                                    <label>休暇区分</label>
+                                    <div class="selection-group">
+                                        @foreach (var option in leavePeriodOptions)
+                                        {
+                                            <div class="selection-chip @(selectedLeavePeriod == option.Value ? "active" : "")" @onclick="() => selectedLeavePeriod = option.Value">@option.Label</div>
+                                        }
+                                    </div>
+                                </FluentGridItem>
+                            }
+                        </FluentGrid>
+
+                        <div>
+                            <label>対象者</label>
+                            <div style="color: #8b949e; font-size: 0.78rem; margin-bottom: 8px;">
+                                自分（@currentUser?.Name）は自動で含まれます
+                            </div>
+                            <div class="participant-selector">
+                                @foreach (var user in allUsers)
+                                {
+                                    if (currentUser != null && user.Id == currentUser.Id)
+                                    {
+                                        continue;
+                                    }
+
+                                    <div class="participant-item" @key="user.Id">
+                                        <FluentCheckbox
+                                            Value="@attendanceScheduleParticipantIds.Contains(user.Id)"
+                                            ValueChanged="@(value => OnAttendanceScheduleParticipantSelectionChanged(user.Id, value))"
+                                            Label="@user.Name" />
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <button class="cyber-button-secondary pulse-hover" style="width: 100%;" @onclick="OnSubmitAttendanceScheduleAsync">
+                            <span class="oi oi-person"></span> 在宅・休暇を登録
+                        </button>
+                    </FluentStack>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="width: 100%; display: flex; justify-content: center; position: relative; z-index: 1; padding-bottom: 30px;">
+        <div class="cyber-card-enhanced holo-card fade-in-up" style="padding: 25px; max-width: 800px; width: 100%; --i:11;">
             <div class="form-header" style="display: flex; align-items: center; justify-content: space-between; border-bottom: none; margin-bottom: 15px; padding-bottom: 0;">
                 <h3 class="gradient-text-enhanced" style="font-size: 1.2rem; margin: 0;">予約状況</h3>
                 <div style="width: 150px;">
@@ -205,6 +351,10 @@
         string Color,
         string EmptyText);
 
+    private sealed record LeavePeriodOption(
+        LeavePeriod Value,
+        string Label);
+
     [SupplyParameterFromQuery]
     public int? RestoreDraft { get; set; }
 
@@ -219,6 +369,10 @@
     private string errorMessage = string.Empty;
     private string repeatType = "しない";
     private string previewErrorMessage = string.Empty;
+    private string workScheduleErrorMessage = string.Empty;
+    private string workScheduleSuccessMessage = string.Empty;
+    private string externalAppointmentTitle = string.Empty;
+    private string attendanceScheduleType = "在宅";
 
     private DateTime? _reserveDate = DateTime.Today;
     private DateTime? reserveDate
@@ -251,15 +405,31 @@
     private DateTime? startTime = DateTime.Today.AddHours(9);
     private DateTime? endTime = DateTime.Today.AddHours(10);
     private DateTime? repeatUntil = DateTime.Today.AddMonths(1);
+    private DateTime? externalAppointmentDate = DateTime.Today;
+    private DateTime? externalAppointmentStartTime = DateTime.Today.AddHours(10);
+    private DateTime? externalAppointmentEndTime = DateTime.Today.AddHours(11);
+    private DateTime? attendanceScheduleDate = DateTime.Today;
+    private LeavePeriod selectedLeavePeriod = LeavePeriod.FullDay;
+
     private readonly List<string> roomOptions = new() { "大会議室", "小会議室" };
     private readonly List<string> typeOptions = new() { "社内", "来客" };
     private readonly List<string> repeatOptions = new() { "しない", "毎日", "毎週" };
+    private readonly List<string> attendanceScheduleTypes = new() { "在宅", "休暇" };
+    private readonly List<LeavePeriodOption> leavePeriodOptions = new()
+    {
+        new(LeavePeriod.Morning, "午前休"),
+        new(LeavePeriod.Afternoon, "午後休"),
+        new(LeavePeriod.FullDay, "休み")
+    };
     private readonly List<WorkScheduleSection> workScheduleSections = new()
     {
         new(WorkScheduleEntryType.ExternalAppointment, "社外予定", "#f0883e", "社外予定はありません"),
         new(WorkScheduleEntryType.WorkFromHome, "在宅", "#a371f7", "在宅予定はありません"),
         new(WorkScheduleEntryType.Leave, "休暇", "#f85149", "休暇予定はありません")
     };
+
+    private readonly HashSet<int> externalAppointmentParticipantIds = new();
+    private readonly HashSet<int> attendanceScheduleParticipantIds = new();
 
     private UserModel? currentUser;
     private List<UserViewModel> allUsers = new();
@@ -279,6 +449,8 @@
         if (currentUser != null)
         {
             reserveName = currentUser.Name;
+            externalAppointmentParticipantIds.Add(currentUser.Id);
+            attendanceScheduleParticipantIds.Add(currentUser.Id);
         }
 
         try
@@ -417,6 +589,133 @@
     private void OnParticipantSelectionChanged(UserViewModel user, bool isSelected)
     {
         user.IsSelected = isSelected;
+    }
+
+    private void OnExternalAppointmentParticipantSelectionChanged(int userId, bool isSelected)
+    {
+        if (isSelected)
+        {
+            externalAppointmentParticipantIds.Add(userId);
+        }
+        else
+        {
+            externalAppointmentParticipantIds.Remove(userId);
+        }
+    }
+
+    private void OnAttendanceScheduleParticipantSelectionChanged(int userId, bool isSelected)
+    {
+        if (isSelected)
+        {
+            attendanceScheduleParticipantIds.Add(userId);
+        }
+        else
+        {
+            attendanceScheduleParticipantIds.Remove(userId);
+        }
+    }
+
+    private async Task OnSubmitExternalAppointmentAsync()
+    {
+        workScheduleErrorMessage = string.Empty;
+        workScheduleSuccessMessage = string.Empty;
+
+        if (string.IsNullOrWhiteSpace(externalAppointmentTitle))
+        {
+            workScheduleErrorMessage = "社外予定の内容を入力してください。";
+            return;
+        }
+
+        if (externalAppointmentDate == null || externalAppointmentStartTime == null || externalAppointmentEndTime == null)
+        {
+            workScheduleErrorMessage = "社外予定の日付、開始時刻、終了時刻を入力してください。";
+            return;
+        }
+
+        var start = externalAppointmentDate.Value.Date + externalAppointmentStartTime.Value.TimeOfDay;
+        var end = externalAppointmentDate.Value.Date + externalAppointmentEndTime.Value.TimeOfDay;
+
+        if (end <= start)
+        {
+            workScheduleErrorMessage = "社外予定の終了時刻は開始時刻より後にしてください。";
+            return;
+        }
+
+        try
+        {
+            await WorkScheduleService.CreateEntryAsync(new CreateWorkScheduleEntryRequest
+            {
+                Type = WorkScheduleEntryType.ExternalAppointment,
+                Title = externalAppointmentTitle,
+                Date = externalAppointmentDate.Value.Date,
+                StartTime = start,
+                EndTime = end,
+                LeavePeriod = LeavePeriod.None,
+                ParticipantIds = BuildWorkScheduleParticipantIds(externalAppointmentParticipantIds)
+            });
+
+            workScheduleSuccessMessage = "社外予定を登録しました。";
+            externalAppointmentTitle = string.Empty;
+            previewDate = externalAppointmentDate.Value.Date;
+            await LoadDayReservationsSafeAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to create external appointment. currentUserId={UserId}", currentUser?.Id);
+            workScheduleErrorMessage = "社外予定の登録に失敗しました。時間をおいて再度お試しください。";
+        }
+    }
+
+    private async Task OnSubmitAttendanceScheduleAsync()
+    {
+        workScheduleErrorMessage = string.Empty;
+        workScheduleSuccessMessage = string.Empty;
+
+        if (attendanceScheduleDate == null)
+        {
+            workScheduleErrorMessage = "在宅・休暇の日付を入力してください。";
+            return;
+        }
+
+        var isLeave = attendanceScheduleType == "休暇";
+
+        try
+        {
+            await WorkScheduleService.CreateEntryAsync(new CreateWorkScheduleEntryRequest
+            {
+                Type = isLeave ? WorkScheduleEntryType.Leave : WorkScheduleEntryType.WorkFromHome,
+                Title = isLeave ? "休暇" : "在宅",
+                Date = attendanceScheduleDate.Value.Date,
+                StartTime = null,
+                EndTime = null,
+                LeavePeriod = isLeave ? selectedLeavePeriod : LeavePeriod.None,
+                ParticipantIds = BuildWorkScheduleParticipantIds(attendanceScheduleParticipantIds)
+            });
+
+            workScheduleSuccessMessage = isLeave ? "休暇予定を登録しました。" : "在宅予定を登録しました。";
+            previewDate = attendanceScheduleDate.Value.Date;
+            await LoadDayReservationsSafeAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to create attendance schedule. currentUserId={UserId}", currentUser?.Id);
+            workScheduleErrorMessage = "在宅・休暇の登録に失敗しました。時間をおいて再度お試しください。";
+        }
+    }
+
+    private List<int> BuildWorkScheduleParticipantIds(HashSet<int> participantIds)
+    {
+        var result = participantIds
+            .Where(id => id > 0)
+            .Distinct()
+            .ToList();
+
+        if (currentUser != null && !result.Contains(currentUser.Id))
+        {
+            result.Insert(0, currentUser.Id);
+        }
+
+        return result;
     }
 
     private async Task LoadDayReservationsSafeAsync()
