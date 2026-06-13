@@ -1,8 +1,9 @@
 using MeetingRoomBooker.Api.Data;
 using MeetingRoomBooker.Api.Options;
 using MeetingRoomBooker.Api.Services.Chatwork;
-using MeetingRoomBooker.Api.Services.RoomConflictRecords;
 using MeetingRoomBooker.Api.Services.Reservations;
+using MeetingRoomBooker.Api.Services.RoomConflictRecords;
+using MeetingRoomBooker.Api.Services.WorkSchedules;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 
@@ -67,6 +68,7 @@ builder.Services.AddScoped<IReservationConflictService, ReservationConflictServi
 builder.Services.AddScoped<IReservationSeriesQueryService, ReservationSeriesQueryService>();
 builder.Services.AddScoped<IRoomConflictRecordService, RoomConflictRecordService>();
 builder.Services.AddScoped<IRoomConflictDetectionService, RoomConflictDetectionService>();
+builder.Services.AddScoped<IWorkScheduleEntryService, WorkScheduleEntryService>();
 
 builder.Services.AddHostedService<ChatworkReminderWorker>();
 builder.Services.AddHostedService<RoomConflictDetectionWorker>();
