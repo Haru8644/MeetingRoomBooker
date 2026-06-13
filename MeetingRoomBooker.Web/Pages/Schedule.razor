@@ -557,8 +557,6 @@
                 <div class="legend-item"><span class="legend-color internal"></span>社内</div>
                 <div class="legend-item"><span class="legend-color visitor"></span>来客</div>
                 <div class="legend-item"><span class="legend-color" style="background: #f0883e;"></span>社外予定</div>
-                <div class="legend-item"><span class="legend-color" style="background: #a371f7;"></span>在宅</div>
-                <div class="legend-item"><span class="legend-color" style="background: #f85149;"></span>休暇</div>
                 <div class="legend-item"><span class="legend-icon my-border-legend"></span>自分</div>
                 <div class="legend-item"><span class="legend-icon warning">⚠</span>重複</div>
             </div>
@@ -607,7 +605,7 @@
                         </div>
                     }
 
-                    @foreach (var scheduleSection in workScheduleSections)
+                    @foreach (var scheduleSection in GetTimelineWorkScheduleSections())
                     {
                         var workScheduleData = GetTimelineWorkScheduleData(scheduleSection, timelineDate.Value);
                         if (!workScheduleData.Items.Any())
@@ -695,6 +693,17 @@
     private sealed record LeavePeriodOption(
         LeavePeriod Value,
         string Label);
+
+    private sealed record ParticipantScheduleConflict(
+        DateTime Date,
+        DateTime RequestedStart,
+        DateTime RequestedEnd,
+        string ParticipantName,
+        string RequestedTitle,
+        string ExistingKind,
+        string ExistingTitle,
+        DateTime ExistingStart,
+        DateTime ExistingEnd);
 
     private readonly List<WorkScheduleSection> workScheduleSections = new()
     {
@@ -958,6 +967,12 @@
             ?? workScheduleSections[0];
     }
 
+    private IEnumerable<WorkScheduleSection> GetTimelineWorkScheduleSections()
+    {
+        return workScheduleSections
+            .Where(section => section.Type == WorkScheduleEntryType.ExternalAppointment);
+    }
+
     private static string GetWorkScheduleTimeLabel(WorkScheduleEntryModel entry)
     {
         if (entry.Type == WorkScheduleEntryType.ExternalAppointment &&
@@ -1170,6 +1185,26 @@
                 return;
             }
 
+            var participantConflicts = FindExternalAppointmentParticipantConflicts(
+                workScheduleEditTitle,
+                workScheduleEditDate.Value.Date,
+                start,
+                end,
+                request.ParticipantIds,
+                selectedWorkSchedule.Id);
+
+            if (participantConflicts.Count > 0)
+            {
+                var confirmed = await JSRuntime.InvokeAsync<bool>(
+                    "confirm",
+                    BuildParticipantConflictConfirmationMessage(participantConflicts));
+
+                if (!confirmed)
+                {
+                    return;
+                }
+            }
+
             request.Title = workScheduleEditTitle;
             request.StartTime = start;
             request.EndTime = end;
@@ -1261,6 +1296,159 @@
         return currentUser == null
             ? new List<int>()
             : new List<int> { currentUser.Id };
+    }
+
+    private List<ParticipantScheduleConflict> FindExternalAppointmentParticipantConflicts(
+        string requestedTitle,
+        DateTime requestedDate,
+        DateTime requestedStart,
+        DateTime requestedEnd,
+        IReadOnlyCollection<int> requestedParticipantIds,
+        int ignoredWorkScheduleId)
+    {
+        var result = new List<ParticipantScheduleConflict>();
+
+        foreach (var existingReservation in allReservations)
+        {
+            if (existingReservation.Date.Date != requestedDate.Date ||
+                !TimesOverlap(requestedStart, requestedEnd, existingReservation.StartTime, existingReservation.EndTime))
+            {
+                continue;
+            }
+
+            var existingParticipantIds = GetReservationParticipantIds(existingReservation);
+            var duplicatedParticipantIds = requestedParticipantIds.Intersect(existingParticipantIds).Distinct();
+
+            foreach (var participantId in duplicatedParticipantIds)
+            {
+                result.Add(new ParticipantScheduleConflict(
+                    requestedDate.Date,
+                    requestedStart,
+                    requestedEnd,
+                    GetParticipantName(participantId),
+                    requestedTitle,
+                    "会議室予約",
+                    GetReservationTitle(existingReservation),
+                    existingReservation.StartTime,
+                    existingReservation.EndTime));
+            }
+        }
+
+        foreach (var existingSchedule in allWorkSchedules)
+        {
+            if (existingSchedule.Id == ignoredWorkScheduleId ||
+                existingSchedule.Type != WorkScheduleEntryType.ExternalAppointment ||
+                !existingSchedule.StartTime.HasValue ||
+                !existingSchedule.EndTime.HasValue ||
+                existingSchedule.Date.Date != requestedDate.Date ||
+                !TimesOverlap(requestedStart, requestedEnd, existingSchedule.StartTime.Value, existingSchedule.EndTime.Value))
+            {
+                continue;
+            }
+
+            var existingParticipantIds = GetWorkScheduleParticipantIds(existingSchedule);
+            var duplicatedParticipantIds = requestedParticipantIds.Intersect(existingParticipantIds).Distinct();
+
+            foreach (var participantId in duplicatedParticipantIds)
+            {
+                result.Add(new ParticipantScheduleConflict(
+                    requestedDate.Date,
+                    requestedStart,
+                    requestedEnd,
+                    GetParticipantName(participantId),
+                    requestedTitle,
+                    "社外予定",
+                    existingSchedule.Title,
+                    existingSchedule.StartTime.Value,
+                    existingSchedule.EndTime.Value));
+            }
+        }
+
+        return result;
+    }
+
+    private HashSet<int> GetReservationParticipantIds(ReservationModel reservation)
+    {
+        var participantIds = new HashSet<int>();
+
+        if (reservation.UserId > 0)
+        {
+            participantIds.Add(reservation.UserId);
+        }
+
+        foreach (var participantId in reservation.ParticipantIds ?? new List<int>())
+        {
+            if (participantId > 0)
+            {
+                participantIds.Add(participantId);
+            }
+        }
+
+        return participantIds;
+    }
+
+    private static HashSet<int> GetWorkScheduleParticipantIds(WorkScheduleEntryModel schedule)
+    {
+        return (schedule.ParticipantIds ?? new List<int>())
+            .Where(id => id > 0)
+            .Distinct()
+            .ToHashSet();
+    }
+
+    private string GetParticipantName(int userId)
+    {
+        if (currentUser != null && currentUser.Id == userId)
+        {
+            return currentUser.Name;
+        }
+
+        var user = allUsers.FirstOrDefault(u => u.Id == userId);
+        return user?.Name ?? $"ユーザーID:{userId}";
+    }
+
+    private static string GetReservationTitle(ReservationModel reservation)
+    {
+        if (!string.IsNullOrWhiteSpace(reservation.Purpose))
+        {
+            return reservation.Purpose;
+        }
+
+        if (!string.IsNullOrWhiteSpace(reservation.Name))
+        {
+            return reservation.Name;
+        }
+
+        return $"{reservation.Room}予約";
+    }
+
+    private static bool TimesOverlap(DateTime start1, DateTime end1, DateTime start2, DateTime end2)
+    {
+        return start1 < end2 && end1 > start2;
+    }
+
+    private static string BuildParticipantConflictConfirmationMessage(
+        IReadOnlyCollection<ParticipantScheduleConflict> participantConflicts)
+    {
+        var lines = new List<string>
+        {
+            $"{participantConflicts.Count}件の参加者予定が重複しています。",
+            "それでも保存しますか？",
+            string.Empty,
+            "重複内容:"
+        };
+
+        foreach (var conflict in participantConflicts.Take(8))
+        {
+            lines.Add(
+                $"・{conflict.Date:yyyy/MM/dd} {conflict.ParticipantName}さん: {conflict.RequestedTitle} ({conflict.RequestedStart:HH:mm}〜{conflict.RequestedEnd:HH:mm}) / 既存{conflict.ExistingKind}: {conflict.ExistingTitle} ({conflict.ExistingStart:HH:mm}〜{conflict.ExistingEnd:HH:mm})");
+        }
+
+        if (participantConflicts.Count > 8)
+        {
+            lines.Add($"ほか {participantConflicts.Count - 8}件");
+        }
+
+        return string.Join("\n", lines);
     }
 
     private void StartEdit()
