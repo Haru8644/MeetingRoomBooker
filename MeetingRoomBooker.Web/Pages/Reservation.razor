@@ -1,5 +1,6 @@
 @page "/reservation"
 @using System.Globalization
+@implements IDisposable
 @inject IBookingService BookingService
 @inject WorkScheduleApiService WorkScheduleService
 @inject IJSRuntime JSRuntime
@@ -15,12 +16,18 @@
                 <h3 class="gradient-text-enhanced glitch-text" data-text="NEW RESERVATION">NEW RESERVATION</h3>
                 <div style="text-align: right;"><span class="date-text">@currentDate</span><span class="cyber-clock">@currentTime</span></div>
             </div>
+
             @if (!string.IsNullOrEmpty(errorMessage))
             {
                 <div class="alert-error fade-in">@errorMessage</div>
             }
+
             <FluentStack Orientation="Orientation.Vertical" VerticalGap="20">
-                <div class="fade-in-stagger" style="--i:1"><label>予約者名</label><FluentTextField @bind-Value="reserveName" ReadOnly="@(currentUser != null)" Style="width: 100%;" /></div>
+                <div class="fade-in-stagger" style="--i:1">
+                    <label>予約者名</label>
+                    <FluentTextField @bind-Value="reserveName" ReadOnly="@(currentUser != null)" Style="width: 100%;" />
+                </div>
+
                 <div class="fade-in-stagger" style="--i:2">
                     <label>参加メンバー</label>
                     <div class="participant-selector">
@@ -31,10 +38,13 @@
                                 continue;
                             }
 
-                            <div class="participant-item" @key="user.Id"><FluentCheckbox Value="@user.IsSelected" ValueChanged="@(value => OnParticipantSelectionChanged(user, value))" Label="@user.Name" /></div>
+                            <div class="participant-item" @key="user.Id">
+                                <FluentCheckbox Value="@user.IsSelected" ValueChanged="@(value => OnParticipantSelectionChanged(user, value))" Label="@user.Name" />
+                            </div>
                         }
                     </div>
                 </div>
+
                 <FluentGrid Spacing="2" Class="fade-in-stagger" Style="--i:3">
                     <FluentGridItem xs="12" sm="12">
                         <label>利用区分</label>
@@ -46,6 +56,7 @@
                         </div>
                     </FluentGridItem>
                 </FluentGrid>
+
                 <div class="fade-in-stagger" style="--i:4">
                     <label>会議室</label>
                     <div class="selection-group">
@@ -55,9 +66,18 @@
                         }
                     </div>
                 </div>
-                <div class="fade-in-stagger" style="--i:5"><label>利用目的</label><FluentTextField @bind-Value="reservePurpose" Style="width: 100%;" /></div>
+
+                <div class="fade-in-stagger" style="--i:5">
+                    <label>利用目的</label>
+                    <FluentTextField @bind-Value="reservePurpose" Style="width: 100%;" />
+                </div>
+
                 <FluentGrid Spacing="2" Class="fade-in-stagger" Style="--i:6; position: relative; z-index: 10;">
-                    <FluentGridItem xs="12" sm="6"><label>利用日</label><FluentDatePicker @bind-Value="reserveDate" Style="width: 100%;" /></FluentGridItem>
+                    <FluentGridItem xs="12" sm="6">
+                        <label>利用日</label>
+                        <FluentDatePicker @bind-Value="reserveDate" Style="width: 100%;" />
+                    </FluentGridItem>
+
                     <FluentGridItem xs="12" sm="3">
                         <label>繰り返し</label>
                         <div class="selection-group">
@@ -67,13 +87,19 @@
                             }
                         </div>
                     </FluentGridItem>
-                    <FluentGridItem xs="12" sm="3"><label>終了日</label><FluentDatePicker @bind-Value="repeatUntil" Style="width: 100%;" Disabled="@(repeatType == "しない")" /></FluentGridItem>
+
+                    <FluentGridItem xs="12" sm="3">
+                        <label>終了日</label>
+                        <FluentDatePicker @bind-Value="repeatUntil" Style="width: 100%;" Disabled="@(repeatType == "しない")" />
+                    </FluentGridItem>
                 </FluentGrid>
+
                 <FluentGrid Spacing="2" Class="fade-in-stagger" Style="--i:7; position: relative; z-index: 9;">
                     <FluentGridItem xs="6">
                         <label>開始</label>
                         <FluentTimePicker Value="startTime" ValueChanged="OnStartTimeChanged" Style="width: 100%;" />
                     </FluentGridItem>
+
                     <FluentGridItem xs="6">
                         <label>終了</label>
                         <FluentTimePicker @bind-Value="endTime" Style="width: 100%;" />
@@ -81,10 +107,15 @@
                 </FluentGrid>
 
                 <div class="fade-in-stagger" style="--i:8; margin-top: 15px;">
-                    <button class="cyber-button-primary pulse-hover" style="width: 100%;" @onclick="OnSubmit"><span class="oi oi-check"></span> RESERVE</button>
+                    <button class="cyber-button-primary pulse-hover" style="width: 100%;" @onclick="OnSubmit">
+                        <span class="oi oi-check"></span> RESERVE
+                    </button>
                 </div>
+
                 <div class="fade-in-stagger" style="--i:9; margin-top: 10px; display: flex; justify-content: flex-end;">
-                    <button class="cyber-button-secondary pulse-hover" style="font-size: 0.85rem; padding: 6px 15px;" @onclick="GoToSchedule"><span class="oi oi-calendar"></span> カレンダーで空きを確認</button>
+                    <button class="cyber-button-secondary pulse-hover" style="font-size: 0.85rem; padding: 6px 15px;" @onclick="GoToSchedule">
+                        <span class="oi oi-calendar"></span> カレンダーで空きを確認
+                    </button>
                 </div>
             </FluentStack>
         </div>
@@ -122,20 +153,22 @@
                             <FluentTextField @bind-Value="externalAppointmentTitle" Placeholder="例：顧客訪問、外部打ち合わせ" Style="width: 100%;" />
                         </div>
 
-                        <FluentGrid Spacing="2" Style="position: relative; z-index: 12;">
-                            <FluentGridItem xs="12" sm="4">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 18px; align-items: end; position: relative; z-index: 12;">
+                            <div>
                                 <label>日付</label>
                                 <FluentDatePicker @bind-Value="externalAppointmentDate" Style="width: 100%;" />
-                            </FluentGridItem>
-                            <FluentGridItem xs="6" sm="4">
+                            </div>
+
+                            <div>
                                 <label>開始</label>
-                                <FluentTimePicker @bind-Value="externalAppointmentStartTime" Style="width: 100%;" />
-                            </FluentGridItem>
-                            <FluentGridItem xs="6" sm="4">
+                                <FluentTimePicker Value="externalAppointmentStartTime" ValueChanged="OnExternalAppointmentStartTimeChanged" Style="width: 100%;" />
+                            </div>
+
+                            <div>
                                 <label>終了</label>
                                 <FluentTimePicker @bind-Value="externalAppointmentEndTime" Style="width: 100%;" />
-                            </FluentGridItem>
-                        </FluentGrid>
+                            </div>
+                        </div>
 
                         <div>
                             <label>参加者</label>
@@ -183,15 +216,15 @@
                             </div>
                         </div>
 
-                        <FluentGrid Spacing="2" Style="position: relative; z-index: 11;">
-                            <FluentGridItem xs="12" sm="6">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; align-items: start; position: relative; z-index: 11;">
+                            <div>
                                 <label>日付</label>
                                 <FluentDatePicker @bind-Value="attendanceScheduleDate" Style="width: 100%;" />
-                            </FluentGridItem>
+                            </div>
 
                             @if (attendanceScheduleType == "休暇")
                             {
-                                <FluentGridItem xs="12" sm="6">
+                                <div>
                                     <label>休暇区分</label>
                                     <div class="selection-group">
                                         @foreach (var option in leavePeriodOptions)
@@ -199,31 +232,12 @@
                                             <div class="selection-chip @(selectedLeavePeriod == option.Value ? "active" : "")" @onclick="() => selectedLeavePeriod = option.Value">@option.Label</div>
                                         }
                                     </div>
-                                </FluentGridItem>
+                                </div>
                             }
-                        </FluentGrid>
+                        </div>
 
-                        <div>
-                            <label>対象者</label>
-                            <div style="color: #8b949e; font-size: 0.78rem; margin-bottom: 8px;">
-                                自分（@currentUser?.Name）は自動で含まれます
-                            </div>
-                            <div class="participant-selector">
-                                @foreach (var user in allUsers)
-                                {
-                                    if (currentUser != null && user.Id == currentUser.Id)
-                                    {
-                                        continue;
-                                    }
-
-                                    <div class="participant-item" @key="user.Id">
-                                        <FluentCheckbox
-                                            Value="@attendanceScheduleParticipantIds.Contains(user.Id)"
-                                            ValueChanged="@(value => OnAttendanceScheduleParticipantSelectionChanged(user.Id, value))"
-                                            Label="@user.Name" />
-                                    </div>
-                                }
-                            </div>
+                        <div style="padding: 10px 12px; border: 1px solid rgba(48,54,61,0.85); border-radius: 8px; background: rgba(0,0,0,0.18); color: #8b949e; font-size: 0.85rem; width: fit-content;">
+                            登録対象：<span style="color: #c9d1d9; font-weight: 700;">@(currentUser?.Name ?? "ログインユーザー")</span>
                         </div>
 
                         <button class="cyber-button-secondary pulse-hover" style="width: 100%;" @onclick="OnSubmitAttendanceScheduleAsync">
@@ -429,7 +443,6 @@
     };
 
     private readonly HashSet<int> externalAppointmentParticipantIds = new();
-    private readonly HashSet<int> attendanceScheduleParticipantIds = new();
 
     private UserModel? currentUser;
     private List<UserViewModel> allUsers = new();
@@ -450,7 +463,6 @@
         {
             reserveName = currentUser.Name;
             externalAppointmentParticipantIds.Add(currentUser.Id);
-            attendanceScheduleParticipantIds.Add(currentUser.Id);
         }
 
         try
@@ -603,18 +615,6 @@
         }
     }
 
-    private void OnAttendanceScheduleParticipantSelectionChanged(int userId, bool isSelected)
-    {
-        if (isSelected)
-        {
-            attendanceScheduleParticipantIds.Add(userId);
-        }
-        else
-        {
-            attendanceScheduleParticipantIds.Remove(userId);
-        }
-    }
-
     private async Task OnSubmitExternalAppointmentAsync()
     {
         workScheduleErrorMessage = string.Empty;
@@ -657,7 +657,7 @@
             workScheduleSuccessMessage = "社外予定を登録しました。";
             externalAppointmentTitle = string.Empty;
             previewDate = externalAppointmentDate.Value.Date;
-            await LoadDayReservationsSafeAsync();
+            Navigation.NavigateTo("/schedule");
         }
         catch (Exception ex)
         {
@@ -689,12 +689,12 @@
                 StartTime = null,
                 EndTime = null,
                 LeavePeriod = isLeave ? selectedLeavePeriod : LeavePeriod.None,
-                ParticipantIds = BuildWorkScheduleParticipantIds(attendanceScheduleParticipantIds)
+                ParticipantIds = BuildCurrentUserOnlyParticipantIds()
             });
 
             workScheduleSuccessMessage = isLeave ? "休暇予定を登録しました。" : "在宅予定を登録しました。";
             previewDate = attendanceScheduleDate.Value.Date;
-            await LoadDayReservationsSafeAsync();
+            Navigation.NavigateTo("/schedule");
         }
         catch (Exception ex)
         {
@@ -716,6 +716,13 @@
         }
 
         return result;
+    }
+
+    private List<int> BuildCurrentUserOnlyParticipantIds()
+    {
+        return currentUser == null
+            ? new List<int>()
+            : new List<int> { currentUser.Id };
     }
 
     private async Task LoadDayReservationsSafeAsync()
@@ -837,6 +844,16 @@
         if (startTime.HasValue)
         {
             endTime = startTime.Value.AddHours(1);
+        }
+    }
+
+    private void OnExternalAppointmentStartTimeChanged(DateTime? newTime)
+    {
+        externalAppointmentStartTime = newTime;
+
+        if (externalAppointmentStartTime.HasValue)
+        {
+            externalAppointmentEndTime = externalAppointmentStartTime.Value.AddHours(1);
         }
     }
 
