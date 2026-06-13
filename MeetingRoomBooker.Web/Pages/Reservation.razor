@@ -1,6 +1,7 @@
-﻿@page "/reservation"
+@page "/reservation"
 @using System.Globalization
 @inject IBookingService BookingService
+@inject WorkScheduleApiService WorkScheduleService
 @inject IJSRuntime JSRuntime
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
@@ -97,27 +98,93 @@
                 </div>
             </div>
 
-            @if (dayReservations == null)
+            @if (isPreviewLoading)
             {
                 <div class="loading-text" style="color: #8b949e;">カレンダー情報を取得中...</div>
             }
-            else if (!dayReservations.Any())
+            else if (!string.IsNullOrWhiteSpace(previewErrorMessage))
+            {
+                <div class="alert-error fade-in">@previewErrorMessage</div>
+            }
+            else if (!dayReservations.Any() && !dayWorkSchedules.Any())
             {
                 <div style="color: #00d2ff; text-align: center; padding: 15px; border: 1px dashed #30363d; border-radius: 4px;">
-                    この日の予約はまだありません
+                    この日の予定はまだありません
                 </div>
             }
             else
             {
-                <FluentStack Orientation="Orientation.Vertical" VerticalGap="10">
-                    @foreach (var r in dayReservations)
+                <FluentStack Orientation="Orientation.Vertical" VerticalGap="14">
+                    @foreach (var room in roomOptions)
                     {
-                        <div style="display: flex; align-items: center; padding: 10px; background: rgba(0,0,0,0.3); border-left: 3px solid @(r.Room == "大会議室" ? "#58a6ff" : "#3fb950"); border-radius: 0 4px 4px 0;">
-                            <div style="font-family: 'Consolas', monospace; color: #58a6ff; font-weight: bold; width: 120px;">
-                                @r.StartTime.ToString("HH:mm") - @r.EndTime.ToString("HH:mm")
+                        var reservations = GetRoomReservations(room);
+
+                        <div style="padding: 12px; background: rgba(0,0,0,0.18); border: 1px solid rgba(48,54,61,0.9); border-radius: 8px;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+                                <span style="display: inline-block; width: 8px; height: 8px; border-radius: 999px; background: @(room == "大会議室" ? "#58a6ff" : "#3fb950"); box-shadow: 0 0 10px @(room == "大会議室" ? "#58a6ff" : "#3fb950");"></span>
+                                <span style="color: #e0e0e0; font-weight: 800;">@room</span>
+                                <span style="color: #8b949e; font-size: 0.8rem;">@reservations.Count 件</span>
                             </div>
-                            <div style="color: #e0e0e0; font-weight: bold; margin-right: 15px;">【@r.Room】</div>
-                            <div style="color: #c9d1d9; flex-grow: 1;">@r.Name <span style="font-size: 0.8em; color: #8b949e;">(@r.Type)</span></div>
+
+                            @if (!reservations.Any())
+                            {
+                                <div style="color: #8b949e; font-size: 0.9rem; padding: 8px 10px; border: 1px dashed rgba(48,54,61,0.8); border-radius: 6px;">
+                                    予約はありません
+                                </div>
+                            }
+                            else
+                            {
+                                <FluentStack Orientation="Orientation.Vertical" VerticalGap="8">
+                                    @foreach (var r in reservations)
+                                    {
+                                        <div style="display: flex; align-items: center; padding: 10px; background: rgba(0,0,0,0.3); border-left: 3px solid @(r.Room == "大会議室" ? "#58a6ff" : "#3fb950"); border-radius: 0 4px 4px 0;">
+                                            <div style="font-family: 'Consolas', monospace; color: #58a6ff; font-weight: bold; width: 120px;">
+                                                @r.StartTime.ToString("HH:mm") - @r.EndTime.ToString("HH:mm")
+                                            </div>
+                                            <div style="color: #e0e0e0; font-weight: bold; margin-right: 15px;">【@r.Room】</div>
+                                            <div style="color: #c9d1d9; flex-grow: 1;">@BuildReservationPreviewText(r) <span style="font-size: 0.8em; color: #8b949e;">(@r.Type)</span></div>
+                                        </div>
+                                    }
+                                </FluentStack>
+                            }
+                        </div>
+                    }
+
+                    @foreach (var scheduleSection in workScheduleSections)
+                    {
+                        var entries = GetWorkSchedules(scheduleSection.Type);
+
+                        <div style="padding: 12px; background: rgba(0,0,0,0.18); border: 1px solid rgba(48,54,61,0.9); border-radius: 8px;">
+                            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+                                <span style="display: inline-block; width: 8px; height: 8px; border-radius: 999px; background: @scheduleSection.Color; box-shadow: 0 0 10px @scheduleSection.Color;"></span>
+                                <span style="color: #e0e0e0; font-weight: 800;">@scheduleSection.Label</span>
+                                <span style="color: #8b949e; font-size: 0.8rem;">@entries.Count 件</span>
+                            </div>
+
+                            @if (!entries.Any())
+                            {
+                                <div style="color: #8b949e; font-size: 0.9rem; padding: 8px 10px; border: 1px dashed rgba(48,54,61,0.8); border-radius: 6px;">
+                                    @scheduleSection.EmptyText
+                                </div>
+                            }
+                            else
+                            {
+                                <FluentStack Orientation="Orientation.Vertical" VerticalGap="8">
+                                    @foreach (var entry in entries)
+                                    {
+                                        <div style="display: flex; align-items: center; padding: 10px; background: rgba(0,0,0,0.3); border-left: 3px solid @scheduleSection.Color; border-radius: 0 4px 4px 0;">
+                                            <div style="font-family: 'Consolas', monospace; color: @scheduleSection.Color; font-weight: bold; width: 120px;">
+                                                @GetWorkScheduleTimeLabel(entry)
+                                            </div>
+                                            <div style="color: #e0e0e0; font-weight: bold; margin-right: 15px;">【@scheduleSection.Label】</div>
+                                            <div style="color: #c9d1d9; flex-grow: 1;">
+                                                @entry.Title
+                                                <span style="font-size: 0.8em; color: #8b949e;">@GetWorkScheduleDetails(entry)</span>
+                                            </div>
+                                        </div>
+                                    }
+                                </FluentStack>
+                            }
                         </div>
                     }
                 </FluentStack>
@@ -132,6 +199,12 @@
         public bool IsSelected { get; set; }
     }
 
+    private sealed record WorkScheduleSection(
+        WorkScheduleEntryType Type,
+        string Label,
+        string Color,
+        string EmptyText);
+
     [SupplyParameterFromQuery]
     public int? RestoreDraft { get; set; }
 
@@ -145,6 +218,7 @@
     private string reservePurpose = string.Empty;
     private string errorMessage = string.Empty;
     private string repeatType = "しない";
+    private string previewErrorMessage = string.Empty;
 
     private DateTime? _reserveDate = DateTime.Today;
     private DateTime? reserveDate
@@ -180,9 +254,18 @@
     private readonly List<string> roomOptions = new() { "大会議室", "小会議室" };
     private readonly List<string> typeOptions = new() { "社内", "来客" };
     private readonly List<string> repeatOptions = new() { "しない", "毎日", "毎週" };
+    private readonly List<WorkScheduleSection> workScheduleSections = new()
+    {
+        new(WorkScheduleEntryType.ExternalAppointment, "社外予定", "#f0883e", "社外予定はありません"),
+        new(WorkScheduleEntryType.WorkFromHome, "在宅", "#a371f7", "在宅予定はありません"),
+        new(WorkScheduleEntryType.Leave, "休暇", "#f85149", "休暇予定はありません")
+    };
+
     private UserModel? currentUser;
     private List<UserViewModel> allUsers = new();
     private List<ReservationModel> dayReservations = new();
+    private List<WorkScheduleEntryModel> dayWorkSchedules = new();
+    private bool isPreviewLoading;
     private System.Threading.Timer? _timer;
 
     protected override async Task OnInitializedAsync()
@@ -343,21 +426,110 @@
             return;
         }
 
+        isPreviewLoading = true;
+        previewErrorMessage = string.Empty;
+        await InvokeAsync(StateHasChanged);
+
         try
         {
+            var targetDate = previewDate.Value.Date;
             var existing = await BookingService.GetReservationsAsync();
+            var workSchedules = await WorkScheduleService.GetEntriesAsync(targetDate, targetDate);
+
             dayReservations = existing
-                .Where(r => r.Date.Date == previewDate.Value.Date)
-                .OrderBy(r => r.StartTime)
+                .Where(r => r.Date.Date == targetDate)
+                .OrderBy(r => r.Room)
+                .ThenBy(r => r.StartTime)
                 .ToList();
 
-            await InvokeAsync(StateHasChanged);
+            dayWorkSchedules = workSchedules
+                .OrderBy(entry => entry.Type)
+                .ThenBy(entry => entry.StartTime ?? entry.Date)
+                .ThenBy(entry => entry.Id)
+                .ToList();
         }
         catch (Exception ex)
         {
-            Logger.LogWarning(ex, "Failed to load day reservations for preview.");
+            Logger.LogWarning(ex, "Failed to load day reservations or work schedules for preview.");
             dayReservations = new List<ReservationModel>();
+            dayWorkSchedules = new List<WorkScheduleEntryModel>();
+            previewErrorMessage = "予約状況の取得に失敗しました。時間をおいて再度お試しください。";
         }
+        finally
+        {
+            isPreviewLoading = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private IReadOnlyList<ReservationModel> GetRoomReservations(string room)
+    {
+        return dayReservations
+            .Where(r => r.Room == room)
+            .OrderBy(r => r.StartTime)
+            .ToList();
+    }
+
+    private IReadOnlyList<WorkScheduleEntryModel> GetWorkSchedules(WorkScheduleEntryType type)
+    {
+        return dayWorkSchedules
+            .Where(entry => entry.Type == type)
+            .OrderBy(entry => entry.StartTime ?? entry.Date)
+            .ThenBy(entry => entry.Id)
+            .ToList();
+    }
+
+    private static string BuildReservationPreviewText(ReservationModel reservation)
+    {
+        if (!string.IsNullOrWhiteSpace(reservation.Purpose))
+        {
+            return $"{reservation.Purpose} / {reservation.Name}";
+        }
+
+        return reservation.Name;
+    }
+
+    private static string GetWorkScheduleTimeLabel(WorkScheduleEntryModel entry)
+    {
+        if (entry.Type == WorkScheduleEntryType.ExternalAppointment &&
+            entry.StartTime.HasValue &&
+            entry.EndTime.HasValue)
+        {
+            return $"{entry.StartTime.Value:HH:mm} - {entry.EndTime.Value:HH:mm}";
+        }
+
+        if (entry.Type == WorkScheduleEntryType.Leave)
+        {
+            return GetLeavePeriodLabel(entry.LeavePeriod);
+        }
+
+        return "終日";
+    }
+
+    private static string GetWorkScheduleDetails(WorkScheduleEntryModel entry)
+    {
+        var participants = string.IsNullOrWhiteSpace(entry.Participants)
+            ? "対象者未設定"
+            : entry.Participants;
+
+        return entry.Type switch
+        {
+            WorkScheduleEntryType.ExternalAppointment => $" / {participants}",
+            WorkScheduleEntryType.WorkFromHome => $" / {participants}",
+            WorkScheduleEntryType.Leave => $" / {participants} / {GetLeavePeriodLabel(entry.LeavePeriod)}",
+            _ => $" / {participants}"
+        };
+    }
+
+    private static string GetLeavePeriodLabel(LeavePeriod leavePeriod)
+    {
+        return leavePeriod switch
+        {
+            LeavePeriod.Morning => "午前休",
+            LeavePeriod.Afternoon => "午後休",
+            LeavePeriod.FullDay => "休み",
+            _ => "休暇"
+        };
     }
 
     private void OnStartTimeChanged(DateTime? newTime)
