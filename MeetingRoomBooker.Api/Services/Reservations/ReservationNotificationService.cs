@@ -1,4 +1,5 @@
 using MeetingRoomBooker.Api.Data;
+using MeetingRoomBooker.Api.Services.WorkSchedules;
 using MeetingRoomBooker.Shared.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -24,16 +25,20 @@ public interface IReservationNotificationService
 public sealed class ReservationNotificationService : IReservationNotificationService
 {
     private const string InfoNotificationType = "Info";
+    private const string WarningNotificationType = "Warning";
 
     private readonly AppDbContext _context;
     private readonly IReservationSeriesQueryService _reservationSeriesQueryService;
+    private readonly IWorkScheduleParticipantConflictService _workScheduleParticipantConflictService;
 
     public ReservationNotificationService(
         AppDbContext context,
-        IReservationSeriesQueryService reservationSeriesQueryService)
+        IReservationSeriesQueryService reservationSeriesQueryService,
+        IWorkScheduleParticipantConflictService workScheduleParticipantConflictService)
     {
         _context = context;
         _reservationSeriesQueryService = reservationSeriesQueryService;
+        _workScheduleParticipantConflictService = workScheduleParticipantConflictService;
     }
 
     public async Task NotifyParticipantsForCreatedReservationAsync(ReservationModel reservation)
@@ -44,9 +49,20 @@ public sealed class ReservationNotificationService : IReservationNotificationSer
             return;
         }
 
+        var participantConflicts = await _workScheduleParticipantConflictService
+            .FindReservationExternalAppointmentConflictsAsync(reservation, CancellationToken.None);
+
+        var notificationType = participantConflicts.Count > 0
+            ? WarningNotificationType
+            : InfoNotificationType;
+
         if (ReservationRules.IsRecurring(reservation))
         {
-            await UpsertRecurringReservationNotificationsAsync(reservation, targetUsers);
+            await UpsertRecurringReservationNotificationsAsync(
+                reservation,
+                targetUsers,
+                notificationType,
+                participantConflicts);
             return;
         }
 
@@ -54,8 +70,8 @@ public sealed class ReservationNotificationService : IReservationNotificationSer
         {
             await UpsertNotificationAsync(
                 userId,
-                InfoNotificationType,
-                BuildAddedParticipantMessage(reservation),
+                notificationType,
+                BuildAddedParticipantMessage(reservation, participantConflicts),
                 reservation.Date,
                 reservation.Id);
         }
@@ -71,18 +87,26 @@ public sealed class ReservationNotificationService : IReservationNotificationSer
         var addedParticipantIds = currentParticipantIds.Except(previousParticipantIds).ToList();
         var removedParticipantIds = previousParticipantIds.Except(currentParticipantIds).ToList();
 
+        var participantConflicts = await _workScheduleParticipantConflictService
+            .FindReservationExternalAppointmentConflictsAsync(reservation, CancellationToken.None);
+
+        var notificationType = participantConflicts.Count > 0
+            ? WarningNotificationType
+            : InfoNotificationType;
+
         var detailedMessage = await BuildReservationUpdatedMessageAsync(
             previousReservation,
             reservation,
             addedParticipantIds,
-            removedParticipantIds);
+            removedParticipantIds,
+            participantConflicts);
 
         foreach (var userId in addedParticipantIds)
         {
             await UpsertNotificationAsync(
                 userId,
-                InfoNotificationType,
-                BuildAddedParticipantMessage(reservation),
+                notificationType,
+                BuildAddedParticipantMessage(reservation, participantConflicts),
                 reservation.Date,
                 reservation.Id);
         }
@@ -106,7 +130,7 @@ public sealed class ReservationNotificationService : IReservationNotificationSer
         {
             await UpsertNotificationAsync(
                 userId,
-                InfoNotificationType,
+                notificationType,
                 detailedMessage,
                 reservation.Date,
                 reservation.Id);
@@ -145,7 +169,9 @@ public sealed class ReservationNotificationService : IReservationNotificationSer
 
     private async Task UpsertRecurringReservationNotificationsAsync(
         ReservationModel reservation,
-        IReadOnlyCollection<int> targetUsers)
+        IReadOnlyCollection<int> targetUsers,
+        string notificationType,
+        IReadOnlyCollection<WorkScheduleParticipantConflict> participantConflicts)
     {
         var seriesReservations = await _reservationSeriesQueryService.GetSeriesReservationsAsync(
             reservation,
@@ -159,14 +185,14 @@ public sealed class ReservationNotificationService : IReservationNotificationSer
         }
 
         var count = seriesReservations.Count;
-        var message = $"{reservation.Name}さんが繰り返し予約「{GetReservationLabel(reservation)}」にあなたを追加しました。({count}件)";
+        var message = $"{reservation.Name}さんが繰り返し予約「{GetReservationLabel(reservation)}」にあなたを追加しました。({count}件){BuildConflictText(participantConflicts)}";
         var messagePrefix = GetRecurringNotificationPrefix(reservation);
 
         foreach (var userId in targetUsers)
         {
             await UpsertNotificationAsync(
                 userId,
-                InfoNotificationType,
+                notificationType,
                 message,
                 firstReservation.Date,
                 firstReservation.Id,
@@ -178,7 +204,8 @@ public sealed class ReservationNotificationService : IReservationNotificationSer
         ReservationModel previousReservation,
         ReservationModel reservation,
         IReadOnlyCollection<int> addedParticipantIds,
-        IReadOnlyCollection<int> removedParticipantIds)
+        IReadOnlyCollection<int> removedParticipantIds,
+        IReadOnlyCollection<WorkScheduleParticipantConflict> participantConflicts)
     {
         var changes = new List<string>();
 
@@ -223,13 +250,18 @@ public sealed class ReservationNotificationService : IReservationNotificationSer
             changes.Add($"参加メンバーから {removedNames} が削除されました");
         }
 
-        if (changes.Count == 0)
+        if (changes.Count == 0 && participantConflicts.Count == 0)
         {
             return null;
         }
 
         var notificationLabel = !string.IsNullOrWhiteSpace(previousLabel) ? previousLabel : currentLabel;
-        return $"予約「{notificationLabel}」が更新されました。{string.Join(" ", changes.Select(change => $"{change}。"))}";
+        if (changes.Count == 0)
+        {
+            return $"予約「{notificationLabel}」に参加者の予定重複があります。{BuildConflictText(participantConflicts)}";
+        }
+
+        return $"予約「{notificationLabel}」が更新されました。{string.Join(" ", changes.Select(change => $"{change}。"))}{BuildConflictText(participantConflicts)}";
     }
 
     private async Task<Dictionary<int, string>> GetUserNamesByIdAsync(IEnumerable<int> userIds)
@@ -280,6 +312,7 @@ public sealed class ReservationNotificationService : IReservationNotificationSer
                 Message = message,
                 TargetDate = targetDate,
                 TargetReservationId = targetReservationId,
+                TargetWorkScheduleEntryId = null,
                 CreatedAt = DateTime.Now,
                 IsRead = false
             });
@@ -310,14 +343,50 @@ public sealed class ReservationNotificationService : IReservationNotificationSer
         return $"{reservation.StartTime:HH:mm}〜{reservation.EndTime:HH:mm}";
     }
 
-    private static string BuildAddedParticipantMessage(ReservationModel reservation)
+    private static string BuildAddedParticipantMessage(
+        ReservationModel reservation,
+        IReadOnlyCollection<WorkScheduleParticipantConflict> participantConflicts)
     {
-        return $"{reservation.Name}さんが予約「{GetReservationLabel(reservation)}」の参加メンバーにあなたを追加しました。利用日: {reservation.Date:yyyy/MM/dd} / 会議室: {reservation.Room} / 時間: {GetTimeRangeText(reservation)}";
+        return $"{reservation.Name}さんが予約「{GetReservationLabel(reservation)}」の参加メンバーにあなたを追加しました。利用日: {reservation.Date:yyyy/MM/dd} / 会議室: {reservation.Room} / 時間: {GetTimeRangeText(reservation)}{BuildConflictText(participantConflicts)}";
     }
 
     private static string BuildRemovedParticipantMessage(ReservationModel reservation)
     {
         return $"{reservation.Name}さんが予約「{GetReservationLabel(reservation)}」の参加メンバーからあなたを削除しました。";
+    }
+
+    private static string BuildConflictText(IReadOnlyCollection<WorkScheduleParticipantConflict> conflicts)
+    {
+        if (conflicts.Count == 0)
+        {
+            return string.Empty;
+        }
+
+        var lines = conflicts
+            .GroupBy(conflict => new
+            {
+                conflict.ParticipantUserId,
+                conflict.SourceType,
+                conflict.SourceId
+            })
+            .Select(group => group.First())
+            .Take(5)
+            .Select(conflict =>
+                $"{conflict.ParticipantName}: {conflict.SourceType}「{conflict.SourceTitle}」 {conflict.Date:yyyy/MM/dd} {GetTimeRangeText(conflict.StartTime, conflict.EndTime)}")
+            .ToList();
+
+        var suffix = conflicts.Count > 5
+            ? $" ほか{conflicts.Count - 5}件"
+            : string.Empty;
+
+        return $" 注意: 参加者の予定重複があります。{string.Join(" ", lines)}{suffix}";
+    }
+
+    private static string GetTimeRangeText(DateTime? startTime, DateTime? endTime)
+    {
+        return startTime.HasValue && endTime.HasValue
+            ? $"{startTime.Value:HH:mm}〜{endTime.Value:HH:mm}"
+            : "終日";
     }
 
     private static string GetRecurringNotificationPrefix(ReservationModel reservation)

@@ -3,6 +3,7 @@ using System;
 using MeetingRoomBooker.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MeetingRoomBooker.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260615083231_AddWorkScheduleNotificationTarget")]
+    partial class AddWorkScheduleNotificationTarget
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.23");
@@ -67,21 +70,10 @@ namespace MeetingRoomBooker.Api.Migrations
                     b.Property<int?>("TargetUserId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("WorkScheduleEntryId")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("Id");
 
                     b.HasIndex("DeliveryKey")
                         .IsUnique();
-
-                    b.HasIndex("DeliveryType");
-
-                    b.HasIndex("ReservationId");
-
-                    b.HasIndex("TargetUserId");
-
-                    b.HasIndex("WorkScheduleEntryId");
 
                     b.ToTable("ChatworkDeliveryLogs");
                 });

@@ -1,11 +1,21 @@
 using MeetingRoomBooker.Api.Models;
 using MeetingRoomBooker.Shared.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace MeetingRoomBooker.Api.Data
 {
     public class AppDbContext : DbContext
     {
+        private static readonly ValueComparer<List<int>> IntListComparer = new(
+            (left, right) => (left ?? new List<int>()).SequenceEqual(right ?? new List<int>()),
+            value => value == null
+                ? 0
+                : value.Aggregate(0, (hash, item) => HashCode.Combine(hash, item)),
+            value => value == null
+                ? new List<int>()
+                : value.ToList());
+
         public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
         {
@@ -24,14 +34,16 @@ namespace MeetingRoomBooker.Api.Data
 
             modelBuilder.Entity<ReservationModel>(entity =>
             {
-                entity.Property(e => e.ParticipantIds)
+                var participantIdsProperty = entity.Property(e => e.ParticipantIds)
                     .HasConversion(
-                        v => string.Join(',', v),
-                        v => string.IsNullOrWhiteSpace(v)
+                        value => string.Join(',', value),
+                        value => string.IsNullOrWhiteSpace(value)
                             ? new List<int>()
-                            : v.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                               .Select(int.Parse)
-                               .ToList());
+                            : value.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                .Select(int.Parse)
+                                .ToList());
+
+                participantIdsProperty.Metadata.SetValueComparer(IntListComparer);
 
                 entity.Property(e => e.SeriesId)
                     .HasMaxLength(50)
@@ -51,10 +63,32 @@ namespace MeetingRoomBooker.Api.Data
                 entity.Property(x => x.IsAdmin).HasDefaultValue(false);
             });
 
+            modelBuilder.Entity<NotificationModel>(entity =>
+            {
+                entity.HasIndex(x => new
+                {
+                    x.UserId,
+                    x.Type,
+                    x.TargetReservationId
+                });
+
+                entity.HasIndex(x => new
+                {
+                    x.UserId,
+                    x.Type,
+                    x.TargetWorkScheduleEntryId
+                });
+            });
+
             modelBuilder.Entity<ChatworkDeliveryLog>(entity =>
             {
                 entity.HasIndex(x => x.DeliveryKey)
                     .IsUnique();
+
+                entity.HasIndex(x => x.ReservationId);
+                entity.HasIndex(x => x.WorkScheduleEntryId);
+                entity.HasIndex(x => x.TargetUserId);
+                entity.HasIndex(x => x.DeliveryType);
 
                 entity.Property(x => x.DeliveryType)
                     .HasMaxLength(100);
@@ -65,10 +99,10 @@ namespace MeetingRoomBooker.Api.Data
 
                 entity.Property(x => x.RoomId)
                     .HasMaxLength(100);
-                
+
                 entity.Property(x => x.Status)
                     .HasMaxLength(50);
-               
+
                 entity.Property(x => x.ErrorMessage)
                     .HasMaxLength(1000);
             });
@@ -109,14 +143,16 @@ namespace MeetingRoomBooker.Api.Data
                 entity.Property(x => x.Participants)
                     .HasMaxLength(500);
 
-                entity.Property(x => x.ParticipantIds)
+                var participantIdsProperty = entity.Property(x => x.ParticipantIds)
                     .HasConversion(
-                        v => string.Join(',', v),
-                        v => string.IsNullOrWhiteSpace(v)
+                        value => string.Join(',', value),
+                        value => string.IsNullOrWhiteSpace(value)
                             ? new List<int>()
-                            : v.Split(',', StringSplitOptions.RemoveEmptyEntries)
-                               .Select(int.Parse)
-                               .ToList());
+                            : value.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                .Select(int.Parse)
+                                .ToList());
+
+                participantIdsProperty.Metadata.SetValueComparer(IntListComparer);
             });
         }
     }

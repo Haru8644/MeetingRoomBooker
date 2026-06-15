@@ -1,5 +1,6 @@
 using MeetingRoomBooker.Api.Data;
 using MeetingRoomBooker.Api.Models;
+using MeetingRoomBooker.Api.Services.Chatwork;
 using MeetingRoomBooker.Shared.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,10 +12,29 @@ public sealed class WorkScheduleEntryService : IWorkScheduleEntryService
     private const int ParticipantsMaxLength = 500;
 
     private readonly AppDbContext _context;
+    private readonly IWorkScheduleNotificationService? _notificationService;
+    private readonly IWorkScheduleChatworkNotificationService? _chatworkNotificationService;
 
     public WorkScheduleEntryService(AppDbContext context)
+        : this(context, null, null)
+    {
+    }
+
+    public WorkScheduleEntryService(
+        AppDbContext context,
+        IWorkScheduleNotificationService? notificationService)
+        : this(context, notificationService, null)
+    {
+    }
+
+    public WorkScheduleEntryService(
+        AppDbContext context,
+        IWorkScheduleNotificationService? notificationService,
+        IWorkScheduleChatworkNotificationService? chatworkNotificationService)
     {
         _context = context;
+        _notificationService = notificationService;
+        _chatworkNotificationService = chatworkNotificationService;
     }
 
     public async Task<IReadOnlyList<WorkScheduleEntryModel>> GetEntriesAsync(
@@ -92,6 +112,20 @@ public sealed class WorkScheduleEntryService : IWorkScheduleEntryService
         await _context.SaveChangesAsync(cancellationToken);
 
         var response = await GetEntryAsync(entry.Id, cancellationToken);
+        if (response != null)
+        {
+            if (_notificationService != null)
+            {
+                await _notificationService.NotifyCreatedAsync(response, cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+
+            if (_chatworkNotificationService != null)
+            {
+                await _chatworkNotificationService.SendCreatedAsync(response, cancellationToken);
+            }
+        }
+
         return WorkScheduleEntryResult.Success(response);
     }
 
@@ -125,6 +159,8 @@ public sealed class WorkScheduleEntryService : IWorkScheduleEntryService
             return WorkScheduleEntryResult.BadRequest(normalized.ErrorMessage);
         }
 
+        var previousEntry = ToModel(entry);
+
         entry.Type = normalized.Type;
         entry.Title = normalized.Title;
         entry.Date = normalized.Date;
@@ -138,6 +174,20 @@ public sealed class WorkScheduleEntryService : IWorkScheduleEntryService
         await _context.SaveChangesAsync(cancellationToken);
 
         var response = await GetEntryAsync(entry.Id, cancellationToken);
+        if (response != null)
+        {
+            if (_notificationService != null)
+            {
+                await _notificationService.NotifyUpdatedAsync(previousEntry, response, cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+
+            if (_chatworkNotificationService != null)
+            {
+                await _chatworkNotificationService.SendUpdatedAsync(previousEntry, response, cancellationToken);
+            }
+        }
+
         return WorkScheduleEntryResult.Success(response);
     }
 
@@ -160,8 +210,21 @@ public sealed class WorkScheduleEntryService : IWorkScheduleEntryService
             return WorkScheduleEntryResult.ForbiddenResult();
         }
 
+        var deletedEntry = ToModel(entry);
+
         _context.WorkScheduleEntries.Remove(entry);
         await _context.SaveChangesAsync(cancellationToken);
+
+        if (_notificationService != null)
+        {
+            await _notificationService.NotifyDeletedAsync(deletedEntry, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+        if (_chatworkNotificationService != null)
+        {
+            await _chatworkNotificationService.SendDeletedAsync(deletedEntry, cancellationToken);
+        }
 
         return WorkScheduleEntryResult.Success();
     }

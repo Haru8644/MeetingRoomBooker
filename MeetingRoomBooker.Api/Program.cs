@@ -62,12 +62,18 @@ builder.Services.AddHttpClient<IChatworkClient, ChatworkClient>(client =>
 
 builder.Services.AddScoped<IChatworkRoomResolver, ChatworkRoomResolver>();
 builder.Services.AddScoped<IReservationChatworkNotificationService, ReservationChatworkNotificationService>();
+builder.Services.AddScoped<IWorkScheduleChatworkNotificationService, WorkScheduleChatworkNotificationService>();
+
 builder.Services.AddScoped<IReservationAccessService, ReservationAccessService>();
 builder.Services.AddScoped<IReservationNotificationService, ReservationNotificationService>();
 builder.Services.AddScoped<IReservationConflictService, ReservationConflictService>();
 builder.Services.AddScoped<IReservationSeriesQueryService, ReservationSeriesQueryService>();
+
 builder.Services.AddScoped<IRoomConflictRecordService, RoomConflictRecordService>();
 builder.Services.AddScoped<IRoomConflictDetectionService, RoomConflictDetectionService>();
+
+builder.Services.AddScoped<IWorkScheduleParticipantConflictService, WorkScheduleParticipantConflictService>();
+builder.Services.AddScoped<IWorkScheduleNotificationService, WorkScheduleNotificationService>();
 builder.Services.AddScoped<IWorkScheduleEntryService, WorkScheduleEntryService>();
 
 builder.Services.AddHostedService<ChatworkReminderWorker>();
