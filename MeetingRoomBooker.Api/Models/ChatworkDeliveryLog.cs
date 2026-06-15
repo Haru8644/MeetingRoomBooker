@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace MeetingRoomBooker.Api.Models
 {
@@ -6,6 +6,7 @@ namespace MeetingRoomBooker.Api.Models
     {
         public int Id { get; set; }
         public int ReservationId { get; set; }
+        public int? WorkScheduleEntryId { get; set; }
         public string DeliveryType { get; set; } = string.Empty;
         public string? DeliveryKey { get; set; }
         public int? TargetUserId { get; set; }

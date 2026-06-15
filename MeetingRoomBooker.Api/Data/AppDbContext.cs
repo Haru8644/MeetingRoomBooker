@@ -85,6 +85,11 @@ namespace MeetingRoomBooker.Api.Data
                 entity.HasIndex(x => x.DeliveryKey)
                     .IsUnique();
 
+                entity.HasIndex(x => x.ReservationId);
+                entity.HasIndex(x => x.WorkScheduleEntryId);
+                entity.HasIndex(x => x.TargetUserId);
+                entity.HasIndex(x => x.DeliveryType);
+
                 entity.Property(x => x.DeliveryType)
                     .HasMaxLength(100);
 
