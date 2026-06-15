@@ -1,6 +1,7 @@
-﻿using System.Text;
+using System.Text;
 using MeetingRoomBooker.Api.Data;
 using MeetingRoomBooker.Api.Models;
+using MeetingRoomBooker.Api.Services.WorkSchedules;
 using MeetingRoomBooker.Shared.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,17 +12,20 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
         private readonly AppDbContext _context;
         private readonly IChatworkClient _chatworkClient;
         private readonly IChatworkRoomResolver _roomResolver;
+        private readonly IWorkScheduleParticipantConflictService _workScheduleParticipantConflictService;
         private readonly ILogger<ReservationChatworkNotificationService> _logger;
 
         public ReservationChatworkNotificationService(
             AppDbContext context,
             IChatworkClient chatworkClient,
             IChatworkRoomResolver roomResolver,
+            IWorkScheduleParticipantConflictService workScheduleParticipantConflictService,
             ILogger<ReservationChatworkNotificationService> logger)
         {
             _context = context;
             _chatworkClient = chatworkClient;
             _roomResolver = roomResolver;
+            _workScheduleParticipantConflictService = workScheduleParticipantConflictService;
             _logger = logger;
         }
 
@@ -43,12 +47,16 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
             var stakeholderIds = GetStakeholderUserIds(reservation);
             var usersById = await GetUsersByIdAsync(stakeholderIds, cancellationToken);
             var stakeholderUsers = GetUsers(stakeholderIds, usersById);
+            var participantConflicts = await _workScheduleParticipantConflictService
+                .FindReservationExternalAppointmentConflictsAsync(reservation, cancellationToken);
+
             var stakeholderMessage = BuildStakeholderCreatedMessage(
                 reservation,
                 usersById,
                 stakeholderUsers,
                 1,
-                overlappingReservations);
+                overlappingReservations,
+                participantConflicts);
 
             await SendReservationCreatedDirectNotificationsAsync(
                 reservation,
@@ -78,12 +86,16 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
             var stakeholderIds = GetStakeholderUserIds(representativeReservation);
             var usersById = await GetUsersByIdAsync(stakeholderIds, cancellationToken);
             var stakeholderUsers = GetUsers(stakeholderIds, usersById);
+            var participantConflicts = await _workScheduleParticipantConflictService
+                .FindReservationExternalAppointmentConflictsAsync(representativeReservation, cancellationToken);
+
             var stakeholderMessage = BuildStakeholderCreatedMessage(
                 representativeReservation,
                 usersById,
                 stakeholderUsers,
                 createdCount,
-                overlappingReservations);
+                overlappingReservations,
+                participantConflicts);
 
             await SendReservationCreatedDirectNotificationsAsync(
                 representativeReservation,
@@ -104,8 +116,10 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
             var usersById = await GetUsersByIdAsync(stakeholderIds, cancellationToken);
             var stakeholderUsers = GetUsers(stakeholderIds, usersById);
             var changeLines = BuildChangeLines(previousReservation, currentReservation, usersById);
+            var participantConflicts = await _workScheduleParticipantConflictService
+                .FindReservationExternalAppointmentConflictsAsync(currentReservation, cancellationToken);
 
-            if (changeLines.Count == 0)
+            if (changeLines.Count == 0 && participantConflicts.Count == 0)
             {
                 return;
             }
@@ -114,7 +128,8 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                 currentReservation,
                 usersById,
                 stakeholderUsers,
-                changeLines);
+                changeLines,
+                participantConflicts: participantConflicts);
 
             var changeId = Guid.NewGuid().ToString("N");
 
@@ -143,7 +158,10 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                 representativeCurrentReservation,
                 usersById);
 
-            if (changeLines.Count == 0)
+            var participantConflicts = await _workScheduleParticipantConflictService
+                .FindReservationExternalAppointmentConflictsAsync(representativeCurrentReservation, cancellationToken);
+
+            if (changeLines.Count == 0 && participantConflicts.Count == 0)
             {
                 return;
             }
@@ -153,7 +171,8 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                 usersById,
                 stakeholderUsers,
                 changeLines,
-                updatedCount);
+                updatedCount,
+                participantConflicts);
 
             var changeId = Guid.NewGuid().ToString("N");
 
@@ -405,6 +424,7 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                     _context.ChatworkDeliveryLogs.Add(new ChatworkDeliveryLog
                     {
                         ReservationId = reservation.Id,
+                        WorkScheduleEntryId = null,
                         DeliveryType = deliveryType,
                         DeliveryKey = deliveryKey,
                         TargetUserId = targetUser.Id,
@@ -432,6 +452,7 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                     _context.ChatworkDeliveryLogs.Add(new ChatworkDeliveryLog
                     {
                         ReservationId = reservation.Id,
+                        WorkScheduleEntryId = null,
                         DeliveryType = deliveryType,
                         DeliveryKey = deliveryKey,
                         TargetUserId = targetUser.Id,
@@ -460,6 +481,7 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                     _context.ChatworkDeliveryLogs.Add(new ChatworkDeliveryLog
                     {
                         ReservationId = reservation.Id,
+                        WorkScheduleEntryId = null,
                         DeliveryType = deliveryType,
                         DeliveryKey = deliveryKey,
                         TargetUserId = targetUser.Id,
@@ -686,9 +708,13 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
             IReadOnlyDictionary<int, UserModel> usersById,
             IReadOnlyCollection<UserModel> targetUsers,
             int createdCount = 1,
-            IReadOnlyCollection<ReservationModel>? overlappingReservations = null)
+            IReadOnlyCollection<ReservationModel>? overlappingReservations = null,
+            IReadOnlyCollection<WorkScheduleParticipantConflict>? participantConflicts = null)
         {
-            var extraLines = BuildCreatedExtraLines(createdCount, overlappingReservations);
+            var extraLines = BuildCreatedExtraLines(
+                createdCount,
+                overlappingReservations,
+                participantConflicts);
 
             return BuildStakeholderSummaryMessage(
                 "会議予約を受け付けました",
@@ -703,7 +729,8 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
 
         private static IReadOnlyCollection<string>? BuildCreatedExtraLines(
             int createdCount,
-            IReadOnlyCollection<ReservationModel>? overlappingReservations)
+            IReadOnlyCollection<ReservationModel>? overlappingReservations,
+            IReadOnlyCollection<WorkScheduleParticipantConflict>? participantConflicts)
         {
             var lines = new List<string>();
 
@@ -742,6 +769,8 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                 }
             }
 
+            AddParticipantConflictLines(lines, participantConflicts);
+
             return lines.Count == 0 ? null : lines;
         }
 
@@ -750,18 +779,28 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
             IReadOnlyDictionary<int, UserModel> usersById,
             IReadOnlyCollection<UserModel> targetUsers,
             IReadOnlyCollection<string> changeLines,
-            int updatedCount = 1)
+            int updatedCount = 1,
+            IReadOnlyCollection<WorkScheduleParticipantConflict>? participantConflicts = null)
         {
-            var extraLines = changeLines
-                .Select(change => $"- {change}")
-                .Prepend("変更点:")
-                .ToList();
+            var extraLines = new List<string>();
+
+            if (changeLines.Count > 0)
+            {
+                extraLines.Add("変更点:");
+                extraLines.AddRange(changeLines.Select(change => $"- {change}"));
+            }
 
             if (updatedCount > 1)
             {
-                extraLines.Add("[hr]");
+                if (extraLines.Count > 0)
+                {
+                    extraLines.Add("[hr]");
+                }
+
                 extraLines.Add($"更新件数: {updatedCount}件");
             }
+
+            AddParticipantConflictLines(extraLines, participantConflicts);
 
             return BuildStakeholderSummaryMessage(
                 "会議予約が変更されました",
@@ -840,11 +879,59 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
 
             if (extraLines is not null)
             {
-                lines.Add("[hr]");
-                lines.AddRange(extraLines);
+                var filteredExtraLines = extraLines
+                    .Where(line => !string.IsNullOrWhiteSpace(line))
+                    .ToList();
+
+                if (filteredExtraLines.Count > 0)
+                {
+                    lines.Add("[hr]");
+                    lines.AddRange(filteredExtraLines);
+                }
             }
 
             return BuildInfoMessage(title, lines);
+        }
+
+        private static void AddParticipantConflictLines(
+            List<string> lines,
+            IReadOnlyCollection<WorkScheduleParticipantConflict>? participantConflicts)
+        {
+            var conflicts = participantConflicts?
+                .GroupBy(conflict => new
+                {
+                    conflict.ParticipantUserId,
+                    conflict.SourceType,
+                    conflict.SourceId
+                })
+                .Select(group => group.First())
+                .OrderBy(conflict => conflict.Date)
+                .ThenBy(conflict => conflict.StartTime ?? conflict.Date)
+                .ThenBy(conflict => conflict.ParticipantName)
+                .ToList() ?? new List<WorkScheduleParticipantConflict>();
+
+            if (conflicts.Count == 0)
+            {
+                return;
+            }
+
+            if (lines.Count > 0)
+            {
+                lines.Add("[hr]");
+            }
+
+            lines.Add("注意: 参加者の予定が社外予定と重複しています");
+            lines.Add($"重複件数: {conflicts.Count}件");
+
+            foreach (var conflict in conflicts.Take(5))
+            {
+                lines.Add($"- {conflict.ParticipantName}: {conflict.SourceType}「{conflict.SourceTitle}」 {conflict.Date:yyyy/MM/dd} {GetTimeRangeText(conflict.StartTime, conflict.EndTime)}");
+            }
+
+            if (conflicts.Count > 5)
+            {
+                lines.Add($"- ほか {conflicts.Count - 5}件");
+            }
         }
 
         private static List<string> BuildChangeLines(
@@ -959,6 +1046,13 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
         private static string GetTimeRangeText(ReservationModel reservation)
         {
             return $"{reservation.StartTime:HH:mm}〜{reservation.EndTime:HH:mm}";
+        }
+
+        private static string GetTimeRangeText(DateTime? startTime, DateTime? endTime)
+        {
+            return startTime.HasValue && endTime.HasValue
+                ? $"{startTime.Value:HH:mm}〜{endTime.Value:HH:mm}"
+                : "終日";
         }
     }
 }
