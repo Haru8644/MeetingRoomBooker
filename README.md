@@ -1,257 +1,534 @@
 # MeetingRoomBooker
 
-MeetingRoomBooker is a meeting room booking system built with **Blazor WebAssembly** and **ASP.NET Core Web API** for small internal teams.
+MeetingRoomBooker is an internal meeting room booking and employee schedule management system built with **Blazor WebAssembly**, **ASP.NET Core Web API**, **Entity Framework Core**, and **SQLite**.
 
-It was originally developed during my internship to improve day-to-day meeting room operations, including booking management, participant handling, notifications, and reminders.  
-This public version has been cleaned up and reorganized so the architecture, authentication model, and deployment assumptions are easier to understand as a portfolio project, without exposing company-specific data or secrets.
+It was originally developed to solve a real internal operations problem: meeting room reservations were managed in a shared calendar where room bookings and unrelated schedules were mixed together, which made availability hard to understand and caused duplicate reservations.
 
----
+This project focuses not only on basic CRUD operations, but also on practical operational concerns such as:
 
-## Overview
-
-Managing meeting rooms through chat tools and shared calendars alone often creates operational friction:
-
-- it is hard to see room availability at a glance
-- ownership and participant responsibility can become unclear
-- updates and cancellations are easy to miss
-- reminder and reception workflows often depend on manual coordination
-- overlapping reservations may be caught too late
-
-MeetingRoomBooker brings these concerns into a single workflow that covers **reservations, access control, notifications, and day-to-day operational visibility**.
+* API-side conflict validation
+* participant-based schedule conflict warnings
+* recurring reservation handling
+* in-app notifications
+* Chatwork direct notifications
+* reminder delivery
+* admin-controlled user management
+* safe deployment and database migration practices
 
 ---
 
-## Features
+## Background
 
-### Reservation management
-- Create reservations with date, time, room, category, and purpose
-- Add participants to a reservation
-- View schedules in calendar and timeline formats
-- Make organizers and participants easy to distinguish in the UI
+Before MeetingRoomBooker, meeting room usage was managed through a general-purpose calendar. This created several operational issues:
+
+* meeting room reservations were mixed with non-room schedules
+* users could miss updates or cancellations
+* responsibility for confirming changes was unclear
+* duplicate bookings were sometimes noticed too late
+* reception and reminder workflows depended on manual coordination
+
+MeetingRoomBooker was designed as a dedicated workflow for small internal teams, bringing reservations, participants, notifications, conflict checks, and operational visibility into one system.
+
+---
+
+## Key Features
+
+### Meeting room reservations
+
+* Create, update, and delete meeting room reservations
+* Select date, time, room, category, purpose, and number of attendees
+* Add participants to reservations
+* View reservations on calendar and timeline screens
+* Join or leave existing reservations
+* Restrict edits and deletes to organizers or admins
+* Validate room/time conflicts on the API side
 
 ### Recurring reservations
-- Support daily and weekly recurring bookings
-- Delete recurring reservations with scope options:
-  - This occurrence only
-  - This and following
-  - Entire series
-- Update recurring reservations with scope options:
-  - Single occurrence
-  - This and following
-  - Entire series
 
-### Notifications
-- Notify users when participants are added or removed
-- Send detailed update notifications based on reservation changes
-- Notify organizers when someone joins or leaves a reservation
-- Send direct Chatwork notifications to reservation owners and participants
-- Send reminder notifications 10 minutes before the meeting starts
-- Track Chatwork delivery results per target user for operational troubleshooting
+* Create daily and weekly recurring reservations
+* Update recurring reservations by scope:
 
-### Operational support
-- Cookie-based authentication with persistent sessions
-- Remember Me support
-- Admin user management
-- Self-join flow for existing reservations
-- Draft persistence while filling out reservation forms
+  * single occurrence
+  * this and following
+  * entire series
+* Delete recurring reservations by scope:
 
-### Security and access control
-- Server-side authentication and authorization checks
-- Reservation updates and deletions restricted to the organizer or an admin
-- Notifications visible only to the relevant user or an admin
-- Admin-only protection for management APIs
-- Plaintext password storage removed for new registrations
-- Legacy plaintext passwords can be migrated to hashed storage after a successful login
+  * single occurrence
+  * this and following
+  * entire series
+* Keep recurring reservation logic on the backend so the UI does not become the source of truth
+
+### Employee work schedules
+
+MeetingRoomBooker also supports employee schedule entries alongside meeting room reservations.
+
+Supported work schedule types:
+
+* external appointments
+* work-from-home schedules
+* leave schedules
+
+Work schedules can be:
+
+* created from the reservation screen
+* displayed on the schedule screen
+* shown together with room reservations
+* opened in detail modals
+* edited and deleted with permission checks
+
+External appointments are treated as time-based schedules. Work-from-home and leave schedules are treated as day-level status entries, so they are visible in the main schedule list without overcrowding the timeline.
+
+### Participant conflict warnings
+
+The system detects participant-level conflicts, not only room conflicts.
+
+Examples:
+
+* a meeting room reservation overlaps with an external appointment for the same participant
+* an external appointment overlaps with a meeting room reservation for the same participant
+* two external appointments overlap for the same participant
+
+These conflicts are shown as warnings rather than always blocking the operation, because real internal schedules sometimes intentionally overlap. The goal is to make conflicts visible before and after registration.
+
+### In-app notifications
+
+MeetingRoomBooker creates in-app notifications for affected users.
+
+Notification examples:
+
+* a participant was added to a reservation
+* a participant was removed from a reservation
+* a reservation was updated
+* a work schedule was created
+* a work schedule was updated
+* a work schedule was deleted
+* a participant schedule conflict exists
+
+Notifications are associated with either a reservation or a work schedule entry through target IDs, making it easier to trace what each notification refers to.
+
+### Chatwork notifications
+
+Chatwork integration is handled entirely on the backend. The frontend never receives the Chatwork API token.
+
+Supported Chatwork notification targets include:
+
+* reservation organizers
+* reservation participants
+* users removed from a reservation
+* work schedule participants
+* users removed from a work schedule entry
+
+Supported Chatwork notification events include:
+
+* reservation creation
+* reservation update
+* reservation cancellation
+* reservation reminders
+* work schedule creation
+* work schedule update
+* work schedule deletion
+* participant conflict warnings
+
+Chatwork delivery is tracked per user, so one failed delivery does not block notifications for other users.
+
+### Reminder delivery
+
+A background worker checks for upcoming reservations and sends 10-minute reminder notifications through Chatwork.
+
+Delivery is protected by delivery keys so the same reminder is not repeatedly sent to the same user.
+
+### Admin and operations support
+
+Admins can:
+
+* register users
+* update user names
+* manage Chatwork account IDs
+* manage Chatwork direct room IDs
+* delete users
+* manage reservations beyond normal ownership rules when necessary
+
+An additional Operations Web UI is included for operational screens and admin-oriented workflows.
 
 ---
 
 ## Tech Stack
 
 ### Frontend
-- Blazor WebAssembly
-- Microsoft Fluent UI for Blazor
-- Shared C# models and contracts
+
+* Blazor WebAssembly
+* Microsoft Fluent UI for Blazor
+* Shared C# models
+* React / TypeScript / Vite for Operations Web
 
 ### Backend
-- ASP.NET Core Web API
-- Entity Framework Core
-- Cookie Authentication
-- Hosted Service for Chatwork reminders
 
-### Data / Infrastructure
-- SQLite
-- Nginx
-- Linux VPS
-- systemd
+* C# / .NET 8
+* ASP.NET Core Web API
+* Entity Framework Core
+* Cookie Authentication
+* Hosted Services for background workers
+* xUnit for automated tests
+
+### Database and infrastructure
+
+* SQLite
+* EF Core migrations
+* nginx
+* systemd
+* Linux VPS
+* GitHub Actions
 
 ---
 
-## Architecture
+## Repository Structure
 
 ```text
-MeetingRoomBooker.Web     ... Blazor WebAssembly frontend
-MeetingRoomBooker.Api     ... Authentication, reservation, notification, and Chatwork APIs
-MeetingRoomBooker.Shared  ... Shared models and service contracts
+MeetingRoomBooker.Api
+  ASP.NET Core Web API
+  Authentication, reservation APIs, work schedule APIs, notifications,
+  Chatwork integration, background workers, and EF Core persistence
+
+MeetingRoomBooker.Web
+  Blazor WebAssembly frontend
+  Reservation screen, schedule screen, notifications, settings, and user management UI
+
+MeetingRoomBooker.Shared
+  Shared DTOs and models used by both API and Web
+
+MeetingRoomBooker.Tests
+  xUnit tests for reservation rules, conflict detection, notifications,
+  work schedule rules, and Chatwork notification behavior
+
+MeetingRoomBooker.OperationsWeb
+  React / TypeScript / Vite operations UI
+
+docs
+  Design notes, deployment notes, conflict detection documentation,
+  and operational verification documents
+```
+
+---
+
+## Architecture Overview
+
+```text
++------------------------------+
+| MeetingRoomBooker.Web        |
+| Blazor WebAssembly           |
++--------------+---------------+
+               |
+               | HTTP API
+               v
++--------------+---------------+
+| MeetingRoomBooker.Api        |
+| ASP.NET Core Web API         |
+|                              |
+| - Auth / Users               |
+| - Reservations               |
+| - Work schedules             |
+| - Notifications              |
+| - Chatwork delivery          |
+| - Background workers         |
++--------------+---------------+
+               |
+               | EF Core
+               v
++--------------+---------------+
+| SQLite                       |
+| app.db                       |
++------------------------------+
 ```
 
 ### Design principles
-- Keep frontend and backend responsibilities clearly separated
-- Share contracts between client and server to reduce mismatches
-- Enforce final authorization on the API side, not only in the UI
-- Handle external notification delivery on the backend rather than exposing Chatwork directly from the frontend
+
+* Keep UI logic and business rules separate
+* Enforce authorization and conflict validation on the API side
+* Use shared models to reduce contract mismatches between frontend and backend
+* Keep notification delivery on the backend
+* Treat external integrations as operationally unreliable and log delivery results
+* Keep production deployment simple enough for a small internal system
+* Avoid casual production database migrations without backup and verification
+
+---
+
+## Domain Model Overview
+
+### Reservations
+
+A reservation represents a meeting room booking.
+
+Main fields include:
+
+* room
+* date
+* start time
+* end time
+* purpose
+* reservation owner
+* participants
+* recurring series information
+
+Room/time conflicts are validated before saving.
+
+### Work schedule entries
+
+A work schedule entry represents an employee schedule item.
+
+Supported types:
+
+* `ExternalAppointment`
+* `WorkFromHome`
+* `Leave`
+
+External appointments have start and end times. Work-from-home and leave entries are day-level schedule entries.
+
+### Notifications
+
+Notifications can target either:
+
+* a reservation
+* a work schedule entry
+
+This makes the notification model flexible enough to handle both meeting room workflows and employee schedule workflows.
+
+### Chatwork delivery logs
+
+Chatwork delivery logs track individual delivery attempts.
+
+Each log can include:
+
+* reservation ID
+* work schedule entry ID
+* delivery type
+* delivery key
+* target user ID
+* room ID
+* delivery status
+* error message
+* attempted time
+* sent time
+* message body
+
+Delivery statuses include:
+
+* `Succeeded`
+* `Failed`
+* `Skipped`
+
+A skipped delivery usually means the target user does not have a direct Chatwork room ID configured.
+
+---
+
+## Conflict Handling
+
+MeetingRoomBooker handles two types of conflicts.
+
+### Room conflicts
+
+Room conflicts are blocking conflicts.
+
+If another reservation already uses the same room at an overlapping time, the API prevents the reservation from being saved unless the operation explicitly allows overlap in a controlled flow.
+
+### Participant schedule conflicts
+
+Participant conflicts are warning-based conflicts.
+
+For example, a participant may already have an external appointment at the same time as a meeting room reservation.
+
+These conflicts are not always blocked because some overlaps may be intentional, but they are surfaced through:
+
+* confirmation dialogs in the UI
+* warning icons on the schedule screen
+* in-app warning notifications
+* Chatwork warning messages
+
+This design keeps the operation flexible while still making risky schedules visible.
+
+---
+
+## Notification Design
+
+### In-app notifications
+
+In-app notifications are created when users are affected by changes.
+
+Examples:
+
+* a user is added to a reservation
+* a user is removed from a reservation
+* a reservation is updated
+* a work schedule is created
+* a work schedule is updated
+* a work schedule is deleted
+* a participant conflict exists
+
+Update notifications include change details where possible.
+
+### Chatwork direct notifications
+
+Chatwork direct notifications are sent to affected users.
+
+For updates, the system separates users into:
+
+* retained participants
+* added participants
+* removed participants
+
+This allows the message to match the user's actual relationship to the change.
+
+For example:
+
+* retained users receive an update notification
+* added users receive an "added" notification
+* removed users receive a "removed" notification
+
+### Duplicate delivery prevention
+
+Each Chatwork notification uses a delivery key.
+
+Example keys:
+
+```text
+ReservationCreated:reservation:{reservationId}:user:{targetUserId}
+ReservationUpdated:reservation:{reservationId}:user:{targetUserId}:change:{changeId}
+Reminder10Minutes:reservation:{reservationId}:user:{targetUserId}:start:{scheduledStartTime}
+
+WorkScheduleCreated:work-schedule:{workScheduleEntryId}:user:{targetUserId}
+WorkScheduleUpdated:work-schedule:{workScheduleEntryId}:user:{targetUserId}:change:{changeId}
+WorkScheduleDeleted:work-schedule:{workScheduleEntryId}:user:{targetUserId}
+```
+
+This prevents duplicate delivery while still allowing each affected user to receive their own notification.
 
 ---
 
 ## Authentication and Authorization
 
 ### Authentication
-- ASP.NET Core Cookie Authentication
-- Persistent sessions through Remember Me
-- HttpOnly authentication cookies
+
+* ASP.NET Core Cookie Authentication
+* HttpOnly authentication cookies
+* Remember Me support
+* Persistent sessions for internal users
 
 ### Authorization
 
 Regular users can:
-- view reservation schedules
-- create reservations
-- update or delete their own reservations
-- join or leave other users' reservations
-- view their own notifications
+
+* view schedules
+* create reservations
+* update or delete their own reservations
+* join or leave reservations
+* view their own notifications
+* create and manage their own work schedule entries
 
 Admins can:
-- list users
-- register users
-- update user names, Chatwork account IDs, and direct Chatwork room IDs
-- delete users
-- access admin-only management APIs
-- manage reservations beyond normal ownership rules when necessary
+
+* manage users
+* manage Chatwork user mappings
+* access admin-only APIs
+* manage reservations and schedules beyond normal ownership rules when necessary
 
 ### Password handling
-- New passwords are stored as hashes
-- Legacy plaintext passwords can be migrated after a successful login
-- Plaintext values are cleared once migration is complete
+
+* New passwords are stored as hashes
+* Legacy plaintext password values can be migrated after successful login
+* Plaintext values are cleared after migration
 
 ---
 
-## Reservation Integrity
+## Testing
 
-The API performs **server-side overlap validation** before saving reservations, so duplicate bookings are not prevented by the UI alone.
+The project includes xUnit tests for important business rules.
 
-This approach is suitable for a small internal deployment.  
-In a higher-concurrency environment, I would strengthen this further with stricter transactional handling or database-level guarantees.
+Covered areas include:
 
----
+* reservation access rules
+* reservation overlap checks
+* recurring reservation rules
+* room conflict detection
+* room conflict record management
+* work schedule validation
+* work schedule system notifications
+* work schedule Chatwork notifications
+* reservation Chatwork participant conflict warnings
 
-## Chatwork Integration
+Run all tests:
 
-Chatwork integration is handled entirely on the backend.  
-The frontend never receives the Chatwork API token.
-
-### Supported events
-- Reservation created
-- Reservation updated
-- Reminder sent 10 minutes before the meeting
-
-### Direct notification targets
-For direct Chatwork notifications, MeetingRoomBooker sends messages to:
-
-- the reservation owner
-- reservation participants
-- users who were removed from a reservation after an update
-
-This is designed so that users who are affected by a reservation change can still receive the update even if they are no longer part of the final participant list.
-
-### User mapping
-Each user can store two Chatwork-related identifiers:
-
-- `ChatworkAccountId`: used for Chatwork mentions
-- `ChatworkDirectRoomId`: used as the destination room ID for direct Chatwork messages
-
-Admins can manage these values from the user management screen.
-
-### Delivery logging
-Chatwork delivery results are tracked per target user.
-
-Each delivery log can include:
-
-- `ReservationId`
-- `DeliveryType`
-- `DeliveryKey`
-- `TargetUserId`
-- `RoomId`
-- `Status`
-- `ErrorMessage`
-- `AttemptedAt`
-- `SentAt`
-
-The delivery status can be:
-
-- `Succeeded`: the message was sent successfully
-- `Failed`: the system attempted to send the message, but Chatwork delivery failed
-- `Skipped`: the target user did not have a direct Chatwork room ID configured
-
-### Duplicate delivery prevention
-Each direct notification uses a `DeliveryKey` to prevent duplicate delivery.
-
-Examples:
-
-```text
-ReservationCreated:reservation:{reservationId}:user:{targetUserId}
-ReservationUpdated:reservation:{reservationId}:user:{targetUserId}:change:{changeId}
-Reminder10Minutes:reservation:{reservationId}:user:{targetUserId}:start:{scheduledStartTime}
+```bash
+dotnet test MeetingRoomBooker.slnx
 ```
 
-This makes duplicate prevention user-aware.  
-For example, the same reservation reminder can be sent once to each participant, while still preventing repeated delivery to the same user.
+Build the solution:
 
-### Failure handling
-Direct Chatwork delivery is processed user by user.
+```bash
+dotnet build
+```
 
-If delivery to one user fails, the system records a failed delivery log and continues processing the remaining users.  
-This prevents a single Chatwork API failure or missing room setting from blocking notifications for everyone else.
+---
 
-### Reminder worker
-The reminder worker is responsible for finding reservations that start soon.  
-The actual direct delivery and delivery logging are delegated to the Chatwork notification service, keeping scheduling and delivery responsibilities separate.
+## CI / Automation
+
+GitHub Actions are used for build and verification.
+
+Main workflows include:
+
+* `.NET` build and test CI
+* Operations Web build CI
+* manual publish workflows
+* manual VPS deployment workflows
+* manual VPS deployment with migration confirmation
+
+Production deployment workflows require explicit confirmation inputs so that schema-changing deployments are not triggered accidentally.
 
 ---
 
 ## Local Development
 
 ### Prerequisites
-- .NET 8 SDK
-- Visual Studio 2022 or VS Code
+
+* .NET 8 SDK
+* Visual Studio 2022 or VS Code
+* Node.js for Operations Web development
 
 ### Run the API
+
 ```bash
 cd MeetingRoomBooker.Api
 dotnet restore
 dotnet run
 ```
 
-### Run the Web app
+### Run the Blazor Web app
+
 ```bash
 cd MeetingRoomBooker.Web
 dotnet restore
 dotnet run
 ```
 
-### Create the first admin user
-If the database is empty, the first registered user becomes the initial admin.
+### Run Operations Web
 
-There is no public self-signup screen in the UI.  
-For the first account only, create the user through:
+```bash
+cd MeetingRoomBooker.OperationsWeb
+npm install
+npm run dev
+```
 
-- `POST /api/Users/register` in Swagger, or
-- any API client
+### Build Operations Web
 
-After that, additional users should be created from the admin management screen.
+```bash
+cd MeetingRoomBooker.OperationsWeb
+npm run build
+```
 
 ---
 
 ## Configuration
 
-### Web
+### Web configuration
+
 `MeetingRoomBooker.Web/wwwroot/appsettings.json`
 
 ```json
@@ -260,88 +537,141 @@ After that, additional users should be created from the admin management screen.
 }
 ```
 
-### API
+### API configuration
+
 `MeetingRoomBooker.Api/appsettings.json`
 
-Main settings include:
+Important settings include:
 
-- `ConnectionStrings:DefaultConnection`
-- `Cors:AllowedOrigins`
-- `Chatwork:Enabled`
-- `Chatwork:ApiToken`
-- `Chatwork:RoomId`
-- `Chatwork:StakeholderRoomId`
-- `Chatwork:ReceptionRoomId`
-- `Chatwork:RoomMappings`
+* `ConnectionStrings:DefaultConnection`
+* `Cors:AllowedOrigins`
+* `Chatwork:Enabled`
+* `Chatwork:ApiToken`
+* `Chatwork:RoomId`
+* `Chatwork:StakeholderRoomId`
+* `Chatwork:ReceptionRoomId`
+* `Chatwork:RoomMappings`
+* `RoomConflictDetection`
+
+Do not commit production secrets or real Chatwork tokens.
+
+---
+
+## Database and Migrations
+
+The project uses SQLite with EF Core migrations.
+
+Recent schema areas include:
+
+* reservations
+* users
+* notifications
+* Chatwork delivery logs
+* room conflict records
+* work schedule entries
+
+Because this project can be used in a real internal environment, production database migrations must be handled carefully.
+
+Before applying migrations to production:
+
+1. confirm the actual production database path
+2. back up the SQLite database with a timestamp
+3. inspect `__EFMigrationsHistory`
+4. inspect existing tables
+5. test the migration against a copied database when possible
+6. stop the API process
+7. back up the database again
+8. apply migrations
+9. restart the API
+10. verify core workflows
+11. prepare rollback steps before starting
+
+Do not run production migrations casually.
 
 ---
 
 ## Deployment Assumptions
 
-This project is intended for a **small internal, single-node deployment**.
+This project is designed for a small internal, single-node deployment.
 
-A typical setup looks like this:
+A typical production setup is:
 
-- Web: static file hosting
-- API: long-running Kestrel process
-- Nginx: reverse proxy
-- systemd: API process management
-- SQLite: lightweight database for internal operational use
+```text
+Browser
+  |
+  v
+nginx
+  |
+  +--> static Blazor Web files
+  |
+  +--> ASP.NET Core API on localhost
+          |
+          v
+        SQLite
+```
 
-The goal is to keep the system understandable and maintainable without introducing unnecessary infrastructure complexity.
+Expected components:
 
----
+* Ubuntu-based VPS
+* nginx
+* systemd service for the API
+* static file hosting for the Blazor Web app
+* SQLite database file
+* manual deployment workflow with backup and rollback preparation
 
-## What This Project Demonstrates
-
-As a portfolio project, this repository is meant to highlight:
-
-- practical internal tool design rather than toy CRUD
-- API-side authorization instead of UI-only restrictions
-- cookie-based authentication with persistent sessions
-- recurring reservation workflows with scoped update and delete behavior
-- operational notifications, reminder handling, and delivery logging
-- backend-only Chatwork integration with user-level delivery tracking
-- shared contracts between frontend and backend
-
----
-
-## Possible Next Improvements
-
-Areas I would improve next include:
-
-- automated API tests and end-to-end tests
-- clearer separation between controllers and application services
-- stronger audit logging
-- a smoother migration path from SQLite to PostgreSQL
-- CI automation for build, test, format, and publish
-- a more explicit database initialization and admin bootstrap flow
+This keeps the system understandable and maintainable without introducing unnecessary infrastructure for a small team.
 
 ---
 
 ## Security and Privacy Notes
 
-Before publishing or sharing a deployment based on this project, make sure to:
+Before sharing or deploying this project, make sure to:
 
-- remove all real email addresses, tokens, and secrets
-- avoid committing local database files
-- avoid publishing screenshots that contain personal information
-- exclude production URLs, VPS details, and credentials
+* remove all real credentials
+* remove real Chatwork tokens
+* avoid committing production database files
+* avoid publishing screenshots with personal information
+* avoid exposing VPS hostnames or private URLs
+* verify that Git author email uses a safe public or noreply address
 
 ---
 
-## Demo Materials
+## What This Project Demonstrates
 
-The following assets help make the project easier to present:
+This project is intended to show practical application development skills beyond simple CRUD.
 
-- login screen
-- calendar screen
-- reservation form
-- admin management screen
-- Chatwork notification examples
+It demonstrates:
+
+* real operational problem discovery
+* backend-side business rule enforcement
+* conflict detection design
+* recurring reservation modeling
+* user-aware notification design
+* external API integration with delivery logging
+* API-side authorization
+* database migration awareness
+* test coverage for service-level rules
+* CI and deployment workflow organization
+* production-minded rollback and backup thinking
+
+---
+
+## Possible Next Improvements
+
+Areas I would improve next:
+
+* add end-to-end tests for core reservation flows
+* improve observability around notification delivery
+* add richer audit logs for admin operations
+* introduce stronger database-level guarantees for high-concurrency usage
+* evaluate PostgreSQL migration if the system grows beyond small-team usage
+* improve README screenshots and demo materials
+* document production rollout steps in more detail
 
 ---
 
 ## Summary
 
-> A meeting room booking system designed around real internal operational needs, covering reservations, access control, notifications, and reminders end to end.
+MeetingRoomBooker is a meeting room booking and employee schedule management system designed around real internal operations.
+
+It combines reservations, recurring schedules, work schedules, participant conflict warnings, notifications, Chatwork integration, tests, and production-aware deployment practices into one maintainable internal tool.
