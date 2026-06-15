@@ -11,10 +11,19 @@ public sealed class WorkScheduleEntryService : IWorkScheduleEntryService
     private const int ParticipantsMaxLength = 500;
 
     private readonly AppDbContext _context;
+    private readonly IWorkScheduleNotificationService? _notificationService;
 
     public WorkScheduleEntryService(AppDbContext context)
+        : this(context, null)
+    {
+    }
+
+    public WorkScheduleEntryService(
+        AppDbContext context,
+        IWorkScheduleNotificationService? notificationService)
     {
         _context = context;
+        _notificationService = notificationService;
     }
 
     public async Task<IReadOnlyList<WorkScheduleEntryModel>> GetEntriesAsync(
@@ -92,6 +101,12 @@ public sealed class WorkScheduleEntryService : IWorkScheduleEntryService
         await _context.SaveChangesAsync(cancellationToken);
 
         var response = await GetEntryAsync(entry.Id, cancellationToken);
+        if (response != null && _notificationService != null)
+        {
+            await _notificationService.NotifyCreatedAsync(response, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
         return WorkScheduleEntryResult.Success(response);
     }
 
@@ -125,6 +140,8 @@ public sealed class WorkScheduleEntryService : IWorkScheduleEntryService
             return WorkScheduleEntryResult.BadRequest(normalized.ErrorMessage);
         }
 
+        var previousEntry = ToModel(entry);
+
         entry.Type = normalized.Type;
         entry.Title = normalized.Title;
         entry.Date = normalized.Date;
@@ -138,6 +155,12 @@ public sealed class WorkScheduleEntryService : IWorkScheduleEntryService
         await _context.SaveChangesAsync(cancellationToken);
 
         var response = await GetEntryAsync(entry.Id, cancellationToken);
+        if (response != null && _notificationService != null)
+        {
+            await _notificationService.NotifyUpdatedAsync(previousEntry, response, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
         return WorkScheduleEntryResult.Success(response);
     }
 
@@ -160,8 +183,16 @@ public sealed class WorkScheduleEntryService : IWorkScheduleEntryService
             return WorkScheduleEntryResult.ForbiddenResult();
         }
 
+        var deletedEntry = ToModel(entry);
+
         _context.WorkScheduleEntries.Remove(entry);
         await _context.SaveChangesAsync(cancellationToken);
+
+        if (_notificationService != null)
+        {
+            await _notificationService.NotifyDeletedAsync(deletedEntry, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
+        }
 
         return WorkScheduleEntryResult.Success();
     }

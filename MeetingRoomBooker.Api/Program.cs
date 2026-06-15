@@ -68,6 +68,8 @@ builder.Services.AddScoped<IReservationConflictService, ReservationConflictServi
 builder.Services.AddScoped<IReservationSeriesQueryService, ReservationSeriesQueryService>();
 builder.Services.AddScoped<IRoomConflictRecordService, RoomConflictRecordService>();
 builder.Services.AddScoped<IRoomConflictDetectionService, RoomConflictDetectionService>();
+builder.Services.AddScoped<IWorkScheduleParticipantConflictService, WorkScheduleParticipantConflictService>();
+builder.Services.AddScoped<IWorkScheduleNotificationService, WorkScheduleNotificationService>();
 builder.Services.AddScoped<IWorkScheduleEntryService, WorkScheduleEntryService>();
 
 builder.Services.AddHostedService<ChatworkReminderWorker>();
