@@ -1305,9 +1305,10 @@
             request.LeavePeriod = workScheduleEditLeavePeriod;
         }
 
+        var scheduleId = selectedWorkSchedule.Id;
+
         try
         {
-            var scheduleId = selectedWorkSchedule.Id;
             await WorkScheduleService.UpdateEntryAsync(scheduleId, request);
 
             isEditingWorkSchedule = false;
@@ -1319,7 +1320,7 @@
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Failed to update work schedule entry. entryId={EntryId}", selectedWorkSchedule.Id);
+            Logger.LogError(ex, "Failed to update work schedule entry. entryId={EntryId}", scheduleId);
             await JSRuntime.InvokeVoidAsync("alert", "勤務予定の更新に失敗しました。時間をおいて再度お試しください。");
         }
     }
@@ -1340,9 +1341,11 @@
             return;
         }
 
+        var scheduleId = selectedWorkSchedule.Id;
+
         try
         {
-            await WorkScheduleService.DeleteEntryAsync(selectedWorkSchedule.Id);
+            await WorkScheduleService.DeleteEntryAsync(scheduleId);
             selectedWorkSchedule = null;
             isEditingWorkSchedule = false;
             ResetWorkScheduleEditState();
@@ -1351,7 +1354,7 @@
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Failed to delete work schedule entry. entryId={EntryId}", selectedWorkSchedule.Id);
+            Logger.LogError(ex, "Failed to delete work schedule entry. entryId={EntryId}", scheduleId);
             await JSRuntime.InvokeVoidAsync("alert", "勤務予定の削除に失敗しました。時間をおいて再度お試しください。");
         }
     }
