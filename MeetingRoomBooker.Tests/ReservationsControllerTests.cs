@@ -74,6 +74,86 @@ public sealed class ReservationsControllerTests
     }
 
     [Fact]
+    public async Task PostReservationSeries_WhenRoomConflictExistsAndAllowOverlapFalse_ReturnsConflict()
+    {
+        using var database = CreateTestDatabase();
+        await SeedUsersAsync(database.Context);
+
+        database.Context.Reservations.Add(CreateReservation(
+            room: "Room A",
+            startTime: new DateTime(2026, 6, 1, 10, 0, 0),
+            endTime: new DateTime(2026, 6, 1, 11, 0, 0)));
+        await database.Context.SaveChangesAsync();
+        database.Context.ChangeTracker.Clear();
+
+        var controller = CreateController(database.Context);
+        var request = new List<ReservationModel>
+        {
+            CreateRecurringReservation(
+                room: "Room A",
+                startTime: new DateTime(2026, 6, 1, 10, 30, 0),
+                endTime: new DateTime(2026, 6, 1, 11, 30, 0),
+                repeatUntil: new DateTime(2026, 6, 8)),
+            CreateRecurringReservation(
+                room: "Room A",
+                startTime: new DateTime(2026, 6, 8, 10, 30, 0),
+                endTime: new DateTime(2026, 6, 8, 11, 30, 0),
+                repeatUntil: new DateTime(2026, 6, 8))
+        };
+
+        var result = await controller.PostReservationSeries(
+            request,
+            allowOverlap: false,
+            CancellationToken.None);
+
+        Assert.IsType<ConflictObjectResult>(result.Result);
+        Assert.Equal(1, await database.Context.Reservations.CountAsync());
+    }
+
+    [Fact]
+    public async Task PostReservationSeries_WhenRoomConflictExistsAndAllowOverlapTrue_CreatesReservations()
+    {
+        using var database = CreateTestDatabase();
+        await SeedUsersAsync(database.Context);
+
+        database.Context.Reservations.Add(CreateReservation(
+            room: "Room A",
+            startTime: new DateTime(2026, 6, 1, 10, 0, 0),
+            endTime: new DateTime(2026, 6, 1, 11, 0, 0)));
+        await database.Context.SaveChangesAsync();
+        database.Context.ChangeTracker.Clear();
+
+        var controller = CreateController(database.Context);
+        var request = new List<ReservationModel>
+        {
+            CreateRecurringReservation(
+                room: "Room A",
+                startTime: new DateTime(2026, 6, 1, 10, 30, 0),
+                endTime: new DateTime(2026, 6, 1, 11, 30, 0),
+                repeatUntil: new DateTime(2026, 6, 8)),
+            CreateRecurringReservation(
+                room: "Room A",
+                startTime: new DateTime(2026, 6, 8, 10, 30, 0),
+                endTime: new DateTime(2026, 6, 8, 11, 30, 0),
+                repeatUntil: new DateTime(2026, 6, 8))
+        };
+
+        var result = await controller.PostReservationSeries(
+            request,
+            allowOverlap: true,
+            CancellationToken.None);
+
+        var createdResult = Assert.IsType<CreatedAtActionResult>(result.Result);
+        var createdReservations = Assert.IsAssignableFrom<IEnumerable<ReservationModel>>(createdResult.Value)
+            .ToList();
+        var seriesId = Assert.Single(createdReservations.Select(x => x.SeriesId).Distinct());
+
+        Assert.Equal(2, createdReservations.Count);
+        Assert.Equal(3, await database.Context.Reservations.CountAsync());
+        Assert.False(string.IsNullOrWhiteSpace(seriesId));
+    }
+
+    [Fact]
     public async Task PutReservation_WhenOnlyConflictsWithItself_ReturnsNoContent()
     {
         using var database = CreateTestDatabase();
@@ -196,6 +276,19 @@ public sealed class ReservationsControllerTests
             ParticipantIds = new List<int> { 1 },
             Participants = "Test User"
         };
+    }
+
+    private static ReservationModel CreateRecurringReservation(
+        string room,
+        DateTime startTime,
+        DateTime endTime,
+        DateTime repeatUntil)
+    {
+        var reservation = CreateReservation(room, startTime, endTime);
+        reservation.RepeatType = "Weekly";
+        reservation.RepeatUntil = repeatUntil;
+
+        return reservation;
     }
 
     private static async Task SeedUsersAsync(AppDbContext context)
