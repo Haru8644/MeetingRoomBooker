@@ -5,7 +5,12 @@ namespace MeetingRoomBooker.Web.Services
 {
     public sealed class DbBookingService : IBookingService
     {
-        public event Action? OnChange;
+        public event Action? OnChange
+        {
+            add { }
+            remove { }
+        }
+
         public Task<UserModel?> LoginAsync(string email, string password) => Task.FromResult<UserModel?>(null);
         public Task<bool> RegisterUserAsync(UserModel user) => Task.FromResult(false);
         public Task DeleteUserAsync(int userId) => Task.CompletedTask;
