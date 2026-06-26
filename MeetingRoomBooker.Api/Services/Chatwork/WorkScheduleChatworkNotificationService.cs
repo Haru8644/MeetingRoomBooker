@@ -149,6 +149,38 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                 cancellationToken);
         }
 
+        public async Task SendReminderAsync(
+            WorkScheduleEntryModel entry,
+            CancellationToken cancellationToken = default)
+        {
+            if (entry.Type != WorkScheduleEntryType.ExternalAppointment ||
+                !entry.StartTime.HasValue ||
+                !entry.EndTime.HasValue)
+            {
+                return;
+            }
+
+            var targetUserIds = GetParticipantIds(entry);
+            var usersById = await GetUsersByIdAsync(targetUserIds, cancellationToken);
+            var targetUsers = GetUsers(targetUserIds, usersById);
+
+            if (targetUsers.Count == 0)
+            {
+                return;
+            }
+
+            await SendDirectNotificationsAsync(
+                entry,
+                targetUsers,
+                ChatworkDeliveryTypes.WorkScheduleReminder10Minutes,
+                user => ChatworkDeliveryKeys.WorkScheduleReminder10Minutes(
+                    entry.Id,
+                    user.Id,
+                    entry.StartTime.Value),
+                BuildReminderMessage(entry),
+                cancellationToken);
+        }
+
         private async Task<Dictionary<int, UserModel>> GetUsersByIdAsync(
             IEnumerable<int> userIds,
             CancellationToken cancellationToken)
@@ -350,6 +382,20 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
             return BuildInfoMessage(
                 $"{GetTypeLabel(entry.Type)}が削除されました",
                 BuildSummaryLines(entry));
+        }
+
+        private static string BuildReminderMessage(WorkScheduleEntryModel entry)
+        {
+            return BuildInfoMessage(
+                "社外予定リマインド",
+                new[]
+                {
+                    "10分後に開始します。",
+                    $"内容: {entry.Title}",
+                    $"日付: {entry.Date:yyyy/MM/dd}",
+                    $"時間: {GetTimeRangeText(entry)}",
+                    $"対象者: {GetParticipantText(entry)}"
+                });
         }
 
         private static List<string> BuildSummaryLines(WorkScheduleEntryModel entry)

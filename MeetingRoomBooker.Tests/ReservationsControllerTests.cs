@@ -185,7 +185,7 @@ public sealed class ReservationsControllerTests
     }
 
     [Fact]
-    public async Task PutReservation_WhenConflictsWithAnotherReservation_ReturnsConflict()
+    public async Task PutReservation_WhenConflictsWithAnotherReservation_ReturnsNoContentAndUpdatesReservation()
     {
         using var database = CreateTestDatabase();
         await SeedUsersAsync(database.Context);
@@ -218,14 +218,83 @@ public sealed class ReservationsControllerTests
             notifyParticipants: true,
             CancellationToken.None);
 
-        Assert.IsType<ConflictObjectResult>(result);
+        Assert.IsType<NoContentResult>(result);
 
-        var unchangedReservation = await database.Context.Reservations
+        var updatedReservation = await database.Context.Reservations
             .AsNoTracking()
             .SingleAsync(x => x.Id == reservationToUpdate.Id);
 
-        Assert.Equal(new DateTime(2026, 6, 1, 9, 0, 0), unchangedReservation.StartTime);
-        Assert.Equal(new DateTime(2026, 6, 1, 10, 0, 0), unchangedReservation.EndTime);
+        Assert.Equal(new DateTime(2026, 6, 1, 10, 0, 0), updatedReservation.StartTime);
+        Assert.Equal(new DateTime(2026, 6, 1, 11, 0, 0), updatedReservation.EndTime);
+    }
+
+    [Fact]
+    public async Task UpdateReservationSeries_WhenConflictsWithAnotherReservation_ReturnsNoContentAndUpdatesReservations()
+    {
+        using var database = CreateTestDatabase();
+        await SeedUsersAsync(database.Context);
+
+        const string seriesId = "series-1";
+        var baseReservation = CreateRecurringReservation(
+            room: "Room A",
+            startTime: new DateTime(2026, 6, 1, 9, 0, 0),
+            endTime: new DateTime(2026, 6, 1, 10, 0, 0),
+            repeatUntil: new DateTime(2026, 6, 8));
+        baseReservation.Id = 1;
+        baseReservation.SeriesId = seriesId;
+
+        var followingReservation = CreateRecurringReservation(
+            room: "Room A",
+            startTime: new DateTime(2026, 6, 8, 9, 0, 0),
+            endTime: new DateTime(2026, 6, 8, 10, 0, 0),
+            repeatUntil: new DateTime(2026, 6, 8));
+        followingReservation.Id = 2;
+        followingReservation.SeriesId = seriesId;
+
+        var conflictingReservation = CreateReservation(
+            id: 3,
+            room: "Room A",
+            startTime: new DateTime(2026, 6, 1, 10, 30, 0),
+            endTime: new DateTime(2026, 6, 1, 11, 30, 0));
+
+        database.Context.Reservations.AddRange(baseReservation, followingReservation, conflictingReservation);
+        await database.Context.SaveChangesAsync();
+        database.Context.ChangeTracker.Clear();
+
+        var controller = CreateController(database.Context);
+        var updatedReservation = CreateRecurringReservation(
+            room: "Room A",
+            startTime: new DateTime(2026, 6, 1, 10, 0, 0),
+            endTime: new DateTime(2026, 6, 1, 11, 0, 0),
+            repeatUntil: new DateTime(2026, 6, 8));
+        updatedReservation.Id = baseReservation.Id;
+        updatedReservation.SeriesId = seriesId;
+
+        var result = await controller.UpdateReservationSeries(
+            baseReservation.Id,
+            new ReservationSeriesUpdateRequest
+            {
+                OriginalReservation = baseReservation,
+                UpdatedReservation = updatedReservation,
+                NotifyParticipants = true,
+                Scope = ReservationSeriesScopes.All
+            },
+            CancellationToken.None);
+
+        Assert.IsType<NoContentResult>(result);
+
+        var updatedSeries = await database.Context.Reservations
+            .AsNoTracking()
+            .Where(x => x.SeriesId == seriesId)
+            .OrderBy(x => x.Date)
+            .ToListAsync();
+
+        Assert.Equal(2, updatedSeries.Count);
+        Assert.All(updatedSeries, reservation =>
+        {
+            Assert.Equal(new TimeSpan(10, 0, 0), reservation.StartTime.TimeOfDay);
+            Assert.Equal(new TimeSpan(11, 0, 0), reservation.EndTime.TimeOfDay);
+        });
     }
 
     private static ReservationsController CreateController(AppDbContext context)

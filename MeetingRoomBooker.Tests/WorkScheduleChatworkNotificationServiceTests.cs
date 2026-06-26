@@ -243,6 +243,134 @@ public sealed class WorkScheduleChatworkNotificationServiceTests
         });
     }
 
+    [Fact]
+    public async Task SendReminderAsync_SendsDirectMessagesAndCreatesDeliveryLogs()
+    {
+        using var database = CreateTestDatabase();
+        await SeedUsersAsync(database.Context);
+
+        var userWithoutDirectRoom = await database.Context.Users
+            .SingleAsync(user => user.Id == 3);
+
+        userWithoutDirectRoom.ChatworkDirectRoomId = null;
+        await database.Context.SaveChangesAsync();
+
+        var chatworkClient = new RecordingChatworkClient();
+        var service = CreateService(database.Context, chatworkClient);
+
+        var entry = new WorkScheduleEntryModel
+        {
+            Id = 50,
+            CreatedByUserId = 1,
+            Type = WorkScheduleEntryType.ExternalAppointment,
+            Title = "顧客訪問",
+            Date = new DateTime(2026, 6, 15),
+            StartTime = new DateTime(2026, 6, 15, 10, 0, 0),
+            EndTime = new DateTime(2026, 6, 15, 11, 0, 0),
+            LeavePeriod = LeavePeriod.None,
+            ParticipantIds = new List<int> { 1, 2, 3 },
+            Participants = "稲生遥希、田中太郎、佐藤花子"
+        };
+
+        await service.SendReminderAsync(entry, CancellationToken.None);
+
+        Assert.Equal(2, chatworkClient.SentMessages.Count);
+        Assert.Contains(chatworkClient.SentMessages, message => message.RoomId == "room-1");
+        Assert.Contains(chatworkClient.SentMessages, message => message.RoomId == "room-2");
+        Assert.DoesNotContain(chatworkClient.SentMessages, message => message.RoomId == "room-3");
+
+        Assert.All(chatworkClient.SentMessages, message =>
+        {
+            Assert.Contains("社外予定リマインド", message.Message);
+            Assert.Contains("10分後に開始します。", message.Message);
+            Assert.Contains("内容: 顧客訪問", message.Message);
+            Assert.Contains("時間: 10:00〜11:00", message.Message);
+        });
+
+        var logs = await database.Context.ChatworkDeliveryLogs
+            .OrderBy(log => log.TargetUserId)
+            .ToListAsync();
+
+        Assert.Equal(3, logs.Count);
+
+        Assert.All(logs, log =>
+        {
+            Assert.Equal(0, log.ReservationId);
+            Assert.Equal(entry.Id, log.WorkScheduleEntryId);
+            Assert.Equal("WorkScheduleReminder10Minutes", log.DeliveryType);
+            Assert.Contains("WorkScheduleReminder10Minutes:work-schedule:50", log.DeliveryKey);
+            Assert.Equal(entry.StartTime, log.ScheduledStartTime);
+        });
+
+        Assert.Equal("Succeeded", logs[0].Status);
+        Assert.Equal("Succeeded", logs[1].Status);
+        Assert.Equal("Skipped", logs[2].Status);
+        Assert.Contains("ChatworkDirectRoomId", logs[2].ErrorMessage);
+    }
+
+    [Fact]
+    public async Task SendReminderAsync_WhenDeliveryKeyAlreadyExists_DoesNotSendDuplicate()
+    {
+        using var database = CreateTestDatabase();
+        await SeedUsersAsync(database.Context);
+
+        var chatworkClient = new RecordingChatworkClient();
+        var service = CreateService(database.Context, chatworkClient);
+
+        var entry = new WorkScheduleEntryModel
+        {
+            Id = 60,
+            CreatedByUserId = 1,
+            Type = WorkScheduleEntryType.ExternalAppointment,
+            Title = "顧客訪問",
+            Date = new DateTime(2026, 6, 15),
+            StartTime = new DateTime(2026, 6, 15, 10, 0, 0),
+            EndTime = new DateTime(2026, 6, 15, 11, 0, 0),
+            LeavePeriod = LeavePeriod.None,
+            ParticipantIds = new List<int> { 1 },
+            Participants = "稲生遥希"
+        };
+
+        await service.SendReminderAsync(entry, CancellationToken.None);
+        await service.SendReminderAsync(entry, CancellationToken.None);
+
+        Assert.Single(chatworkClient.SentMessages);
+        Assert.Single(await database.Context.ChatworkDeliveryLogs.ToListAsync());
+    }
+
+    [Fact]
+    public async Task SendReminderAsync_IgnoresNonExternalOrUntimedEntries()
+    {
+        using var database = CreateTestDatabase();
+        await SeedUsersAsync(database.Context);
+
+        var chatworkClient = new RecordingChatworkClient();
+        var service = CreateService(database.Context, chatworkClient);
+
+        await service.SendReminderAsync(new WorkScheduleEntryModel
+        {
+            Id = 70,
+            Type = WorkScheduleEntryType.WorkFromHome,
+            Title = "在宅",
+            Date = new DateTime(2026, 6, 15),
+            ParticipantIds = new List<int> { 1 },
+            Participants = "稲生遥希"
+        }, CancellationToken.None);
+
+        await service.SendReminderAsync(new WorkScheduleEntryModel
+        {
+            Id = 71,
+            Type = WorkScheduleEntryType.ExternalAppointment,
+            Title = "顧客訪問",
+            Date = new DateTime(2026, 6, 15),
+            ParticipantIds = new List<int> { 1 },
+            Participants = "稲生遥希"
+        }, CancellationToken.None);
+
+        Assert.Empty(chatworkClient.SentMessages);
+        Assert.Empty(await database.Context.ChatworkDeliveryLogs.ToListAsync());
+    }
+
     private static WorkScheduleChatworkNotificationService CreateService(
         AppDbContext context,
         RecordingChatworkClient chatworkClient)
