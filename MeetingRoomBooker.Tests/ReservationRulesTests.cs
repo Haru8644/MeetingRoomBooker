@@ -24,7 +24,7 @@ public sealed class ReservationRulesTests
         Assert.Equal(new List<int> { 3, 2 }, reservation.ParticipantIds);
         Assert.Equal(new DateTime(2026, 6, 1, 9, 0, 0), reservation.StartTime);
         Assert.Equal(new DateTime(2026, 6, 1, 10, 0, 0), reservation.EndTime);
-        Assert.Equal("しない", reservation.RepeatType);
+        Assert.Equal(ReservationRepeatTypes.None, reservation.RepeatType);
         Assert.Null(reservation.RepeatUntil);
         Assert.Null(reservation.SeriesId);
     }
@@ -38,7 +38,7 @@ public sealed class ReservationRulesTests
             Date = new DateTime(2026, 6, 1),
             StartTime = new DateTime(2026, 6, 1, 9, 0, 0),
             EndTime = new DateTime(2026, 6, 1, 10, 0, 0),
-            RepeatType = "毎週",
+            RepeatType = ReservationRepeatTypes.Weekly,
             RepeatUntil = new DateTime(2026, 6, 30),
             SeriesId = " series-1 "
         };
@@ -46,7 +46,7 @@ public sealed class ReservationRulesTests
         ReservationRules.Normalize(reservation);
 
         Assert.Equal("series-1", reservation.SeriesId);
-        Assert.Equal("毎週", reservation.RepeatType);
+        Assert.Equal(ReservationRepeatTypes.Weekly, reservation.RepeatType);
         Assert.Equal(new DateTime(2026, 6, 30), reservation.RepeatUntil);
     }
 
@@ -76,7 +76,7 @@ public sealed class ReservationRulesTests
     public void Validate_returns_error_when_recurring_until_is_before_reservation_date()
     {
         var reservation = CreateValidReservation();
-        reservation.RepeatType = "毎週";
+        reservation.RepeatType = ReservationRepeatTypes.Weekly;
         reservation.RepeatUntil = reservation.Date.AddDays(-1);
 
         var result = ReservationRules.Validate(reservation);
@@ -88,7 +88,7 @@ public sealed class ReservationRulesTests
     public void SetSeriesIdForCreated_generates_series_id_for_recurring_reservation()
     {
         var reservation = CreateValidReservation();
-        reservation.RepeatType = "毎週";
+        reservation.RepeatType = ReservationRepeatTypes.Weekly;
         reservation.RepeatUntil = reservation.Date.AddDays(14);
 
         ReservationRules.SetSeriesIdForCreated(reservation);
@@ -100,12 +100,24 @@ public sealed class ReservationRulesTests
     public void SetSeriesIdForCreated_clears_series_id_for_non_recurring_reservation()
     {
         var reservation = CreateValidReservation();
-        reservation.RepeatType = "しない";
+        reservation.RepeatType = ReservationRepeatTypes.None;
         reservation.SeriesId = "series-1";
 
         ReservationRules.SetSeriesIdForCreated(reservation);
 
         Assert.Null(reservation.SeriesId);
+    }
+
+    [Fact]
+    public void IsRecurring_returns_true_for_biweekly_reservation()
+    {
+        var reservation = CreateValidReservation();
+        reservation.RepeatType = ReservationRepeatTypes.Biweekly;
+        reservation.RepeatUntil = reservation.Date.AddDays(28);
+
+        var result = ReservationRules.IsRecurring(reservation);
+
+        Assert.True(result);
     }
 
     [Theory]
