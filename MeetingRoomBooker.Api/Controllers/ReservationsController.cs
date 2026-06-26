@@ -254,16 +254,6 @@ namespace MeetingRoomBooker.Api.Controllers
                 return BadRequest(validationError);
             }
 
-            var conflict = await _reservationConflictService.FindFirstConflictAsync(
-                reservation,
-                excludedReservationIds: new[] { reservation.Id },
-                cancellationToken: cancellationToken);
-
-            if (conflict != null)
-            {
-                return Conflict(_reservationConflictService.BuildConflictMessage(conflict));
-            }
-
             var previousParticipantIds = ReservationRules.GetNotifiableParticipantIds(existingReservation);
             var currentParticipantIds = ReservationRules.GetNotifiableParticipantIds(reservation);
 
@@ -509,16 +499,6 @@ namespace MeetingRoomBooker.Api.Controllers
                 if (!string.IsNullOrWhiteSpace(updatedValidationError))
                 {
                     return BadRequest(updatedValidationError);
-                }
-
-                var conflict = await _reservationConflictService.FindFirstConflictAsync(
-                    updatedReservation,
-                    targetIds,
-                    cancellationToken);
-
-                if (conflict != null)
-                {
-                    return Conflict(_reservationConflictService.BuildConflictMessage(conflict));
                 }
 
                 var previousReservation = ReservationRules.Clone(target);

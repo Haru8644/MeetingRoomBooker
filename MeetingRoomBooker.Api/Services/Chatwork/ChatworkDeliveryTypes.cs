@@ -9,5 +9,6 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
         public const string WorkScheduleCreated = "WorkScheduleCreated";
         public const string WorkScheduleUpdated = "WorkScheduleUpdated";
         public const string WorkScheduleDeleted = "WorkScheduleDeleted";
+        public const string WorkScheduleReminder10Minutes = "WorkScheduleReminder10Minutes";
     }
 }

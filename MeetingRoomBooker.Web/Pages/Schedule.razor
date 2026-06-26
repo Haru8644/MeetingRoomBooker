@@ -156,8 +156,8 @@
 
                                                 <div class="time-badge">@b.StartTime.ToString("HH:mm") - @b.EndTime.ToString("HH:mm")</div>
                                                 <div class="card-content">
-                                                    <div class="card-title">@b.Name</div>
-                                                    <div class="card-desc">@b.Purpose</div>
+                                                    <div class="card-title">@GetReservationCardTitle(b)</div>
+                                                    <div class="card-desc">@GetReservationCardDetails(b)</div>
                                                 </div>
                                             </div>
                                         }
@@ -198,7 +198,7 @@
                                                     @GetWorkScheduleTimeLabel(entry)
                                                 </div>
                                                 <div class="card-content">
-                                                    <div class="card-title">@entry.Title</div>
+                                                    <div class="card-title">@GetWorkScheduleCardTitle(entry)</div>
                                                     <div class="card-desc">@GetWorkScheduleDetails(entry)</div>
                                                 </div>
                                             </div>
@@ -601,8 +601,8 @@
                                             <div class="warning-icon">⚠</div>
                                         }
                                         <div class="block-content">
-                                            <div class="block-text name">@item.Booking!.Name</div>
-                                            <div class="block-text purpose">@item.Booking!.Purpose</div>
+                                            <div class="block-text name">@GetReservationCardTitle(item.Booking!)</div>
+                                            <div class="block-text purpose">@GetReservationCardDetails(item.Booking!)</div>
                                         </div>
                                     </div>
                                 }
@@ -638,7 +638,7 @@
                                         }
 
                                         <div class="block-content">
-                                            <div class="block-text name">@item.Entry!.Title</div>
+                                            <div class="block-text name">@GetWorkScheduleCardTitle(item.Entry!)</div>
                                             <div class="block-text purpose">@GetWorkScheduleDetails(item.Entry!)</div>
                                         </div>
                                     </div>
@@ -1039,6 +1039,47 @@
             .Where(name => !string.IsNullOrWhiteSpace(name));
 
         return string.Join(", ", names);
+    }
+
+    private string GetReservationCardTitle(ReservationModel reservation)
+    {
+        if (!string.IsNullOrWhiteSpace(reservation.Purpose))
+        {
+            return reservation.Purpose;
+        }
+
+        if (!string.IsNullOrWhiteSpace(reservation.Name))
+        {
+            return reservation.Name;
+        }
+
+        return $"{reservation.Room}予約";
+    }
+
+    private string GetReservationCardDetails(ReservationModel reservation)
+    {
+        var participantNames = GetParticipantNames(reservation.ParticipantIds);
+        if (!string.IsNullOrWhiteSpace(participantNames))
+        {
+            return participantNames;
+        }
+
+        if (!string.IsNullOrWhiteSpace(reservation.Participants))
+        {
+            return reservation.Participants;
+        }
+
+        return "参加者未設定";
+    }
+
+    private string GetWorkScheduleCardTitle(WorkScheduleEntryModel entry)
+    {
+        if (!string.IsNullOrWhiteSpace(entry.Title))
+        {
+            return entry.Title;
+        }
+
+        return GetWorkScheduleSection(entry.Type).Label;
     }
 
     private WorkScheduleSection GetWorkScheduleSection(WorkScheduleEntryType type)
@@ -1450,19 +1491,6 @@
         return result;
     }
 
-    private ReservationModel? FindRoomConflictForEdit(ReservationModel requestedReservation)
-    {
-        return allReservations.FirstOrDefault(existing =>
-            existing.Id != requestedReservation.Id &&
-            existing.Room == requestedReservation.Room &&
-            existing.Date.Date == requestedReservation.Date.Date &&
-            TimesOverlap(
-                requestedReservation.StartTime,
-                requestedReservation.EndTime,
-                existing.StartTime,
-                existing.EndTime));
-    }
-
     private List<ParticipantScheduleConflict> FindReservationExternalAppointmentParticipantConflicts(ReservationModel requestedReservation)
     {
         var result = new List<ParticipantScheduleConflict>();
@@ -1511,24 +1539,6 @@
         }
 
         return result;
-    }
-
-    private static string BuildEditRoomConflictMessage(ReservationModel requestedReservation, ReservationModel existingReservation)
-    {
-        var existingTitle = GetReservationTitle(existingReservation);
-
-        return string.Join("\n", new[]
-        {
-            "会議室の予約時間が重複しています。",
-            "重複しているため、この内容では保存できません。",
-            string.Empty,
-            "重複内容:",
-            $"・{requestedReservation.Date:yyyy/MM/dd} {requestedReservation.Room}",
-            $"・変更後: {requestedReservation.StartTime:HH:mm}〜{requestedReservation.EndTime:HH:mm} / {GetReservationTitle(requestedReservation)}",
-            $"・既存予約: {existingReservation.StartTime:HH:mm}〜{existingReservation.EndTime:HH:mm} / {existingTitle}",
-            string.Empty,
-            "時間または会議室を変更してから、もう一度保存してください。"
-        });
     }
 
     private static string BuildReservationParticipantConflictConfirmationMessage(
@@ -1720,16 +1730,6 @@
         }
 
         updatedReservation.ParticipantIds = BuildEditParticipantIds();
-
-        var roomConflict = FindRoomConflictForEdit(updatedReservation);
-        if (roomConflict != null)
-        {
-            await JSRuntime.InvokeVoidAsync(
-                "alert",
-                BuildEditRoomConflictMessage(updatedReservation, roomConflict));
-
-            return;
-        }
 
         var participantConflicts = FindReservationExternalAppointmentParticipantConflicts(updatedReservation);
         if (participantConflicts.Count > 0)

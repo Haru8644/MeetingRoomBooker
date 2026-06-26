@@ -36,5 +36,10 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
         {
             return $"{ChatworkDeliveryTypes.WorkScheduleDeleted}:work-schedule:{workScheduleEntryId}:user:{targetUserId}";
         }
+
+        public static string WorkScheduleReminder10Minutes(int workScheduleEntryId, int targetUserId, DateTime scheduledStartTime)
+        {
+            return $"{ChatworkDeliveryTypes.WorkScheduleReminder10Minutes}:work-schedule:{workScheduleEntryId}:user:{targetUserId}:start:{scheduledStartTime:O}";
+        }
     }
 }
