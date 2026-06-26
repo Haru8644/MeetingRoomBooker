@@ -6,14 +6,12 @@ public static class ReservationRules
 {
     public static bool IsRecurring(ReservationModel reservation)
     {
-        return !string.IsNullOrWhiteSpace(reservation.RepeatType)
-            && reservation.RepeatType != "しない"
-            && reservation.RepeatUntil.HasValue;
+        return ReservationRecurrence.IsRecurring(reservation.RepeatType, reservation.RepeatUntil);
     }
 
     public static bool IsWeekend(DateTime date)
     {
-        return date.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday;
+        return ReservationRecurrence.IsWeekend(date);
     }
 
     public static void Normalize(ReservationModel reservation)
@@ -33,14 +31,14 @@ public static class ReservationRules
 
         if (string.IsNullOrWhiteSpace(reservation.RepeatType))
         {
-            reservation.RepeatType = "しない";
+            reservation.RepeatType = ReservationRepeatTypes.None;
         }
 
         reservation.SeriesId = string.IsNullOrWhiteSpace(reservation.SeriesId)
             ? null
             : reservation.SeriesId.Trim();
 
-        if (reservation.RepeatType == "しない")
+        if (ReservationRecurrence.IsNone(reservation.RepeatType))
         {
             reservation.RepeatUntil = null;
             reservation.SeriesId = null;

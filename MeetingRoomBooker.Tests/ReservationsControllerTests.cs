@@ -154,6 +154,48 @@ public sealed class ReservationsControllerTests
     }
 
     [Fact]
+    public async Task PostReservationSeries_WhenRepeatTypeIsBiweekly_AssignsSameSeriesId()
+    {
+        using var database = CreateTestDatabase();
+        await SeedUsersAsync(database.Context);
+
+        var controller = CreateController(database.Context);
+        var request = new List<ReservationModel>
+        {
+            CreateRecurringReservation(
+                room: "Room A",
+                startTime: new DateTime(2026, 6, 1, 10, 0, 0),
+                endTime: new DateTime(2026, 6, 1, 11, 0, 0),
+                repeatUntil: new DateTime(2026, 6, 15),
+                repeatType: ReservationRepeatTypes.Biweekly),
+            CreateRecurringReservation(
+                room: "Room A",
+                startTime: new DateTime(2026, 6, 15, 10, 0, 0),
+                endTime: new DateTime(2026, 6, 15, 11, 0, 0),
+                repeatUntil: new DateTime(2026, 6, 15),
+                repeatType: ReservationRepeatTypes.Biweekly)
+        };
+
+        var result = await controller.PostReservationSeries(
+            request,
+            allowOverlap: false,
+            CancellationToken.None);
+
+        var createdResult = Assert.IsType<CreatedAtActionResult>(result.Result);
+        var createdReservations = Assert.IsAssignableFrom<IEnumerable<ReservationModel>>(createdResult.Value)
+            .ToList();
+        var seriesId = Assert.Single(createdReservations.Select(x => x.SeriesId).Distinct());
+
+        Assert.Equal(2, createdReservations.Count);
+        Assert.False(string.IsNullOrWhiteSpace(seriesId));
+        Assert.All(createdReservations, reservation =>
+        {
+            Assert.Equal(ReservationRepeatTypes.Biweekly, reservation.RepeatType);
+            Assert.Equal(new DateTime(2026, 6, 15), reservation.RepeatUntil);
+        });
+    }
+
+    [Fact]
     public async Task PutReservation_WhenOnlyConflictsWithItself_ReturnsNoContent()
     {
         using var database = CreateTestDatabase();
@@ -351,10 +393,11 @@ public sealed class ReservationsControllerTests
         string room,
         DateTime startTime,
         DateTime endTime,
-        DateTime repeatUntil)
+        DateTime repeatUntil,
+        string repeatType = "Weekly")
     {
         var reservation = CreateReservation(room, startTime, endTime);
-        reservation.RepeatType = "Weekly";
+        reservation.RepeatType = repeatType;
         reservation.RepeatUntil = repeatUntil;
 
         return reservation;

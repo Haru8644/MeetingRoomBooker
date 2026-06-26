@@ -90,7 +90,7 @@
 
                     <FluentGridItem xs="12" sm="3">
                         <label>終了日</label>
-                        <FluentDatePicker @bind-Value="repeatUntil" Style="width: 100%;" Disabled="@(repeatType == "しない")" />
+                        <FluentDatePicker @bind-Value="repeatUntil" Style="width: 100%;" Disabled="@(repeatType == ReservationRepeatTypes.None)" />
                     </FluentGridItem>
                 </FluentGrid>
 
@@ -396,7 +396,7 @@
     private string reserveType = "社内";
     private string reservePurpose = string.Empty;
     private string errorMessage = string.Empty;
-    private string repeatType = "しない";
+    private string repeatType = ReservationRepeatTypes.None;
     private string previewErrorMessage = string.Empty;
     private string workScheduleErrorMessage = string.Empty;
     private string workScheduleSuccessMessage = string.Empty;
@@ -442,7 +442,13 @@
 
     private readonly List<string> roomOptions = new() { "大会議室", "小会議室" };
     private readonly List<string> typeOptions = new() { "社内", "来客" };
-    private readonly List<string> repeatOptions = new() { "しない", "毎日", "毎週" };
+    private readonly List<string> repeatOptions = new()
+    {
+        ReservationRepeatTypes.None,
+        ReservationRepeatTypes.Daily,
+        ReservationRepeatTypes.Weekly,
+        ReservationRepeatTypes.Biweekly
+    };
     private readonly List<string> attendanceScheduleTypes = new() { "在宅", "休暇" };
     private readonly List<LeavePeriodOption> leavePeriodOptions = new()
     {
@@ -914,32 +920,7 @@
         string repeatType,
         DateTime? repeatEndDate)
     {
-        if (repeatType == "しない")
-        {
-            return new List<DateTime> { startDate.Date };
-        }
-
-        var targetDates = new List<DateTime>();
-        var currentDate = startDate.Date;
-        var endDate = repeatEndDate?.Date ?? startDate.Date;
-        var dayStep = repeatType == "毎週" ? 7 : 1;
-
-        while (currentDate <= endDate)
-        {
-            if (!IsWeekend(currentDate))
-            {
-                targetDates.Add(currentDate);
-            }
-
-            currentDate = currentDate.AddDays(dayStep);
-        }
-
-        return targetDates;
-    }
-
-    private static bool IsWeekend(DateTime date)
-    {
-        return date.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday;
+        return ReservationRecurrence.BuildTargetDates(startDate, repeatType, repeatEndDate);
     }
 
     private ReservationModel CreateReservationModel(
@@ -961,7 +942,7 @@
             UserId = currentUser?.Id ?? 0,
             ParticipantIds = selectedParticipantIds,
             RepeatType = repeatType,
-            RepeatUntil = repeatType != "しない" ? repeatUntil : null
+            RepeatUntil = repeatType != ReservationRepeatTypes.None ? repeatUntil : null
         };
     }
 
