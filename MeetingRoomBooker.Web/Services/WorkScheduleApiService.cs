@@ -118,6 +118,20 @@ public sealed class WorkScheduleApiService
         await EnsureSuccessAsync(response, $"勤務予定 id={id} の削除に失敗しました。");
     }
 
+    public async Task DeleteEntrySeriesAsync(
+        int id,
+        string scope,
+        CancellationToken cancellationToken = default)
+    {
+        var encodedScope = WebUtility.UrlEncode(WorkScheduleSeriesScopes.Normalize(scope));
+        var response = await SendAsync(
+            HttpMethod.Delete,
+            $"api/work-schedule-entries/{id}/series?scope={encodedScope}",
+            cancellationToken: cancellationToken);
+
+        await EnsureSuccessAsync(response, $"勤務予定 id={id} のまとめ削除に失敗しました。");
+    }
+
     private async Task<HttpResponseMessage> SendAsync(
         HttpMethod method,
         string requestUri,

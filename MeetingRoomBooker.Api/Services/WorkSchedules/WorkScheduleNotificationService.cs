@@ -191,6 +191,47 @@ public sealed class WorkScheduleNotificationService : IWorkScheduleNotificationS
         }
     }
 
+    public async Task NotifySeriesDeletedAsync(
+        IReadOnlyList<WorkScheduleEntryModel> entries,
+        string scope,
+        CancellationToken cancellationToken)
+    {
+        var orderedEntries = entries
+            .OrderBy(entry => entry.Date)
+            .ThenBy(entry => entry.StartTime ?? entry.Date)
+            .ThenBy(entry => entry.Id)
+            .ToList();
+
+        if (orderedEntries.Count == 0)
+        {
+            return;
+        }
+
+        var targetUserIds = orderedEntries
+            .SelectMany(GetNotifiableParticipantIds)
+            .Distinct()
+            .ToList();
+
+        if (targetUserIds.Count == 0)
+        {
+            return;
+        }
+
+        var representativeEntry = orderedEntries[0];
+        var message = BuildSeriesDeletedMessage(orderedEntries, scope);
+
+        foreach (var userId in targetUserIds)
+        {
+            await UpsertNotificationAsync(
+                userId,
+                InfoNotificationType,
+                message,
+                representativeEntry.Date,
+                representativeEntry.Id,
+                cancellationToken);
+        }
+    }
+
     private async Task<IReadOnlyList<string>> BuildChangeLinesAsync(
         WorkScheduleEntryModel previousEntry,
         WorkScheduleEntryModel currentEntry,
@@ -361,6 +402,20 @@ public sealed class WorkScheduleNotificationService : IWorkScheduleNotificationS
         return $"{GetTypeLabel(entry.Type)}「{entry.Title}」が削除されました。日付: {entry.Date:yyyy/MM/dd}";
     }
 
+    private static string BuildSeriesDeletedMessage(
+        IReadOnlyList<WorkScheduleEntryModel> entries,
+        string scope)
+    {
+        var firstEntry = entries[0];
+        var lastEntry = entries[^1];
+
+        return $"{GetTypeLabel(firstEntry.Type)}「{firstEntry.Title}」をまとめて削除しました。" +
+               $"削除範囲: {GetSeriesScopeLabel(scope)} / " +
+               $"期間: {firstEntry.Date:yyyy/MM/dd}〜{lastEntry.Date:yyyy/MM/dd} / " +
+               $"件数: {entries.Count}件 / " +
+               $"対象者: {GetParticipantText(firstEntry)}";
+    }
+
     private static string BuildEntrySummary(WorkScheduleEntryModel entry)
     {
         var items = new List<string>
@@ -445,6 +500,16 @@ public sealed class WorkScheduleNotificationService : IWorkScheduleNotificationS
             WorkScheduleEntryType.WorkFromHome => "在宅予定",
             WorkScheduleEntryType.Leave => "休暇予定",
             _ => "勤務予定"
+        };
+    }
+
+    private static string GetSeriesScopeLabel(string scope)
+    {
+        return WorkScheduleSeriesScopes.Normalize(scope) switch
+        {
+            WorkScheduleSeriesScopes.Following => "今回以降",
+            WorkScheduleSeriesScopes.All => "全て",
+            _ => "今回のみ"
         };
     }
 

@@ -20,4 +20,9 @@ public interface IWorkScheduleNotificationService
     Task NotifyDeletedAsync(
         WorkScheduleEntryModel entry,
         CancellationToken cancellationToken);
+
+    Task NotifySeriesDeletedAsync(
+        IReadOnlyList<WorkScheduleEntryModel> entries,
+        string scope,
+        CancellationToken cancellationToken);
 }

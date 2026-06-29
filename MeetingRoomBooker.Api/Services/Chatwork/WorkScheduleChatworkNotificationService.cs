@@ -203,6 +203,52 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                 cancellationToken);
         }
 
+        public async Task SendSeriesDeletedAsync(
+            IReadOnlyList<WorkScheduleEntryModel> entries,
+            string scope,
+            CancellationToken cancellationToken = default)
+        {
+            var orderedEntries = entries
+                .OrderBy(entry => entry.Date)
+                .ThenBy(entry => entry.StartTime ?? entry.Date)
+                .ThenBy(entry => entry.Id)
+                .ToList();
+
+            if (orderedEntries.Count == 0)
+            {
+                return;
+            }
+
+            var representativeEntry = orderedEntries[0];
+            var seriesId = representativeEntry.SeriesId?.Trim();
+            if (string.IsNullOrWhiteSpace(seriesId))
+            {
+                seriesId = representativeEntry.Id.ToString();
+            }
+
+            var normalizedScope = WorkScheduleSeriesScopes.Normalize(scope);
+            var targetUserIds = orderedEntries
+                .SelectMany(GetParticipantIds)
+                .Distinct()
+                .ToList();
+
+            var usersById = await GetUsersByIdAsync(targetUserIds, cancellationToken);
+            var targetUsers = GetUsers(targetUserIds, usersById);
+
+            if (targetUsers.Count == 0)
+            {
+                return;
+            }
+
+            await SendDirectNotificationsAsync(
+                representativeEntry,
+                targetUsers,
+                ChatworkDeliveryTypes.WorkScheduleSeriesDeleted,
+                user => ChatworkDeliveryKeys.WorkScheduleSeriesDeleted(seriesId, normalizedScope, user.Id),
+                BuildSeriesDeletedMessage(orderedEntries, normalizedScope),
+                cancellationToken);
+        }
+
         public async Task SendReminderAsync(
             WorkScheduleEntryModel entry,
             CancellationToken cancellationToken = default)
@@ -466,6 +512,32 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                 BuildSummaryLines(entry));
         }
 
+        private static string BuildSeriesDeletedMessage(
+            IReadOnlyList<WorkScheduleEntryModel> entries,
+            string scope)
+        {
+            var firstEntry = entries[0];
+            var lastEntry = entries[^1];
+            var lines = new List<string>
+            {
+                $"内容: {firstEntry.Title}",
+                $"削除範囲: {GetSeriesScopeLabel(scope)}",
+                $"期間: {firstEntry.Date:yyyy/MM/dd}〜{lastEntry.Date:yyyy/MM/dd}",
+                $"件数: {entries.Count}件"
+            };
+
+            if (firstEntry.Type == WorkScheduleEntryType.ExternalAppointment)
+            {
+                lines.Add($"時間: {GetTimeRangeText(firstEntry)}");
+            }
+
+            lines.Add($"対象者: {GetParticipantText(firstEntry)}");
+
+            return BuildInfoMessage(
+                $"{GetTypeLabel(firstEntry.Type)}をまとめて削除しました",
+                lines);
+        }
+
         private static string BuildReminderMessage(WorkScheduleEntryModel entry)
         {
             return BuildInfoMessage(
@@ -647,6 +719,16 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
             return string.IsNullOrWhiteSpace(entry.Participants)
                 ? "未設定"
                 : entry.Participants;
+        }
+
+        private static string GetSeriesScopeLabel(string scope)
+        {
+            return WorkScheduleSeriesScopes.Normalize(scope) switch
+            {
+                WorkScheduleSeriesScopes.Following => "今回以降",
+                WorkScheduleSeriesScopes.All => "全て",
+                _ => "今回のみ"
+            };
         }
 
         private static string GetTypeLabel(WorkScheduleEntryType type)

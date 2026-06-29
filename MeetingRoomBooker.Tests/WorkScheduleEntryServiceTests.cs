@@ -580,6 +580,263 @@ public sealed class WorkScheduleEntryServiceTests
         Assert.Empty(database.Context.WorkScheduleEntries);
     }
 
+    [Fact]
+    public async Task DeleteEntrySeriesAsync_WhenScopeSingle_DeletesOnlySelectedEntry()
+    {
+        using var database = CreateTestDatabase();
+        await SeedUsersAsync(database.Context);
+
+        var seriesId = "series-1";
+        var first = CreateSeriesEntry(seriesId, new DateTime(2026, 6, 1), createdByUserId: 1);
+        var second = CreateSeriesEntry(seriesId, new DateTime(2026, 6, 2), createdByUserId: 1);
+        var third = CreateSeriesEntry(seriesId, new DateTime(2026, 6, 3), createdByUserId: 1);
+
+        database.Context.WorkScheduleEntries.AddRange(first, second, third);
+        await database.Context.SaveChangesAsync();
+
+        var notificationService = new RecordingWorkScheduleNotificationService();
+        var chatworkNotificationService = new RecordingWorkScheduleChatworkNotificationService();
+        var service = new WorkScheduleEntryService(
+            database.Context,
+            notificationService,
+            chatworkNotificationService);
+
+        var result = await service.DeleteEntrySeriesAsync(
+            second.Id,
+            WorkScheduleSeriesScopes.Single,
+            currentUserId: 1,
+            isAdmin: false,
+            CancellationToken.None);
+
+        Assert.Null(result.ErrorMessage);
+        Assert.False(result.Forbidden);
+
+        var remainingIds = await database.Context.WorkScheduleEntries
+            .OrderBy(entry => entry.Id)
+            .Select(entry => entry.Id)
+            .ToArrayAsync();
+
+        Assert.Equal(new[] { first.Id, third.Id }, remainingIds);
+        Assert.Equal(1, notificationService.DeletedCallCount);
+        Assert.Equal(0, notificationService.SeriesDeletedCallCount);
+        Assert.Equal(1, chatworkNotificationService.DeletedCallCount);
+        Assert.Equal(0, chatworkNotificationService.SeriesDeletedCallCount);
+    }
+
+    [Fact]
+    public async Task DeleteEntrySeriesAsync_WhenScopeFollowing_DeletesSelectedAndFutureEntriesOnly()
+    {
+        using var database = CreateTestDatabase();
+        await SeedUsersAsync(database.Context);
+
+        var seriesId = "series-1";
+        var first = CreateSeriesEntry(seriesId, new DateTime(2026, 6, 1), createdByUserId: 1);
+        var second = CreateSeriesEntry(seriesId, new DateTime(2026, 6, 2), createdByUserId: 1);
+        var third = CreateSeriesEntry(seriesId, new DateTime(2026, 6, 3), createdByUserId: 1);
+        var otherSeries = CreateSeriesEntry("series-2", new DateTime(2026, 6, 3), createdByUserId: 1);
+
+        database.Context.WorkScheduleEntries.AddRange(first, second, third, otherSeries);
+        await database.Context.SaveChangesAsync();
+
+        var notificationService = new RecordingWorkScheduleNotificationService();
+        var chatworkNotificationService = new RecordingWorkScheduleChatworkNotificationService();
+        var service = new WorkScheduleEntryService(
+            database.Context,
+            notificationService,
+            chatworkNotificationService);
+
+        var result = await service.DeleteEntrySeriesAsync(
+            second.Id,
+            WorkScheduleSeriesScopes.Following,
+            currentUserId: 1,
+            isAdmin: false,
+            CancellationToken.None);
+
+        Assert.Null(result.ErrorMessage);
+        Assert.False(result.Forbidden);
+
+        var remainingIds = await database.Context.WorkScheduleEntries
+            .OrderBy(entry => entry.Id)
+            .Select(entry => entry.Id)
+            .ToArrayAsync();
+
+        Assert.Equal(new[] { first.Id, otherSeries.Id }, remainingIds);
+        Assert.Equal(0, notificationService.DeletedCallCount);
+        Assert.Equal(1, notificationService.SeriesDeletedCallCount);
+        Assert.Equal(2, notificationService.LastSeriesDeletedEntriesCount);
+        Assert.Equal(WorkScheduleSeriesScopes.Following, notificationService.LastSeriesDeletedScope);
+        Assert.Equal(0, chatworkNotificationService.DeletedCallCount);
+        Assert.Equal(1, chatworkNotificationService.SeriesDeletedCallCount);
+    }
+
+    [Fact]
+    public async Task DeleteEntrySeriesAsync_WhenScopeAll_DeletesAllEntriesInSameSeries()
+    {
+        using var database = CreateTestDatabase();
+        await SeedUsersAsync(database.Context);
+
+        var seriesId = "series-1";
+        var first = CreateSeriesEntry(seriesId, new DateTime(2026, 6, 1), createdByUserId: 1);
+        var second = CreateSeriesEntry(seriesId, new DateTime(2026, 6, 2), createdByUserId: 1);
+        var third = CreateSeriesEntry(seriesId, new DateTime(2026, 6, 3), createdByUserId: 1);
+        var otherSeries = CreateSeriesEntry("series-2", new DateTime(2026, 6, 3), createdByUserId: 1);
+
+        database.Context.WorkScheduleEntries.AddRange(first, second, third, otherSeries);
+        await database.Context.SaveChangesAsync();
+
+        var notificationService = new RecordingWorkScheduleNotificationService();
+        var service = new WorkScheduleEntryService(database.Context, notificationService);
+
+        var result = await service.DeleteEntrySeriesAsync(
+            second.Id,
+            WorkScheduleSeriesScopes.All,
+            currentUserId: 1,
+            isAdmin: false,
+            CancellationToken.None);
+
+        Assert.Null(result.ErrorMessage);
+        Assert.False(result.Forbidden);
+
+        var remainingEntry = Assert.Single(await database.Context.WorkScheduleEntries.ToListAsync());
+        Assert.Equal(otherSeries.Id, remainingEntry.Id);
+        Assert.Equal(1, notificationService.SeriesDeletedCallCount);
+        Assert.Equal(3, notificationService.LastSeriesDeletedEntriesCount);
+        Assert.Equal(WorkScheduleSeriesScopes.All, notificationService.LastSeriesDeletedScope);
+    }
+
+    [Fact]
+    public async Task DeleteEntrySeriesAsync_ReturnsBadRequest_WhenFollowingRequestedForEntryWithoutSeriesId()
+    {
+        using var database = CreateTestDatabase();
+        await SeedUsersAsync(database.Context);
+
+        var entry = CreateEntry(
+            type: WorkScheduleEntryType.ExternalAppointment,
+            title: "顧客訪問",
+            date: new DateTime(2026, 6, 1),
+            createdByUserId: 1);
+
+        database.Context.WorkScheduleEntries.Add(entry);
+        await database.Context.SaveChangesAsync();
+
+        var service = new WorkScheduleEntryService(database.Context);
+
+        var result = await service.DeleteEntrySeriesAsync(
+            entry.Id,
+            WorkScheduleSeriesScopes.Following,
+            currentUserId: 1,
+            isAdmin: false,
+            CancellationToken.None);
+
+        Assert.Equal("繰り返し社外予定のみまとめて削除できます。", result.ErrorMessage);
+        Assert.Single(database.Context.WorkScheduleEntries);
+    }
+
+    [Fact]
+    public async Task DeleteEntrySeriesAsync_ReturnsBadRequest_WhenFollowingRequestedForWorkFromHome()
+    {
+        using var database = CreateTestDatabase();
+        await SeedUsersAsync(database.Context);
+
+        var entry = CreateEntry(
+            type: WorkScheduleEntryType.WorkFromHome,
+            title: "在宅",
+            date: new DateTime(2026, 6, 1),
+            createdByUserId: 1);
+
+        entry.SeriesId = "series-1";
+        database.Context.WorkScheduleEntries.Add(entry);
+        await database.Context.SaveChangesAsync();
+
+        var service = new WorkScheduleEntryService(database.Context);
+
+        var result = await service.DeleteEntrySeriesAsync(
+            entry.Id,
+            WorkScheduleSeriesScopes.Following,
+            currentUserId: 1,
+            isAdmin: false,
+            CancellationToken.None);
+
+        Assert.Equal("繰り返し社外予定のみまとめて削除できます。", result.ErrorMessage);
+        Assert.Single(database.Context.WorkScheduleEntries);
+    }
+
+    [Fact]
+    public async Task DeleteEntrySeriesAsync_ReturnsBadRequest_WhenScopeIsInvalid()
+    {
+        using var database = CreateTestDatabase();
+        await SeedUsersAsync(database.Context);
+
+        var entry = CreateSeriesEntry("series-1", new DateTime(2026, 6, 1), createdByUserId: 1);
+        database.Context.WorkScheduleEntries.Add(entry);
+        await database.Context.SaveChangesAsync();
+
+        var service = new WorkScheduleEntryService(database.Context);
+
+        var result = await service.DeleteEntrySeriesAsync(
+            entry.Id,
+            "invalid",
+            currentUserId: 1,
+            isAdmin: false,
+            CancellationToken.None);
+
+        Assert.Equal("削除範囲が不正です。", result.ErrorMessage);
+        Assert.Single(database.Context.WorkScheduleEntries);
+    }
+
+    [Fact]
+    public async Task DeleteEntrySeriesAsync_ReturnsForbidden_WhenNonAdminDeletesSeriesContainingOtherUsersEntry()
+    {
+        using var database = CreateTestDatabase();
+        await SeedUsersAsync(database.Context);
+
+        var seriesId = "series-1";
+        var first = CreateSeriesEntry(seriesId, new DateTime(2026, 6, 1), createdByUserId: 1);
+        var second = CreateSeriesEntry(seriesId, new DateTime(2026, 6, 2), createdByUserId: 2);
+
+        database.Context.WorkScheduleEntries.AddRange(first, second);
+        await database.Context.SaveChangesAsync();
+
+        var service = new WorkScheduleEntryService(database.Context);
+
+        var result = await service.DeleteEntrySeriesAsync(
+            first.Id,
+            WorkScheduleSeriesScopes.All,
+            currentUserId: 1,
+            isAdmin: false,
+            CancellationToken.None);
+
+        Assert.True(result.Forbidden);
+        Assert.Equal(2, database.Context.WorkScheduleEntries.Count());
+    }
+
+    [Fact]
+    public async Task DeleteEntrySeriesAsync_AllowsAdminToDeleteOtherUsersSeries()
+    {
+        using var database = CreateTestDatabase();
+        await SeedUsersAsync(database.Context);
+
+        var seriesId = "series-1";
+        var first = CreateSeriesEntry(seriesId, new DateTime(2026, 6, 1), createdByUserId: 1);
+        var second = CreateSeriesEntry(seriesId, new DateTime(2026, 6, 2), createdByUserId: 2);
+
+        database.Context.WorkScheduleEntries.AddRange(first, second);
+        await database.Context.SaveChangesAsync();
+
+        var service = new WorkScheduleEntryService(database.Context);
+
+        var result = await service.DeleteEntrySeriesAsync(
+            first.Id,
+            WorkScheduleSeriesScopes.All,
+            currentUserId: 1,
+            isAdmin: true,
+            CancellationToken.None);
+
+        Assert.Null(result.ErrorMessage);
+        Assert.False(result.Forbidden);
+        Assert.Empty(database.Context.WorkScheduleEntries);
+    }
+
     private static async Task SeedUsersAsync(AppDbContext context)
     {
         context.Users.AddRange(
@@ -597,6 +854,26 @@ public sealed class WorkScheduleEntryServiceTests
             });
 
         await context.SaveChangesAsync();
+    }
+
+    private static WorkScheduleEntry CreateSeriesEntry(
+        string seriesId,
+        DateTime date,
+        int createdByUserId)
+    {
+        var entry = CreateEntry(
+            WorkScheduleEntryType.ExternalAppointment,
+            "顧客訪問",
+            date,
+            createdByUserId);
+
+        entry.SeriesId = seriesId;
+        entry.RepeatType = WorkScheduleRepeatTypes.Daily;
+        entry.RepeatUntil = new DateTime(2026, 6, 30);
+        entry.ParticipantIds = new List<int> { createdByUserId };
+        entry.Participants = createdByUserId == 1 ? "稲生遥希" : "田中太郎";
+
+        return entry;
     }
 
     private static WorkScheduleEntry CreateEntry(
@@ -648,6 +925,14 @@ public sealed class WorkScheduleEntryServiceTests
 
         public int SeriesCreatedCallCount { get; private set; }
 
+        public int DeletedCallCount { get; private set; }
+
+        public int SeriesDeletedCallCount { get; private set; }
+
+        public int LastSeriesDeletedEntriesCount { get; private set; }
+
+        public string? LastSeriesDeletedScope { get; private set; }
+
         public Task NotifyCreatedAsync(
             WorkScheduleEntryModel entry,
             CancellationToken cancellationToken)
@@ -676,6 +961,18 @@ public sealed class WorkScheduleEntryServiceTests
             WorkScheduleEntryModel entry,
             CancellationToken cancellationToken)
         {
+            DeletedCallCount++;
+            return Task.CompletedTask;
+        }
+
+        public Task NotifySeriesDeletedAsync(
+            IReadOnlyList<WorkScheduleEntryModel> entries,
+            string scope,
+            CancellationToken cancellationToken)
+        {
+            SeriesDeletedCallCount++;
+            LastSeriesDeletedEntriesCount = entries.Count;
+            LastSeriesDeletedScope = scope;
             return Task.CompletedTask;
         }
     }
@@ -685,6 +982,10 @@ public sealed class WorkScheduleEntryServiceTests
         public int CreatedCallCount { get; private set; }
 
         public int SeriesCreatedCallCount { get; private set; }
+
+        public int DeletedCallCount { get; private set; }
+
+        public int SeriesDeletedCallCount { get; private set; }
 
         public Task SendCreatedAsync(
             WorkScheduleEntryModel entry,
@@ -714,6 +1015,16 @@ public sealed class WorkScheduleEntryServiceTests
             WorkScheduleEntryModel entry,
             CancellationToken cancellationToken = default)
         {
+            DeletedCallCount++;
+            return Task.CompletedTask;
+        }
+
+        public Task SendSeriesDeletedAsync(
+            IReadOnlyList<WorkScheduleEntryModel> entries,
+            string scope,
+            CancellationToken cancellationToken = default)
+        {
+            SeriesDeletedCallCount++;
             return Task.CompletedTask;
         }
 
@@ -755,6 +1066,14 @@ public sealed class WorkScheduleEntryServiceTests
         {
             throw new InvalidOperationException("notification failed");
         }
+
+        public Task NotifySeriesDeletedAsync(
+            IReadOnlyList<WorkScheduleEntryModel> entries,
+            string scope,
+            CancellationToken cancellationToken)
+        {
+            throw new InvalidOperationException("series delete notification failed");
+        }
     }
 
     private sealed class ThrowingWorkScheduleChatworkNotificationService : IWorkScheduleChatworkNotificationService
@@ -786,6 +1105,14 @@ public sealed class WorkScheduleEntryServiceTests
             CancellationToken cancellationToken = default)
         {
             throw new InvalidOperationException("chatwork failed");
+        }
+
+        public Task SendSeriesDeletedAsync(
+            IReadOnlyList<WorkScheduleEntryModel> entries,
+            string scope,
+            CancellationToken cancellationToken = default)
+        {
+            throw new InvalidOperationException("series delete chatwork failed");
         }
 
         public Task SendReminderAsync(

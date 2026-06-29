@@ -37,4 +37,11 @@ public interface IWorkScheduleEntryService
         int currentUserId,
         bool isAdmin,
         CancellationToken cancellationToken);
+
+    Task<WorkScheduleEntryResult> DeleteEntrySeriesAsync(
+        int id,
+        string? scope,
+        int currentUserId,
+        bool isAdmin,
+        CancellationToken cancellationToken);
 }

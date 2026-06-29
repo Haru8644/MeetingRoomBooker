@@ -175,6 +175,42 @@ public sealed class WorkScheduleEntriesController : ControllerBase
         return NoContent();
     }
 
+    [HttpDelete("{id:int}/series")]
+    public async Task<IActionResult> DeleteEntrySeries(
+        int id,
+        [FromQuery] string? scope,
+        CancellationToken cancellationToken)
+    {
+        if (!TryGetCurrentUserId(out var currentUserId))
+        {
+            return Unauthorized();
+        }
+
+        var result = await _service.DeleteEntrySeriesAsync(
+            id,
+            scope,
+            currentUserId,
+            IsCurrentUserAdmin(),
+            cancellationToken);
+
+        if (result.NotFound)
+        {
+            return NotFound();
+        }
+
+        if (result.Forbidden)
+        {
+            return Forbid();
+        }
+
+        if (result.ErrorMessage != null)
+        {
+            return BadRequest(result.ErrorMessage);
+        }
+
+        return NoContent();
+    }
+
     private bool TryGetCurrentUserId(out int userId)
     {
         var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);

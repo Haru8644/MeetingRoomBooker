@@ -446,7 +446,17 @@
                     @if (CanManageWorkSchedule(selectedWorkSchedule))
                     {
                         <button class="cyber-button-primary" @onclick="StartWorkScheduleEdit">編集</button>
-                        <button class="cyber-button-danger" @onclick="DeleteWorkScheduleAsync">削除</button>
+
+                        @if (IsRecurringExternalAppointment(selectedWorkSchedule))
+                        {
+                            <button class="cyber-button-danger" @onclick="() => DeleteWorkScheduleAsync(WorkScheduleSeriesScopes.Single)">今回のみ削除</button>
+                            <button class="cyber-button-danger" @onclick="() => DeleteWorkScheduleAsync(WorkScheduleSeriesScopes.Following)">今回以降削除</button>
+                            <button class="cyber-button-danger" @onclick="() => DeleteWorkScheduleAsync(WorkScheduleSeriesScopes.All)">全て削除</button>
+                        }
+                        else
+                        {
+                            <button class="cyber-button-danger" @onclick="() => DeleteWorkScheduleAsync(WorkScheduleSeriesScopes.Single)">削除</button>
+                        }
                     }
 
                     <button class="cyber-button-secondary" @onclick="CloseWorkScheduleDetail">閉じる</button>
@@ -1374,16 +1384,17 @@
         }
     }
 
-    private async Task DeleteWorkScheduleAsync()
+    private async Task DeleteWorkScheduleAsync(string scope)
     {
         if (selectedWorkSchedule == null)
         {
             return;
         }
 
+        var normalizedScope = WorkScheduleSeriesScopes.Normalize(scope);
         var confirmed = await JSRuntime.InvokeAsync<bool>(
             "confirm",
-            $"{GetWorkScheduleSection(selectedWorkSchedule.Type).Label}を削除しますか？");
+            GetWorkScheduleDeleteConfirmationMessage(normalizedScope, selectedWorkSchedule));
 
         if (!confirmed)
         {
@@ -1394,7 +1405,16 @@
 
         try
         {
-            await WorkScheduleService.DeleteEntryAsync(scheduleId);
+            if (IsRecurringExternalAppointment(selectedWorkSchedule) &&
+                normalizedScope != WorkScheduleSeriesScopes.Single)
+            {
+                await WorkScheduleService.DeleteEntrySeriesAsync(scheduleId, normalizedScope);
+            }
+            else
+            {
+                await WorkScheduleService.DeleteEntryAsync(scheduleId);
+            }
+
             selectedWorkSchedule = null;
             isEditingWorkSchedule = false;
             ResetWorkScheduleEditState();
@@ -1404,8 +1424,33 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Failed to delete work schedule entry. entryId={EntryId}", scheduleId);
-            await JSRuntime.InvokeVoidAsync("alert", "勤務予定の削除に失敗しました。時間をおいて再度お試しください。");
+            await JSRuntime.InvokeVoidAsync("alert", $"削除に失敗しました: {ex.Message}");
         }
+    }
+
+    private static bool IsRecurringExternalAppointment(WorkScheduleEntryModel entry)
+    {
+        return entry.Type == WorkScheduleEntryType.ExternalAppointment &&
+               !string.IsNullOrWhiteSpace(entry.SeriesId);
+    }
+
+    private string GetWorkScheduleDeleteConfirmationMessage(
+        string scope,
+        WorkScheduleEntryModel entry)
+    {
+        if (!IsRecurringExternalAppointment(entry))
+        {
+            return $"{GetWorkScheduleSection(entry.Type).Label}を削除しますか？";
+        }
+
+        if (scope == WorkScheduleSeriesScopes.Single)
+        {
+            return "この社外予定を削除しますか？";
+        }
+
+        return scope == WorkScheduleSeriesScopes.Following
+            ? "この社外予定を今回以降まとめて削除しますか？"
+            : "この繰り返し社外予定をすべて削除しますか？";
     }
 
     private List<int> BuildWorkScheduleEditParticipantIds()

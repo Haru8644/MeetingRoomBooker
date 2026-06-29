@@ -276,6 +276,14 @@ public sealed class ChatworkReminderWorkerTests
             return Task.CompletedTask;
         }
 
+        public Task SendSeriesDeletedAsync(
+            IReadOnlyList<WorkScheduleEntryModel> entries,
+            string scope,
+            CancellationToken cancellationToken = default)
+        {
+            return Task.CompletedTask;
+        }
+
         public Task SendReminderAsync(
             WorkScheduleEntryModel entry,
             CancellationToken cancellationToken = default)
