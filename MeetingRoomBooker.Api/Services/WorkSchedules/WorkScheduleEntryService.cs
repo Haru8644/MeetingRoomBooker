@@ -353,6 +353,133 @@ public sealed class WorkScheduleEntryService : IWorkScheduleEntryService
         return WorkScheduleEntryResult.Success(response);
     }
 
+    public async Task<WorkScheduleEntryResult> UpdateEntrySeriesAsync(
+        int id,
+        UpdateWorkScheduleEntryRequest request,
+        string? scope,
+        int currentUserId,
+        bool isAdmin,
+        CancellationToken cancellationToken)
+    {
+        var normalizedScope = WorkScheduleSeriesScopes.Normalize(scope);
+        if (!WorkScheduleSeriesScopes.IsValid(normalizedScope))
+        {
+            return WorkScheduleEntryResult.BadRequest("反映範囲が不正です。");
+        }
+
+        if (normalizedScope == WorkScheduleSeriesScopes.Single)
+        {
+            return await UpdateEntryAsync(
+                id,
+                request,
+                currentUserId,
+                isAdmin,
+                cancellationToken);
+        }
+
+        if (request.Type != WorkScheduleEntryType.ExternalAppointment)
+        {
+            return WorkScheduleEntryResult.BadRequest("繰り返し社外予定のみまとめて編集できます。");
+        }
+
+        if (HasRecurrenceInput(request.RepeatType, request.RepeatUntil))
+        {
+            return WorkScheduleEntryResult.BadRequest("繰り返し条件の変更は未対応です。");
+        }
+
+        var selectedEntry = await _context.WorkScheduleEntries
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
+        if (selectedEntry == null)
+        {
+            return WorkScheduleEntryResult.NotFoundResult();
+        }
+
+        if (selectedEntry.Type != WorkScheduleEntryType.ExternalAppointment ||
+            string.IsNullOrWhiteSpace(selectedEntry.SeriesId))
+        {
+            return WorkScheduleEntryResult.BadRequest("繰り返し社外予定のみまとめて編集できます。");
+        }
+
+        var seriesId = selectedEntry.SeriesId.Trim();
+        var selectedStartTime = selectedEntry.StartTime ?? selectedEntry.Date.Date;
+
+        var targetEntries = await _context.WorkScheduleEntries
+            .Where(entry => entry.SeriesId == seriesId)
+            .Where(entry => entry.Type == WorkScheduleEntryType.ExternalAppointment)
+            .Where(entry =>
+                normalizedScope == WorkScheduleSeriesScopes.All ||
+                entry.Date.Date > selectedEntry.Date.Date ||
+                (entry.Date.Date == selectedEntry.Date.Date &&
+                 (entry.StartTime ?? entry.Date.Date) >= selectedStartTime))
+            .OrderBy(entry => entry.Date)
+            .ThenBy(entry => entry.StartTime ?? entry.Date)
+            .ThenBy(entry => entry.Id)
+            .ToListAsync(cancellationToken);
+
+        if (targetEntries.Count == 0)
+        {
+            return WorkScheduleEntryResult.BadRequest("更新対象の社外予定がありません。");
+        }
+
+        if (targetEntries.Any(entry => !CanManage(entry, currentUserId, isAdmin)))
+        {
+            return WorkScheduleEntryResult.ForbiddenResult();
+        }
+
+        var now = DateTime.Now;
+        var previousEntries = targetEntries
+            .Select(ToModel)
+            .ToList();
+
+        foreach (var targetEntry in targetEntries)
+        {
+            var normalized = await NormalizeRequestAsync(
+                request.Type,
+                request.Title,
+                targetEntry.Date.Date,
+                request.StartTime,
+                request.EndTime,
+                request.LeavePeriod,
+                request.ParticipantIds,
+                request.Participants,
+                targetEntry.CreatedByUserId,
+                cancellationToken);
+
+            if (normalized.ErrorMessage != null)
+            {
+                return WorkScheduleEntryResult.BadRequest(normalized.ErrorMessage);
+            }
+
+            targetEntry.Title = normalized.Title;
+            targetEntry.StartTime = normalized.StartTime;
+            targetEntry.EndTime = normalized.EndTime;
+            targetEntry.LeavePeriod = normalized.LeavePeriod;
+            targetEntry.ParticipantIds = normalized.ParticipantIds;
+            targetEntry.Participants = normalized.Participants;
+            targetEntry.UpdatedAt = now;
+        }
+
+        await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+
+        await _context.SaveChangesAsync(cancellationToken);
+
+        await transaction.CommitAsync(cancellationToken);
+
+        var currentEntries = targetEntries
+            .Select(ToModel)
+            .ToList();
+
+        await TrySendSeriesUpdatedNotificationsAsync(
+            previousEntries,
+            currentEntries,
+            normalizedScope,
+            cancellationToken);
+
+        return WorkScheduleEntryResult.Success(currentEntries.FirstOrDefault(entry => entry.Id == id));
+    }
+
     public async Task<WorkScheduleEntryResult> DeleteEntryAsync(
         int id,
         int currentUserId,
@@ -471,6 +598,46 @@ public sealed class WorkScheduleEntryService : IWorkScheduleEntryService
             cancellationToken);
 
         return WorkScheduleEntryResult.Success();
+    }
+
+    private async Task TrySendSeriesUpdatedNotificationsAsync(
+        IReadOnlyList<WorkScheduleEntryModel> previousEntries,
+        IReadOnlyList<WorkScheduleEntryModel> currentEntries,
+        string scope,
+        CancellationToken cancellationToken)
+    {
+        if (_notificationService != null)
+        {
+            try
+            {
+                await _notificationService.NotifySeriesUpdatedAsync(previousEntries, currentEntries, scope, cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(
+                    ex,
+                    "Failed to create system notifications for updated work schedule series {SeriesId}.",
+                    currentEntries.FirstOrDefault()?.SeriesId);
+                _context.ChangeTracker.Clear();
+            }
+        }
+
+        if (_chatworkNotificationService != null)
+        {
+            try
+            {
+                await _chatworkNotificationService.SendSeriesUpdatedAsync(previousEntries, currentEntries, scope, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(
+                    ex,
+                    "Failed to send Chatwork notifications for updated work schedule series {SeriesId}.",
+                    currentEntries.FirstOrDefault()?.SeriesId);
+                _context.ChangeTracker.Clear();
+            }
+        }
     }
 
     private async Task TrySendSeriesDeletedNotificationsAsync(

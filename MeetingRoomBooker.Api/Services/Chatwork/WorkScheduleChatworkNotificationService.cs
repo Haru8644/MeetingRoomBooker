@@ -181,6 +181,70 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
             }
         }
 
+        public async Task SendSeriesUpdatedAsync(
+            IReadOnlyList<WorkScheduleEntryModel> previousEntries,
+            IReadOnlyList<WorkScheduleEntryModel> currentEntries,
+            string scope,
+            CancellationToken cancellationToken = default)
+        {
+            var orderedPreviousEntries = previousEntries
+                .OrderBy(entry => entry.Date)
+                .ThenBy(entry => entry.StartTime ?? entry.Date)
+                .ThenBy(entry => entry.Id)
+                .ToList();
+
+            var orderedCurrentEntries = currentEntries
+                .OrderBy(entry => entry.Date)
+                .ThenBy(entry => entry.StartTime ?? entry.Date)
+                .ThenBy(entry => entry.Id)
+                .ToList();
+
+            if (orderedPreviousEntries.Count == 0 || orderedCurrentEntries.Count == 0)
+            {
+                return;
+            }
+
+            var representativeEntry = orderedCurrentEntries[0];
+            var seriesId = representativeEntry.SeriesId?.Trim();
+            if (string.IsNullOrWhiteSpace(seriesId))
+            {
+                seriesId = representativeEntry.Id.ToString();
+            }
+
+            var normalizedScope = WorkScheduleSeriesScopes.Normalize(scope);
+            var targetUserIds = orderedPreviousEntries
+                .SelectMany(GetParticipantIds)
+                .Concat(orderedCurrentEntries.SelectMany(GetParticipantIds))
+                .Distinct()
+                .ToList();
+
+            var usersById = await GetUsersByIdAsync(targetUserIds, cancellationToken);
+            var targetUsers = GetUsers(targetUserIds, usersById);
+
+            if (targetUsers.Count == 0)
+            {
+                return;
+            }
+
+            var conflicts = new List<WorkScheduleParticipantConflict>();
+            foreach (var entry in orderedCurrentEntries)
+            {
+                conflicts.AddRange(await _conflictService.FindExternalAppointmentConflictsAsync(
+                    entry,
+                    cancellationToken));
+            }
+
+            var changeId = Guid.NewGuid().ToString("N");
+
+            await SendDirectNotificationsAsync(
+                representativeEntry,
+                targetUsers,
+                ChatworkDeliveryTypes.WorkScheduleSeriesUpdated,
+                user => ChatworkDeliveryKeys.WorkScheduleSeriesUpdated(seriesId, normalizedScope, user.Id, changeId),
+                BuildSeriesUpdatedMessage(orderedPreviousEntries, orderedCurrentEntries, normalizedScope, conflicts),
+                cancellationToken);
+        }
+
         public async Task SendDeletedAsync(
             WorkScheduleEntryModel entry,
             CancellationToken cancellationToken = default)
@@ -503,6 +567,64 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                     $"内容: {entry.Title}",
                     $"日付: {entry.Date:yyyy/MM/dd}"
                 });
+        }
+
+        private static string BuildSeriesUpdatedMessage(
+            IReadOnlyList<WorkScheduleEntryModel> previousEntries,
+            IReadOnlyList<WorkScheduleEntryModel> currentEntries,
+            string scope,
+            IReadOnlyCollection<WorkScheduleParticipantConflict> conflicts)
+        {
+            var firstPreviousEntry = previousEntries[0];
+            var firstCurrentEntry = currentEntries[0];
+            var lastCurrentEntry = currentEntries[^1];
+            var lines = new List<string>
+            {
+                $"内容: {firstCurrentEntry.Title}",
+                $"反映範囲: {GetSeriesScopeLabel(scope)}",
+                $"期間: {firstCurrentEntry.Date:yyyy/MM/dd}〜{lastCurrentEntry.Date:yyyy/MM/dd}",
+                $"件数: {currentEntries.Count}件",
+                $"時間: {GetTimeRangeText(firstCurrentEntry)}",
+                $"対象者: {GetParticipantText(firstCurrentEntry)}"
+            };
+
+            var changeLines = BuildSeriesChangeLines(firstPreviousEntry, firstCurrentEntry);
+            if (changeLines.Count > 0)
+            {
+                lines.Add("[hr]");
+                lines.Add("変更点:");
+                lines.AddRange(changeLines.Select(change => $"- {change}"));
+            }
+
+            lines.AddRange(BuildConflictLines(conflicts));
+
+            return BuildInfoMessage(
+                $"{GetTypeLabel(firstCurrentEntry.Type)}をまとめて変更しました",
+                lines);
+        }
+
+        private static IReadOnlyList<string> BuildSeriesChangeLines(
+            WorkScheduleEntryModel previousEntry,
+            WorkScheduleEntryModel currentEntry)
+        {
+            var changes = new List<string>();
+
+            if (!string.Equals(previousEntry.Title, currentEntry.Title, StringComparison.Ordinal))
+            {
+                changes.Add($"内容が「{previousEntry.Title}」から「{currentEntry.Title}」に変更されました");
+            }
+
+            if (previousEntry.StartTime != currentEntry.StartTime || previousEntry.EndTime != currentEntry.EndTime)
+            {
+                changes.Add($"時間が {GetTimeRangeText(previousEntry)} から {GetTimeRangeText(currentEntry)} に変更されました");
+            }
+
+            if (!previousEntry.ParticipantIds.SequenceEqual(currentEntry.ParticipantIds))
+            {
+                changes.Add("対象者が変更されました");
+            }
+
+            return changes;
         }
 
         private static string BuildDeletedMessage(WorkScheduleEntryModel entry)
