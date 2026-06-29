@@ -24,5 +24,10 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
         Task SendReminderAsync(
             WorkScheduleEntryModel entry,
             CancellationToken cancellationToken = default);
+
+        Task SendSeriesDeletedAsync(
+            IReadOnlyList<WorkScheduleEntryModel> entries,
+            string scope,
+            CancellationToken cancellationToken = default);
     }
 }

@@ -391,6 +391,127 @@ public sealed class WorkScheduleEntryService : IWorkScheduleEntryService
         return WorkScheduleEntryResult.Success();
     }
 
+    public async Task<WorkScheduleEntryResult> DeleteEntrySeriesAsync(
+        int id,
+        string? scope,
+        int currentUserId,
+        bool isAdmin,
+        CancellationToken cancellationToken)
+    {
+        var normalizedScope = WorkScheduleSeriesScopes.Normalize(scope);
+        if (!WorkScheduleSeriesScopes.IsValid(normalizedScope))
+        {
+            return WorkScheduleEntryResult.BadRequest("削除範囲が不正です。");
+        }
+
+        if (normalizedScope == WorkScheduleSeriesScopes.Single)
+        {
+            return await DeleteEntryAsync(
+                id,
+                currentUserId,
+                isAdmin,
+                cancellationToken);
+        }
+
+        var selectedEntry = await _context.WorkScheduleEntries
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
+        if (selectedEntry == null)
+        {
+            return WorkScheduleEntryResult.NotFoundResult();
+        }
+
+        if (selectedEntry.Type != WorkScheduleEntryType.ExternalAppointment ||
+            string.IsNullOrWhiteSpace(selectedEntry.SeriesId))
+        {
+            return WorkScheduleEntryResult.BadRequest("繰り返し社外予定のみまとめて削除できます。");
+        }
+
+        var seriesId = selectedEntry.SeriesId.Trim();
+        var selectedStartTime = selectedEntry.StartTime ?? selectedEntry.Date.Date;
+
+        var targetEntries = await _context.WorkScheduleEntries
+            .Where(entry => entry.SeriesId == seriesId)
+            .Where(entry => entry.Type == WorkScheduleEntryType.ExternalAppointment)
+            .Where(entry =>
+                normalizedScope == WorkScheduleSeriesScopes.All ||
+                entry.Date.Date > selectedEntry.Date.Date ||
+                (entry.Date.Date == selectedEntry.Date.Date &&
+                 (entry.StartTime ?? entry.Date.Date) >= selectedStartTime))
+            .OrderBy(entry => entry.Date)
+            .ThenBy(entry => entry.StartTime ?? entry.Date)
+            .ThenBy(entry => entry.Id)
+            .ToListAsync(cancellationToken);
+
+        if (targetEntries.Count == 0)
+        {
+            return WorkScheduleEntryResult.BadRequest("削除対象の社外予定がありません。");
+        }
+
+        if (targetEntries.Any(entry => !CanManage(entry, currentUserId, isAdmin)))
+        {
+            return WorkScheduleEntryResult.ForbiddenResult();
+        }
+
+        var deletedEntries = targetEntries
+            .Select(ToModel)
+            .ToList();
+
+        await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+
+        _context.WorkScheduleEntries.RemoveRange(targetEntries);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        await transaction.CommitAsync(cancellationToken);
+
+        await TrySendSeriesDeletedNotificationsAsync(
+            deletedEntries,
+            normalizedScope,
+            cancellationToken);
+
+        return WorkScheduleEntryResult.Success();
+    }
+
+    private async Task TrySendSeriesDeletedNotificationsAsync(
+        IReadOnlyList<WorkScheduleEntryModel> entries,
+        string scope,
+        CancellationToken cancellationToken)
+    {
+        if (_notificationService != null)
+        {
+            try
+            {
+                await _notificationService.NotifySeriesDeletedAsync(entries, scope, cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(
+                    ex,
+                    "Failed to create system notifications for deleted work schedule series {SeriesId}.",
+                    entries.FirstOrDefault()?.SeriesId);
+                _context.ChangeTracker.Clear();
+            }
+        }
+
+        if (_chatworkNotificationService != null)
+        {
+            try
+            {
+                await _chatworkNotificationService.SendSeriesDeletedAsync(entries, scope, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(
+                    ex,
+                    "Failed to send Chatwork notifications for deleted work schedule series {SeriesId}.",
+                    entries.FirstOrDefault()?.SeriesId);
+                _context.ChangeTracker.Clear();
+            }
+        }
+    }
+
     private async Task TrySendSeriesCreatedNotificationsAsync(
         IReadOnlyList<WorkScheduleEntryModel> entries,
         CancellationToken cancellationToken)
