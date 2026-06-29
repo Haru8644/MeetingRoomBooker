@@ -136,9 +136,14 @@ namespace MeetingRoomBooker.Api.Data
                 entity.HasIndex(x => x.Date);
                 entity.HasIndex(x => x.Type);
                 entity.HasIndex(x => x.CreatedByUserId);
+                entity.HasIndex(x => x.SeriesId);
 
                 entity.Property(x => x.Title)
                     .HasMaxLength(100);
+
+                entity.Property(x => x.SeriesId)
+                    .HasMaxLength(50)
+                    .IsRequired(false);
 
                 entity.Property(x => x.Participants)
                     .HasMaxLength(500);

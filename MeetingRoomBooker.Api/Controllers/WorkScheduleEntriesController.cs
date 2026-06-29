@@ -81,6 +81,30 @@ public sealed class WorkScheduleEntriesController : ControllerBase
             result.Entry);
     }
 
+    [HttpPost("series")]
+    public async Task<ActionResult<IReadOnlyList<WorkScheduleEntryModel>>> CreateEntrySeries(
+        [FromBody] CreateWorkScheduleEntryRequest request,
+        CancellationToken cancellationToken)
+    {
+        if (!TryGetCurrentUserId(out var currentUserId))
+        {
+            return Unauthorized();
+        }
+
+        var result = await _service.CreateEntrySeriesAsync(
+            request,
+            currentUserId,
+            IsCurrentUserAdmin(),
+            cancellationToken);
+
+        if (result.ErrorMessage != null)
+        {
+            return BadRequest(result.ErrorMessage);
+        }
+
+        return Ok(result.Entries);
+    }
+
     [HttpPut("{id:int}")]
     public async Task<ActionResult<WorkScheduleEntryModel>> UpdateEntry(
         int id,

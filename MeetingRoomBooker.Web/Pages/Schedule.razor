@@ -415,6 +415,14 @@
                         <div class="value value-text">@selectedWorkSchedule.Date.ToString("yyyy/MM/dd")<br />@GetWorkScheduleTimeLabel(selectedWorkSchedule)</div>
                     </div>
 
+                    @if (!WorkScheduleRecurrence.IsNone(selectedWorkSchedule.RepeatType))
+                    {
+                        <div class="cyber-detail-row slide-in-right" style="--i:3">
+                            <div class="label">繰り返し</div>
+                            <div class="value value-text">@selectedWorkSchedule.RepeatType<br />終了日: @(selectedWorkSchedule.RepeatUntil?.ToString("yyyy/MM/dd") ?? "未設定")</div>
+                        </div>
+                    }
+
                     <div class="cyber-detail-row slide-in-right" style="--i:3">
                         <div class="label">内容</div>
                         <div class="value value-text">@selectedWorkSchedule.Title</div>

@@ -12,11 +12,17 @@ public sealed class WorkScheduleEntry
 
 	public string Title { get; set; } = string.Empty;
 
+	public string? SeriesId { get; set; }
+
 	public DateTime Date { get; set; }
 
 	public DateTime? StartTime { get; set; }
 
 	public DateTime? EndTime { get; set; }
+
+	public string? RepeatType { get; set; }
+
+	public DateTime? RepeatUntil { get; set; }
 
 	public LeavePeriod LeavePeriod { get; set; } = LeavePeriod.None;
 

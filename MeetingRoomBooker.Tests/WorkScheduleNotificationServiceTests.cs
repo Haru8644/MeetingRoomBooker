@@ -64,6 +64,68 @@ public sealed class WorkScheduleNotificationServiceTests
     }
 
     [Fact]
+    public async Task NotifySeriesCreatedAsync_CreatesSummaryNotificationsForParticipants()
+    {
+        using var database = CreateTestDatabase();
+        await SeedUsersAsync(database.Context);
+
+        var notificationService = new WorkScheduleNotificationService(
+            database.Context,
+            new WorkScheduleParticipantConflictService(database.Context));
+
+        var entries = new List<WorkScheduleEntryModel>
+        {
+            new()
+            {
+                Id = 10,
+                CreatedByUserId = 1,
+                Type = WorkScheduleEntryType.ExternalAppointment,
+                Title = "顧客訪問",
+                SeriesId = "series-1",
+                Date = new DateTime(2026, 6, 1),
+                StartTime = new DateTime(2026, 6, 1, 10, 0, 0),
+                EndTime = new DateTime(2026, 6, 1, 11, 0, 0),
+                RepeatType = WorkScheduleRepeatTypes.Weekly,
+                RepeatUntil = new DateTime(2026, 6, 8),
+                ParticipantIds = new List<int> { 1, 2 },
+                Participants = "稲生遥希、田中太郎"
+            },
+            new()
+            {
+                Id = 11,
+                CreatedByUserId = 1,
+                Type = WorkScheduleEntryType.ExternalAppointment,
+                Title = "顧客訪問",
+                SeriesId = "series-1",
+                Date = new DateTime(2026, 6, 8),
+                StartTime = new DateTime(2026, 6, 8, 10, 0, 0),
+                EndTime = new DateTime(2026, 6, 8, 11, 0, 0),
+                RepeatType = WorkScheduleRepeatTypes.Weekly,
+                RepeatUntil = new DateTime(2026, 6, 8),
+                ParticipantIds = new List<int> { 1, 2 },
+                Participants = "稲生遥希、田中太郎"
+            }
+        };
+
+        await notificationService.NotifySeriesCreatedAsync(entries, CancellationToken.None);
+        await database.Context.SaveChangesAsync();
+
+        var notifications = await database.Context.Notifications
+            .OrderBy(notification => notification.UserId)
+            .ToListAsync();
+
+        Assert.Equal(2, notifications.Count);
+        Assert.All(notifications, notification =>
+        {
+            Assert.Equal("Info", notification.Type);
+            Assert.Equal(10, notification.TargetWorkScheduleEntryId);
+            Assert.Contains("社外予定「顧客訪問」を繰り返し登録しました", notification.Message);
+            Assert.Contains("繰り返し: 毎週", notification.Message);
+            Assert.Contains("件数: 2件", notification.Message);
+        });
+    }
+
+    [Fact]
     public async Task CreateEntryAsync_CreatesWarningNotifications_WhenExternalAppointmentOverlapsReservation()
     {
         using var database = CreateTestDatabase();

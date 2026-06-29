@@ -30,11 +30,18 @@ namespace MeetingRoomBooker.Shared.Models
         [StringLength(100, ErrorMessage = "内容は100文字以内で入力してください。")]
         public string Title { get; set; } = string.Empty;
 
+        [StringLength(50)]
+        public string? SeriesId { get; set; }
+
         public DateTime Date { get; set; } = DateTime.Today;
 
         public DateTime? StartTime { get; set; }
 
         public DateTime? EndTime { get; set; }
+
+        public string? RepeatType { get; set; }
+
+        public DateTime? RepeatUntil { get; set; }
 
         public LeavePeriod LeavePeriod { get; set; } = LeavePeriod.None;
 
@@ -60,6 +67,10 @@ namespace MeetingRoomBooker.Shared.Models
 
         public DateTime? EndTime { get; set; }
 
+        public string? RepeatType { get; set; } = WorkScheduleRepeatTypes.None;
+
+        public DateTime? RepeatUntil { get; set; }
+
         public LeavePeriod LeavePeriod { get; set; } = LeavePeriod.None;
 
         public List<int> ParticipantIds { get; set; } = new();
@@ -79,6 +90,10 @@ namespace MeetingRoomBooker.Shared.Models
         public DateTime? StartTime { get; set; }
 
         public DateTime? EndTime { get; set; }
+
+        public string? RepeatType { get; set; } = WorkScheduleRepeatTypes.None;
+
+        public DateTime? RepeatUntil { get; set; }
 
         public LeavePeriod LeavePeriod { get; set; } = LeavePeriod.None;
 

@@ -171,6 +171,24 @@
                         </div>
 
                         <div>
+                            <label>繰り返し</label>
+                            <div class="selection-group">
+                                @foreach (var option in workScheduleRepeatOptions)
+                                {
+                                    <div class="selection-chip @(externalAppointmentRepeatType == option ? "active" : "")" @onclick="() => externalAppointmentRepeatType = option">@option</div>
+                                }
+                            </div>
+                        </div>
+
+                        @if (!WorkScheduleRecurrence.IsNone(externalAppointmentRepeatType))
+                        {
+                            <div style="position: relative; z-index: 11;">
+                                <label>終了日</label>
+                                <FluentDatePicker @bind-Value="externalAppointmentRepeatUntil" Style="width: 100%;" />
+                            </div>
+                        }
+
+                        <div>
                             <label>参加者</label>
                             <div style="color: #8b949e; font-size: 0.78rem; margin-bottom: 8px;">
                                 自分（@currentUser?.Name）は自動で含まれます
@@ -401,6 +419,7 @@
     private string workScheduleErrorMessage = string.Empty;
     private string workScheduleSuccessMessage = string.Empty;
     private string externalAppointmentTitle = string.Empty;
+    private string externalAppointmentRepeatType = WorkScheduleRepeatTypes.None;
     private string attendanceScheduleType = "在宅";
 
     private DateTime? _reserveDate = DateTime.Today;
@@ -437,6 +456,7 @@
     private DateTime? externalAppointmentDate = DateTime.Today;
     private DateTime? externalAppointmentStartTime = DateTime.Today.AddHours(10);
     private DateTime? externalAppointmentEndTime = DateTime.Today.AddHours(11);
+    private DateTime? externalAppointmentRepeatUntil = DateTime.Today.AddMonths(1);
     private DateTime? attendanceScheduleDate = DateTime.Today;
     private LeavePeriod selectedLeavePeriod = LeavePeriod.FullDay;
 
@@ -448,6 +468,12 @@
         ReservationRepeatTypes.Daily,
         ReservationRepeatTypes.Weekly,
         ReservationRepeatTypes.Biweekly
+    };
+    private readonly List<string> workScheduleRepeatOptions = new()
+    {
+        WorkScheduleRepeatTypes.None,
+        WorkScheduleRepeatTypes.Daily,
+        WorkScheduleRepeatTypes.Weekly
     };
     private readonly List<string> attendanceScheduleTypes = new() { "在宅", "休暇" };
     private readonly List<LeavePeriodOption> leavePeriodOptions = new()
@@ -662,6 +688,25 @@
             return;
         }
 
+        var isRecurring = !WorkScheduleRecurrence.IsNone(externalAppointmentRepeatType);
+        DateTime? repeatUntilDate = null;
+        if (isRecurring)
+        {
+            if (externalAppointmentRepeatUntil == null)
+            {
+                workScheduleErrorMessage = "繰り返し終了日を入力してください。";
+                return;
+            }
+
+            repeatUntilDate = externalAppointmentRepeatUntil.Value.Date;
+
+            if (repeatUntilDate.Value < externalAppointmentDate.Value.Date)
+            {
+                workScheduleErrorMessage = "繰り返し終了日は開始日以降にしてください。";
+                return;
+            }
+        }
+
         try
         {
             var participantIds = BuildWorkScheduleParticipantIds(externalAppointmentParticipantIds);
@@ -685,7 +730,7 @@
                 }
             }
 
-            await WorkScheduleService.CreateEntryAsync(new CreateWorkScheduleEntryRequest
+            var request = new CreateWorkScheduleEntryRequest
             {
                 Type = WorkScheduleEntryType.ExternalAppointment,
                 Title = externalAppointmentTitle,
@@ -693,11 +738,24 @@
                 StartTime = start,
                 EndTime = end,
                 LeavePeriod = LeavePeriod.None,
-                ParticipantIds = participantIds
-            });
+                ParticipantIds = participantIds,
+                RepeatType = externalAppointmentRepeatType,
+                RepeatUntil = repeatUntilDate
+            };
 
-            workScheduleSuccessMessage = "社外予定を登録しました。";
+            if (isRecurring)
+            {
+                var createdEntries = await WorkScheduleService.CreateEntrySeriesAsync(request);
+                workScheduleSuccessMessage = $"社外予定を繰り返し登録しました。（{createdEntries.Count}件）";
+            }
+            else
+            {
+                await WorkScheduleService.CreateEntryAsync(request);
+                workScheduleSuccessMessage = "社外予定を登録しました。";
+            }
+
             externalAppointmentTitle = string.Empty;
+            externalAppointmentRepeatType = WorkScheduleRepeatTypes.None;
             previewDate = externalAppointmentDate.Value.Date;
             Navigation.NavigateTo("/schedule");
         }

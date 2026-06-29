@@ -73,6 +73,22 @@ public sealed class WorkScheduleApiService
             ?? throw new InvalidOperationException("勤務予定の登録結果が空です。");
     }
 
+    public async Task<List<WorkScheduleEntryModel>> CreateEntrySeriesAsync(
+        CreateWorkScheduleEntryRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var response = await SendAsync(
+            HttpMethod.Post,
+            "api/work-schedule-entries/series",
+            request,
+            cancellationToken);
+
+        await EnsureSuccessAsync(response, "勤務予定の繰り返し登録に失敗しました。");
+
+        return await ReadFromJsonAsync<List<WorkScheduleEntryModel>>(response, cancellationToken)
+            ?? new List<WorkScheduleEntryModel>();
+    }
+
     public async Task<WorkScheduleEntryModel> UpdateEntryAsync(
         int id,
         UpdateWorkScheduleEntryRequest request,
