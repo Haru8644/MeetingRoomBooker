@@ -1549,6 +1549,39 @@
         return result;
     }
 
+    private string BuildReservationRoomConflictConfirmationMessage(ReservationModel target)
+    {
+        var conflicts = allReservations
+            .Where(existing =>
+                existing.Id != target.Id &&
+                existing.Room == target.Room &&
+                existing.Date.Date == target.Date.Date &&
+                TimesOverlap(target.StartTime, target.EndTime, existing.StartTime, existing.EndTime))
+            .OrderBy(existing => existing.StartTime)
+            .ToList();
+
+        var lines = new List<string>
+        {
+            $"{conflicts.Count}件の会議室予約が重複しています。",
+            "それでも保存しますか？",
+            string.Empty,
+            "重複内容:"
+        };
+
+        foreach (var conflict in conflicts.Take(8))
+        {
+            lines.Add(
+                $"・{conflict.Date:yyyy/MM/dd} {conflict.Room}: {GetReservationTitle(conflict)} ({conflict.StartTime:HH:mm}〜{conflict.EndTime:HH:mm})");
+        }
+
+        if (conflicts.Count > 8)
+        {
+            lines.Add($"ほか {conflicts.Count - 8}件");
+        }
+
+        return string.Join("\n", lines);
+    }
+
     private static string BuildReservationParticipantConflictConfirmationMessage(
         IReadOnlyCollection<ParticipantScheduleConflict> participantConflicts)
     {
@@ -1738,6 +1771,18 @@
         }
 
         updatedReservation.ParticipantIds = BuildEditParticipantIds();
+
+        if (HasRoomConflict(updatedReservation))
+        {
+            var confirmed = await JSRuntime.InvokeAsync<bool>(
+                "confirm",
+                BuildReservationRoomConflictConfirmationMessage(updatedReservation));
+
+            if (!confirmed)
+            {
+                return;
+            }
+        }
 
         var participantConflicts = FindReservationExternalAppointmentParticipantConflicts(updatedReservation);
         if (participantConflicts.Count > 0)
