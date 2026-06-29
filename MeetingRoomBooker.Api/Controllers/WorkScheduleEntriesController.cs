@@ -141,6 +141,44 @@ public sealed class WorkScheduleEntriesController : ControllerBase
         return Ok(result.Entry);
     }
 
+    [HttpPut("{id:int}/series")]
+    public async Task<IActionResult> UpdateEntrySeries(
+        int id,
+        [FromQuery] string? scope,
+        [FromBody] UpdateWorkScheduleEntryRequest request,
+        CancellationToken cancellationToken)
+    {
+        if (!TryGetCurrentUserId(out var currentUserId))
+        {
+            return Unauthorized();
+        }
+
+        var result = await _service.UpdateEntrySeriesAsync(
+            id,
+            request,
+            scope,
+            currentUserId,
+            IsCurrentUserAdmin(),
+            cancellationToken);
+
+        if (result.NotFound)
+        {
+            return NotFound();
+        }
+
+        if (result.Forbidden)
+        {
+            return Forbid();
+        }
+
+        if (result.ErrorMessage != null)
+        {
+            return BadRequest(result.ErrorMessage);
+        }
+
+        return NoContent();
+    }
+
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteEntry(
         int id,

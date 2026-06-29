@@ -525,6 +525,24 @@
                                     }
                                 </div>
                             </div>
+
+                            @if (IsRecurringExternalAppointment(selectedWorkSchedule))
+                            {
+                                <div class="fade-in-up" style="--i:6; position: relative; z-index: 30; margin-top: 10px; border-top: 1px solid #30363d; padding-top: 10px;">
+                                    <label>反映範囲</label>
+                                    <div class="selection-group">
+                                        <div class="selection-chip @(workScheduleEditSeriesScope == WorkScheduleSeriesScopes.Single ? "active" : "")" @onclick="() => workScheduleEditSeriesScope = WorkScheduleSeriesScopes.Single">今回のみ</div>
+                                        <div class="selection-chip @(workScheduleEditSeriesScope == WorkScheduleSeriesScopes.Following ? "active" : "")" @onclick="() => workScheduleEditSeriesScope = WorkScheduleSeriesScopes.Following">今回以降</div>
+                                        <div class="selection-chip @(workScheduleEditSeriesScope == WorkScheduleSeriesScopes.All ? "active" : "")" @onclick="() => workScheduleEditSeriesScope = WorkScheduleSeriesScopes.All">全て</div>
+                                    </div>
+                                    @if (workScheduleEditSeriesScope != WorkScheduleSeriesScopes.Single)
+                                    {
+                                        <div class="value-text" style="font-size: 0.85rem; margin-top: 6px; color: #8b949e;">
+                                            まとめて編集では各予定の日付はそのまま残し、内容・時間・参加者を反映します。
+                                        </div>
+                                    }
+                                </div>
+                            }
                         }
                         else
                         {
@@ -711,6 +729,7 @@
     private DateTime? workScheduleEditEnd;
     private LeavePeriod workScheduleEditLeavePeriod = LeavePeriod.FullDay;
     private HashSet<int> workScheduleEditParticipantIds = new();
+    private string workScheduleEditSeriesScope = WorkScheduleSeriesScopes.Single;
 
     private sealed record WorkScheduleSection(
         WorkScheduleEntryType Type,
@@ -1112,13 +1131,23 @@
             .Where(section => section.Type == WorkScheduleEntryType.ExternalAppointment);
     }
 
+    private static string FormatDate(DateTime value)
+    {
+        return value.ToString("yyyy/MM/dd", CultureInfo.InvariantCulture);
+    }
+
+    private static string FormatClock(DateTime value)
+    {
+        return value.ToString("HH:mm", CultureInfo.InvariantCulture);
+    }
+
     private static string GetWorkScheduleTimeLabel(WorkScheduleEntryModel entry)
     {
         if (entry.Type == WorkScheduleEntryType.ExternalAppointment &&
             entry.StartTime.HasValue &&
             entry.EndTime.HasValue)
         {
-            return $"{entry.StartTime.Value:HH:mm} - {entry.EndTime.Value:HH:mm}";
+            return $"{FormatClock(entry.StartTime.Value)} - {FormatClock(entry.EndTime.Value)}";
         }
 
         if (entry.Type == WorkScheduleEntryType.Leave)
@@ -1237,6 +1266,7 @@
         workScheduleEditParticipantIds = (selectedWorkSchedule.ParticipantIds ?? new List<int>())
             .Where(id => currentUser == null || id != currentUser.Id)
             .ToHashSet();
+        workScheduleEditSeriesScope = WorkScheduleSeriesScopes.Single;
 
         isEditingWorkSchedule = true;
     }
@@ -1255,6 +1285,7 @@
         workScheduleEditEnd = null;
         workScheduleEditLeavePeriod = LeavePeriod.FullDay;
         workScheduleEditParticipantIds = new HashSet<int>();
+        workScheduleEditSeriesScope = WorkScheduleSeriesScopes.Single;
     }
 
     private void OnWorkScheduleEditStartChanged(DateTime? newTime)
@@ -1292,10 +1323,17 @@
             return;
         }
 
+        var normalizedScope = WorkScheduleSeriesScopes.Normalize(workScheduleEditSeriesScope);
+        var isRecurringExternalEdit = IsRecurringExternalAppointment(selectedWorkSchedule);
+        var isSeriesEdit = isRecurringExternalEdit && normalizedScope != WorkScheduleSeriesScopes.Single;
+        var requestDate = isSeriesEdit
+            ? selectedWorkSchedule.Date.Date
+            : workScheduleEditDate.Value.Date;
+
         var request = new UpdateWorkScheduleEntryRequest
         {
             Type = selectedWorkSchedule.Type,
-            Date = workScheduleEditDate.Value.Date,
+            Date = requestDate,
             ParticipantIds = selectedWorkSchedule.Type == WorkScheduleEntryType.ExternalAppointment
                 ? BuildWorkScheduleEditParticipantIds()
                 : BuildCurrentUserOnlyParticipantIds()
@@ -1315,8 +1353,8 @@
                 return;
             }
 
-            var start = workScheduleEditDate.Value.Date + workScheduleEditStart.Value.TimeOfDay;
-            var end = workScheduleEditDate.Value.Date + workScheduleEditEnd.Value.TimeOfDay;
+            var start = requestDate + workScheduleEditStart.Value.TimeOfDay;
+            var end = requestDate + workScheduleEditEnd.Value.TimeOfDay;
 
             if (end <= start)
             {
@@ -1324,13 +1362,21 @@
                 return;
             }
 
-            var participantConflicts = FindExternalAppointmentParticipantConflicts(
-                workScheduleEditTitle,
-                workScheduleEditDate.Value.Date,
-                start,
-                end,
-                request.ParticipantIds,
-                selectedWorkSchedule.Id);
+            var participantConflicts = isSeriesEdit
+                ? FindExternalAppointmentParticipantConflictsForSeriesEdit(
+                    selectedWorkSchedule,
+                    normalizedScope,
+                    workScheduleEditTitle,
+                    workScheduleEditStart.Value.TimeOfDay,
+                    workScheduleEditEnd.Value.TimeOfDay,
+                    request.ParticipantIds)
+                : FindExternalAppointmentParticipantConflicts(
+                    workScheduleEditTitle,
+                    requestDate,
+                    start,
+                    end,
+                    request.ParticipantIds,
+                    selectedWorkSchedule.Id);
 
             if (participantConflicts.Count > 0)
             {
@@ -1368,7 +1414,14 @@
 
         try
         {
-            await WorkScheduleService.UpdateEntryAsync(scheduleId, request);
+            if (isSeriesEdit)
+            {
+                await WorkScheduleService.UpdateEntrySeriesAsync(scheduleId, normalizedScope, request);
+            }
+            else
+            {
+                await WorkScheduleService.UpdateEntryAsync(scheduleId, request);
+            }
 
             isEditingWorkSchedule = false;
             ResetWorkScheduleEditState();
@@ -1432,6 +1485,113 @@
     {
         return entry.Type == WorkScheduleEntryType.ExternalAppointment &&
                !string.IsNullOrWhiteSpace(entry.SeriesId);
+    }
+
+    private List<ParticipantScheduleConflict> FindExternalAppointmentParticipantConflictsForSeriesEdit(
+        WorkScheduleEntryModel selectedEntry,
+        string scope,
+        string requestedTitle,
+        TimeSpan requestedStartTime,
+        TimeSpan requestedEndTime,
+        IReadOnlyCollection<int> requestedParticipantIds)
+    {
+        var targetEntries = GetScopedWorkScheduleEntries(selectedEntry, scope);
+        var targetEntryIds = targetEntries
+            .Select(entry => entry.Id)
+            .ToHashSet();
+        var result = new List<ParticipantScheduleConflict>();
+
+        foreach (var targetEntry in targetEntries)
+        {
+            var requestedDate = targetEntry.Date.Date;
+            var requestedStart = requestedDate + requestedStartTime;
+            var requestedEnd = requestedDate + requestedEndTime;
+
+            foreach (var existingReservation in allReservations)
+            {
+                if (existingReservation.Date.Date != requestedDate.Date ||
+                    !TimesOverlap(requestedStart, requestedEnd, existingReservation.StartTime, existingReservation.EndTime))
+                {
+                    continue;
+                }
+
+                var existingParticipantIds = GetReservationParticipantIds(existingReservation);
+                var duplicatedParticipantIds = requestedParticipantIds.Intersect(existingParticipantIds).Distinct();
+
+                foreach (var participantId in duplicatedParticipantIds)
+                {
+                    result.Add(new ParticipantScheduleConflict(
+                        requestedDate.Date,
+                        requestedStart,
+                        requestedEnd,
+                        GetParticipantName(participantId),
+                        requestedTitle,
+                        "会議室予約",
+                        GetReservationTitle(existingReservation),
+                        existingReservation.StartTime,
+                        existingReservation.EndTime));
+                }
+            }
+
+            foreach (var existingSchedule in allWorkSchedules)
+            {
+                if (targetEntryIds.Contains(existingSchedule.Id) ||
+                    existingSchedule.Type != WorkScheduleEntryType.ExternalAppointment ||
+                    !existingSchedule.StartTime.HasValue ||
+                    !existingSchedule.EndTime.HasValue ||
+                    existingSchedule.Date.Date != requestedDate.Date ||
+                    !TimesOverlap(requestedStart, requestedEnd, existingSchedule.StartTime.Value, existingSchedule.EndTime.Value))
+                {
+                    continue;
+                }
+
+                var existingParticipantIds = GetWorkScheduleParticipantIds(existingSchedule);
+                var duplicatedParticipantIds = requestedParticipantIds.Intersect(existingParticipantIds).Distinct();
+
+                foreach (var participantId in duplicatedParticipantIds)
+                {
+                    result.Add(new ParticipantScheduleConflict(
+                        requestedDate.Date,
+                        requestedStart,
+                        requestedEnd,
+                        GetParticipantName(participantId),
+                        requestedTitle,
+                        "社外予定",
+                        existingSchedule.Title,
+                        existingSchedule.StartTime.Value,
+                        existingSchedule.EndTime.Value));
+                }
+            }
+        }
+
+        return result;
+    }
+
+    private List<WorkScheduleEntryModel> GetScopedWorkScheduleEntries(
+        WorkScheduleEntryModel selectedEntry,
+        string scope)
+    {
+        if (string.IsNullOrWhiteSpace(selectedEntry.SeriesId))
+        {
+            return new List<WorkScheduleEntryModel> { selectedEntry };
+        }
+
+        var normalizedScope = WorkScheduleSeriesScopes.Normalize(scope);
+        var selectedStartTime = selectedEntry.StartTime ?? selectedEntry.Date.Date;
+
+        return allWorkSchedules
+            .Where(entry => entry.SeriesId == selectedEntry.SeriesId)
+            .Where(entry => entry.Type == WorkScheduleEntryType.ExternalAppointment)
+            .Where(entry =>
+                normalizedScope == WorkScheduleSeriesScopes.All ||
+                entry.Id == selectedEntry.Id ||
+                entry.Date.Date > selectedEntry.Date.Date ||
+                (entry.Date.Date == selectedEntry.Date.Date &&
+                 (entry.StartTime ?? entry.Date.Date) >= selectedStartTime))
+            .OrderBy(entry => entry.Date)
+            .ThenBy(entry => entry.StartTime ?? entry.Date)
+            .ThenBy(entry => entry.Id)
+            .ToList();
     }
 
     private string GetWorkScheduleDeleteConfirmationMessage(
@@ -1616,7 +1776,7 @@
         foreach (var conflict in conflicts.Take(8))
         {
             lines.Add(
-                $"・{conflict.Date:yyyy/MM/dd} {conflict.Room}: {GetReservationTitle(conflict)} ({conflict.StartTime:HH:mm}〜{conflict.EndTime:HH:mm})");
+                $"・{FormatDate(conflict.Date)} {conflict.Room}: {GetReservationTitle(conflict)} ({FormatClock(conflict.StartTime)}〜{FormatClock(conflict.EndTime)})");
         }
 
         if (conflicts.Count > 8)
@@ -1641,7 +1801,7 @@
         foreach (var conflict in participantConflicts.Take(8))
         {
             lines.Add(
-                $"・{conflict.Date:yyyy/MM/dd} {conflict.ParticipantName}さん: {conflict.RequestedTitle} ({conflict.RequestedStart:HH:mm}〜{conflict.RequestedEnd:HH:mm}) / 既存{conflict.ExistingKind}: {conflict.ExistingTitle} ({conflict.ExistingStart:HH:mm}〜{conflict.ExistingEnd:HH:mm})");
+                $"・{FormatDate(conflict.Date)} {conflict.ParticipantName}さん: {conflict.RequestedTitle} ({FormatClock(conflict.RequestedStart)}〜{FormatClock(conflict.RequestedEnd)}) / 既存{conflict.ExistingKind}: {conflict.ExistingTitle} ({FormatClock(conflict.ExistingStart)}〜{FormatClock(conflict.ExistingEnd)})");
         }
 
         if (participantConflicts.Count > 8)
@@ -1725,7 +1885,7 @@
         foreach (var conflict in participantConflicts.Take(8))
         {
             lines.Add(
-                $"・{conflict.Date:yyyy/MM/dd} {conflict.ParticipantName}さん: {conflict.RequestedTitle} ({conflict.RequestedStart:HH:mm}〜{conflict.RequestedEnd:HH:mm}) / 既存{conflict.ExistingKind}: {conflict.ExistingTitle} ({conflict.ExistingStart:HH:mm}〜{conflict.ExistingEnd:HH:mm})");
+                $"・{FormatDate(conflict.Date)} {conflict.ParticipantName}さん: {conflict.RequestedTitle} ({FormatClock(conflict.RequestedStart)}〜{FormatClock(conflict.RequestedEnd)}) / 既存{conflict.ExistingKind}: {conflict.ExistingTitle} ({FormatClock(conflict.ExistingStart)}〜{FormatClock(conflict.ExistingEnd)})");
         }
 
         if (participantConflicts.Count > 8)

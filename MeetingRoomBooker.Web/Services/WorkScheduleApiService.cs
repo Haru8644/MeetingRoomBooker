@@ -106,6 +106,22 @@ public sealed class WorkScheduleApiService
             ?? throw new InvalidOperationException("勤務予定の更新結果が空です。");
     }
 
+    public async Task UpdateEntrySeriesAsync(
+        int id,
+        string scope,
+        UpdateWorkScheduleEntryRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var encodedScope = WebUtility.UrlEncode(WorkScheduleSeriesScopes.Normalize(scope));
+        var response = await SendAsync(
+            HttpMethod.Put,
+            $"api/work-schedule-entries/{id}/series?scope={encodedScope}",
+            request,
+            cancellationToken);
+
+        await EnsureSuccessAsync(response, $"勤務予定 id={id} のまとめ更新に失敗しました。");
+    }
+
     public async Task DeleteEntryAsync(
         int id,
         CancellationToken cancellationToken = default)

@@ -168,6 +168,71 @@ public sealed class WorkScheduleNotificationService : IWorkScheduleNotificationS
         }
     }
 
+    public async Task NotifySeriesUpdatedAsync(
+        IReadOnlyList<WorkScheduleEntryModel> previousEntries,
+        IReadOnlyList<WorkScheduleEntryModel> currentEntries,
+        string scope,
+        CancellationToken cancellationToken)
+    {
+        var orderedPreviousEntries = previousEntries
+            .OrderBy(entry => entry.Date)
+            .ThenBy(entry => entry.StartTime ?? entry.Date)
+            .ThenBy(entry => entry.Id)
+            .ToList();
+
+        var orderedCurrentEntries = currentEntries
+            .OrderBy(entry => entry.Date)
+            .ThenBy(entry => entry.StartTime ?? entry.Date)
+            .ThenBy(entry => entry.Id)
+            .ToList();
+
+        if (orderedPreviousEntries.Count == 0 || orderedCurrentEntries.Count == 0)
+        {
+            return;
+        }
+
+        var targetUserIds = orderedPreviousEntries
+            .SelectMany(GetNotifiableParticipantIds)
+            .Concat(orderedCurrentEntries.SelectMany(GetNotifiableParticipantIds))
+            .Distinct()
+            .ToList();
+
+        if (targetUserIds.Count == 0)
+        {
+            return;
+        }
+
+        var conflicts = new List<WorkScheduleParticipantConflict>();
+        foreach (var entry in orderedCurrentEntries)
+        {
+            conflicts.AddRange(await _conflictService.FindExternalAppointmentConflictsAsync(
+                entry,
+                cancellationToken));
+        }
+
+        var representativeEntry = orderedCurrentEntries[0];
+        var message = BuildSeriesUpdatedMessage(
+            orderedPreviousEntries,
+            orderedCurrentEntries,
+            scope,
+            conflicts);
+
+        var notificationType = conflicts.Count > 0
+            ? WarningNotificationType
+            : InfoNotificationType;
+
+        foreach (var userId in targetUserIds)
+        {
+            await UpsertNotificationAsync(
+                userId,
+                notificationType,
+                message,
+                representativeEntry.Date,
+                representativeEntry.Id,
+                cancellationToken);
+        }
+    }
+
     public async Task NotifyDeletedAsync(
         WorkScheduleEntryModel entry,
         CancellationToken cancellationToken)
@@ -383,6 +448,55 @@ public sealed class WorkScheduleNotificationService : IWorkScheduleNotificationS
             : $" 変更点: {string.Join(" ", changeLines.Select(change => $"{change}。"))}";
 
         return $"{GetTypeLabel(entry.Type)}「{entry.Title}」が更新されました。{BuildEntrySummary(entry)}{changeText}{BuildConflictText(conflicts)}";
+    }
+
+    private static string BuildSeriesUpdatedMessage(
+        IReadOnlyList<WorkScheduleEntryModel> previousEntries,
+        IReadOnlyList<WorkScheduleEntryModel> currentEntries,
+        string scope,
+        IReadOnlyCollection<WorkScheduleParticipantConflict> conflicts)
+    {
+        var firstPreviousEntry = previousEntries[0];
+        var firstCurrentEntry = currentEntries[0];
+        var lastCurrentEntry = currentEntries[^1];
+
+        var changeLines = BuildSeriesChangeLines(firstPreviousEntry, firstCurrentEntry);
+        var changeText = changeLines.Count == 0
+            ? string.Empty
+            : $" 変更点: {string.Join(" ", changeLines.Select(change => $"{change}。"))}";
+
+        return $"{GetTypeLabel(firstCurrentEntry.Type)}「{firstCurrentEntry.Title}」をまとめて更新しました。" +
+               $"反映範囲: {GetSeriesScopeLabel(scope)} / " +
+               $"期間: {firstCurrentEntry.Date:yyyy/MM/dd}〜{lastCurrentEntry.Date:yyyy/MM/dd} / " +
+               $"件数: {currentEntries.Count}件 / " +
+               $"時間: {GetTimeRangeText(firstCurrentEntry)} / " +
+               $"対象者: {GetParticipantText(firstCurrentEntry)}" +
+               changeText +
+               BuildConflictText(conflicts);
+    }
+
+    private static IReadOnlyList<string> BuildSeriesChangeLines(
+        WorkScheduleEntryModel previousEntry,
+        WorkScheduleEntryModel currentEntry)
+    {
+        var changes = new List<string>();
+
+        if (!string.Equals(previousEntry.Title, currentEntry.Title, StringComparison.Ordinal))
+        {
+            changes.Add($"内容が「{previousEntry.Title}」から「{currentEntry.Title}」に変更されました");
+        }
+
+        if (previousEntry.StartTime != currentEntry.StartTime || previousEntry.EndTime != currentEntry.EndTime)
+        {
+            changes.Add($"時間が {GetTimeRangeText(previousEntry)} から {GetTimeRangeText(currentEntry)} に変更されました");
+        }
+
+        if (!previousEntry.ParticipantIds.SequenceEqual(currentEntry.ParticipantIds))
+        {
+            changes.Add("対象者が変更されました");
+        }
+
+        return changes;
     }
 
     private static string BuildAddedParticipantMessage(

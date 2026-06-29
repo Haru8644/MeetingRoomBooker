@@ -37,6 +37,11 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
             return $"{ChatworkDeliveryTypes.WorkScheduleUpdated}:work-schedule:{workScheduleEntryId}:user:{targetUserId}:change:{changeId}";
         }
 
+        public static string WorkScheduleSeriesUpdated(string seriesId, string scope, int targetUserId, string changeId)
+        {
+            return $"{ChatworkDeliveryTypes.WorkScheduleSeriesUpdated}:work-schedule-series:{seriesId}:scope:{scope}:user:{targetUserId}:change:{changeId}";
+        }
+
         public static string WorkScheduleDeleted(int workScheduleEntryId, int targetUserId)
         {
             return $"{ChatworkDeliveryTypes.WorkScheduleDeleted}:work-schedule:{workScheduleEntryId}:user:{targetUserId}";

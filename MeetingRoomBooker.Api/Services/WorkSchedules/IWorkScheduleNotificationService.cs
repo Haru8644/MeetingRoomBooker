@@ -17,6 +17,12 @@ public interface IWorkScheduleNotificationService
         WorkScheduleEntryModel currentEntry,
         CancellationToken cancellationToken);
 
+    Task NotifySeriesUpdatedAsync(
+        IReadOnlyList<WorkScheduleEntryModel> previousEntries,
+        IReadOnlyList<WorkScheduleEntryModel> currentEntries,
+        string scope,
+        CancellationToken cancellationToken);
+
     Task NotifyDeletedAsync(
         WorkScheduleEntryModel entry,
         CancellationToken cancellationToken);

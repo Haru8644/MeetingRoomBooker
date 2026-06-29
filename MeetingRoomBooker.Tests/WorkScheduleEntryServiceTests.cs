@@ -581,6 +581,418 @@ public sealed class WorkScheduleEntryServiceTests
     }
 
     [Fact]
+    public async Task UpdateEntrySeriesAsync_WhenScopeSingle_UpdatesOnlySelectedEntry()
+    {
+        using var database = CreateTestDatabase();
+        await SeedUsersAsync(database.Context);
+
+        var seriesId = "series-1";
+        var first = CreateSeriesEntry(seriesId, new DateTime(2026, 6, 1), createdByUserId: 1);
+        var second = CreateSeriesEntry(seriesId, new DateTime(2026, 6, 2), createdByUserId: 1);
+        var third = CreateSeriesEntry(seriesId, new DateTime(2026, 6, 3), createdByUserId: 1);
+
+        database.Context.WorkScheduleEntries.AddRange(first, second, third);
+        await database.Context.SaveChangesAsync();
+
+        var notificationService = new RecordingWorkScheduleNotificationService();
+        var chatworkNotificationService = new RecordingWorkScheduleChatworkNotificationService();
+        var service = new WorkScheduleEntryService(
+            database.Context,
+            notificationService,
+            chatworkNotificationService);
+
+        var result = await service.UpdateEntrySeriesAsync(
+            second.Id,
+            new UpdateWorkScheduleEntryRequest
+            {
+                Type = WorkScheduleEntryType.ExternalAppointment,
+                Title = "更新後の顧客訪問",
+                Date = new DateTime(2026, 6, 20),
+                StartTime = new DateTime(2026, 1, 1, 14, 0, 0),
+                EndTime = new DateTime(2026, 1, 1, 15, 0, 0),
+                ParticipantIds = new List<int> { 1, 2 }
+            },
+            WorkScheduleSeriesScopes.Single,
+            currentUserId: 1,
+            isAdmin: false,
+            CancellationToken.None);
+
+        Assert.Null(result.ErrorMessage);
+        Assert.False(result.Forbidden);
+        Assert.NotNull(result.Entry);
+
+        var entries = await database.Context.WorkScheduleEntries
+            .AsNoTracking()
+            .ToDictionaryAsync(entry => entry.Id);
+
+        Assert.Equal("顧客訪問", entries[first.Id].Title);
+        Assert.Equal(new DateTime(2026, 6, 1), entries[first.Id].Date.Date);
+        Assert.Equal("更新後の顧客訪問", entries[second.Id].Title);
+        Assert.Equal(new DateTime(2026, 6, 20), entries[second.Id].Date.Date);
+        Assert.Equal(new DateTime(2026, 6, 20, 14, 0, 0), entries[second.Id].StartTime);
+        Assert.Equal(new DateTime(2026, 6, 20, 15, 0, 0), entries[second.Id].EndTime);
+        Assert.Equal("顧客訪問", entries[third.Id].Title);
+        Assert.Equal(new DateTime(2026, 6, 3), entries[third.Id].Date.Date);
+        Assert.Equal(1, notificationService.UpdatedCallCount);
+        Assert.Equal(0, notificationService.SeriesUpdatedCallCount);
+        Assert.Equal(1, chatworkNotificationService.UpdatedCallCount);
+        Assert.Equal(0, chatworkNotificationService.SeriesUpdatedCallCount);
+    }
+
+    [Fact]
+    public async Task UpdateEntrySeriesAsync_WhenScopeFollowing_UpdatesSelectedAndFutureEntriesKeepingDates()
+    {
+        using var database = CreateTestDatabase();
+        await SeedUsersAsync(database.Context);
+
+        var seriesId = "series-1";
+        var first = CreateSeriesEntry(seriesId, new DateTime(2026, 6, 1), createdByUserId: 1);
+        var second = CreateSeriesEntry(seriesId, new DateTime(2026, 6, 2), createdByUserId: 1);
+        var third = CreateSeriesEntry(seriesId, new DateTime(2026, 6, 3), createdByUserId: 1);
+        var otherSeries = CreateSeriesEntry("series-2", new DateTime(2026, 6, 3), createdByUserId: 1);
+
+        database.Context.WorkScheduleEntries.AddRange(first, second, third, otherSeries);
+        await database.Context.SaveChangesAsync();
+
+        var notificationService = new RecordingWorkScheduleNotificationService();
+        var chatworkNotificationService = new RecordingWorkScheduleChatworkNotificationService();
+        var service = new WorkScheduleEntryService(
+            database.Context,
+            notificationService,
+            chatworkNotificationService);
+
+        var result = await service.UpdateEntrySeriesAsync(
+            second.Id,
+            new UpdateWorkScheduleEntryRequest
+            {
+                Type = WorkScheduleEntryType.ExternalAppointment,
+                Title = "更新後の顧客訪問",
+                Date = new DateTime(2026, 6, 20),
+                StartTime = new DateTime(2026, 1, 1, 14, 0, 0),
+                EndTime = new DateTime(2026, 1, 1, 15, 0, 0),
+                ParticipantIds = new List<int> { 1, 2 }
+            },
+            WorkScheduleSeriesScopes.Following,
+            currentUserId: 1,
+            isAdmin: false,
+            CancellationToken.None);
+
+        Assert.Null(result.ErrorMessage);
+        Assert.False(result.Forbidden);
+
+        var entries = await database.Context.WorkScheduleEntries
+            .AsNoTracking()
+            .OrderBy(entry => entry.Id)
+            .ToDictionaryAsync(entry => entry.Id);
+
+        Assert.Equal("顧客訪問", entries[first.Id].Title);
+        Assert.Equal(new DateTime(2026, 6, 1), entries[first.Id].Date.Date);
+        Assert.Equal(new DateTime(2026, 6, 1, 10, 0, 0), entries[first.Id].StartTime);
+
+        Assert.Equal("更新後の顧客訪問", entries[second.Id].Title);
+        Assert.Equal(new DateTime(2026, 6, 2), entries[second.Id].Date.Date);
+        Assert.Equal(new DateTime(2026, 6, 2, 14, 0, 0), entries[second.Id].StartTime);
+        Assert.Equal(new DateTime(2026, 6, 2, 15, 0, 0), entries[second.Id].EndTime);
+        Assert.Equal(new List<int> { 1, 2 }, entries[second.Id].ParticipantIds);
+        Assert.Equal("稲生遥希、田中太郎", entries[second.Id].Participants);
+
+        Assert.Equal("更新後の顧客訪問", entries[third.Id].Title);
+        Assert.Equal(new DateTime(2026, 6, 3), entries[third.Id].Date.Date);
+        Assert.Equal(new DateTime(2026, 6, 3, 14, 0, 0), entries[third.Id].StartTime);
+        Assert.Equal(new DateTime(2026, 6, 3, 15, 0, 0), entries[third.Id].EndTime);
+
+        Assert.Equal("顧客訪問", entries[otherSeries.Id].Title);
+        Assert.Equal(0, notificationService.UpdatedCallCount);
+        Assert.Equal(1, notificationService.SeriesUpdatedCallCount);
+        Assert.Equal(2, notificationService.LastSeriesUpdatedEntriesCount);
+        Assert.Equal(WorkScheduleSeriesScopes.Following, notificationService.LastSeriesUpdatedScope);
+        Assert.Equal(0, chatworkNotificationService.UpdatedCallCount);
+        Assert.Equal(1, chatworkNotificationService.SeriesUpdatedCallCount);
+    }
+
+    [Fact]
+    public async Task UpdateEntrySeriesAsync_WhenScopeAll_UpdatesAllEntriesInSameSeries()
+    {
+        using var database = CreateTestDatabase();
+        await SeedUsersAsync(database.Context);
+
+        var seriesId = "series-1";
+        var first = CreateSeriesEntry(seriesId, new DateTime(2026, 6, 1), createdByUserId: 1);
+        var second = CreateSeriesEntry(seriesId, new DateTime(2026, 6, 2), createdByUserId: 1);
+        var third = CreateSeriesEntry(seriesId, new DateTime(2026, 6, 3), createdByUserId: 1);
+        var otherSeries = CreateSeriesEntry("series-2", new DateTime(2026, 6, 3), createdByUserId: 1);
+
+        database.Context.WorkScheduleEntries.AddRange(first, second, third, otherSeries);
+        await database.Context.SaveChangesAsync();
+
+        var notificationService = new RecordingWorkScheduleNotificationService();
+        var service = new WorkScheduleEntryService(database.Context, notificationService);
+
+        var result = await service.UpdateEntrySeriesAsync(
+            second.Id,
+            new UpdateWorkScheduleEntryRequest
+            {
+                Type = WorkScheduleEntryType.ExternalAppointment,
+                Title = "全件更新後",
+                Date = new DateTime(2026, 6, 20),
+                StartTime = new DateTime(2026, 1, 1, 9, 30, 0),
+                EndTime = new DateTime(2026, 1, 1, 10, 30, 0),
+                ParticipantIds = new List<int> { 1 }
+            },
+            WorkScheduleSeriesScopes.All,
+            currentUserId: 1,
+            isAdmin: false,
+            CancellationToken.None);
+
+        Assert.Null(result.ErrorMessage);
+        Assert.False(result.Forbidden);
+
+        var entries = await database.Context.WorkScheduleEntries
+            .AsNoTracking()
+            .OrderBy(entry => entry.Id)
+            .ToDictionaryAsync(entry => entry.Id);
+
+        Assert.All(new[] { first.Id, second.Id, third.Id }, id =>
+        {
+            Assert.Equal("全件更新後", entries[id].Title);
+            Assert.Equal(entries[id].Date.Date.AddHours(9).AddMinutes(30), entries[id].StartTime);
+            Assert.Equal(entries[id].Date.Date.AddHours(10).AddMinutes(30), entries[id].EndTime);
+        });
+
+        Assert.Equal("顧客訪問", entries[otherSeries.Id].Title);
+        Assert.Equal(1, notificationService.SeriesUpdatedCallCount);
+        Assert.Equal(3, notificationService.LastSeriesUpdatedEntriesCount);
+        Assert.Equal(WorkScheduleSeriesScopes.All, notificationService.LastSeriesUpdatedScope);
+    }
+
+    [Fact]
+    public async Task UpdateEntrySeriesAsync_ReturnsBadRequest_WhenFollowingRequestedForEntryWithoutSeriesId()
+    {
+        using var database = CreateTestDatabase();
+        await SeedUsersAsync(database.Context);
+
+        var entry = CreateEntry(
+            type: WorkScheduleEntryType.ExternalAppointment,
+            title: "顧客訪問",
+            date: new DateTime(2026, 6, 1),
+            createdByUserId: 1);
+
+        database.Context.WorkScheduleEntries.Add(entry);
+        await database.Context.SaveChangesAsync();
+
+        var service = new WorkScheduleEntryService(database.Context);
+
+        var result = await service.UpdateEntrySeriesAsync(
+            entry.Id,
+            new UpdateWorkScheduleEntryRequest
+            {
+                Type = WorkScheduleEntryType.ExternalAppointment,
+                Title = "更新後",
+                Date = new DateTime(2026, 6, 1),
+                StartTime = new DateTime(2026, 1, 1, 14, 0, 0),
+                EndTime = new DateTime(2026, 1, 1, 15, 0, 0),
+                ParticipantIds = new List<int> { 1 }
+            },
+            WorkScheduleSeriesScopes.Following,
+            currentUserId: 1,
+            isAdmin: false,
+            CancellationToken.None);
+
+        Assert.Equal("繰り返し社外予定のみまとめて編集できます。", result.ErrorMessage);
+        Assert.Single(database.Context.WorkScheduleEntries);
+    }
+
+    [Fact]
+    public async Task UpdateEntrySeriesAsync_ReturnsBadRequest_WhenFollowingRequestedForWorkFromHome()
+    {
+        using var database = CreateTestDatabase();
+        await SeedUsersAsync(database.Context);
+
+        var entry = CreateEntry(
+            type: WorkScheduleEntryType.WorkFromHome,
+            title: "在宅",
+            date: new DateTime(2026, 6, 1),
+            createdByUserId: 1);
+
+        entry.SeriesId = "series-1";
+        database.Context.WorkScheduleEntries.Add(entry);
+        await database.Context.SaveChangesAsync();
+
+        var service = new WorkScheduleEntryService(database.Context);
+
+        var result = await service.UpdateEntrySeriesAsync(
+            entry.Id,
+            new UpdateWorkScheduleEntryRequest
+            {
+                Type = WorkScheduleEntryType.WorkFromHome,
+                Title = "在宅更新",
+                Date = new DateTime(2026, 6, 1),
+                ParticipantIds = new List<int> { 1 }
+            },
+            WorkScheduleSeriesScopes.Following,
+            currentUserId: 1,
+            isAdmin: false,
+            CancellationToken.None);
+
+        Assert.Equal("繰り返し社外予定のみまとめて編集できます。", result.ErrorMessage);
+        Assert.Single(database.Context.WorkScheduleEntries);
+    }
+
+    [Fact]
+    public async Task UpdateEntrySeriesAsync_ReturnsBadRequest_WhenScopeIsInvalid()
+    {
+        using var database = CreateTestDatabase();
+        await SeedUsersAsync(database.Context);
+
+        var entry = CreateSeriesEntry("series-1", new DateTime(2026, 6, 1), createdByUserId: 1);
+        database.Context.WorkScheduleEntries.Add(entry);
+        await database.Context.SaveChangesAsync();
+
+        var service = new WorkScheduleEntryService(database.Context);
+
+        var result = await service.UpdateEntrySeriesAsync(
+            entry.Id,
+            new UpdateWorkScheduleEntryRequest
+            {
+                Type = WorkScheduleEntryType.ExternalAppointment,
+                Title = "更新後",
+                Date = new DateTime(2026, 6, 1),
+                StartTime = new DateTime(2026, 1, 1, 14, 0, 0),
+                EndTime = new DateTime(2026, 1, 1, 15, 0, 0),
+                ParticipantIds = new List<int> { 1 }
+            },
+            "invalid",
+            currentUserId: 1,
+            isAdmin: false,
+            CancellationToken.None);
+
+        Assert.Equal("反映範囲が不正です。", result.ErrorMessage);
+        Assert.Single(database.Context.WorkScheduleEntries);
+    }
+
+    [Fact]
+    public async Task UpdateEntrySeriesAsync_ReturnsForbidden_WhenNonAdminUpdatesSeriesContainingOtherUsersEntry()
+    {
+        using var database = CreateTestDatabase();
+        await SeedUsersAsync(database.Context);
+
+        var seriesId = "series-1";
+        var first = CreateSeriesEntry(seriesId, new DateTime(2026, 6, 1), createdByUserId: 1);
+        var second = CreateSeriesEntry(seriesId, new DateTime(2026, 6, 2), createdByUserId: 2);
+
+        database.Context.WorkScheduleEntries.AddRange(first, second);
+        await database.Context.SaveChangesAsync();
+
+        var service = new WorkScheduleEntryService(database.Context);
+
+        var result = await service.UpdateEntrySeriesAsync(
+            first.Id,
+            new UpdateWorkScheduleEntryRequest
+            {
+                Type = WorkScheduleEntryType.ExternalAppointment,
+                Title = "更新後",
+                Date = new DateTime(2026, 6, 1),
+                StartTime = new DateTime(2026, 1, 1, 14, 0, 0),
+                EndTime = new DateTime(2026, 1, 1, 15, 0, 0),
+                ParticipantIds = new List<int> { 1 }
+            },
+            WorkScheduleSeriesScopes.All,
+            currentUserId: 1,
+            isAdmin: false,
+            CancellationToken.None);
+
+        Assert.True(result.Forbidden);
+        Assert.Equal(2, database.Context.WorkScheduleEntries.Count());
+        Assert.All(database.Context.WorkScheduleEntries, entry => Assert.Equal("顧客訪問", entry.Title));
+    }
+
+    [Fact]
+    public async Task UpdateEntrySeriesAsync_AllowsAdminToUpdateOtherUsersSeries()
+    {
+        using var database = CreateTestDatabase();
+        await SeedUsersAsync(database.Context);
+
+        var seriesId = "series-1";
+        var first = CreateSeriesEntry(seriesId, new DateTime(2026, 6, 1), createdByUserId: 1);
+        var second = CreateSeriesEntry(seriesId, new DateTime(2026, 6, 2), createdByUserId: 2);
+
+        database.Context.WorkScheduleEntries.AddRange(first, second);
+        await database.Context.SaveChangesAsync();
+
+        var service = new WorkScheduleEntryService(database.Context);
+
+        var result = await service.UpdateEntrySeriesAsync(
+            first.Id,
+            new UpdateWorkScheduleEntryRequest
+            {
+                Type = WorkScheduleEntryType.ExternalAppointment,
+                Title = "管理者更新",
+                Date = new DateTime(2026, 6, 1),
+                StartTime = new DateTime(2026, 1, 1, 13, 0, 0),
+                EndTime = new DateTime(2026, 1, 1, 14, 0, 0),
+                ParticipantIds = new List<int> { 1 }
+            },
+            WorkScheduleSeriesScopes.All,
+            currentUserId: 1,
+            isAdmin: true,
+            CancellationToken.None);
+
+        Assert.Null(result.ErrorMessage);
+        Assert.False(result.Forbidden);
+
+        var titles = await database.Context.WorkScheduleEntries
+            .AsNoTracking()
+            .Select(entry => entry.Title)
+            .ToListAsync();
+
+        Assert.Equal(new[] { "管理者更新", "管理者更新" }, titles);
+    }
+
+    [Fact]
+    public async Task UpdateEntrySeriesAsync_WhenSummaryNotificationFails_KeepsUpdatedEntries()
+    {
+        using var database = CreateTestDatabase();
+        await SeedUsersAsync(database.Context);
+
+        var seriesId = "series-1";
+        var first = CreateSeriesEntry(seriesId, new DateTime(2026, 6, 1), createdByUserId: 1);
+        var second = CreateSeriesEntry(seriesId, new DateTime(2026, 6, 2), createdByUserId: 1);
+
+        database.Context.WorkScheduleEntries.AddRange(first, second);
+        await database.Context.SaveChangesAsync();
+
+        var service = new WorkScheduleEntryService(
+            database.Context,
+            new ThrowingWorkScheduleNotificationService(),
+            new ThrowingWorkScheduleChatworkNotificationService());
+
+        var result = await service.UpdateEntrySeriesAsync(
+            first.Id,
+            new UpdateWorkScheduleEntryRequest
+            {
+                Type = WorkScheduleEntryType.ExternalAppointment,
+                Title = "通知失敗後も更新",
+                Date = new DateTime(2026, 6, 1),
+                StartTime = new DateTime(2026, 1, 1, 13, 0, 0),
+                EndTime = new DateTime(2026, 1, 1, 14, 0, 0),
+                ParticipantIds = new List<int> { 1 }
+            },
+            WorkScheduleSeriesScopes.All,
+            currentUserId: 1,
+            isAdmin: false,
+            CancellationToken.None);
+
+        Assert.Null(result.ErrorMessage);
+
+        var titles = await database.Context.WorkScheduleEntries
+            .AsNoTracking()
+            .Select(entry => entry.Title)
+            .ToListAsync();
+
+        Assert.Equal(new[] { "通知失敗後も更新", "通知失敗後も更新" }, titles);
+    }
+
+    [Fact]
     public async Task DeleteEntrySeriesAsync_WhenScopeSingle_DeletesOnlySelectedEntry()
     {
         using var database = CreateTestDatabase();
@@ -925,6 +1337,14 @@ public sealed class WorkScheduleEntryServiceTests
 
         public int SeriesCreatedCallCount { get; private set; }
 
+        public int UpdatedCallCount { get; private set; }
+
+        public int SeriesUpdatedCallCount { get; private set; }
+
+        public int LastSeriesUpdatedEntriesCount { get; private set; }
+
+        public string? LastSeriesUpdatedScope { get; private set; }
+
         public int DeletedCallCount { get; private set; }
 
         public int SeriesDeletedCallCount { get; private set; }
@@ -954,6 +1374,19 @@ public sealed class WorkScheduleEntryServiceTests
             WorkScheduleEntryModel currentEntry,
             CancellationToken cancellationToken)
         {
+            UpdatedCallCount++;
+            return Task.CompletedTask;
+        }
+
+        public Task NotifySeriesUpdatedAsync(
+            IReadOnlyList<WorkScheduleEntryModel> previousEntries,
+            IReadOnlyList<WorkScheduleEntryModel> currentEntries,
+            string scope,
+            CancellationToken cancellationToken)
+        {
+            SeriesUpdatedCallCount++;
+            LastSeriesUpdatedEntriesCount = currentEntries.Count;
+            LastSeriesUpdatedScope = scope;
             return Task.CompletedTask;
         }
 
@@ -983,6 +1416,10 @@ public sealed class WorkScheduleEntryServiceTests
 
         public int SeriesCreatedCallCount { get; private set; }
 
+        public int UpdatedCallCount { get; private set; }
+
+        public int SeriesUpdatedCallCount { get; private set; }
+
         public int DeletedCallCount { get; private set; }
 
         public int SeriesDeletedCallCount { get; private set; }
@@ -1008,6 +1445,17 @@ public sealed class WorkScheduleEntryServiceTests
             WorkScheduleEntryModel currentEntry,
             CancellationToken cancellationToken = default)
         {
+            UpdatedCallCount++;
+            return Task.CompletedTask;
+        }
+
+        public Task SendSeriesUpdatedAsync(
+            IReadOnlyList<WorkScheduleEntryModel> previousEntries,
+            IReadOnlyList<WorkScheduleEntryModel> currentEntries,
+            string scope,
+            CancellationToken cancellationToken = default)
+        {
+            SeriesUpdatedCallCount++;
             return Task.CompletedTask;
         }
 
@@ -1060,6 +1508,15 @@ public sealed class WorkScheduleEntryServiceTests
             throw new InvalidOperationException("notification failed");
         }
 
+        public Task NotifySeriesUpdatedAsync(
+            IReadOnlyList<WorkScheduleEntryModel> previousEntries,
+            IReadOnlyList<WorkScheduleEntryModel> currentEntries,
+            string scope,
+            CancellationToken cancellationToken)
+        {
+            throw new InvalidOperationException("series update notification failed");
+        }
+
         public Task NotifyDeletedAsync(
             WorkScheduleEntryModel entry,
             CancellationToken cancellationToken)
@@ -1098,6 +1555,15 @@ public sealed class WorkScheduleEntryServiceTests
             CancellationToken cancellationToken = default)
         {
             throw new InvalidOperationException("chatwork failed");
+        }
+
+        public Task SendSeriesUpdatedAsync(
+            IReadOnlyList<WorkScheduleEntryModel> previousEntries,
+            IReadOnlyList<WorkScheduleEntryModel> currentEntries,
+            string scope,
+            CancellationToken cancellationToken = default)
+        {
+            throw new InvalidOperationException("series update chatwork failed");
         }
 
         public Task SendDeletedAsync(
