@@ -131,6 +131,74 @@ public sealed class WorkScheduleChatworkNotificationServiceTests
     }
 
     [Fact]
+    public async Task SendSeriesCreatedAsync_SendsSummaryMessagesAndCreatesSeriesDeliveryLogs()
+    {
+        using var database = CreateTestDatabase();
+        await SeedUsersAsync(database.Context);
+
+        var chatworkClient = new RecordingChatworkClient();
+        var service = CreateService(database.Context, chatworkClient);
+
+        var entries = new List<WorkScheduleEntryModel>
+        {
+            new()
+            {
+                Id = 101,
+                CreatedByUserId = 1,
+                Type = WorkScheduleEntryType.ExternalAppointment,
+                Title = "顧客訪問",
+                SeriesId = "series-1",
+                Date = new DateTime(2026, 6, 1),
+                StartTime = new DateTime(2026, 6, 1, 10, 0, 0),
+                EndTime = new DateTime(2026, 6, 1, 11, 0, 0),
+                RepeatType = WorkScheduleRepeatTypes.Weekly,
+                RepeatUntil = new DateTime(2026, 6, 8),
+                ParticipantIds = new List<int> { 1, 2 },
+                Participants = "稲生遥希、田中太郎"
+            },
+            new()
+            {
+                Id = 102,
+                CreatedByUserId = 1,
+                Type = WorkScheduleEntryType.ExternalAppointment,
+                Title = "顧客訪問",
+                SeriesId = "series-1",
+                Date = new DateTime(2026, 6, 8),
+                StartTime = new DateTime(2026, 6, 8, 10, 0, 0),
+                EndTime = new DateTime(2026, 6, 8, 11, 0, 0),
+                RepeatType = WorkScheduleRepeatTypes.Weekly,
+                RepeatUntil = new DateTime(2026, 6, 8),
+                ParticipantIds = new List<int> { 1, 2 },
+                Participants = "稲生遥希、田中太郎"
+            }
+        };
+
+        await service.SendSeriesCreatedAsync(entries, CancellationToken.None);
+
+        Assert.Equal(2, chatworkClient.SentMessages.Count);
+        Assert.All(chatworkClient.SentMessages, message =>
+        {
+            Assert.Contains("社外予定を繰り返し登録しました", message.Message);
+            Assert.Contains("内容: 顧客訪問", message.Message);
+            Assert.Contains("繰り返し: 毎週", message.Message);
+            Assert.Contains("件数: 2件", message.Message);
+        });
+
+        var logs = await database.Context.ChatworkDeliveryLogs
+            .OrderBy(log => log.TargetUserId)
+            .ToListAsync();
+
+        Assert.Equal(2, logs.Count);
+        Assert.All(logs, log =>
+        {
+            Assert.Equal(101, log.WorkScheduleEntryId);
+            Assert.Equal("WorkScheduleSeriesCreated", log.DeliveryType);
+            Assert.Contains("WorkScheduleSeriesCreated:work-schedule-series:series-1", log.DeliveryKey);
+            Assert.Equal("Succeeded", log.Status);
+        });
+    }
+
+    [Fact]
     public async Task SendUpdatedAsync_SendsDifferentMessagesToRetainedAddedAndRemovedParticipants()
     {
         using var database = CreateTestDatabase();

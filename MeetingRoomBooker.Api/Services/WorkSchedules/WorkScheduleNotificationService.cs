@@ -51,6 +51,57 @@ public sealed class WorkScheduleNotificationService : IWorkScheduleNotificationS
         }
     }
 
+    public async Task NotifySeriesCreatedAsync(
+        IReadOnlyList<WorkScheduleEntryModel> entries,
+        CancellationToken cancellationToken)
+    {
+        var orderedEntries = entries
+            .OrderBy(entry => entry.Date)
+            .ThenBy(entry => entry.StartTime ?? entry.Date)
+            .ThenBy(entry => entry.Id)
+            .ToList();
+
+        if (orderedEntries.Count == 0)
+        {
+            return;
+        }
+
+        var targetUserIds = orderedEntries
+            .SelectMany(GetNotifiableParticipantIds)
+            .Distinct()
+            .ToList();
+
+        if (targetUserIds.Count == 0)
+        {
+            return;
+        }
+
+        var conflicts = new List<WorkScheduleParticipantConflict>();
+        foreach (var entry in orderedEntries)
+        {
+            conflicts.AddRange(await _conflictService.FindExternalAppointmentConflictsAsync(
+                entry,
+                cancellationToken));
+        }
+
+        var representativeEntry = orderedEntries[0];
+        var message = BuildSeriesCreatedMessage(orderedEntries, conflicts);
+        var notificationType = conflicts.Count > 0
+            ? WarningNotificationType
+            : InfoNotificationType;
+
+        foreach (var userId in targetUserIds)
+        {
+            await UpsertNotificationAsync(
+                userId,
+                notificationType,
+                message,
+                representativeEntry.Date,
+                representativeEntry.Id,
+                cancellationToken);
+        }
+    }
+
     public async Task NotifyUpdatedAsync(
         WorkScheduleEntryModel previousEntry,
         WorkScheduleEntryModel currentEntry,
@@ -264,6 +315,21 @@ public sealed class WorkScheduleNotificationService : IWorkScheduleNotificationS
         IReadOnlyCollection<WorkScheduleParticipantConflict> conflicts)
     {
         return $"{GetTypeLabel(entry.Type)}「{entry.Title}」が登録されました。{BuildEntrySummary(entry)}{BuildConflictText(conflicts)}";
+    }
+
+    private static string BuildSeriesCreatedMessage(
+        IReadOnlyList<WorkScheduleEntryModel> entries,
+        IReadOnlyCollection<WorkScheduleParticipantConflict> conflicts)
+    {
+        var firstEntry = entries[0];
+        var lastEntry = entries[^1];
+
+        return $"{GetTypeLabel(firstEntry.Type)}「{firstEntry.Title}」を繰り返し登録しました。" +
+               $"期間: {firstEntry.Date:yyyy/MM/dd}〜{lastEntry.Date:yyyy/MM/dd} / " +
+               $"繰り返し: {firstEntry.RepeatType ?? WorkScheduleRepeatTypes.None} / " +
+               $"件数: {entries.Count}件 / " +
+               $"対象者: {GetParticipantText(firstEntry)}" +
+               BuildConflictText(conflicts);
     }
 
     private static string BuildUpdatedMessage(

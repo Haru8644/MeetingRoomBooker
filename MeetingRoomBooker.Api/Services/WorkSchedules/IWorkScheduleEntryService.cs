@@ -19,6 +19,12 @@ public interface IWorkScheduleEntryService
         bool isAdmin,
         CancellationToken cancellationToken);
 
+    Task<WorkScheduleEntrySeriesResult> CreateEntrySeriesAsync(
+        CreateWorkScheduleEntryRequest request,
+        int currentUserId,
+        bool isAdmin,
+        CancellationToken cancellationToken);
+
     Task<WorkScheduleEntryResult> UpdateEntryAsync(
         int id,
         UpdateWorkScheduleEntryRequest request,

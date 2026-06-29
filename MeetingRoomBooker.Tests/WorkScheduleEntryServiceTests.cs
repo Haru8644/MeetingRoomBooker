@@ -1,5 +1,6 @@
 using MeetingRoomBooker.Api.Data;
 using MeetingRoomBooker.Api.Models;
+using MeetingRoomBooker.Api.Services.Chatwork;
 using MeetingRoomBooker.Api.Services.WorkSchedules;
 using MeetingRoomBooker.Shared.Models;
 using Microsoft.Data.Sqlite;
@@ -72,6 +73,271 @@ public sealed class WorkScheduleEntryServiceTests
 
         Assert.Equal("終了時刻は開始時刻より後にしてください。", result.ErrorMessage);
         Assert.Null(result.Entry);
+    }
+
+    [Fact]
+    public async Task CreateEntrySeriesAsync_WhenDailyExternalAppointmentRequested_CreatesWeekdayEntriesWithSameSeriesId()
+    {
+        using var database = CreateTestDatabase();
+        await SeedUsersAsync(database.Context);
+
+        var notificationService = new RecordingWorkScheduleNotificationService();
+        var chatworkNotificationService = new RecordingWorkScheduleChatworkNotificationService();
+        var service = new WorkScheduleEntryService(
+            database.Context,
+            notificationService,
+            chatworkNotificationService);
+
+        var result = await service.CreateEntrySeriesAsync(
+            new CreateWorkScheduleEntryRequest
+            {
+                Type = WorkScheduleEntryType.ExternalAppointment,
+                Title = "顧客訪問",
+                Date = new DateTime(2026, 6, 5),
+                StartTime = new DateTime(2026, 1, 1, 10, 0, 0),
+                EndTime = new DateTime(2026, 1, 1, 11, 0, 0),
+                ParticipantIds = new List<int> { 2 },
+                RepeatType = WorkScheduleRepeatTypes.Daily,
+                RepeatUntil = new DateTime(2026, 6, 9)
+            },
+            currentUserId: 1,
+            isAdmin: false,
+            CancellationToken.None);
+
+        Assert.Null(result.ErrorMessage);
+        Assert.Equal(3, result.Entries.Count);
+        Assert.Equal(new List<DateTime>
+        {
+            new(2026, 6, 5),
+            new(2026, 6, 8),
+            new(2026, 6, 9)
+        }, result.Entries.Select(entry => entry.Date).ToList());
+
+        var seriesId = Assert.Single(result.Entries.Select(entry => entry.SeriesId).Distinct());
+        Assert.False(string.IsNullOrWhiteSpace(seriesId));
+        Assert.All(result.Entries, entry =>
+        {
+            Assert.Equal(WorkScheduleRepeatTypes.Daily, entry.RepeatType);
+            Assert.Equal(new DateTime(2026, 6, 9), entry.RepeatUntil);
+            Assert.Equal(seriesId, entry.SeriesId);
+            Assert.Equal(entry.Date.Date.AddHours(10), entry.StartTime);
+            Assert.Equal(entry.Date.Date.AddHours(11), entry.EndTime);
+        });
+
+        Assert.Equal(3, await database.Context.WorkScheduleEntries.CountAsync());
+        Assert.Equal(1, notificationService.SeriesCreatedCallCount);
+        Assert.Equal(0, notificationService.CreatedCallCount);
+        Assert.Equal(1, chatworkNotificationService.SeriesCreatedCallCount);
+        Assert.Equal(0, chatworkNotificationService.CreatedCallCount);
+    }
+
+    [Fact]
+    public async Task CreateEntrySeriesAsync_WhenWeeklyExternalAppointmentRequested_CreatesSevenDayStepEntries()
+    {
+        using var database = CreateTestDatabase();
+        await SeedUsersAsync(database.Context);
+
+        var service = new WorkScheduleEntryService(database.Context);
+
+        var result = await service.CreateEntrySeriesAsync(
+            new CreateWorkScheduleEntryRequest
+            {
+                Type = WorkScheduleEntryType.ExternalAppointment,
+                Title = "週次訪問",
+                Date = new DateTime(2026, 6, 1),
+                StartTime = new DateTime(2026, 1, 1, 10, 0, 0),
+                EndTime = new DateTime(2026, 1, 1, 11, 0, 0),
+                ParticipantIds = new List<int> { 2 },
+                RepeatType = WorkScheduleRepeatTypes.Weekly,
+                RepeatUntil = new DateTime(2026, 6, 15)
+            },
+            currentUserId: 1,
+            isAdmin: false,
+            CancellationToken.None);
+
+        Assert.Null(result.ErrorMessage);
+        Assert.Equal(new List<DateTime>
+        {
+            new(2026, 6, 1),
+            new(2026, 6, 8),
+            new(2026, 6, 15)
+        }, result.Entries.Select(entry => entry.Date).ToList());
+    }
+
+    [Theory]
+    [InlineData("隔週")]
+    [InlineData("毎月")]
+    [InlineData("invalid")]
+    public async Task CreateEntrySeriesAsync_ReturnsBadRequest_WhenRepeatTypeIsUnsupported(string repeatType)
+    {
+        using var database = CreateTestDatabase();
+        await SeedUsersAsync(database.Context);
+
+        var service = new WorkScheduleEntryService(database.Context);
+
+        var result = await service.CreateEntrySeriesAsync(
+            new CreateWorkScheduleEntryRequest
+            {
+                Type = WorkScheduleEntryType.ExternalAppointment,
+                Title = "顧客訪問",
+                Date = new DateTime(2026, 6, 1),
+                StartTime = new DateTime(2026, 1, 1, 10, 0, 0),
+                EndTime = new DateTime(2026, 1, 1, 11, 0, 0),
+                ParticipantIds = new List<int> { 2 },
+                RepeatType = repeatType,
+                RepeatUntil = new DateTime(2026, 6, 15)
+            },
+            currentUserId: 1,
+            isAdmin: false,
+            CancellationToken.None);
+
+        Assert.NotNull(result.ErrorMessage);
+        Assert.Empty(result.Entries);
+        Assert.Empty(database.Context.WorkScheduleEntries);
+    }
+
+    [Fact]
+    public async Task CreateEntrySeriesAsync_ReturnsBadRequest_WhenRepeatUntilIsMissing()
+    {
+        using var database = CreateTestDatabase();
+        await SeedUsersAsync(database.Context);
+
+        var service = new WorkScheduleEntryService(database.Context);
+
+        var result = await service.CreateEntrySeriesAsync(
+            new CreateWorkScheduleEntryRequest
+            {
+                Type = WorkScheduleEntryType.ExternalAppointment,
+                Title = "顧客訪問",
+                Date = new DateTime(2026, 6, 1),
+                StartTime = new DateTime(2026, 1, 1, 10, 0, 0),
+                EndTime = new DateTime(2026, 1, 1, 11, 0, 0),
+                ParticipantIds = new List<int> { 2 },
+                RepeatType = WorkScheduleRepeatTypes.Daily
+            },
+            currentUserId: 1,
+            isAdmin: false,
+            CancellationToken.None);
+
+        Assert.Equal("繰り返し終了日を入力してください。", result.ErrorMessage);
+        Assert.Empty(database.Context.WorkScheduleEntries);
+    }
+
+    [Fact]
+    public async Task CreateEntrySeriesAsync_ReturnsBadRequest_WhenRepeatUntilIsBeforeStartDate()
+    {
+        using var database = CreateTestDatabase();
+        await SeedUsersAsync(database.Context);
+
+        var service = new WorkScheduleEntryService(database.Context);
+
+        var result = await service.CreateEntrySeriesAsync(
+            new CreateWorkScheduleEntryRequest
+            {
+                Type = WorkScheduleEntryType.ExternalAppointment,
+                Title = "顧客訪問",
+                Date = new DateTime(2026, 6, 2),
+                StartTime = new DateTime(2026, 1, 1, 10, 0, 0),
+                EndTime = new DateTime(2026, 1, 1, 11, 0, 0),
+                ParticipantIds = new List<int> { 2 },
+                RepeatType = WorkScheduleRepeatTypes.Daily,
+                RepeatUntil = new DateTime(2026, 6, 1)
+            },
+            currentUserId: 1,
+            isAdmin: false,
+            CancellationToken.None);
+
+        Assert.Equal("繰り返し終了日は開始日以降にしてください。", result.ErrorMessage);
+        Assert.Empty(database.Context.WorkScheduleEntries);
+    }
+
+    [Fact]
+    public async Task CreateEntrySeriesAsync_ReturnsBadRequest_WhenGeneratedEntryCountExceedsLimit()
+    {
+        using var database = CreateTestDatabase();
+        await SeedUsersAsync(database.Context);
+
+        var service = new WorkScheduleEntryService(database.Context);
+
+        var result = await service.CreateEntrySeriesAsync(
+            new CreateWorkScheduleEntryRequest
+            {
+                Type = WorkScheduleEntryType.ExternalAppointment,
+                Title = "顧客訪問",
+                Date = new DateTime(2026, 1, 1),
+                StartTime = new DateTime(2026, 1, 1, 10, 0, 0),
+                EndTime = new DateTime(2026, 1, 1, 11, 0, 0),
+                ParticipantIds = new List<int> { 2 },
+                RepeatType = WorkScheduleRepeatTypes.Daily,
+                RepeatUntil = new DateTime(2026, 4, 30)
+            },
+            currentUserId: 1,
+            isAdmin: false,
+            CancellationToken.None);
+
+        Assert.Equal("繰り返し作成は最大60件までです。", result.ErrorMessage);
+        Assert.Empty(database.Context.WorkScheduleEntries);
+    }
+
+    [Theory]
+    [InlineData(WorkScheduleEntryType.WorkFromHome)]
+    [InlineData(WorkScheduleEntryType.Leave)]
+    public async Task CreateEntrySeriesAsync_ReturnsBadRequest_WhenNonExternalAppointmentUsesRecurrence(
+        WorkScheduleEntryType type)
+    {
+        using var database = CreateTestDatabase();
+        await SeedUsersAsync(database.Context);
+
+        var service = new WorkScheduleEntryService(database.Context);
+
+        var result = await service.CreateEntrySeriesAsync(
+            new CreateWorkScheduleEntryRequest
+            {
+                Type = type,
+                Date = new DateTime(2026, 6, 1),
+                LeavePeriod = type == WorkScheduleEntryType.Leave ? LeavePeriod.FullDay : LeavePeriod.None,
+                ParticipantIds = new List<int> { 1 },
+                RepeatType = WorkScheduleRepeatTypes.Weekly,
+                RepeatUntil = new DateTime(2026, 6, 15)
+            },
+            currentUserId: 1,
+            isAdmin: false,
+            CancellationToken.None);
+
+        Assert.Equal("繰り返し作成は社外予定のみ指定できます。", result.ErrorMessage);
+        Assert.Empty(database.Context.WorkScheduleEntries);
+    }
+
+    [Fact]
+    public async Task CreateEntrySeriesAsync_WhenSummaryNotificationFails_KeepsCreatedEntries()
+    {
+        using var database = CreateTestDatabase();
+        await SeedUsersAsync(database.Context);
+
+        var service = new WorkScheduleEntryService(
+            database.Context,
+            new ThrowingWorkScheduleNotificationService(),
+            new ThrowingWorkScheduleChatworkNotificationService());
+
+        var result = await service.CreateEntrySeriesAsync(
+            new CreateWorkScheduleEntryRequest
+            {
+                Type = WorkScheduleEntryType.ExternalAppointment,
+                Title = "顧客訪問",
+                Date = new DateTime(2026, 6, 1),
+                StartTime = new DateTime(2026, 1, 1, 10, 0, 0),
+                EndTime = new DateTime(2026, 1, 1, 11, 0, 0),
+                ParticipantIds = new List<int> { 2 },
+                RepeatType = WorkScheduleRepeatTypes.Weekly,
+                RepeatUntil = new DateTime(2026, 6, 8)
+            },
+            currentUserId: 1,
+            isAdmin: false,
+            CancellationToken.None);
+
+        Assert.Null(result.ErrorMessage);
+        Assert.Equal(2, result.Entries.Count);
+        Assert.Equal(2, await database.Context.WorkScheduleEntries.CountAsync());
     }
 
     [Fact]
@@ -374,6 +640,160 @@ public sealed class WorkScheduleEntryServiceTests
         context.Database.EnsureCreated();
 
         return new TestDatabase(connection, context);
+    }
+
+    private sealed class RecordingWorkScheduleNotificationService : IWorkScheduleNotificationService
+    {
+        public int CreatedCallCount { get; private set; }
+
+        public int SeriesCreatedCallCount { get; private set; }
+
+        public Task NotifyCreatedAsync(
+            WorkScheduleEntryModel entry,
+            CancellationToken cancellationToken)
+        {
+            CreatedCallCount++;
+            return Task.CompletedTask;
+        }
+
+        public Task NotifySeriesCreatedAsync(
+            IReadOnlyList<WorkScheduleEntryModel> entries,
+            CancellationToken cancellationToken)
+        {
+            SeriesCreatedCallCount++;
+            return Task.CompletedTask;
+        }
+
+        public Task NotifyUpdatedAsync(
+            WorkScheduleEntryModel previousEntry,
+            WorkScheduleEntryModel currentEntry,
+            CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task NotifyDeletedAsync(
+            WorkScheduleEntryModel entry,
+            CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
+    }
+
+    private sealed class RecordingWorkScheduleChatworkNotificationService : IWorkScheduleChatworkNotificationService
+    {
+        public int CreatedCallCount { get; private set; }
+
+        public int SeriesCreatedCallCount { get; private set; }
+
+        public Task SendCreatedAsync(
+            WorkScheduleEntryModel entry,
+            CancellationToken cancellationToken = default)
+        {
+            CreatedCallCount++;
+            return Task.CompletedTask;
+        }
+
+        public Task SendSeriesCreatedAsync(
+            IReadOnlyList<WorkScheduleEntryModel> entries,
+            CancellationToken cancellationToken = default)
+        {
+            SeriesCreatedCallCount++;
+            return Task.CompletedTask;
+        }
+
+        public Task SendUpdatedAsync(
+            WorkScheduleEntryModel previousEntry,
+            WorkScheduleEntryModel currentEntry,
+            CancellationToken cancellationToken = default)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task SendDeletedAsync(
+            WorkScheduleEntryModel entry,
+            CancellationToken cancellationToken = default)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task SendReminderAsync(
+            WorkScheduleEntryModel entry,
+            CancellationToken cancellationToken = default)
+        {
+            return Task.CompletedTask;
+        }
+    }
+
+    private sealed class ThrowingWorkScheduleNotificationService : IWorkScheduleNotificationService
+    {
+        public Task NotifyCreatedAsync(
+            WorkScheduleEntryModel entry,
+            CancellationToken cancellationToken)
+        {
+            throw new InvalidOperationException("notification failed");
+        }
+
+        public Task NotifySeriesCreatedAsync(
+            IReadOnlyList<WorkScheduleEntryModel> entries,
+            CancellationToken cancellationToken)
+        {
+            throw new InvalidOperationException("series notification failed");
+        }
+
+        public Task NotifyUpdatedAsync(
+            WorkScheduleEntryModel previousEntry,
+            WorkScheduleEntryModel currentEntry,
+            CancellationToken cancellationToken)
+        {
+            throw new InvalidOperationException("notification failed");
+        }
+
+        public Task NotifyDeletedAsync(
+            WorkScheduleEntryModel entry,
+            CancellationToken cancellationToken)
+        {
+            throw new InvalidOperationException("notification failed");
+        }
+    }
+
+    private sealed class ThrowingWorkScheduleChatworkNotificationService : IWorkScheduleChatworkNotificationService
+    {
+        public Task SendCreatedAsync(
+            WorkScheduleEntryModel entry,
+            CancellationToken cancellationToken = default)
+        {
+            throw new InvalidOperationException("chatwork failed");
+        }
+
+        public Task SendSeriesCreatedAsync(
+            IReadOnlyList<WorkScheduleEntryModel> entries,
+            CancellationToken cancellationToken = default)
+        {
+            throw new InvalidOperationException("series chatwork failed");
+        }
+
+        public Task SendUpdatedAsync(
+            WorkScheduleEntryModel previousEntry,
+            WorkScheduleEntryModel currentEntry,
+            CancellationToken cancellationToken = default)
+        {
+            throw new InvalidOperationException("chatwork failed");
+        }
+
+        public Task SendDeletedAsync(
+            WorkScheduleEntryModel entry,
+            CancellationToken cancellationToken = default)
+        {
+            throw new InvalidOperationException("chatwork failed");
+        }
+
+        public Task SendReminderAsync(
+            WorkScheduleEntryModel entry,
+            CancellationToken cancellationToken = default)
+        {
+            throw new InvalidOperationException("chatwork failed");
+        }
     }
 
     private sealed class TestDatabase : IDisposable

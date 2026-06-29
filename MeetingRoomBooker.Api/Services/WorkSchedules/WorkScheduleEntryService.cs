@@ -3,6 +3,7 @@ using MeetingRoomBooker.Api.Models;
 using MeetingRoomBooker.Api.Services.Chatwork;
 using MeetingRoomBooker.Shared.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace MeetingRoomBooker.Api.Services.WorkSchedules;
 
@@ -10,20 +11,22 @@ public sealed class WorkScheduleEntryService : IWorkScheduleEntryService
 {
     private const int TitleMaxLength = 100;
     private const int ParticipantsMaxLength = 500;
+    private const int MaxRecurringEntryCount = 60;
 
     private readonly AppDbContext _context;
     private readonly IWorkScheduleNotificationService? _notificationService;
     private readonly IWorkScheduleChatworkNotificationService? _chatworkNotificationService;
+    private readonly ILogger<WorkScheduleEntryService>? _logger;
 
     public WorkScheduleEntryService(AppDbContext context)
-        : this(context, null, null)
+        : this(context, null, null, null)
     {
     }
 
     public WorkScheduleEntryService(
         AppDbContext context,
         IWorkScheduleNotificationService? notificationService)
-        : this(context, notificationService, null)
+        : this(context, notificationService, null, null)
     {
     }
 
@@ -31,10 +34,20 @@ public sealed class WorkScheduleEntryService : IWorkScheduleEntryService
         AppDbContext context,
         IWorkScheduleNotificationService? notificationService,
         IWorkScheduleChatworkNotificationService? chatworkNotificationService)
+        : this(context, notificationService, chatworkNotificationService, null)
+    {
+    }
+
+    public WorkScheduleEntryService(
+        AppDbContext context,
+        IWorkScheduleNotificationService? notificationService,
+        IWorkScheduleChatworkNotificationService? chatworkNotificationService,
+        ILogger<WorkScheduleEntryService>? logger)
     {
         _context = context;
         _notificationService = notificationService;
         _chatworkNotificationService = chatworkNotificationService;
+        _logger = logger;
     }
 
     public async Task<IReadOnlyList<WorkScheduleEntryModel>> GetEntriesAsync(
@@ -81,6 +94,17 @@ public sealed class WorkScheduleEntryService : IWorkScheduleEntryService
         bool isAdmin,
         CancellationToken cancellationToken)
     {
+        if (request.Type != WorkScheduleEntryType.ExternalAppointment &&
+            HasRecurrenceInput(request.RepeatType, request.RepeatUntil))
+        {
+            return WorkScheduleEntryResult.BadRequest("繰り返し作成は社外予定のみ指定できます。");
+        }
+
+        if (!WorkScheduleRecurrence.IsNone(request.RepeatType))
+        {
+            return WorkScheduleEntryResult.BadRequest("繰り返し作成は社外予定の一括作成APIを使用してください。");
+        }
+
         var normalized = await NormalizeCreateRequestAsync(
             request,
             currentUserId,
@@ -129,6 +153,133 @@ public sealed class WorkScheduleEntryService : IWorkScheduleEntryService
         return WorkScheduleEntryResult.Success(response);
     }
 
+    public async Task<WorkScheduleEntrySeriesResult> CreateEntrySeriesAsync(
+        CreateWorkScheduleEntryRequest request,
+        int currentUserId,
+        bool isAdmin,
+        CancellationToken cancellationToken)
+    {
+        var repeatType = NormalizeRepeatType(request.RepeatType);
+        if (WorkScheduleRecurrence.IsNone(repeatType))
+        {
+            var singleResult = await CreateEntryAsync(
+                request,
+                currentUserId,
+                isAdmin,
+                cancellationToken);
+
+            return singleResult.ErrorMessage == null && singleResult.Entry != null
+                ? WorkScheduleEntrySeriesResult.Success(new List<WorkScheduleEntryModel> { singleResult.Entry })
+                : WorkScheduleEntrySeriesResult.BadRequest(singleResult.ErrorMessage ?? "社外予定の登録に失敗しました。");
+        }
+
+        if (request.Type != WorkScheduleEntryType.ExternalAppointment)
+        {
+            return WorkScheduleEntrySeriesResult.BadRequest("繰り返し作成は社外予定のみ指定できます。");
+        }
+
+        if (!WorkScheduleRecurrence.IsSupported(repeatType))
+        {
+            return WorkScheduleEntrySeriesResult.BadRequest("繰り返しの種類が不正です。");
+        }
+
+        if (!request.RepeatUntil.HasValue)
+        {
+            return WorkScheduleEntrySeriesResult.BadRequest("繰り返し終了日を入力してください。");
+        }
+
+        if (request.RepeatUntil.Value.Date < request.Date.Date)
+        {
+            return WorkScheduleEntrySeriesResult.BadRequest("繰り返し終了日は開始日以降にしてください。");
+        }
+
+        var targetDates = WorkScheduleRecurrence.BuildTargetDates(
+            request.Date,
+            repeatType,
+            request.RepeatUntil.Value);
+
+        if (targetDates.Count == 0)
+        {
+            return WorkScheduleEntrySeriesResult.BadRequest("作成対象の日付がありません。");
+        }
+
+        if (targetDates.Count > MaxRecurringEntryCount)
+        {
+            return WorkScheduleEntrySeriesResult.BadRequest($"繰り返し作成は最大{MaxRecurringEntryCount}件までです。");
+        }
+
+        var now = DateTime.Now;
+        var seriesId = Guid.NewGuid().ToString("N");
+        var entries = new List<WorkScheduleEntry>();
+
+        foreach (var targetDate in targetDates)
+        {
+            var normalized = await NormalizeCreateRequestAsync(
+                new CreateWorkScheduleEntryRequest
+                {
+                    Type = request.Type,
+                    Title = request.Title,
+                    Date = targetDate,
+                    StartTime = request.StartTime,
+                    EndTime = request.EndTime,
+                    LeavePeriod = request.LeavePeriod,
+                    ParticipantIds = request.ParticipantIds,
+                    Participants = request.Participants
+                },
+                currentUserId,
+                cancellationToken);
+
+            if (normalized.ErrorMessage != null)
+            {
+                return WorkScheduleEntrySeriesResult.BadRequest(normalized.ErrorMessage);
+            }
+
+            entries.Add(new WorkScheduleEntry
+            {
+                CreatedByUserId = currentUserId,
+                Type = normalized.Type,
+                Title = normalized.Title,
+                SeriesId = seriesId,
+                Date = normalized.Date,
+                StartTime = normalized.StartTime,
+                EndTime = normalized.EndTime,
+                RepeatType = repeatType,
+                RepeatUntil = request.RepeatUntil.Value.Date,
+                LeavePeriod = normalized.LeavePeriod,
+                ParticipantIds = normalized.ParticipantIds,
+                Participants = normalized.Participants,
+                CreatedAt = now,
+                UpdatedAt = now
+            });
+        }
+
+        await using var transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+
+        _context.WorkScheduleEntries.AddRange(entries);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        await transaction.CommitAsync(cancellationToken);
+
+        var savedEntries = await _context.WorkScheduleEntries
+            .AsNoTracking()
+            .Where(entry => entry.SeriesId == seriesId)
+            .OrderBy(entry => entry.Date)
+            .ThenBy(entry => entry.StartTime ?? entry.Date)
+            .ThenBy(entry => entry.Id)
+            .ToListAsync(cancellationToken);
+
+        var response = savedEntries
+            .Select(ToModel)
+            .ToList();
+
+        if (response.Count > 0)
+        {
+            await TrySendSeriesCreatedNotificationsAsync(response, cancellationToken);
+        }
+
+        return WorkScheduleEntrySeriesResult.Success(response);
+    }
+
     public async Task<WorkScheduleEntryResult> UpdateEntryAsync(
         int id,
         UpdateWorkScheduleEntryRequest request,
@@ -136,6 +287,17 @@ public sealed class WorkScheduleEntryService : IWorkScheduleEntryService
         bool isAdmin,
         CancellationToken cancellationToken)
     {
+        if (request.Type != WorkScheduleEntryType.ExternalAppointment &&
+            HasRecurrenceInput(request.RepeatType, request.RepeatUntil))
+        {
+            return WorkScheduleEntryResult.BadRequest("繰り返し作成は社外予定のみ指定できます。");
+        }
+
+        if (!WorkScheduleRecurrence.IsNone(request.RepeatType))
+        {
+            return WorkScheduleEntryResult.BadRequest("繰り返し予定の一括更新は未対応です。");
+        }
+
         var entry = await _context.WorkScheduleEntries
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
@@ -227,6 +389,44 @@ public sealed class WorkScheduleEntryService : IWorkScheduleEntryService
         }
 
         return WorkScheduleEntryResult.Success();
+    }
+
+    private async Task TrySendSeriesCreatedNotificationsAsync(
+        IReadOnlyList<WorkScheduleEntryModel> entries,
+        CancellationToken cancellationToken)
+    {
+        if (_notificationService != null)
+        {
+            try
+            {
+                await _notificationService.NotifySeriesCreatedAsync(entries, cancellationToken);
+                await _context.SaveChangesAsync(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(
+                    ex,
+                    "Failed to create system notifications for work schedule series {SeriesId}.",
+                    entries.FirstOrDefault()?.SeriesId);
+                _context.ChangeTracker.Clear();
+            }
+        }
+
+        if (_chatworkNotificationService != null)
+        {
+            try
+            {
+                await _chatworkNotificationService.SendSeriesCreatedAsync(entries, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(
+                    ex,
+                    "Failed to send Chatwork notifications for work schedule series {SeriesId}.",
+                    entries.FirstOrDefault()?.SeriesId);
+                _context.ChangeTracker.Clear();
+            }
+        }
     }
 
     private async Task<NormalizedWorkScheduleEntry> NormalizeCreateRequestAsync(
@@ -505,6 +705,21 @@ public sealed class WorkScheduleEntryService : IWorkScheduleEntryService
         return value?.Trim() ?? string.Empty;
     }
 
+    private static string NormalizeRepeatType(string? repeatType)
+    {
+        return string.IsNullOrWhiteSpace(repeatType)
+            ? WorkScheduleRepeatTypes.None
+            : repeatType.Trim();
+    }
+
+    private static bool HasRecurrenceInput(
+        string? repeatType,
+        DateTime? repeatUntil)
+    {
+        return !WorkScheduleRecurrence.IsNone(repeatType)
+            || repeatUntil.HasValue;
+    }
+
     private static bool CanManage(
         WorkScheduleEntry entry,
         int currentUserId,
@@ -521,9 +736,12 @@ public sealed class WorkScheduleEntryService : IWorkScheduleEntryService
             CreatedByUserId = entry.CreatedByUserId,
             Type = entry.Type,
             Title = entry.Title,
+            SeriesId = entry.SeriesId,
             Date = entry.Date,
             StartTime = entry.StartTime,
             EndTime = entry.EndTime,
+            RepeatType = entry.RepeatType,
+            RepeatUntil = entry.RepeatUntil,
             LeavePeriod = entry.LeavePeriod,
             ParticipantIds = new List<int>(entry.ParticipantIds ?? new List<int>()),
             Participants = entry.Participants,

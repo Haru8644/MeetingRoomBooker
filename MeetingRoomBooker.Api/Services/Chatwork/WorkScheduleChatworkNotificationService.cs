@@ -54,6 +54,60 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                 cancellationToken);
         }
 
+        public async Task SendSeriesCreatedAsync(
+            IReadOnlyList<WorkScheduleEntryModel> entries,
+            CancellationToken cancellationToken = default)
+        {
+            var orderedEntries = entries
+                .OrderBy(entry => entry.Date)
+                .ThenBy(entry => entry.StartTime ?? entry.Date)
+                .ThenBy(entry => entry.Id)
+                .ToList();
+
+            if (orderedEntries.Count == 0)
+            {
+                return;
+            }
+
+            var representativeEntry = orderedEntries[0];
+            var seriesId = representativeEntry.SeriesId?.Trim();
+            if (string.IsNullOrWhiteSpace(seriesId))
+            {
+                seriesId = representativeEntry.Id.ToString();
+            }
+
+            var targetUserIds = orderedEntries
+                .SelectMany(GetParticipantIds)
+                .Distinct()
+                .ToList();
+
+            var usersById = await GetUsersByIdAsync(targetUserIds, cancellationToken);
+            var targetUsers = GetUsers(targetUserIds, usersById);
+
+            if (targetUsers.Count == 0)
+            {
+                return;
+            }
+
+            var conflicts = new List<WorkScheduleParticipantConflict>();
+            foreach (var entry in orderedEntries)
+            {
+                conflicts.AddRange(await _conflictService.FindExternalAppointmentConflictsAsync(
+                    entry,
+                    cancellationToken));
+            }
+
+            var message = BuildSeriesCreatedMessage(orderedEntries, conflicts);
+
+            await SendDirectNotificationsAsync(
+                representativeEntry,
+                targetUsers,
+                ChatworkDeliveryTypes.WorkScheduleSeriesCreated,
+                user => ChatworkDeliveryKeys.WorkScheduleSeriesCreated(seriesId, user.Id),
+                message,
+                cancellationToken);
+        }
+
         public async Task SendUpdatedAsync(
             WorkScheduleEntryModel previousEntry,
             WorkScheduleEntryModel currentEntry,
@@ -333,6 +387,34 @@ namespace MeetingRoomBooker.Api.Services.Chatwork
                 $"{GetTypeLabel(entry.Type)}が登録されました",
                 BuildSummaryLines(entry)
                     .Concat(BuildConflictLines(conflicts)));
+        }
+
+        private static string BuildSeriesCreatedMessage(
+            IReadOnlyList<WorkScheduleEntryModel> entries,
+            IReadOnlyCollection<WorkScheduleParticipantConflict> conflicts)
+        {
+            var firstEntry = entries[0];
+            var lastEntry = entries[^1];
+
+            var lines = new List<string>
+            {
+                $"内容: {firstEntry.Title}",
+                $"期間: {firstEntry.Date:yyyy/MM/dd}〜{lastEntry.Date:yyyy/MM/dd}",
+                $"繰り返し: {firstEntry.RepeatType ?? WorkScheduleRepeatTypes.None}",
+                $"件数: {entries.Count}件"
+            };
+
+            if (firstEntry.Type == WorkScheduleEntryType.ExternalAppointment)
+            {
+                lines.Add($"時間: {GetTimeRangeText(firstEntry)}");
+            }
+
+            lines.Add($"対象者: {GetParticipantText(firstEntry)}");
+            lines.AddRange(BuildConflictLines(conflicts));
+
+            return BuildInfoMessage(
+                $"{GetTypeLabel(firstEntry.Type)}を繰り返し登録しました",
+                lines);
         }
 
         private static string BuildUpdatedMessage(
