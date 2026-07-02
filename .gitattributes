@@ -62,3 +62,8 @@
 #*.PDF   diff=astextplain
 #*.rtf   diff=astextplain
 #*.RTF   diff=astextplain
+# Deployment scripts
+/scripts/deploy/*.sh text eol=lf
+/scripts/deploy/*.ps1 text eol=crlf
+/scripts/deploy/*.json text eol=lf
+/scripts/deploy/*.md text eol=lf
