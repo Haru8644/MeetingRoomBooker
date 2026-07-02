@@ -1,0 +1,7 @@
+{
+  "sshHost": "<VPS_HOST>",
+  "sshUser": "<SSH_USER>",
+  "sshPort": 22,
+  "sshKeyPath": "C:\\Users\\<LOCAL_USER>\\.ssh\\<SSH_KEY_FILE>",
+  "remoteBackupRoot": "/opt/meetingroombooker/backups"
+}
