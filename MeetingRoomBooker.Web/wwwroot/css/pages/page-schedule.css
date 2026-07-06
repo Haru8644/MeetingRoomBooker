@@ -51,11 +51,20 @@
 .calendar-quick-actions {
     margin-top: 14px;
     display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
     justify-content: center;
 }
 
 .today-return-btn {
     min-width: 128px;
+}
+
+.my-items-toggle.active {
+    background: rgba(255, 202, 40, 0.18);
+    border-color: #ffca28;
+    color: #ffca28;
+    box-shadow: 0 0 10px rgba(255, 202, 40, 0.35);
 }
 
 .legend-box {
@@ -1188,7 +1197,6 @@ label {
     box-shadow: 0 0 10px rgba(0, 198, 255, 0.2) !important;
 }
 
-fluent-anchored-region {
+body:has(.schedule-container) fluent-anchored-region {
     z-index: 2147483647 !important;
-    position: fixed !important;
 }
