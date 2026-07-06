@@ -75,6 +75,11 @@
                 <button class="timeline-btn today-return-btn" @onclick="ReturnToToday">
                     <span class="oi oi-reload"></span> 今日に戻る
                 </button>
+                <button class="timeline-btn my-items-toggle @(showOnlyMyItems ? "active" : "")"
+                        aria-pressed="@showOnlyMyItems"
+                        @onclick="ToggleMyItemsFilter">
+                    自分の予定だけ表示
+                </button>
             </div>
 
             <div class="legend-box">
@@ -617,6 +622,10 @@
                     @foreach (var room in roomList)
                     {
                         var roomData = GetTimelineRoomData(room, timelineDate.Value);
+                        if (showOnlyMyItems && !roomData.Items.Any())
+                        {
+                            continue;
+                        }
 
                         <div class="timeline-row" style="@BuildTimelineRowStyle(roomData.RowHeight)">
                             <div class="room-label-tl sticky-element" style="@BuildTimelineRoomLabelStyle(GetRoomColor(room), roomData.RowHeight)">@room</div>
@@ -710,6 +719,7 @@
     private bool isEditing;
     private bool isEditingWorkSchedule;
     private bool isLoading = true;
+    private bool showOnlyMyItems;
     private string editName = string.Empty;
     private string editRoom = string.Empty;
     private string editType = string.Empty;
@@ -846,6 +856,11 @@
         GenerateCalendar();
     }
 
+    private void ToggleMyItemsFilter()
+    {
+        showOnlyMyItems = !showOnlyMyItems;
+    }
+
     private async Task LoadData()
     {
         isLoading = true;
@@ -905,6 +920,7 @@
     {
         return allReservations
             .Where(r => r.Date.Date == date.Date && r.Room == room)
+            .Where(ShouldShowBooking)
             .OrderBy(r => r.StartTime)
             .ToList();
     }
@@ -913,9 +929,20 @@
     {
         return allWorkSchedules
             .Where(entry => entry.Date.Date == date.Date && entry.Type == type)
+            .Where(ShouldShowWorkSchedule)
             .OrderBy(entry => entry.StartTime ?? entry.Date)
             .ThenBy(entry => entry.Id)
             .ToList();
+    }
+
+    private bool ShouldShowBooking(ReservationModel booking)
+    {
+        return !showOnlyMyItems || IsMyBooking(booking);
+    }
+
+    private bool ShouldShowWorkSchedule(WorkScheduleEntryModel entry)
+    {
+        return !showOnlyMyItems || IsMyWorkSchedule(entry);
     }
 
     private bool HasAnyCalendarItem(DateTime date)
