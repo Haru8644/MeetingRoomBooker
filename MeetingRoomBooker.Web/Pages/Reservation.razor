@@ -9,8 +9,8 @@
 @inject ILogger<Reservation> Logger
 @inject ReservationDraftStore DraftStore
 
-<FluentStack Orientation="Orientation.Vertical" VerticalGap="30">
-    <div style="width: 100%; display: flex; justify-content: center; position: relative; z-index: 1;">
+<FluentStack Orientation="Orientation.Vertical" VerticalGap="30" Class="reservation-page">
+    <div class="reservation-form-shell" style="width: 100%; display: flex; justify-content: center; position: relative;">
         <div class="cyber-card-enhanced holo-card" style="padding: 25px; max-width: 800px; width: 100%;">
             <div class="form-header fade-in-stagger" style="--i:0">
                 <h3 class="gradient-text-enhanced glitch-text" data-text="NEW RESERVATION">NEW RESERVATION</h3>
@@ -121,7 +121,7 @@
         </div>
     </div>
 
-    <div class="reservation-work-schedule-shell" style="width: 100%; display: flex; justify-content: center; position: relative; z-index: 2;">
+    <div class="reservation-work-schedule-shell" style="width: 100%; display: flex; justify-content: center; position: relative;">
         <div class="cyber-card-enhanced holo-card fade-in-up" style="padding: 25px; max-width: 800px; width: 100%; --i:10;">
             <div class="form-header" style="display: flex; align-items: center; justify-content: space-between; border-bottom: none; margin-bottom: 18px; padding-bottom: 0;">
                 <h3 class="gradient-text-enhanced" style="font-size: 1.2rem; margin: 0;">社外予定・在宅・休暇</h3>
@@ -267,7 +267,7 @@
         </div>
     </div>
 
-    <div class="reservation-preview-shell" style="width: 100%; display: flex; justify-content: center; position: relative; z-index: 1; padding-bottom: 30px;">
+    <div class="reservation-preview-shell" style="width: 100%; display: flex; justify-content: center; position: relative; padding-bottom: 30px;">
         <div class="cyber-card-enhanced holo-card fade-in-up" style="padding: 25px; max-width: 800px; width: 100%; --i:11;">
             <div class="form-header" style="display: flex; align-items: center; justify-content: space-between; border-bottom: none; margin-bottom: 15px; padding-bottom: 0;">
                 <h3 class="gradient-text-enhanced" style="font-size: 1.2rem; margin: 0;">予約状況</h3>

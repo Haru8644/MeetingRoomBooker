@@ -6,7 +6,6 @@
     box-shadow: 0 0 30px rgba(0, 88, 255, 0.2), inset 0 0 50px rgba(0, 88, 255, 0.05);
     opacity: 0;
     animation: holo-enter 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
-    overflow: visible;
 }
 
 @keyframes holo-enter {
@@ -129,17 +128,23 @@
     box-shadow: 0 0 15px rgba(218, 54, 51, 0.2);
 }
 
+.reservation-page .holo-card,
+.reservation-form-shell,
 .reservation-work-schedule-shell,
 .reservation-preview-shell {
     overflow: visible;
 }
 
+.reservation-form-shell {
+    z-index: 30;
+}
+
 .reservation-work-schedule-shell {
-    z-index: 20 !important;
+    z-index: 20;
 }
 
 .reservation-preview-shell {
-    z-index: 1 !important;
+    z-index: 10;
 }
 
 .holo-card .external-repeat-until-field {
@@ -153,8 +158,8 @@ body:has(.holo-card) .fluent-listbox {
     position: fixed !important;
 }
 
-body:has(.holo-card) fluent-anchored-region {
-    z-index: 2147483647 !important;
+body:has(.reservation-page) fluent-anchored-region {
+    z-index: 10000;
 }
 
 [data-theme="light"] .holo-card {
