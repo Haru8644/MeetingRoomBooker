@@ -1197,6 +1197,7 @@ label {
     box-shadow: 0 0 10px rgba(0, 198, 255, 0.2) !important;
 }
 
-body:has(.schedule-container) fluent-anchored-region {
+fluent-anchored-region {
     z-index: 2147483647 !important;
+    position: fixed !important;
 }
