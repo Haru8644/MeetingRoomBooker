@@ -79,82 +79,16 @@ The Web deployment uses the contents of publish/web/wwwroot, not the publish/web
 
 ---
 
-## CI Workflow
+## GitHub Actions Workflows
 
-The main CI workflow runs on pull requests and pushes to master.
+Automatic CI validates changes in GitHub Actions. Production deployment requires a manual workflow dispatch and explicit confirmation.
 
-It checks:
-
-- dependency restore
-- Release build
-- xUnit tests
-- API publish
-- Web publish
-- expected publish output files
-- database files are not included in publish outputs
-- API and Web publish outputs can be uploaded as GitHub Actions artifacts
-
-This helps catch build, test, and publish issues before deployment.
-
----
-
-## Manual Publish Workflow
-
-A separate manual workflow can be used to generate publish artifacts on demand.
-
-This workflow:
-
-- runs restore, build, and test
-- publishes the API project
-- publishes the Web project
-- verifies required publish outputs
-- uploads API and Web outputs as artifacts
-
-This workflow does not deploy to the VPS.
-
----
-
-## Manual VPS Connection Check
-
-A manual VPS connection check workflow verifies that GitHub Actions can connect to the VPS through SSH.
-
-This workflow checks:
-
-- SSH connectivity
-- expected runtime directories
-- the presence of the deployment script
-
-This workflow does not upload files and does not deploy the application.
-
----
-
-## Manual VPS Upload Checks
-
-Before enabling production deployment, upload checks are separated into safe stages.
-
-### Temporary upload check
-
-A workflow uploads publish outputs to a temporary directory on the VPS.
-
-Example layout:
-
-    /root/mrb-artifact-upload-check/api
-    /root/mrb-artifact-upload-check/web
-
-This confirms that GitHub Actions can upload API and Web publish outputs to the VPS without touching production deployment directories.
-
-### Deploy directory upload check
-
-A workflow uploads publish outputs to deploy staging directories.
-
-Example layout:
-
-    /root/deploy/api
-    /root/deploy/web
-
-This prepares the files that the deployment script will later use.
-
-This workflow does not run the deployment script.
+| Workflow | Trigger | Role |
+| --- | --- | --- |
+| `dotnet-ci` | Pull requests targeting `master` and pushes to `master` | Restores dependencies, builds in Release mode, runs xUnit tests, publishes the API and Web, rejects database files in the outputs, and uploads verified outputs as GitHub Actions artifacts. |
+| `operations-web-ci` | Pull requests targeting `master` and pushes to `master`. Both events require changes under `MeetingRoomBooker.OperationsWeb/**` or to `.github/workflows/operations-web-ci.yml`. | Installs dependencies with `npm ci` and builds OperationsWeb. |
+| `manual-vps-deploy` | Manual dispatch (`workflow_dispatch`) with deployment and no-schema-change confirmations | Builds, tests, and deploys the API and Web to production for releases without database schema changes. |
+| `manual-vps-deploy-with-migration` | Manual dispatch (`workflow_dispatch`) with deployment, schema-change, and backup confirmations | Builds and tests the release, backs up SQLite, applies the EF Core migration bundle, and deploys the API and Web to production. |
 
 ---
 

@@ -2,15 +2,13 @@ package reservations
 
 import "time"
 
-// Reservation holds the fields used by the overlap check.
 type Reservation struct {
 	Room      string
-	Date      time.Time // The booking's calendar date is supplied independently of its times.
+	Date      time.Time
 	StartTime time.Time
 	EndTime   time.Time
 }
 
-// IsConflicting reports whether two reservations overlap in the same room on the same date.
 func IsConflicting(left, right Reservation) bool {
 	if left.Room != right.Room {
 		return false
