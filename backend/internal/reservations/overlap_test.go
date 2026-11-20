@@ -6,7 +6,6 @@ import (
 )
 
 func TestIsConflicting(t *testing.T) {
-	// Use a fixed location to represent the reference C# DateTime values.
 	day := time.Date(2026, time.June, 1, 0, 0, 0, 0, time.UTC)
 	nextDay := day.AddDate(0, 0, 1)
 	left := Reservation{
