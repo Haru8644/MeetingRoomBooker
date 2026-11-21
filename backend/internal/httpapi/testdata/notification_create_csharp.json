@@ -1,0 +1,519 @@
+{
+  "cases": [
+    {
+      "name": "anonymous",
+      "actor": "anonymous",
+      "status": 401,
+      "contentType": "",
+      "request": {
+        "userId": 2,
+        "message": "架空の管理者通知",
+        "createdAt": "2026-06-22T14:01:02.1234567",
+        "targetDate": "2026-06-23T09:15:00",
+        "isRead": false,
+        "type": "Warning",
+        "targetReservationId": 7301,
+        "targetWorkScheduleEntryId": 801
+      },
+      "body": ""
+    },
+    {
+      "name": "member_denied",
+      "actor": "member",
+      "status": 403,
+      "contentType": "",
+      "request": {
+        "userId": 2,
+        "message": "架空の管理者通知",
+        "createdAt": "2026-06-22T14:01:02.1234567",
+        "targetDate": "2026-06-23T09:15:00",
+        "isRead": false,
+        "type": "Warning",
+        "targetReservationId": 7301,
+        "targetWorkScheduleEntryId": 801
+      },
+      "body": ""
+    },
+    {
+      "name": "member_malformed",
+      "actor": "member",
+      "status": 403,
+      "contentType": "",
+      "requestText": "{\"userId\":",
+      "requestContentType": "application/json",
+      "body": ""
+    },
+    {
+      "name": "required_nulls",
+      "actor": "admin",
+      "status": 400,
+      "contentType": "application/problem+json; charset=utf-8",
+      "request": {
+        "message": null,
+        "type": null
+      },
+      "body": {
+        "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+        "title": "One or more validation errors occurred.",
+        "status": 400,
+        "errors": {
+          "Type": [
+            "The Type field is required."
+          ],
+          "Message": [
+            "The Message field is required."
+          ]
+        }
+      }
+    },
+    {
+      "name": "null_date",
+      "actor": "admin",
+      "status": 400,
+      "contentType": "application/problem+json; charset=utf-8",
+      "request": {
+        "userId": 2,
+        "message": "架空の管理者通知",
+        "createdAt": null,
+        "targetDate": "2026-06-23T09:15:00",
+        "isRead": false,
+        "type": "Warning",
+        "targetReservationId": 7301,
+        "targetWorkScheduleEntryId": 801
+      },
+      "body": {
+        "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+        "title": "One or more validation errors occurred.",
+        "status": 400,
+        "errors": {
+          "notification": [
+            "The notification field is required."
+          ],
+          "$.createdAt": [
+            "The JSON value could not be converted to System.DateTime. Path: $.createdAt | LineNumber: 0 | BytePositionInLine: 70."
+          ]
+        }
+      }
+    },
+    {
+      "name": "invalid_value",
+      "actor": "admin",
+      "status": 400,
+      "contentType": "application/problem+json; charset=utf-8",
+      "request": {
+        "userId": "not-an-integer",
+        "message": "架空の管理者通知",
+        "createdAt": "2026-06-22T14:01:02.1234567",
+        "targetDate": "2026-06-23T09:15:00",
+        "isRead": false,
+        "type": "Warning",
+        "targetReservationId": 7301,
+        "targetWorkScheduleEntryId": 801
+      },
+      "body": {
+        "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+        "title": "One or more validation errors occurred.",
+        "status": 400,
+        "errors": {
+          "notification": [
+            "The notification field is required."
+          ],
+          "$.userId": [
+            "The JSON value could not be converted to System.Int32. Path: $.userId | LineNumber: 0 | BytePositionInLine: 27."
+          ]
+        }
+      }
+    },
+    {
+      "name": "invalid_target",
+      "actor": "admin",
+      "status": 400,
+      "contentType": "application/problem+json; charset=utf-8",
+      "request": {
+        "userId": 2,
+        "message": "架空の管理者通知",
+        "createdAt": "2026-06-22T14:01:02.1234567",
+        "targetDate": "2026-06-23T09:15:00",
+        "isRead": false,
+        "type": "Warning",
+        "targetReservationId": 2147483648,
+        "targetWorkScheduleEntryId": 801
+      },
+      "body": {
+        "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+        "title": "One or more validation errors occurred.",
+        "status": 400,
+        "errors": {
+          "notification": [
+            "The notification field is required."
+          ],
+          "$.targetReservationId": [
+            "The JSON value could not be converted to System.Nullable`1[System.Int32]. Path: $.targetReservationId | LineNumber: 0 | BytePositionInLine: 203."
+          ]
+        }
+      }
+    },
+    {
+      "name": "document_null",
+      "actor": "admin",
+      "status": 400,
+      "contentType": "application/problem+json; charset=utf-8",
+      "requestText": "null",
+      "requestContentType": "application/json",
+      "body": {
+        "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+        "title": "One or more validation errors occurred.",
+        "status": 400,
+        "errors": {
+          "": [
+            "A non-empty request body is required."
+          ],
+          "notification": [
+            "The notification field is required."
+          ]
+        }
+      }
+    },
+    {
+      "name": "malformed_json",
+      "actor": "admin",
+      "status": 400,
+      "contentType": "application/problem+json; charset=utf-8",
+      "requestText": "{\"userId\":",
+      "requestContentType": "application/json",
+      "body": {
+        "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+        "title": "One or more validation errors occurred.",
+        "status": 400,
+        "errors": {
+          "notification": [
+            "The notification field is required."
+          ],
+          "$.userId": [
+            "Expected depth to be zero at the end of the JSON payload. There is an open JSON object or array that should be closed. Path: $.userId | LineNumber: 0 | BytePositionInLine: 10."
+          ]
+        }
+      }
+    },
+    {
+      "name": "wrong_media",
+      "actor": "admin",
+      "status": 415,
+      "contentType": "application/problem+json; charset=utf-8",
+      "requestText": "{}",
+      "requestContentType": "text/plain",
+      "body": {
+        "type": "https://tools.ietf.org/html/rfc9110#section-15.5.16",
+        "title": "Unsupported Media Type",
+        "status": 415
+      }
+    },
+    {
+      "name": "all_fields",
+      "actor": "admin",
+      "status": 201,
+      "contentType": "application/json; charset=utf-8",
+      "request": {
+        "userId": 2,
+        "message": "架空の管理者通知",
+        "createdAt": "2026-06-22T14:01:02.1234567",
+        "targetDate": "2026-06-23T09:15:00",
+        "isRead": false,
+        "type": "Warning",
+        "targetReservationId": 7301,
+        "targetWorkScheduleEntryId": 801
+      },
+      "body": {
+        "id": 4101,
+        "userId": 2,
+        "message": "架空の管理者通知",
+        "createdAt": "2026-06-22T14:01:02.1234567",
+        "targetDate": "2026-06-23T09:15:00",
+        "isRead": false,
+        "type": "Warning",
+        "targetReservationId": 7301,
+        "targetWorkScheduleEntryId": 801
+      },
+      "location": "/api/Notifications/user/2",
+      "stored": {
+        "id": 4101,
+        "userId": 2,
+        "message": "架空の管理者通知",
+        "createdAt": "2026-06-22T14:01:02.1234567",
+        "targetDate": "2026-06-23T09:15:00",
+        "isRead": false,
+        "type": "Warning",
+        "targetReservationId": 7301,
+        "targetWorkScheduleEntryId": 801
+      }
+    },
+    {
+      "name": "omitted_defaults",
+      "actor": "admin",
+      "status": 201,
+      "contentType": "application/json; charset=utf-8",
+      "request": {
+        "userId": 2,
+        "message": "省略時の架空通知"
+      },
+      "body": {
+        "id": 4102,
+        "userId": 2,
+        "message": "省略時の架空通知",
+        "createdAt": "2026-11-22T07:47:47.985596+09:00",
+        "targetDate": "2026-11-22T07:47:47.9856081+09:00",
+        "isRead": false,
+        "type": "Info",
+        "targetReservationId": null,
+        "targetWorkScheduleEntryId": null
+      },
+      "location": "/api/Notifications/user/2",
+      "stored": {
+        "id": 4102,
+        "userId": 2,
+        "message": "省略時の架空通知",
+        "createdAt": "2026-11-22T07:47:47.985596",
+        "targetDate": "2026-11-22T07:47:47.9856081",
+        "isRead": false,
+        "type": "Info",
+        "targetReservationId": null,
+        "targetWorkScheduleEntryId": null
+      },
+      "defaultDates": [
+        "createdAt",
+        "targetDate"
+      ]
+    },
+    {
+      "name": "explicit_targets_null",
+      "actor": "admin",
+      "status": 201,
+      "contentType": "application/json; charset=utf-8",
+      "request": {
+        "userId": 2,
+        "message": "架空の管理者通知",
+        "createdAt": "2026-06-22T14:01:02.1234567",
+        "targetDate": "2026-06-23T09:15:00",
+        "isRead": true,
+        "type": "Warning",
+        "targetReservationId": null,
+        "targetWorkScheduleEntryId": null
+      },
+      "body": {
+        "id": 4103,
+        "userId": 2,
+        "message": "架空の管理者通知",
+        "createdAt": "2026-06-22T14:01:02.1234567",
+        "targetDate": "2026-06-23T09:15:00",
+        "isRead": true,
+        "type": "Warning",
+        "targetReservationId": null,
+        "targetWorkScheduleEntryId": null
+      },
+      "location": "/api/Notifications/user/2",
+      "stored": {
+        "id": 4103,
+        "userId": 2,
+        "message": "架空の管理者通知",
+        "createdAt": "2026-06-22T14:01:02.1234567",
+        "targetDate": "2026-06-23T09:15:00",
+        "isRead": true,
+        "type": "Warning",
+        "targetReservationId": null,
+        "targetWorkScheduleEntryId": null
+      }
+    },
+    {
+      "name": "empty_object",
+      "actor": "admin",
+      "status": 201,
+      "contentType": "application/json; charset=utf-8",
+      "request": {},
+      "body": {
+        "id": 4104,
+        "userId": 0,
+        "message": "",
+        "createdAt": "2026-11-22T07:47:48.000459+09:00",
+        "targetDate": "2026-11-22T07:47:48.0004622+09:00",
+        "isRead": false,
+        "type": "Info",
+        "targetReservationId": null,
+        "targetWorkScheduleEntryId": null
+      },
+      "location": "/api/Notifications/user/0",
+      "stored": {
+        "id": 4104,
+        "userId": 0,
+        "message": "",
+        "createdAt": "2026-11-22T07:47:48.000459",
+        "targetDate": "2026-11-22T07:47:48.0004622",
+        "isRead": false,
+        "type": "Info",
+        "targetReservationId": null,
+        "targetWorkScheduleEntryId": null
+      },
+      "defaultDates": [
+        "createdAt",
+        "targetDate"
+      ]
+    },
+    {
+      "name": "missing_recipient",
+      "actor": "admin",
+      "status": 201,
+      "contentType": "application/json; charset=utf-8",
+      "request": {
+        "userId": 9999,
+        "message": "",
+        "createdAt": "2026-06-22T14:01:02.1234567",
+        "targetDate": "2026-06-23T09:15:00",
+        "isRead": false,
+        "type": "Custom",
+        "targetReservationId": 7301,
+        "targetWorkScheduleEntryId": 801
+      },
+      "body": {
+        "id": 4105,
+        "userId": 9999,
+        "message": "",
+        "createdAt": "2026-06-22T14:01:02.1234567",
+        "targetDate": "2026-06-23T09:15:00",
+        "isRead": false,
+        "type": "Custom",
+        "targetReservationId": 7301,
+        "targetWorkScheduleEntryId": 801
+      },
+      "location": "/api/Notifications/user/9999",
+      "stored": {
+        "id": 4105,
+        "userId": 9999,
+        "message": "",
+        "createdAt": "2026-06-22T14:01:02.1234567",
+        "targetDate": "2026-06-23T09:15:00",
+        "isRead": false,
+        "type": "Custom",
+        "targetReservationId": 7301,
+        "targetWorkScheduleEntryId": 801
+      }
+    },
+    {
+      "name": "date_zones",
+      "actor": "admin",
+      "status": 201,
+      "contentType": "application/json; charset=utf-8",
+      "request": {
+        "userId": 2,
+        "message": "架空の管理者通知",
+        "createdAt": "2026-06-22T14:01:02.1234567Z",
+        "targetDate": "2026-06-23T09:15:00+02:00",
+        "isRead": false,
+        "type": "Warning",
+        "targetReservationId": 7301,
+        "targetWorkScheduleEntryId": 801
+      },
+      "body": {
+        "id": 4106,
+        "userId": 2,
+        "message": "架空の管理者通知",
+        "createdAt": "2026-06-22T14:01:02.1234567Z",
+        "targetDate": "2026-06-23T16:15:00+09:00",
+        "isRead": false,
+        "type": "Warning",
+        "targetReservationId": 7301,
+        "targetWorkScheduleEntryId": 801
+      },
+      "location": "/api/Notifications/user/2",
+      "stored": {
+        "id": 4106,
+        "userId": 2,
+        "message": "架空の管理者通知",
+        "createdAt": "2026-06-22T14:01:02.1234567",
+        "targetDate": "2026-06-23T16:15:00",
+        "isRead": false,
+        "type": "Warning",
+        "targetReservationId": 7301,
+        "targetWorkScheduleEntryId": 801
+      }
+    },
+    {
+      "name": "supplied_id",
+      "actor": "admin",
+      "status": 201,
+      "contentType": "application/json; charset=utf-8",
+      "request": {
+        "userId": 2,
+        "message": "架空の管理者通知",
+        "createdAt": "2026-06-22T14:01:02.1234567",
+        "targetDate": "2026-06-23T09:15:00",
+        "isRead": false,
+        "type": "Warning",
+        "targetReservationId": 7301,
+        "targetWorkScheduleEntryId": 801,
+        "id": 4800
+      },
+      "body": {
+        "id": 4800,
+        "userId": 2,
+        "message": "架空の管理者通知",
+        "createdAt": "2026-06-22T14:01:02.1234567",
+        "targetDate": "2026-06-23T09:15:00",
+        "isRead": false,
+        "type": "Warning",
+        "targetReservationId": 7301,
+        "targetWorkScheduleEntryId": 801
+      },
+      "location": "/api/Notifications/user/2",
+      "stored": {
+        "id": 4800,
+        "userId": 2,
+        "message": "架空の管理者通知",
+        "createdAt": "2026-06-22T14:01:02.1234567",
+        "targetDate": "2026-06-23T09:15:00",
+        "isRead": false,
+        "type": "Warning",
+        "targetReservationId": 7301,
+        "targetWorkScheduleEntryId": 801
+      }
+    },
+    {
+      "name": "after_supplied_id",
+      "actor": "admin",
+      "status": 201,
+      "contentType": "application/json; charset=utf-8",
+      "request": {
+        "userId": 2,
+        "message": "架空の管理者通知",
+        "createdAt": "2026-06-22T14:01:02.1234567",
+        "targetDate": "2026-06-23T09:15:00",
+        "isRead": false,
+        "type": "Warning",
+        "targetReservationId": 7301,
+        "targetWorkScheduleEntryId": 801,
+        "id": 0
+      },
+      "body": {
+        "id": 4801,
+        "userId": 2,
+        "message": "架空の管理者通知",
+        "createdAt": "2026-06-22T14:01:02.1234567",
+        "targetDate": "2026-06-23T09:15:00",
+        "isRead": false,
+        "type": "Warning",
+        "targetReservationId": 7301,
+        "targetWorkScheduleEntryId": 801
+      },
+      "location": "/api/Notifications/user/2",
+      "stored": {
+        "id": 4801,
+        "userId": 2,
+        "message": "架空の管理者通知",
+        "createdAt": "2026-06-22T14:01:02.1234567",
+        "targetDate": "2026-06-23T09:15:00",
+        "isRead": false,
+        "type": "Warning",
+        "targetReservationId": 7301,
+        "targetWorkScheduleEntryId": 801
+      }
+    }
+  ]
+}

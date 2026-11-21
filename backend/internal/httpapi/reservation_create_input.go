@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
-	"strconv"
 	"strings"
 	"time"
 	"unicode/utf16"
@@ -19,14 +18,14 @@ const noRepeat = "しない"
 type reservationCreateInput struct {
 	Name           *string
 	Room           *string
-	NumberOfPeople reservationInt
+	NumberOfPeople jsonInt32
 	Type           *string
 	Purpose        *string
 	SeriesID       *string
 	Date           reservationDateTime
 	StartTime      reservationDateTime
 	EndTime        reservationDateTime
-	ParticipantIDs []reservationInt
+	ParticipantIDs []jsonInt32
 	Participants   *string
 	RepeatType     *string
 	RepeatUntil    *reservationDateTime
@@ -92,7 +91,7 @@ func readReservationCreateInput(decoder *json.Decoder, now time.Time) (reservati
 	}
 	input := reservationCreateInput{
 		NumberOfPeople: 1, Type: new("社内"), Purpose: new(""), Date: reservationDateTime{dotnettime.OnDate(now, time.Time{})},
-		ParticipantIDs: []reservationInt{}, Participants: new(""), RepeatType: new(noRepeat),
+		ParticipantIDs: []jsonInt32{}, Participants: new(""), RepeatType: new(noRepeat),
 	}
 	err = json.Unmarshal(raw, &input)
 	return input, err
@@ -159,42 +158,13 @@ func (input reservationCreateInput) normalize(user auth.User) (reservations.List
 	}, ""
 }
 
-type reservationInt int32
-
-func (value *reservationInt) UnmarshalJSON(data []byte) error {
-	number := string(data)
-	if strings.HasPrefix(number, `"`) {
-		if err := json.Unmarshal(data, &number); err != nil {
-			return err
-		}
-	}
-	parsed, err := strconv.ParseInt(number, 10, 32)
-	*value = reservationInt(parsed)
-	return err
-}
-
 type reservationDateTime struct{ time.Time }
 
 func (value *reservationDateTime) UnmarshalJSON(data []byte) error {
-	var text string
-	if err := json.Unmarshal(data, &text); err != nil {
+	var parsed jsonDateTime
+	if err := parsed.UnmarshalJSON(data); err != nil {
 		return err
 	}
-	for _, layout := range []string{
-		time.RFC3339Nano, "2006-01-02T15:04Z07:00", "2006-01-02T15:04:05", "2006-01-02T15:04", time.DateOnly,
-	} {
-		parsed, err := time.Parse(layout, text)
-		if err != nil {
-			continue
-		}
-		if strings.HasSuffix(layout, "Z07:00") && !strings.HasSuffix(text, "Z") {
-			parsed = parsed.In(time.Local)
-		}
-		if parsed.Year() < 1 || parsed.Year() > 9999 {
-			break
-		}
-		value.Time = dotnettime.OnDate(parsed, parsed).Truncate(100 * time.Nanosecond)
-		return nil
-	}
-	return errors.New("expected an ISO 8601 date or date-time")
+	value.Time = dotnettime.OnDate(parsed.Time, parsed.Time).Truncate(100 * time.Nanosecond)
+	return nil
 }
