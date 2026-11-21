@@ -12,12 +12,14 @@ import (
 )
 
 type notificationInbox interface {
+	Create(ctx context.Context, entry notifications.Entry, createdAtTicks, targetDateTicks int64) (int, error)
 	List(ctx context.Context, userID int) ([]notifications.Entry, error)
 	MarkRead(ctx context.Context, id, actorID int, isAdmin bool) error
 	Delete(ctx context.Context, id, actorID int, isAdmin bool) error
 }
 
 func (h sessionHandler) registerNotificationRoutes(mux *http.ServeMux, origins *http.CrossOriginProtection, inbox notificationInbox) {
+	mux.Handle("POST /api/Notifications", origins.Handler(h.requireSession(newAdminNotificationCreateHandler(inbox))))
 	mux.Handle("GET /api/Notifications/user/{userId}", h.notificationRoute("userId", func(w http.ResponseWriter, r *http.Request, user auth.User, userID int) {
 		if user.ID != userID && !user.IsAdmin {
 			w.WriteHeader(http.StatusForbidden)

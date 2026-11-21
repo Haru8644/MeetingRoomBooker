@@ -214,6 +214,23 @@ go test -v -count=1 ./cmd/api -run '^TestNotificationInboxPostgres$'
 
 The browser check used a temporary Blazor copy and two seeded notices for a synthetic member, one for a reservation and one for a work schedule. Chromium displayed the notifications in order. `MARK ALL READ` sent two successful PUTs, and a browser reload showed both rows as read. Deleting one notification returned `204`, and a second reload showed only the remaining read notification. The browser recorded `204` preflights for PUT and DELETE.
 
+## Go administrator notification creation
+
+Blazor sends the notification model to `POST /api/Notifications`. A WSL run of C# at `d8fe3b7` with synthetic users and a disposable SQLite database returned empty `401` and `403` responses for anonymous users and members. The member received `403` even for malformed JSON. Administrators received `400` Problem Details for malformed JSON, invalid numbers and null non-nullable fields, and `415` for a non-JSON content type. Successful requests returned `201`, the full notification JSON, and an absolute `Location` ending in `/api/Notifications/user/{userId}`. The [C# capture](../backend/internal/httpapi/testdata/notification_create_csharp.json) includes 18 requests and the matching SQLite rows for all eight successful requests.
+
+Omitted values defaulted to user ID zero, an empty message, `Info`, an unread flag, and local server time for both dates. The two target IDs accepted both omission and explicit `null`. C# also accepted arbitrary types and IDs pointing to absent records. Input without a zone kept its wall time, UTC input kept `Z` in the POST response, and numeric offsets were converted to the server zone. SQLite stored the wall time with up to seven fractional digits. Go preserves these values in ticks and reuses the inbox JSON fields. Go uses stable Problem Details messages for malformed JSON and type conversion errors. ASP.NET's trace ID, field path and byte position in parser diagnostics are framework-specific.
+
+[Migration `0006`](../backend/migrations/0006_enable_notification_creation.sql) adds a PostgreSQL identity sequence to the existing notification ID column and initializes it from the highest positive ID. The primary key and existing rows keep their IDs. A sequence allocates distinct generated IDs across concurrent inserts. Computing `MAX(id) + 1` per request would require locking all creates and could reuse a deleted ID. C# also accepted a nonzero caller-supplied ID. Go preserves it and advances the sequence when a positive supplied ID reaches its current value. These exceptional inserts take a table lock that allows ordinary reads and coordinates with other writes. Generated-ID requests use a single INSERT. A duplicate explicit ID surfaces as `500`, with an empty body in Go. If a later legacy import uses explicit IDs directly in SQL, stop writers and reconcile the sequence with the imported IDs and the source high-water mark before resuming.
+
+```bash
+# WSL, from backend after migration 0005 and any initial legacy ID import
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f migrations/0006_enable_notification_creation.sql
+# Set NOTIFICATION_CREATE_TEST_DATABASE_URL to a disposable PostgreSQL URL with schema creation privileges.
+TZ=Asia/Tokyo go test -v -count=1 ./cmd/api -run '^TestAdminNotificationCreatePostgres$'
+```
+
+The PostgreSQL 16 integration test matched the C# statuses, successful JSON, Location paths and stored fields. With existing ID `4100`, it issued `4101`. After explicit ID `4800`, it issued `4801`, then issued `4802` even after deleting `4801` and adding a lower ID. A valid admin cookie from an untrusted origin received `403`. The recipient listed the new notification, marked it read, verified the saved flag, deleted it, and confirmed its absence on the next GET. Go unit tests, static analysis, and the Git whitespace check passed in WSL.
+
 ## Recovery to C# and SQLite
 
 Rehearse each stage in development with synthetic rows and a recording fake Chatwork sender. `scripts/deploy/deploy-prod.sh` uses SQLite's backup API and integrity check. `scripts/deploy/rollback-prod.sh` restores the earlier API, web assets and final SQLite snapshot. A rollback after Go accepts writes also needs the committed PostgreSQL state.

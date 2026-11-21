@@ -197,6 +197,8 @@ func startAuthTestAPI(t *testing.T, ctx context.Context, dsn string, frontendOri
 	serverErr := make(chan error, 1)
 	go func() { serverErr <- run(serverCtx) }()
 	stop := func() {
+		// Discard pooled test connections before the server begins its graceful shutdown.
+		http.DefaultClient.CloseIdleConnections()
 		cancel()
 		if err := <-serverErr; err != nil {
 			t.Errorf("Go API: %v", err)
