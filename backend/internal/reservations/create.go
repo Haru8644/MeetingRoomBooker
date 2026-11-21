@@ -44,7 +44,7 @@ func Create(ctx context.Context, pool *pgxpool.Pool, entry ListEntry, allowOverl
 			date, start, end, entry.ParticipantIDs, entry.Participants, entry.RepeatType).Scan(&entry.ID); err != nil {
 			return fmt.Errorf("insert reservation: %w", err)
 		}
-		return nil
+		return notifyAddedParticipants(ctx, tx, entry)
 	})
 	if err != nil {
 		return ListEntry{}, err

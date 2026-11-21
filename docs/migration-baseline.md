@@ -148,9 +148,9 @@ Apply [migration `0003`](../backend/migrations/0003_enable_reservation_creation.
 psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f migrations/0003_enable_reservation_creation.sql
 ```
 
-C# persists the booking, writes in-app notices for participants other than the organizer, and invokes direct Chatwork delivery for configured stakeholders. Its messages can include room and participant schedule conflicts. The first synthetic C# booking produced one in-app notice and two successful fake Chatwork deliveries with delivery log rows. The Go transaction persists the reservation only. Notification and delivery parity remain part of the later notification slice.
+C# persists the booking, writes in-app notices for participants other than the organizer, and invokes direct Chatwork delivery for configured stakeholders. The first synthetic C# booking produced one in-app notice and two successful fake Chatwork deliveries with delivery log rows. See [Go notifications on single reservation creation](#go-notifications-on-single-reservation-creation) for in-app generation and its database requirements. Chatwork delivery is a later migration step.
 
-For verification, set `RESERVATION_CREATE_TEST_DATABASE_URL` to a disposable local PostgreSQL URL that permits creating schemas. The test uses the normal Go server, migrates a schema with existing IDs, and compares HTTP responses with the C# fixture. It holds the room/date lock until two requests are waiting to check that one returns `201`, one returns `409`, and one row is inserted.
+For verification, set `RESERVATION_CREATE_TEST_DATABASE_URL` to a disposable local PostgreSQL URL that permits creating schemas. The test uses the normal Go server, migrates a schema with existing IDs, and compares HTTP responses with the C# fixture. It holds the room/date lock until two requests are waiting to check that one returns `201`, one returns `409`, and the database contains one new reservation and one notification.
 
 ```bash
 # WSL, from backend
@@ -230,6 +230,20 @@ TZ=Asia/Tokyo go test -v -count=1 ./cmd/api -run '^TestAdminNotificationCreatePo
 ```
 
 The PostgreSQL 16 integration test matched the C# statuses, successful JSON, Location paths and stored fields. With existing ID `4100`, it issued `4101`. After explicit ID `4800`, it issued `4801`, then issued `4802` even after deleting `4801` and adding a lower ID. A valid admin cookie from an untrusted origin received `403`. The recipient listed the new notification, marked it read, verified the saved flag, deleted it, and confirmed its absence on the next GET. Go unit tests, static analysis, and the Git whitespace check passed in WSL.
+
+## Go notifications on single reservation creation
+
+After a single reservation is created, each normalized participant other than the organizer receives one unread in-app notification linked to the reservation ID and date. The C# controller at `d8fe3b7` produced `Info` for a booking without participant conflicts, `Warning` when a timed external appointment strictly overlapped the booking, and no rows for a booking with only the organizer. The [SQLite capture](../backend/internal/httpapi/testdata/reservation_create_notifications_csharp.json) records the requests and stored notices. Go includes the organizer in the overlap check and gives each recipient the same warning text, listing up to five conflicts and the remaining count. When conflict start times match, participant names are ordered using the database collation.
+
+Apply migrations `0004` through `0006` before accepting single-reservation writes with participants. Go uses the existing work schedule and notification tables and the notification identity sequence. For an existing matching notice, it refreshes the newest row to unread and removes older matches, as in the C# service. C# saved the reservation and notices separately. Go writes both in the existing room/date transaction, so a notice write failure rolls back the reservation along with the notice rows.
+
+Set `RESERVATION_CREATE_TEST_DATABASE_URL` to a disposable PostgreSQL URL that permits creating schemas and run the tests from `backend`.
+
+```bash
+go test -v -count=1 ./cmd/api -run '^Test(SingleReservationCreate|ReservationCreateNotifications)Postgres$'
+```
+
+The PostgreSQL 16.2 checks exercised the real Go HTTP endpoints. The recipient inbox matched SQLite for the notice text, type, read flag and target date, including seven fractional digits. The tests also checked the generated reservation link, duplicate refresh, a rejected room overlap, concurrent creation, and a forced notification-write failure.
 
 ## Recovery to C# and SQLite
 

@@ -23,6 +23,7 @@ func TestSingleReservationCreatePostgres(t *testing.T) {
 	applyAuthTestSQL(t, ctx, pool, "../../migrations/0002_create_users_and_sessions.sql")
 	applyAuthTestSQL(t, ctx, pool, "../../internal/httpapi/testdata/reservation_list_seed.sql")
 	applyAuthTestSQL(t, ctx, pool, "../../migrations/0003_enable_reservation_creation.sql")
+	applyReservationNotificationMigrations(t, ctx, pool)
 	credentials := seedAuthTestUsers(t, ctx, pool)
 	if _, err := pool.Exec(ctx, `UPDATE users SET name = '架空の予約者' WHERE id = 2`); err != nil {
 		t.Fatal(err)
@@ -137,7 +138,7 @@ func assertConcurrentReservationCreate(t *testing.T, ctx context.Context, pool *
 		t.Fatal(err)
 	}
 
-	const payload = `{"name":"架空の予約者","room":"大会議室","date":"2026-06-19","startTime":"2026-06-19T09:00:00","endTime":"2026-06-19T10:00:00"}`
+	const payload = `{"name":"架空の予約者","room":"大会議室","date":"2026-06-19","startTime":"2026-06-19T09:00:00","endTime":"2026-06-19T10:00:00","participantIds":[3]}`
 	type outcome struct {
 		status int
 		err    error
@@ -193,6 +194,16 @@ func assertConcurrentReservationCreate(t *testing.T, ctx context.Context, pool *
 	}
 	if after != before+1 {
 		t.Fatalf("concurrent create added %d rows, want 1", after-before)
+	}
+	var notices int
+	if err := pool.QueryRow(ctx, `SELECT count(*) FROM notifications n
+		JOIN reservations r ON r.id = n.target_reservation_id
+		WHERE r.room = $1 AND r.date_ticks / 864000000000 = $2::text::date - DATE '0001-01-01'`,
+		room, day).Scan(&notices); err != nil {
+		t.Fatal(err)
+	}
+	if notices != 1 {
+		t.Fatalf("concurrent create added %d notices, want 1", notices)
 	}
 	t.Logf("two requests waiting concurrently returned one 201 and one 409; stored reservations %d → %d", before, after)
 }
