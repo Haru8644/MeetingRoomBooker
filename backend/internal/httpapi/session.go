@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/Haru8644/MeetingRoomBooker/backend/internal/auth"
+	"github.com/Haru8644/MeetingRoomBooker/backend/internal/users"
 )
 
 const sessionCookieName = "MeetingRoomBooker.GoSession"
@@ -32,7 +33,8 @@ type sessionHandler struct {
 }
 
 func RegisterSessionRoutes(mux *http.ServeMux, service sessionService, reservationList http.Handler,
-	createReservation reservationCreator, listWorkSchedules workScheduleLister, options SessionOptions,
+	createReservation reservationCreator, listWorkSchedules workScheduleLister,
+	listParticipants func(context.Context) ([]users.Participant, error), options SessionOptions,
 ) (http.Handler, error) {
 	csrf := http.NewCrossOriginProtection()
 	origins := make(map[string]bool)
@@ -68,6 +70,14 @@ func RegisterSessionRoutes(mux *http.ServeMux, service sessionService, reservati
 	}))
 	mux.Handle(reservationCreatePattern, csrf.Handler(h.requireSession(newReservationCreateHandler(createReservation))))
 	mux.Handle(workScheduleListPattern, h.requireSession(newWorkScheduleListHandler(listWorkSchedules)))
+	mux.Handle("GET /api/Users/participants", h.requireSession(func(w http.ResponseWriter, r *http.Request, _ auth.User) {
+		participants, err := listParticipants(r.Context())
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		writeJSON(w, http.StatusOK, participants)
+	}))
 
 	if len(origins) == 0 {
 		return mux, nil
