@@ -37,7 +37,7 @@ func TestSessionRoutesWithoutDatabase(t *testing.T) {
 		t.Fatal("unauthenticated request read participants")
 		return nil, nil
 	}
-	handler, err := RegisterSessionRoutes(NewHandler(nil, time.Second), auth.NewService(nil), list, create, listWorkSchedules, listParticipants,
+	handler, err := RegisterSessionRoutes(NewHandler(nil, time.Second), auth.NewService(nil), list, create, listWorkSchedules, listParticipants, nil,
 		SessionOptions{Development: true, FrontendOrigins: []string{trusted}})
 	if err != nil {
 		t.Fatal(err)
@@ -47,6 +47,7 @@ func TestSessionRoutesWithoutDatabase(t *testing.T) {
 		{http.MethodGet, "/api/Auth/me"}, {http.MethodPost, logout}, {http.MethodGet, "/api/Reservations"}, {http.MethodPost, "/api/Reservations"},
 		{http.MethodGet, "/api/work-schedule-entries"},
 		{http.MethodGet, "/api/Users/participants"},
+		{http.MethodGet, "/api/Notifications/user/2"}, {http.MethodPut, "/api/Notifications/101/read"}, {http.MethodDelete, "/api/Notifications/101"},
 	} {
 		response := httptest.NewRecorder()
 		handler.ServeHTTP(response, httptest.NewRequest(route.method, route.path, nil))
@@ -127,6 +128,27 @@ func TestSessionRoutesWithoutDatabase(t *testing.T) {
 	if response.Code != http.StatusNoContent || response.Header().Get("Access-Control-Allow-Headers") != "Content-Type" {
 		t.Fatalf("trusted preflight: got %d and headers %v", response.Code, response.Header())
 	}
+	for _, change := range []struct{ method, path string }{
+		{http.MethodPut, "/api/Notifications/101/read"}, {http.MethodDelete, "/api/Notifications/101"},
+	} {
+		preflight := httptest.NewRequest(http.MethodOptions, change.path, nil)
+		preflight.Header.Set("Origin", trusted)
+		preflight.Header.Set("Access-Control-Request-Method", change.method)
+		response := httptest.NewRecorder()
+		handler.ServeHTTP(response, preflight)
+		if response.Code != http.StatusNoContent || response.Header().Get("Access-Control-Allow-Origin") != trusted ||
+			response.Header().Get("Access-Control-Allow-Credentials") != "true" ||
+			!strings.Contains(response.Header().Get("Access-Control-Allow-Methods"), change.method) {
+			t.Fatalf("trusted %s preflight: got %d and headers %v", change.method, response.Code, response.Header())
+		}
+		request := httptest.NewRequest(change.method, change.path, nil)
+		request.Header.Set("Origin", "https://untrusted.example.test")
+		response = httptest.NewRecorder()
+		handler.ServeHTTP(response, request)
+		if response.Code != http.StatusForbidden || response.Header().Get("Access-Control-Allow-Origin") != "" {
+			t.Fatalf("untrusted %s request: got %d and headers %v", change.method, response.Code, response.Header())
+		}
+	}
 }
 
 func TestCredentialFailureJSON(t *testing.T) {
@@ -157,7 +179,7 @@ func TestSessionCookieSecurePolicy(t *testing.T) {
 			t.Fatalf("unexpected cookie attributes (development=%t, URL=%s)", test.development, test.url)
 		}
 	}
-	if _, err := RegisterSessionRoutes(http.NewServeMux(), auth.NewService(nil), http.NotFoundHandler(), nil, nil, nil,
+	if _, err := RegisterSessionRoutes(http.NewServeMux(), auth.NewService(nil), http.NotFoundHandler(), nil, nil, nil, nil,
 		SessionOptions{FrontendOrigins: []string{"http://127.0.0.1:5168"}}); err == nil {
 		t.Fatal("HTTP frontend origin accepted outside development")
 	}

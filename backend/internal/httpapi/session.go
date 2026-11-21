@@ -34,7 +34,7 @@ type sessionHandler struct {
 
 func RegisterSessionRoutes(mux *http.ServeMux, service sessionService, reservationList http.Handler,
 	createReservation reservationCreator, listWorkSchedules workScheduleLister,
-	listParticipants func(context.Context) ([]users.Participant, error), options SessionOptions,
+	listParticipants func(context.Context) ([]users.Participant, error), inbox notificationInbox, options SessionOptions,
 ) (http.Handler, error) {
 	csrf := http.NewCrossOriginProtection()
 	origins := make(map[string]bool)
@@ -78,6 +78,7 @@ func RegisterSessionRoutes(mux *http.ServeMux, service sessionService, reservati
 		}
 		writeJSON(w, http.StatusOK, participants)
 	}))
+	h.registerNotificationRoutes(mux, csrf, inbox)
 
 	if len(origins) == 0 {
 		return mux, nil
@@ -88,7 +89,7 @@ func RegisterSessionRoutes(mux *http.ServeMux, service sessionService, reservati
 			w.Header().Set("Access-Control-Allow-Origin", origin)
 			w.Header().Set("Access-Control-Allow-Credentials", "true")
 			if r.Method == http.MethodOptions && r.Header.Get("Access-Control-Request-Method") != "" {
-				w.Header().Set("Access-Control-Allow-Methods", "GET, POST")
+				w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
 				w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 				w.WriteHeader(http.StatusNoContent)
 				return
