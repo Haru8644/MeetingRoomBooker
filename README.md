@@ -203,7 +203,7 @@ From the repository root, replace `dev-password` with the URL-encoded developmen
 
 ```bash
 cd backend
-DATABASE_URL='postgres://meetingroombooker_dev:dev-password@127.0.0.1:5432/meetingroombooker_dev?sslmode=disable' go run ./cmd/api
+APP_ENV=development DATABASE_URL='postgres://meetingroombooker_dev:dev-password@127.0.0.1:5432/meetingroombooker_dev?sslmode=disable' go run ./cmd/api
 ```
 
 The API listens on `127.0.0.1:8081` by default. Set `HTTP_ADDR` to override the address. From a second WSL terminal, check both endpoints.
@@ -216,6 +216,8 @@ curl -i http://127.0.0.1:8081/readyz
 `/healthz` returns `200` with `{"status":"ok"}`. `/readyz` checks PostgreSQL with a one-second timeout and returns `200` with `{"status":"ready"}` on success or `503` with `{"status":"unavailable"}` if the database is unreachable or `DATABASE_URL` is unset. A malformed connection string causes startup to fail with an `invalid DATABASE_URL` error.
 
 Run `go test -v ./...` from `backend` to exercise these handlers without PostgreSQL.
+
+For session authentication and the reservation list, see the [local schema and smoke test instructions](docs/migration-baseline.md#go-session-authentication).
 
 ### Run the Blazor Web app
 

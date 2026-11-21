@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func NewHandler(ping func(context.Context) error, readinessTimeout time.Duration) http.Handler {
+func NewHandler(ping func(context.Context) error, readinessTimeout time.Duration) *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) {
 		writeStatus(w, http.StatusOK, "ok")

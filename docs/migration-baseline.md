@@ -85,7 +85,7 @@ In WSL, set `DATABASE_URL` to the local development database and apply the migra
 psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f migrations/0001_create_reservations.sql
 ```
 
-Run `go test -v ./...` from `backend` for HTTP tests with an injected reader and identity. For the PostgreSQL comparison, set `RESERVATION_TEST_DATABASE_URL` to a disposable local database with permission to create a schema and run the command below. The test creates and drops its own schema, applies the migration to it, and inserts the [same synthetic rows](../backend/internal/httpapi/testdata/reservation_list_seed.sql) used for the SQLite capture. The Go handler runs on an HTTP test server. Registering the route on the runnable API is part of the authentication follow-up.
+Run `go test -v ./...` from `backend` for HTTP tests with an injected reader and identity. For the PostgreSQL comparison, set `RESERVATION_TEST_DATABASE_URL` to a disposable local database with permission to create a schema and run the command below. The test creates and drops its own schema, applies the migration to it, and inserts the [same synthetic rows](../backend/internal/httpapi/testdata/reservation_list_seed.sql) used for the SQLite capture. The Go handler runs on an HTTP test server for this comparison. The runnable API also serves the route through the session middleware.
 
 ```bash
 RESERVATION_TEST_DATABASE_URL='postgres://meetingroombooker_dev:dev-password@127.0.0.1:5432/meetingroombooker_reservation_test?sslmode=disable' \
@@ -93,6 +93,45 @@ RESERVATION_TEST_DATABASE_URL='postgres://meetingroombooker_dev:dev-password@127
 ```
 
 **Verified in WSL with PostgreSQL 16.15.** The `401` response had an empty body and no redirect. The empty and populated responses matched the C# `200` responses, including every JSON field on all four reservations.
+
+## Go session authentication
+
+The C# reference at `d8fe3b7` was run with a fresh SQLite database and synthetic member and administrator accounts. Blazor sends the session cookie on `POST /api/Auth/login`, `GET /api/Auth/me`, and `POST /api/Auth/logout`. The requests and results below were measured over HTTP, with a separate HTTPS login check and a process-local clock shift for cookie renewal.
+
+| Request | C# result |
+| --- | --- |
+| Missing or invalid login fields, or malformed JSON | `400` with validation Problem Details. Missing or unsupported media type yielded `415`. |
+| Incorrect password or unknown account | `401` with `Invalid email or password.` as text, or a JSON string with `Accept: application/json`. |
+| Member or administrator login and `/me` | `200` with `id`, `name`, `email`, `avatarColor`, `isAdmin`, `chatworkAccountId`, and `chatworkDirectRoomId`. The member's Chatwork fields were null. |
+| Anonymous `/me` or logout | `401` with an empty body and no redirect. |
+| Authenticated logout | `204` with an empty body and a deletion cookie. The original C# cookie was still accepted when sent again. |
+
+The Go handlers preserve these status and profile contracts. Malformed JSON uses Go validation messages and the Problem Details response omits ASP.NET's request trace identifier. Logout deletes the PostgreSQL session, so presenting the same Go cookie afterwards returns an empty `401`.
+
+The C# application generated Identity V3 PBKDF2-HMAC-SHA512 hashes with 100,000 iterations, a 16-byte salt, and a 32-byte subkey. Go verifies that format using `crypto/pbkdf2` and a constant-time subkey comparison. The verifier also reads the Identity V2 and V3 SHA1/SHA256 formats accepted by ASP.NET Identity. It bounds encoded hashes at 256 bytes and iterations at 1,000,000. Requiring password resets during migration would avoid the compatibility parser and interrupt existing sign-ins. The [test vectors](../backend/internal/auth/testdata/identity_vectors.json) include hashes captured from both synthetic C# users and legacy vectors generated with .NET. Seed normalized email addresses and Identity password hashes when preparing users for Go. Plaintext password storage and password rehashing are outside this implementation.
+
+The [PostgreSQL auth migration](../backend/migrations/0002_create_users_and_sessions.sql) stores profiles and active sessions. Each login issues a 32-byte cryptographically random token, with only its SHA-256 digest in PostgreSQL. The session lookup checks expiry and joins the user before any reservation read. A self-contained signed ticket would avoid the database lookup and require separate revocation state. The table gives logout immediate server-side revocation, and successful sign-ins remove expired rows.
+
+C# measured `HttpOnly`, `SameSite=Lax`, `Path=/`, and `Secure` on HTTPS. The Go cookie is host-only with these attributes and uses `Secure` by default. Explicit `APP_ENV=development` allows loopback HTTP and is rejected on a non-loopback bind. Without “remember me” the cookie is a browser-session cookie. With it, the cookie expires after 14 days. Both modes have 14-day server-side expiry and renew once past the halfway point, as measured in C#. Go keeps the session ID on renewal so simultaneous requests can continue using it. The Go cookie is named `MeetingRoomBooker.GoSession`. Deciding whether to require a fresh login or migrate old `MeetingRoomBooker.Auth` sessions belongs to cutover planning.
+
+Login and logout use Go's `CrossOriginProtection` to reject untrusted browser requests using `Sec-Fetch-Site` and `Origin`. `SameSite=Lax` also limits cross-site cookie sends. A per-request CSRF token would require a change to the Blazor client. For a separate frontend origin, `FRONTEND_ORIGINS` takes a comma-separated list of exact, trusted origins and enables credentialed CORS for them. HTTP origins require loopback development. Use the same loopback hostname for the API and frontend when testing cookies across local ports. For HTTPS deployments, preserve the external host at the reverse proxy and use the default secure-cookie setting.
+
+In WSL, export `DATABASE_URL` for the local development database and apply the migrations once from `backend`. For a database with `0001` already applied, start with `0002`.
+
+```bash
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f migrations/0001_create_reservations.sql
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f migrations/0002_create_users_and_sessions.sql
+APP_ENV=development go run ./cmd/api
+```
+
+For the smoke test, set `AUTH_TEST_DATABASE_URL` to a disposable PostgreSQL URL with permission to create schemas. The test applies both migrations in a temporary schema, seeds the synthetic users and reservations, runs the normal Go API startup on a loopback port, and removes the schema afterwards.
+
+```bash
+AUTH_TEST_DATABASE_URL='postgres://meetingroombooker_dev:dev-password@127.0.0.1:5432/meetingroombooker_auth_test?sslmode=disable' \
+  go test -v -count=1 ./cmd/api -run '^TestSessionAuthenticationPostgres$'
+```
+
+**Verified in WSL with PostgreSQL 16.15.** The HTTP test passed for anonymous access before the reservations table existed, correct and incorrect credentials, both user profiles, reservation listing, session and persistent cookies, sliding renewal, logout, replay after logout, and expiry. The database-free tests cover input validation, the secure-cookie policy, and CSRF rejection on both login and logout.
 
 ## Recovery to C# and SQLite
 

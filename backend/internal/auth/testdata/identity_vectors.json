@@ -1,0 +1,27 @@
+[
+  {
+    "name": "admin",
+    "password": "SyntheticAdminOnly-あ1!",
+    "hash": "AQAAAAIAAYagAAAAEMxtOOmr4BocHbUEY1oBrn5MLVGRjkn8JcYz2niJCltMYF0K8Eqa//hA2uewzAtk1w=="
+  },
+  {
+    "name": "member",
+    "password": "SyntheticMemberOnly-雪1!",
+    "hash": "AQAAAAIAAYagAAAAEMga7PhjZN5a60g1NIP6ouR0RP9z4Ka6ZSeNC1bmVbvK3AhQp62rb5HoN0i6F6Hdbg=="
+  },
+  {
+    "name": "IdentityV2",
+    "password": "SyntheticLegacyVector-桜1!",
+    "hash": "AHqiHLNBOTwW/rGTOsBfjpdYuMjNhpxa96UNaqYzXTPvzQfqj4CAA6Wal1eIfTnFsg=="
+  },
+  {
+    "name": "IdentityV3-SHA1",
+    "password": "SyntheticLegacyVector-桜1!",
+    "hash": "AQAAAAAAACcQAAAAEJqMfiROWO/FHwWmB+qiNpeqSJFbaJ4s5sol+eQ2jYbwTFXeeCswEZ6zjM568OhkXg=="
+  },
+  {
+    "name": "IdentityV3-SHA256",
+    "password": "SyntheticLegacyVector-桜1!",
+    "hash": "AQAAAAEAACcQAAAAEOo0jsozg56caKINmrrWomySIQmy3L8IlyKiSvS+b5ITxjfkYF2yHIaOXssR42MMAg=="
+  }
+]
