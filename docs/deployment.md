@@ -87,6 +87,7 @@ Automatic CI validates changes in GitHub Actions. Production deployment requires
 | --- | --- | --- |
 | `dotnet-ci` | Pull requests targeting `master` and pushes to `master` | Restores dependencies, builds in Release mode, runs xUnit tests, publishes the API and Web, rejects database files in the outputs, and uploads verified outputs as GitHub Actions artifacts. |
 | `operations-web-ci` | Pull requests targeting `master` and pushes to `master`. Both events require changes under `MeetingRoomBooker.OperationsWeb/**` or to `.github/workflows/operations-web-ci.yml`. | Installs dependencies with `npm ci` and builds OperationsWeb. |
+| `go-backend-ci` | Pull requests targeting `master` and pushes to `master`. Both events require changes under `backend/**` or to `.github/workflows/go-backend-ci.yml`. | Runs `go test -v ./...` in `backend`. |
 | `manual-vps-deploy` | Manual dispatch (`workflow_dispatch`) with deployment and no-schema-change confirmations | Builds, tests, and deploys the API and Web to production for releases without database schema changes. |
 | `manual-vps-deploy-with-migration` | Manual dispatch (`workflow_dispatch`) with deployment, schema-change, and backup confirmations | Builds and tests the release, backs up SQLite, applies the EF Core migration bundle, and deploys the API and Web to production. |
 
