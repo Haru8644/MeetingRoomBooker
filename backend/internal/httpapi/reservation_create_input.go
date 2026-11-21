@@ -10,6 +10,7 @@ import (
 	"unicode/utf16"
 
 	"github.com/Haru8644/MeetingRoomBooker/backend/internal/auth"
+	"github.com/Haru8644/MeetingRoomBooker/backend/internal/dotnettime"
 	"github.com/Haru8644/MeetingRoomBooker/backend/internal/reservations"
 )
 
@@ -90,7 +91,7 @@ func readReservationCreateInput(decoder *json.Decoder, now time.Time) (reservati
 		return reservationCreateInput{}, err
 	}
 	input := reservationCreateInput{
-		NumberOfPeople: 1, Type: new("社内"), Purpose: new(""), Date: reservationDateTime{timeOnDate(now, time.Time{})},
+		NumberOfPeople: 1, Type: new("社内"), Purpose: new(""), Date: reservationDateTime{dotnettime.OnDate(now, time.Time{})},
 		ParticipantIDs: []reservationInt{}, Participants: new(""), RepeatType: new(noRepeat),
 	}
 	err = json.Unmarshal(raw, &input)
@@ -128,8 +129,8 @@ func (input reservationCreateInput) validate() map[string][]string {
 
 func (input reservationCreateInput) normalize(user auth.User) (reservations.ListEntry, string) {
 	date := input.Date.Time
-	start := timeOnDate(date, input.StartTime.Time)
-	end := timeOnDate(date, input.EndTime.Time)
+	start := dotnettime.OnDate(date, input.StartTime.Time)
+	end := dotnettime.OnDate(date, input.EndTime.Time)
 	if !start.Before(end) {
 		return reservations.ListEntry{}, "終了時刻は開始時刻より後にしてください。"
 	}
@@ -192,13 +193,8 @@ func (value *reservationDateTime) UnmarshalJSON(data []byte) error {
 		if parsed.Year() < 1 || parsed.Year() > 9999 {
 			break
 		}
-		value.Time = timeOnDate(parsed, parsed).Truncate(100 * time.Nanosecond)
+		value.Time = dotnettime.OnDate(parsed, parsed).Truncate(100 * time.Nanosecond)
 		return nil
 	}
 	return errors.New("expected an ISO 8601 date or date-time")
-}
-
-// Store DateTime wall-clock fields without a zone, as in the reservation list.
-func timeOnDate(date, clock time.Time) time.Time {
-	return time.Date(date.Year(), date.Month(), date.Day(), clock.Hour(), clock.Minute(), clock.Second(), clock.Nanosecond(), time.UTC)
 }

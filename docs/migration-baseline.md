@@ -157,6 +157,28 @@ For verification, set `RESERVATION_CREATE_TEST_DATABASE_URL` to a disposable loc
 go test -v -count=1 ./cmd/api -run '^TestSingleReservationCreatePostgres$'
 ```
 
+## Go work schedule list
+
+Blazor sends `GET /api/work-schedule-entries` with the session cookie and optional `from` and `to` dates formatted as `yyyy-MM-dd`. At `d8fe3b7`, this route returns all matching entries to an authenticated user. It orders by date, start time or date when the start is null, numeric type, and ID. Both range bounds are inclusive and are taken at midnight. Entries with a non-midnight legacy date on the last day are therefore outside the range. Missing or empty bounds default independently to seven days before and 31 days after the server's local date. With explicit offsets, ASP.NET normalizes to UTC before taking the date.
+
+The local C# HTTP capture returned an empty `401` for anonymous access, a `400` with `取得開始日は取得終了日以前にしてください。` for an inverted explicit range, and `400` Problem Details for a malformed date. An inferred inverted range returned `200` with `[]`. The [capture fixture](../backend/internal/httpapi/testdata/work_schedule_list_csharp.json) preserves all fields of 11 synthetic entries and the order of each response. The Go test compares numeric types and leave periods, nullable times and recurrence fields, participant order, empty arrays, and seven fractional second digits. Go omits the ASP.NET trace identifier and supports the Blazor date format, the measured ISO date-time forms, and common numeric date forms.
+
+The [PostgreSQL migration](../backend/migrations/0004_create_work_schedule_entries.sql) keeps explicit IDs, ordered integer participant arrays, and .NET ticks with the same conversion used for reservations. Native timestamps would allow PostgreSQL calendar arithmetic and store up to six fractional digits. Tick storage preserves the measured precision and the legacy time of day. The query uses the date index for the bounded lookup and expresses the C# ordering explicitly.
+
+```bash
+# WSL, from backend with DATABASE_URL set to the local development database
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f migrations/0004_create_work_schedule_entries.sql
+```
+
+For the PostgreSQL comparison, set `WORK_SCHEDULE_TEST_DATABASE_URL` to a disposable local database that permits creating schemas. The test starts the Go server and compares the HTTP output with the C# capture. It shifts the fixture dates together for repeatable relative-window checks on later days.
+
+```bash
+# WSL, from backend
+go test -v -count=1 ./cmd/api -run '^TestWorkScheduleListPostgres$'
+```
+
+For the browser check, apply migrations `0001` through `0004` and seed a synthetic member, a 10:00–10:30 booking, and an external appointment, a work-from-home entry, and a leave entry on the browser's selected day. Point a temporary copy of Blazor's `ApiBaseUrl` to the Go API and add the exact Blazor origin to `FRONTEND_ORIGINS`. In Chromium, open the reservation form and verify its preview. Submit a 09:00–10:00 reservation in the same room and verify the success dialog and the calendar. The WSL check observed `200` for the work schedule GET and `201` for the POST. Participant and notification endpoints returned `404` during the same run.
+
 ## Recovery to C# and SQLite
 
 Rehearse each stage in development with synthetic rows and a recording fake Chatwork sender. `scripts/deploy/deploy-prod.sh` uses SQLite's backup API and integrity check. `scripts/deploy/rollback-prod.sh` restores the earlier API, web assets and final SQLite snapshot. A rollback after Go accepts writes also needs the committed PostgreSQL state.

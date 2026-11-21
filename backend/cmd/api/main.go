@@ -15,6 +15,7 @@ import (
 	"github.com/Haru8644/MeetingRoomBooker/backend/internal/auth"
 	"github.com/Haru8644/MeetingRoomBooker/backend/internal/httpapi"
 	"github.com/Haru8644/MeetingRoomBooker/backend/internal/reservations"
+	"github.com/Haru8644/MeetingRoomBooker/backend/internal/workschedules"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -66,7 +67,10 @@ func run(ctx context.Context) error {
 	createReservation := func(ctx context.Context, entry reservations.ListEntry, allowOverlap bool) (reservations.ListEntry, error) {
 		return reservations.Create(ctx, pool, entry, allowOverlap)
 	}
-	handler, err := httpapi.RegisterSessionRoutes(httpapi.NewHandler(ping, readinessTimeout), auth.NewService(pool), reservationList, createReservation,
+	listWorkSchedules := func(ctx context.Context, from, to time.Time) ([]workschedules.Entry, error) {
+		return workschedules.List(ctx, pool, from, to)
+	}
+	handler, err := httpapi.RegisterSessionRoutes(httpapi.NewHandler(ping, readinessTimeout), auth.NewService(pool), reservationList, createReservation, listWorkSchedules,
 		httpapi.SessionOptions{Development: development, FrontendOrigins: strings.Split(os.Getenv("FRONTEND_ORIGINS"), ",")})
 	if err != nil {
 		return err
