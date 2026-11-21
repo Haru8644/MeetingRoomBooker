@@ -61,9 +61,17 @@ func List(ctx context.Context, pool *pgxpool.Pool) ([]ListEntry, error) {
 	return entries, nil
 }
 
+const (
+	unixEpochTicks = 621355968000000000
+	ticksPerSecond = 10_000_000
+	ticksPerDay    = 864_000_000_000
+)
+
 func dateTimeFromTicks(ticks int64) time.Time {
-	const unixEpochTicks = 621355968000000000
-	const ticksPerSecond = 10_000_000
 	unixTicks := ticks - unixEpochTicks
 	return time.Unix(unixTicks/ticksPerSecond, unixTicks%ticksPerSecond*100).UTC()
+}
+
+func dateTimeTicks(value time.Time) int64 {
+	return unixEpochTicks + value.Unix()*ticksPerSecond + int64(value.Nanosecond())/100
 }

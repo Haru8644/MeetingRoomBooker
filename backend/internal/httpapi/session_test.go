@@ -23,14 +23,18 @@ func TestSessionRoutesWithoutDatabase(t *testing.T) {
 		t.Fatal("unauthenticated request read the reservation table")
 		return nil, nil
 	})
-	handler, err := RegisterSessionRoutes(NewHandler(nil, time.Second), auth.NewService(nil), list,
+	create := func(context.Context, reservations.ListEntry, bool) (reservations.ListEntry, error) {
+		t.Fatal("unauthenticated request wrote a reservation")
+		return reservations.ListEntry{}, nil
+	}
+	handler, err := RegisterSessionRoutes(NewHandler(nil, time.Second), auth.NewService(nil), list, create,
 		SessionOptions{Development: true, FrontendOrigins: []string{trusted}})
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	for _, route := range []struct{ method, path string }{
-		{http.MethodGet, "/api/Auth/me"}, {http.MethodPost, logout}, {http.MethodGet, "/api/Reservations"},
+		{http.MethodGet, "/api/Auth/me"}, {http.MethodPost, logout}, {http.MethodGet, "/api/Reservations"}, {http.MethodPost, "/api/Reservations"},
 	} {
 		response := httptest.NewRecorder()
 		handler.ServeHTTP(response, httptest.NewRequest(route.method, route.path, nil))
@@ -76,7 +80,7 @@ func TestSessionRoutesWithoutDatabase(t *testing.T) {
 			}
 		})
 	}
-	for _, path := range []string{login, logout} {
+	for _, path := range []string{login, logout, "/api/Reservations"} {
 		for _, origin := range []string{"https://untrusted.example.test", "null"} {
 			request := httptest.NewRequest(http.MethodPost, path, strings.NewReader(validLogin))
 			request.Header.Set("Content-Type", "application/json")
@@ -117,7 +121,7 @@ func TestCredentialFailureJSON(t *testing.T) {
 	request := httptest.NewRequest(http.MethodPost, "/api/Auth/login", nil)
 	request.Header.Set("Accept", "application/json")
 	response := httptest.NewRecorder()
-	writeCredentialFailure(response, request)
+	writeNegotiatedString(response, request, http.StatusUnauthorized, "Invalid email or password.")
 	var message string
 	if response.Code != http.StatusUnauthorized || response.Header().Get("Content-Type") != "application/json; charset=utf-8" ||
 		json.Unmarshal(response.Body.Bytes(), &message) != nil || message != "Invalid email or password." {
@@ -141,7 +145,7 @@ func TestSessionCookieSecurePolicy(t *testing.T) {
 			t.Fatalf("unexpected cookie attributes (development=%t, URL=%s)", test.development, test.url)
 		}
 	}
-	if _, err := RegisterSessionRoutes(http.NewServeMux(), auth.NewService(nil), http.NotFoundHandler(),
+	if _, err := RegisterSessionRoutes(http.NewServeMux(), auth.NewService(nil), http.NotFoundHandler(), nil,
 		SessionOptions{FrontendOrigins: []string{"http://127.0.0.1:5168"}}); err == nil {
 		t.Fatal("HTTP frontend origin accepted outside development")
 	}

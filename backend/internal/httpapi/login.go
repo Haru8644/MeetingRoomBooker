@@ -19,36 +19,34 @@ type loginRequest struct {
 
 func (h sessionHandler) login(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Cache-Control", "no-store")
-	mediaType, _, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
-	if err != nil || (mediaType != "application/json" && mediaType != "text/json" &&
-		!(strings.HasPrefix(mediaType, "application/") && strings.HasSuffix(mediaType, "+json"))) {
-		writeLoginProblem(w, http.StatusUnsupportedMediaType, nil)
+	if !hasJSONContentType(r) {
+		writeValidationProblem(w, http.StatusUnsupportedMediaType, nil)
 		return
 	}
 
 	decoder := json.NewDecoder(http.MaxBytesReader(w, r.Body, 64<<10))
 	request := &loginRequest{Email: new("")}
-	err = decoder.Decode(&request)
+	err := decoder.Decode(&request)
 	if err == io.EOF || (err == nil && request == nil) {
-		writeLoginProblem(w, http.StatusBadRequest, map[string][]string{
+		writeValidationProblem(w, http.StatusBadRequest, map[string][]string{
 			"": {"A non-empty request body is required."}, "request": {"The request field is required."},
 		})
 		return
 	}
 	if err != nil || decoder.Decode(new(json.RawMessage)) != io.EOF {
-		writeLoginProblem(w, http.StatusBadRequest, map[string][]string{"request": {"A JSON request object is required."}})
+		writeValidationProblem(w, http.StatusBadRequest, map[string][]string{"request": {"A JSON request object is required."}})
 		return
 	}
 	fields := validateLogin(request)
 	if len(fields) != 0 {
-		writeLoginProblem(w, http.StatusBadRequest, fields)
+		writeValidationProblem(w, http.StatusBadRequest, fields)
 		return
 	}
 
 	user, session, err := h.service.Login(r.Context(), strings.ToLower(strings.TrimSpace(*request.Email)),
 		request.Password, string(request.RememberMe) == "true", requestToken(r))
 	if errors.Is(err, auth.ErrUnauthorized) {
-		writeCredentialFailure(w, r)
+		writeNegotiatedString(w, r, http.StatusUnauthorized, "Invalid email or password.")
 		return
 	}
 	if err != nil {
@@ -56,7 +54,7 @@ func (h sessionHandler) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	h.setCookie(w, r, session)
-	writeAuthJSON(w, http.StatusOK, user)
+	writeJSON(w, http.StatusOK, user)
 }
 
 func validateLogin(request *loginRequest) map[string][]string {
@@ -80,21 +78,26 @@ func validateLogin(request *loginRequest) map[string][]string {
 	return fields
 }
 
-func writeCredentialFailure(w http.ResponseWriter, r *http.Request) {
-	const message = "Invalid email or password."
+func hasJSONContentType(r *http.Request) bool {
+	mediaType, _, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
+	return err == nil && (mediaType == "application/json" || mediaType == "text/json" ||
+		strings.HasPrefix(mediaType, "application/") && strings.HasSuffix(mediaType, "+json"))
+}
+
+func writeNegotiatedString(w http.ResponseWriter, r *http.Request, status int, message string) {
 	for _, accept := range strings.Split(r.Header.Get("Accept"), ",") {
 		mediaType, params, err := mime.ParseMediaType(strings.TrimSpace(accept))
 		if err == nil && mediaType == "application/json" && params["q"] != "0" {
-			writeAuthJSON(w, http.StatusUnauthorized, message)
+			writeJSON(w, status, message)
 			return
 		}
 	}
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-	w.WriteHeader(http.StatusUnauthorized)
+	w.WriteHeader(status)
 	_, _ = io.WriteString(w, message)
 }
 
-func writeLoginProblem(w http.ResponseWriter, status int, fields map[string][]string) {
+func writeValidationProblem(w http.ResponseWriter, status int, fields map[string][]string) {
 	const rfc = "https://tools.ietf.org/html/rfc9110#section-"
 	problem := struct {
 		Type   string              `json:"type"`

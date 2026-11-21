@@ -2,7 +2,6 @@ package httpapi
 
 import (
 	"context"
-	"encoding/json"
 	"net/http"
 
 	"github.com/Haru8644/MeetingRoomBooker/backend/internal/reservations"
@@ -34,8 +33,7 @@ func NewReservationListHandler(list func(context.Context) ([]reservations.ListEn
 		for i, entry := range entries {
 			response[i] = newReservationResponse(entry)
 		}
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		_ = json.NewEncoder(w).Encode(response)
+		writeJSON(w, http.StatusOK, response)
 	})
 }
 

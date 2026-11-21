@@ -31,7 +31,7 @@ type sessionHandler struct {
 	development bool
 }
 
-func RegisterSessionRoutes(mux *http.ServeMux, service sessionService, reservationList http.Handler, options SessionOptions) (http.Handler, error) {
+func RegisterSessionRoutes(mux *http.ServeMux, service sessionService, reservationList http.Handler, createReservation reservationCreator, options SessionOptions) (http.Handler, error) {
 	csrf := http.NewCrossOriginProtection()
 	origins := make(map[string]bool)
 	for _, origin := range options.FrontendOrigins {
@@ -57,13 +57,14 @@ func RegisterSessionRoutes(mux *http.ServeMux, service sessionService, reservati
 	h := sessionHandler{service: service, development: options.Development}
 	mux.Handle("POST /api/Auth/login", csrf.Handler(http.HandlerFunc(h.login)))
 	mux.Handle("GET /api/Auth/me", h.requireSession(func(w http.ResponseWriter, _ *http.Request, user auth.User) {
-		writeAuthJSON(w, http.StatusOK, user)
+		writeJSON(w, http.StatusOK, user)
 	}))
 	mux.Handle("POST /api/Auth/logout", csrf.Handler(http.HandlerFunc(h.logout)))
 	mux.Handle(ReservationListPattern, h.requireSession(func(w http.ResponseWriter, r *http.Request, user auth.User) {
 		r = r.WithContext(WithAuthenticatedUser(r.Context(), user.ID))
 		reservationList.ServeHTTP(w, r)
 	}))
+	mux.Handle(reservationCreatePattern, csrf.Handler(h.requireSession(newReservationCreateHandler(createReservation))))
 
 	if len(origins) == 0 {
 		return mux, nil
@@ -146,7 +147,7 @@ func writeSessionError(w http.ResponseWriter, err error) {
 	}
 }
 
-func writeAuthJSON(w http.ResponseWriter, status int, response any) {
+func writeJSON(w http.ResponseWriter, status int, response any) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.WriteHeader(status)
 	_ = json.NewEncoder(w).Encode(response)
