@@ -4,13 +4,17 @@ import (
 	"context"
 	"errors"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
+	"github.com/Haru8644/MeetingRoomBooker/backend/internal/auth"
 	"github.com/Haru8644/MeetingRoomBooker/backend/internal/httpapi"
+	"github.com/Haru8644/MeetingRoomBooker/backend/internal/reservations"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -32,7 +36,15 @@ func run(ctx context.Context) error {
 	if addr == "" {
 		addr = defaultAddr
 	}
+	development := os.Getenv("APP_ENV") == "development"
+	if development {
+		host, _, err := net.SplitHostPort(addr)
+		if err != nil || (host != "localhost" && !net.ParseIP(host).IsLoopback()) {
+			return errors.New("APP_ENV=development requires a loopback HTTP_ADDR")
+		}
+	}
 
+	var pool *pgxpool.Pool
 	var ping func(context.Context) error
 	if databaseURL := os.Getenv("DATABASE_URL"); databaseURL != "" {
 		config, err := pgxpool.ParseConfig(databaseURL)
@@ -40,7 +52,7 @@ func run(ctx context.Context) error {
 			return errors.New("invalid DATABASE_URL")
 		}
 		config.ConnConfig.ConnectTimeout = readinessTimeout
-		pool, err := pgxpool.NewWithConfig(ctx, config)
+		pool, err = pgxpool.NewWithConfig(ctx, config)
 		if err != nil {
 			return errors.New("could not initialize PostgreSQL connection pool")
 		}
@@ -48,9 +60,18 @@ func run(ctx context.Context) error {
 		ping = pool.Ping
 	}
 
+	reservationList := httpapi.NewReservationListHandler(func(ctx context.Context) ([]reservations.ListEntry, error) {
+		return reservations.List(ctx, pool)
+	})
+	handler, err := httpapi.RegisterSessionRoutes(httpapi.NewHandler(ping, readinessTimeout), auth.NewService(pool), reservationList,
+		httpapi.SessionOptions{Development: development, FrontendOrigins: strings.Split(os.Getenv("FRONTEND_ORIGINS"), ",")})
+	if err != nil {
+		return err
+	}
+
 	server := &http.Server{
 		Addr:              addr,
-		Handler:           httpapi.NewHandler(ping, readinessTimeout),
+		Handler:           handler,
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 	serverErr := make(chan error, 1)
