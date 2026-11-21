@@ -189,6 +189,34 @@ dotnet restore
 dotnet run
 ```
 
+### Run the Go API (WSL)
+
+Install the Go version specified in `backend/go.mod` and PostgreSQL. On a fresh Ubuntu PostgreSQL installation, start the service and create a local development role and database once. Set a local development password when `createuser` prompts for one.
+
+```bash
+sudo service postgresql start
+sudo -u postgres createuser --pwprompt meetingroombooker_dev
+sudo -u postgres createdb --owner=meetingroombooker_dev meetingroombooker_dev
+```
+
+From the repository root, replace `dev-password` with the URL-encoded development password and start the API. `sslmode=disable` is for this loopback example.
+
+```bash
+cd backend
+DATABASE_URL='postgres://meetingroombooker_dev:dev-password@127.0.0.1:5432/meetingroombooker_dev?sslmode=disable' go run ./cmd/api
+```
+
+The API listens on `127.0.0.1:8081` by default. Set `HTTP_ADDR` to override the address. From a second WSL terminal, check both endpoints.
+
+```bash
+curl -i http://127.0.0.1:8081/healthz
+curl -i http://127.0.0.1:8081/readyz
+```
+
+`/healthz` returns `200` with `{"status":"ok"}`. `/readyz` checks PostgreSQL with a one-second timeout and returns `200` with `{"status":"ready"}` on success or `503` with `{"status":"unavailable"}` if the database is unreachable or `DATABASE_URL` is unset. A malformed connection string causes startup to fail with an `invalid DATABASE_URL` error.
+
+Run `go test -v ./...` from `backend` to exercise these handlers without PostgreSQL.
+
 ### Run the Blazor Web app
 
 ```bash
