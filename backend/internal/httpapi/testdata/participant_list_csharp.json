@@ -1,0 +1,17 @@
+[
+  {
+    "id": 1,
+    "name": "Synthetic Admin",
+    "avatarColor": "#111111"
+  },
+  {
+    "id": 2,
+    "name": "Synthetic Member",
+    "avatarColor": "#58a6ff"
+  },
+  {
+    "id": 17,
+    "name": "A 架空の参加者",
+    "avatarColor": "#22aa66"
+  }
+]

@@ -179,6 +179,19 @@ go test -v -count=1 ./cmd/api -run '^TestWorkScheduleListPostgres$'
 
 For the browser check, apply migrations `0001` through `0004` and seed a synthetic member, a 10:00–10:30 booking, and an external appointment, a work-from-home entry, and a leave entry on the browser's selected day. Point a temporary copy of Blazor's `ApiBaseUrl` to the Go API and add the exact Blazor origin to `FRONTEND_ORIGINS`. In Chromium, open the reservation form and verify its preview. Submit a 09:00–10:00 reservation in the same room and verify the success dialog and the calendar. The WSL check observed `200` for the work schedule GET and `201` for the POST. Participant and notification endpoints returned `404` during the same run.
 
+## Go participant list
+
+Blazor sends `GET /api/Users/participants` with the session cookie and omits the signed-in user from the reservation picker. At `d8fe3b7`, the C# endpoint returned `200` with identical lists for a member and an administrator. Each row contained `id`, `name`, and `avatarColor`, in ascending ID order. The anonymous response was an empty `401`. The [C# HTTP fixture](../backend/internal/httpapi/testdata/participant_list_csharp.json) records the three synthetic users returned to both roles.
+
+Go reuses the session middleware and selects the three columns directly from the existing `users` table in ID order. A dedicated response type keeps the endpoint's projection independent of the full user profile and admin operations. The PostgreSQL test seeds users out of order and compares the exact JSON for both roles. It also checks the anonymous response before the user table exists.
+
+```bash
+# WSL, from backend with PARTICIPANT_TEST_DATABASE_URL set to a disposable database
+go test -v -count=1 ./cmd/api -run '^TestParticipantListPostgres$'
+```
+
+For the browser check, apply migrations `0001` through `0004` and seed a synthetic member and a second participant. Point a temporary Blazor copy at the Go API and set `FRONTEND_ORIGINS` to the Blazor origin. Sign in as the member, open the reservation form, select the second user, and submit a booking in an available time slot. Chromium observed `GET 200` for the picker and `POST 201` for the booking. The request sent participant ID `17`, PostgreSQL stored `[2, 17]` including the organizer, and the calendar displayed the selected participant's name.
+
 ## Recovery to C# and SQLite
 
 Rehearse each stage in development with synthetic rows and a recording fake Chatwork sender. `scripts/deploy/deploy-prod.sh` uses SQLite's backup API and integrity check. `scripts/deploy/rollback-prod.sh` restores the earlier API, web assets and final SQLite snapshot. A rollback after Go accepts writes also needs the committed PostgreSQL state.
