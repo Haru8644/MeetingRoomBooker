@@ -1,0 +1,348 @@
+{
+  "cases": [
+    {
+      "name": "anonymous_list",
+      "actor": "anonymous",
+      "method": "GET",
+      "path": "/api/Notifications/user/2",
+      "status": 401,
+      "contentType": "",
+      "body": ""
+    },
+    {
+      "name": "anonymous_read",
+      "actor": "anonymous",
+      "method": "PUT",
+      "path": "/api/Notifications/101/read",
+      "status": 401,
+      "contentType": "",
+      "body": ""
+    },
+    {
+      "name": "anonymous_delete",
+      "actor": "anonymous",
+      "method": "DELETE",
+      "path": "/api/Notifications/101",
+      "status": 401,
+      "contentType": "",
+      "body": ""
+    },
+    {
+      "name": "owner_inbox",
+      "actor": "member",
+      "method": "GET",
+      "path": "/api/Notifications/user/2",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "body": [
+        {
+          "id": 101,
+          "userId": 2,
+          "message": "架空の勤務予定通知（新しい）",
+          "createdAt": "2026-06-22T14:01:02.1234567",
+          "targetDate": "2026-06-23T00:00:00",
+          "isRead": false,
+          "type": "Warning",
+          "targetReservationId": null,
+          "targetWorkScheduleEntryId": 801
+        },
+        {
+          "id": 102,
+          "userId": 2,
+          "message": "架空の予約通知（古い）",
+          "createdAt": "2026-06-21T15:10:00",
+          "targetDate": "2026-06-24T09:00:00",
+          "isRead": false,
+          "type": "Info",
+          "targetReservationId": 7301,
+          "targetWorkScheduleEntryId": null
+        }
+      ]
+    },
+    {
+      "name": "other_list_denied",
+      "actor": "other",
+      "method": "GET",
+      "path": "/api/Notifications/user/2",
+      "status": 403,
+      "contentType": "",
+      "body": ""
+    },
+    {
+      "name": "admin_inbox",
+      "actor": "admin",
+      "method": "GET",
+      "path": "/api/Notifications/user/2",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "body": [
+        {
+          "id": 101,
+          "userId": 2,
+          "message": "架空の勤務予定通知（新しい）",
+          "createdAt": "2026-06-22T14:01:02.1234567",
+          "targetDate": "2026-06-23T00:00:00",
+          "isRead": false,
+          "type": "Warning",
+          "targetReservationId": null,
+          "targetWorkScheduleEntryId": 801
+        },
+        {
+          "id": 102,
+          "userId": 2,
+          "message": "架空の予約通知（古い）",
+          "createdAt": "2026-06-21T15:10:00",
+          "targetDate": "2026-06-24T09:00:00",
+          "isRead": false,
+          "type": "Info",
+          "targetReservationId": 7301,
+          "targetWorkScheduleEntryId": null
+        }
+      ]
+    },
+    {
+      "name": "empty_inbox",
+      "actor": "admin",
+      "method": "GET",
+      "path": "/api/Notifications/user/1",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "body": []
+    },
+    {
+      "name": "other_own_inbox",
+      "actor": "other",
+      "method": "GET",
+      "path": "/api/Notifications/user/3",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "body": [
+        {
+          "id": 103,
+          "userId": 3,
+          "message": "他の利用者の架空通知",
+          "createdAt": "2026-06-21T16:09:00",
+          "targetDate": "2026-06-25T00:00:00",
+          "isRead": true,
+          "type": "Info",
+          "targetReservationId": null,
+          "targetWorkScheduleEntryId": null
+        }
+      ]
+    },
+    {
+      "name": "other_read_denied",
+      "actor": "other",
+      "method": "PUT",
+      "path": "/api/Notifications/101/read",
+      "status": 403,
+      "contentType": "",
+      "body": ""
+    },
+    {
+      "name": "other_delete_denied",
+      "actor": "other",
+      "method": "DELETE",
+      "path": "/api/Notifications/101",
+      "status": 403,
+      "contentType": "",
+      "body": ""
+    },
+    {
+      "name": "owner_inbox_unchanged",
+      "actor": "member",
+      "method": "GET",
+      "path": "/api/Notifications/user/2",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "body": [
+        {
+          "id": 101,
+          "userId": 2,
+          "message": "架空の勤務予定通知（新しい）",
+          "createdAt": "2026-06-22T14:01:02.1234567",
+          "targetDate": "2026-06-23T00:00:00",
+          "isRead": false,
+          "type": "Warning",
+          "targetReservationId": null,
+          "targetWorkScheduleEntryId": 801
+        },
+        {
+          "id": 102,
+          "userId": 2,
+          "message": "架空の予約通知（古い）",
+          "createdAt": "2026-06-21T15:10:00",
+          "targetDate": "2026-06-24T09:00:00",
+          "isRead": false,
+          "type": "Info",
+          "targetReservationId": 7301,
+          "targetWorkScheduleEntryId": null
+        }
+      ]
+    },
+    {
+      "name": "owner_read",
+      "actor": "member",
+      "method": "PUT",
+      "path": "/api/Notifications/101/read",
+      "status": 204,
+      "contentType": "",
+      "body": ""
+    },
+    {
+      "name": "owner_read_again",
+      "actor": "member",
+      "method": "PUT",
+      "path": "/api/Notifications/101/read",
+      "status": 204,
+      "contentType": "",
+      "body": ""
+    },
+    {
+      "name": "admin_read",
+      "actor": "admin",
+      "method": "PUT",
+      "path": "/api/Notifications/102/read",
+      "status": 204,
+      "contentType": "",
+      "body": ""
+    },
+    {
+      "name": "both_read",
+      "actor": "member",
+      "method": "GET",
+      "path": "/api/Notifications/user/2",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "body": [
+        {
+          "id": 101,
+          "userId": 2,
+          "message": "架空の勤務予定通知（新しい）",
+          "createdAt": "2026-06-22T14:01:02.1234567",
+          "targetDate": "2026-06-23T00:00:00",
+          "isRead": true,
+          "type": "Warning",
+          "targetReservationId": null,
+          "targetWorkScheduleEntryId": 801
+        },
+        {
+          "id": 102,
+          "userId": 2,
+          "message": "架空の予約通知（古い）",
+          "createdAt": "2026-06-21T15:10:00",
+          "targetDate": "2026-06-24T09:00:00",
+          "isRead": true,
+          "type": "Info",
+          "targetReservationId": 7301,
+          "targetWorkScheduleEntryId": null
+        }
+      ]
+    },
+    {
+      "name": "missing_read",
+      "actor": "other",
+      "method": "PUT",
+      "path": "/api/Notifications/9999/read",
+      "status": 404,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": {
+        "type": "https://tools.ietf.org/html/rfc9110#section-15.5.5",
+        "title": "Not Found",
+        "status": 404
+      }
+    },
+    {
+      "name": "missing_delete",
+      "actor": "member",
+      "method": "DELETE",
+      "path": "/api/Notifications/9999",
+      "status": 404,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": {
+        "type": "https://tools.ietf.org/html/rfc9110#section-15.5.5",
+        "title": "Not Found",
+        "status": 404
+      }
+    },
+    {
+      "name": "owner_delete",
+      "actor": "member",
+      "method": "DELETE",
+      "path": "/api/Notifications/101",
+      "status": 204,
+      "contentType": "",
+      "body": ""
+    },
+    {
+      "name": "owner_delete_again",
+      "actor": "member",
+      "method": "DELETE",
+      "path": "/api/Notifications/101",
+      "status": 404,
+      "contentType": "application/problem+json; charset=utf-8",
+      "body": {
+        "type": "https://tools.ietf.org/html/rfc9110#section-15.5.5",
+        "title": "Not Found",
+        "status": 404
+      }
+    },
+    {
+      "name": "admin_delete",
+      "actor": "admin",
+      "method": "DELETE",
+      "path": "/api/Notifications/102",
+      "status": 204,
+      "contentType": "",
+      "body": ""
+    },
+    {
+      "name": "after_deletion",
+      "actor": "member",
+      "method": "GET",
+      "path": "/api/Notifications/user/2",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "body": []
+    },
+    {
+      "name": "other_inbox_unchanged",
+      "actor": "other",
+      "method": "GET",
+      "path": "/api/Notifications/user/3",
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "body": [
+        {
+          "id": 103,
+          "userId": 3,
+          "message": "他の利用者の架空通知",
+          "createdAt": "2026-06-21T16:09:00",
+          "targetDate": "2026-06-25T00:00:00",
+          "isRead": true,
+          "type": "Info",
+          "targetReservationId": null,
+          "targetWorkScheduleEntryId": null
+        }
+      ]
+    },
+    {
+      "name": "invalid_id",
+      "actor": "member",
+      "method": "PUT",
+      "path": "/api/Notifications/bad-id/read",
+      "status": 404,
+      "contentType": "",
+      "body": ""
+    },
+    {
+      "name": "anonymous_invalid_id",
+      "actor": "anonymous",
+      "method": "GET",
+      "path": "/api/Notifications/user/bad-id",
+      "status": 404,
+      "contentType": "",
+      "body": ""
+    }
+  ]
+}

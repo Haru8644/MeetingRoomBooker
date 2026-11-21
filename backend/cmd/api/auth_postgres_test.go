@@ -179,7 +179,7 @@ func seedAuthTestUsers(t *testing.T, ctx context.Context, pool *pgxpool.Pool) ma
 	return passwords
 }
 
-func startAuthTestAPI(t *testing.T, ctx context.Context, dsn string) (string, func()) {
+func startAuthTestAPI(t *testing.T, ctx context.Context, dsn string, frontendOrigins ...string) (string, func()) {
 	t.Helper()
 	listener, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
@@ -192,7 +192,7 @@ func startAuthTestAPI(t *testing.T, ctx context.Context, dsn string) (string, fu
 	t.Setenv("HTTP_ADDR", addr)
 	t.Setenv("DATABASE_URL", dsn)
 	t.Setenv("APP_ENV", "development")
-	t.Setenv("FRONTEND_ORIGINS", "")
+	t.Setenv("FRONTEND_ORIGINS", strings.Join(frontendOrigins, ","))
 	serverCtx, cancel := context.WithCancel(ctx)
 	serverErr := make(chan error, 1)
 	go func() { serverErr <- run(serverCtx) }()

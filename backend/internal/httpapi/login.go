@@ -97,19 +97,25 @@ func writeNegotiatedString(w http.ResponseWriter, r *http.Request, status int, m
 	_, _ = io.WriteString(w, message)
 }
 
+type problemDetails struct {
+	Type   string              `json:"type"`
+	Title  string              `json:"title"`
+	Status int                 `json:"status"`
+	Errors map[string][]string `json:"errors,omitempty"`
+}
+
 func writeValidationProblem(w http.ResponseWriter, status int, fields map[string][]string) {
 	const rfc = "https://tools.ietf.org/html/rfc9110#section-"
-	problem := struct {
-		Type   string              `json:"type"`
-		Title  string              `json:"title"`
-		Status int                 `json:"status"`
-		Errors map[string][]string `json:"errors,omitempty"`
-	}{rfc + "15.5.1", "One or more validation errors occurred.", status, fields}
+	problem := problemDetails{rfc + "15.5.1", "One or more validation errors occurred.", status, fields}
 	if status == http.StatusUnsupportedMediaType {
 		problem.Type = rfc + "15.5.16"
 		problem.Title = http.StatusText(status)
 	}
+	writeProblemDetails(w, problem)
+}
+
+func writeProblemDetails(w http.ResponseWriter, problem problemDetails) {
 	w.Header().Set("Content-Type", "application/problem+json; charset=utf-8")
-	w.WriteHeader(status)
+	w.WriteHeader(problem.Status)
 	_ = json.NewEncoder(w).Encode(problem)
 }

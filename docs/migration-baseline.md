@@ -192,6 +192,28 @@ go test -v -count=1 ./cmd/api -run '^TestParticipantListPostgres$'
 
 For the browser check, apply migrations `0001` through `0004` and seed a synthetic member and a second participant. Point a temporary Blazor copy at the Go API and set `FRONTEND_ORIGINS` to the Blazor origin. Sign in as the member, open the reservation form, select the second user, and submit a booking in an available time slot. Chromium observed `GET 200` for the picker and `POST 201` for the booking. The request sent participant ID `17`, PostgreSQL stored `[2, 17]` including the organizer, and the calendar displayed the selected participant's name.
 
+## Go notification inbox
+
+Blazor calls `GET /api/Notifications/user/{userId}`, `PUT /api/Notifications/{id}/read`, and `DELETE /api/Notifications/{id}`. At `d8fe3b7`, the recipient and administrators could list and change the recipient's notifications. Other members received `403` for existing notifications, and anonymous requests received `401`. The list returned newest first or `[]` when empty. Successful mutations returned `204`, including repeated requests to mark a notification as read. Missing numeric IDs returned `404` Problem Details, and invalid ID paths returned an empty `404`. The [C# HTTP fixture](../backend/internal/httpapi/testdata/notification_inbox_csharp.json) captures all 24 cases with request-specific trace IDs removed.
+
+Go reads the user ID and administrator flag from the session. Mutations check the owner while holding the notification row lock and finish in the same transaction. An authorization lookup followed by a separate write could race with deletion. A write filtered only by owner would also merge the `403` and `404` outcomes. `PUT` and `DELETE` use the existing origin protection. Credentialed CORS preflights advertise these methods for configured frontend origins.
+
+The [PostgreSQL migration](../backend/migrations/0005_create_notifications.sql) preserves explicit IDs, nullable reservation and work schedule targets, and .NET tick precision. The target IDs retain the values from the C# model, including notifications that refer to records that are absent. The index supports lookup by recipient and creation time.
+
+```bash
+# WSL, from backend with DATABASE_URL set to the local development database
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f migrations/0005_create_notifications.sql
+```
+
+Set `NOTIFICATION_TEST_DATABASE_URL` to a disposable local PostgreSQL URL that permits creating schemas. The test compares statuses, content types, and JSON against the C# fixture and covers both trusted preflights and denied cross-origin writes using a valid session.
+
+```bash
+# WSL, from backend
+go test -v -count=1 ./cmd/api -run '^TestNotificationInboxPostgres$'
+```
+
+The browser check used a temporary Blazor copy and two seeded notices for a synthetic member, one for a reservation and one for a work schedule. Chromium displayed the notifications in order. `MARK ALL READ` sent two successful PUTs, and a browser reload showed both rows as read. Deleting one notification returned `204`, and a second reload showed only the remaining read notification. The browser recorded `204` preflights for PUT and DELETE.
+
 ## Recovery to C# and SQLite
 
 Rehearse each stage in development with synthetic rows and a recording fake Chatwork sender. `scripts/deploy/deploy-prod.sh` uses SQLite's backup API and integrity check. `scripts/deploy/rollback-prod.sh` restores the earlier API, web assets and final SQLite snapshot. A rollback after Go accepts writes also needs the committed PostgreSQL state.

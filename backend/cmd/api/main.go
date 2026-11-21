@@ -14,6 +14,7 @@ import (
 
 	"github.com/Haru8644/MeetingRoomBooker/backend/internal/auth"
 	"github.com/Haru8644/MeetingRoomBooker/backend/internal/httpapi"
+	"github.com/Haru8644/MeetingRoomBooker/backend/internal/notifications"
 	"github.com/Haru8644/MeetingRoomBooker/backend/internal/reservations"
 	"github.com/Haru8644/MeetingRoomBooker/backend/internal/users"
 	"github.com/Haru8644/MeetingRoomBooker/backend/internal/workschedules"
@@ -75,7 +76,7 @@ func run(ctx context.Context) error {
 		return users.ListParticipants(ctx, pool)
 	}
 	handler, err := httpapi.RegisterSessionRoutes(httpapi.NewHandler(ping, readinessTimeout), auth.NewService(pool),
-		reservationList, createReservation, listWorkSchedules, listParticipants,
+		reservationList, createReservation, listWorkSchedules, listParticipants, notifications.NewInbox(pool),
 		httpapi.SessionOptions{Development: development, FrontendOrigins: strings.Split(os.Getenv("FRONTEND_ORIGINS"), ",")})
 	if err != nil {
 		return err
