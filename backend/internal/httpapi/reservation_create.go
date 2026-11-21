@@ -78,26 +78,21 @@ func newReservationCreateHandler(create reservationCreator) func(http.ResponseWr
 }
 
 func readAllowOverlap(query string) (bool, string) {
-	for parameter := range strings.SplitSeq(query, "&") {
-		key, rawValue, _ := strings.Cut(parameter, "=")
-		field, err := url.QueryUnescape(key)
-		if err != nil || !strings.EqualFold(field, "allowOverlap") {
-			continue
-		}
-		value, err := url.QueryUnescape(rawValue)
-		if err != nil {
-			return false, fmt.Sprintf("The value '%s' is not valid.", rawValue)
-		}
-		switch strings.ToLower(strings.TrimSpace(value)) {
-		case "true":
-			return true, ""
-		case "false":
-			return false, ""
-		case "":
-			return false, fmt.Sprintf("The value '%s' is invalid.", value)
-		default:
-			return false, fmt.Sprintf("The value '%s' is not valid.", value)
-		}
+	value, found, err := firstQueryValue(query, "allowOverlap")
+	if err != nil {
+		return false, fmt.Sprintf("The value '%s' is not valid.", value)
 	}
-	return false, ""
+	if !found {
+		return false, ""
+	}
+	switch strings.ToLower(strings.TrimSpace(value)) {
+	case "true":
+		return true, ""
+	case "false":
+		return false, ""
+	case "":
+		return false, fmt.Sprintf("The value '%s' is invalid.", value)
+	default:
+		return false, fmt.Sprintf("The value '%s' is not valid.", value)
+	}
 }

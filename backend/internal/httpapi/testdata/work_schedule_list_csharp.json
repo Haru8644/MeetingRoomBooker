@@ -1,0 +1,331 @@
+{
+  "rows": [
+    {
+      "id": 14,
+      "createdByUserId": 91,
+      "type": 1,
+      "title": "既定範囲より前の在宅",
+      "seriesId": null,
+      "date": "2026-11-14T00:00:00",
+      "startTime": null,
+      "endTime": null,
+      "repeatType": null,
+      "repeatUntil": null,
+      "leavePeriod": 0,
+      "participantIds": [],
+      "participants": "",
+      "createdAt": "2026-11-10T06:07:08",
+      "updatedAt": "2026-11-11T06:07:08.1234567"
+    },
+    {
+      "id": 15,
+      "createdByUserId": 2,
+      "type": 1,
+      "title": "既定の開始境界にある在宅",
+      "seriesId": null,
+      "date": "2026-11-15T00:00:00",
+      "startTime": null,
+      "endTime": null,
+      "repeatType": null,
+      "repeatUntil": null,
+      "leavePeriod": 0,
+      "participantIds": [],
+      "participants": "",
+      "createdAt": "2026-11-10T06:07:08",
+      "updatedAt": "2026-11-11T06:07:08.1234567"
+    },
+    {
+      "id": 22,
+      "createdByUserId": 91,
+      "type": 0,
+      "title": "午前0時の社外予定",
+      "seriesId": null,
+      "date": "2026-11-22T00:00:00",
+      "startTime": "2026-11-22T00:00:00",
+      "endTime": "2026-11-22T00:30:00",
+      "repeatType": null,
+      "repeatUntil": null,
+      "leavePeriod": 0,
+      "participantIds": [
+        2
+      ],
+      "participants": "架空参加者",
+      "createdAt": "2026-11-10T06:07:08",
+      "updatedAt": "2026-11-11T06:07:08.1234567"
+    },
+    {
+      "id": 21,
+      "createdByUserId": 2,
+      "type": 1,
+      "title": "時刻なしの在宅",
+      "seriesId": null,
+      "date": "2026-11-22T00:00:00",
+      "startTime": null,
+      "endTime": null,
+      "repeatType": null,
+      "repeatUntil": null,
+      "leavePeriod": 0,
+      "participantIds": [],
+      "participants": "",
+      "createdAt": "2026-11-10T06:07:08",
+      "updatedAt": "2026-11-11T06:07:08.1234567"
+    },
+    {
+      "id": 19,
+      "createdByUserId": 2,
+      "type": 2,
+      "title": "午前休",
+      "seriesId": null,
+      "date": "2026-11-22T00:00:00",
+      "startTime": null,
+      "endTime": null,
+      "repeatType": null,
+      "repeatUntil": null,
+      "leavePeriod": 1,
+      "participantIds": [],
+      "participants": "",
+      "createdAt": "2026-11-10T06:07:08",
+      "updatedAt": "2026-11-11T06:07:08.1234567"
+    },
+    {
+      "id": 16,
+      "createdByUserId": 91,
+      "type": 0,
+      "title": "繰り返しの社外予定",
+      "seriesId": "synthetic-series",
+      "date": "2026-11-22T00:00:00",
+      "startTime": "2026-11-22T09:15:00.1234567",
+      "endTime": "2026-11-22T10:00:00",
+      "repeatType": "毎週",
+      "repeatUntil": "2026-12-20T00:00:00",
+      "leavePeriod": 0,
+      "participantIds": [
+        5,
+        29
+      ],
+      "participants": "架空参加者",
+      "createdAt": "2026-11-10T06:07:08",
+      "updatedAt": "2026-11-11T06:07:08.1234567"
+    },
+    {
+      "id": 17,
+      "createdByUserId": 2,
+      "type": 0,
+      "title": "同時刻でIDが後の社外予定",
+      "seriesId": null,
+      "date": "2026-11-22T00:00:00",
+      "startTime": "2026-11-22T09:15:00.1234567",
+      "endTime": "2026-11-22T10:00:00",
+      "repeatType": null,
+      "repeatUntil": null,
+      "leavePeriod": 0,
+      "participantIds": [
+        29,
+        5
+      ],
+      "participants": "架空参加者",
+      "createdAt": "2026-11-10T06:07:08",
+      "updatedAt": "2026-11-11T06:07:08.1234567"
+    },
+    {
+      "id": 36,
+      "createdByUserId": 91,
+      "type": 2,
+      "title": "旧形式の日付に時刻がある休暇",
+      "seriesId": null,
+      "date": "2026-11-22T12:00:00",
+      "startTime": null,
+      "endTime": null,
+      "repeatType": null,
+      "repeatUntil": null,
+      "leavePeriod": 3,
+      "participantIds": [],
+      "participants": "",
+      "createdAt": "2026-11-10T06:07:08",
+      "updatedAt": "2026-11-11T06:07:08.1234567"
+    },
+    {
+      "id": 40,
+      "createdByUserId": 91,
+      "type": 1,
+      "title": "既定の終了境界にある在宅",
+      "seriesId": null,
+      "date": "2026-12-23T00:00:00",
+      "startTime": null,
+      "endTime": null,
+      "repeatType": null,
+      "repeatUntil": null,
+      "leavePeriod": 0,
+      "participantIds": [],
+      "participants": "",
+      "createdAt": "2026-11-10T06:07:08",
+      "updatedAt": "2026-11-11T06:07:08.1234567"
+    },
+    {
+      "id": 41,
+      "createdByUserId": 2,
+      "type": 1,
+      "title": "既定終了日の正午に登録された旧形式",
+      "seriesId": null,
+      "date": "2026-12-23T12:00:00",
+      "startTime": null,
+      "endTime": null,
+      "repeatType": null,
+      "repeatUntil": null,
+      "leavePeriod": 0,
+      "participantIds": [],
+      "participants": "",
+      "createdAt": "2026-11-10T06:07:08",
+      "updatedAt": "2026-11-11T06:07:08.1234567"
+    },
+    {
+      "id": 42,
+      "createdByUserId": 91,
+      "type": 2,
+      "title": "既定範囲より後の午後休",
+      "seriesId": null,
+      "date": "2026-12-24T00:00:00",
+      "startTime": null,
+      "endTime": null,
+      "repeatType": null,
+      "repeatUntil": null,
+      "leavePeriod": 2,
+      "participantIds": [],
+      "participants": "",
+      "createdAt": "2026-11-10T06:07:08",
+      "updatedAt": "2026-11-11T06:07:08.1234567"
+    }
+  ],
+  "cases": [
+    {
+      "name": "anonymous",
+      "query": "",
+      "status": 401,
+      "result": ""
+    },
+    {
+      "name": "explicit_range_and_boundaries",
+      "query": "from=2026-11-14&to=2026-12-24",
+      "status": 200,
+      "result": [
+        14,
+        15,
+        22,
+        21,
+        19,
+        16,
+        17,
+        36,
+        40,
+        41,
+        42
+      ]
+    },
+    {
+      "name": "defaults",
+      "query": "",
+      "status": 200,
+      "result": [
+        15,
+        22,
+        21,
+        19,
+        16,
+        17,
+        36,
+        40
+      ]
+    },
+    {
+      "name": "same_day",
+      "query": "from=2026-11-22&to=2026-11-22",
+      "status": 200,
+      "result": [
+        22,
+        21,
+        19,
+        16,
+        17
+      ]
+    },
+    {
+      "name": "time_of_day_in_bounds",
+      "query": "from=2026-11-22T23%3A00%3A00&to=2026-11-22T01%3A00%3A00",
+      "status": 200,
+      "result": [
+        22,
+        21,
+        19,
+        16,
+        17
+      ]
+    },
+    {
+      "name": "zoned_from",
+      "query": "from=2026-11-15T00%3A30%3A00%2B09%3A00&to=2026-11-15",
+      "status": 200,
+      "result": [
+        14,
+        15
+      ]
+    },
+    {
+      "name": "only_from",
+      "query": "from=2026-12-23",
+      "status": 200,
+      "result": [
+        40
+      ]
+    },
+    {
+      "name": "only_to",
+      "query": "to=2026-11-15",
+      "status": 200,
+      "result": [
+        15
+      ]
+    },
+    {
+      "name": "empty_from",
+      "query": "from=&to=2026-11-15",
+      "status": 200,
+      "result": [
+        15
+      ]
+    },
+    {
+      "name": "empty_inferred_range",
+      "query": "from=2026-12-24",
+      "status": 200,
+      "result": []
+    },
+    {
+      "name": "empty_explicit_range",
+      "query": "from=2026-11-20&to=2026-11-21",
+      "status": 200,
+      "result": []
+    },
+    {
+      "name": "inverted_range",
+      "query": "from=2026-11-23&to=2026-11-22",
+      "status": 400,
+      "result": "取得開始日は取得終了日以前にしてください。"
+    },
+    {
+      "name": "invalid_date",
+      "query": "from=not-a-date",
+      "status": 400,
+      "result": {
+        "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+        "title": "One or more validation errors occurred.",
+        "status": 400,
+        "errors": {
+          "from": [
+            "The value 'not-a-date' is not valid."
+          ]
+        }
+      }
+    }
+  ],
+  "referenceDay": "2026-11-22"
+}

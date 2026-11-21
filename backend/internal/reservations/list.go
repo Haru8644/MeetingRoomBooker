@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/Haru8644/MeetingRoomBooker/backend/internal/dotnettime"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -46,11 +47,11 @@ func List(ctx context.Context, pool *pgxpool.Pool) ([]ListEntry, error) {
 		); err != nil {
 			return nil, fmt.Errorf("scan reservation: %w", err)
 		}
-		entry.Date = dateTimeFromTicks(date)
-		entry.StartTime = dateTimeFromTicks(startTime)
-		entry.EndTime = dateTimeFromTicks(endTime)
+		entry.Date = dotnettime.FromTicks(date)
+		entry.StartTime = dotnettime.FromTicks(startTime)
+		entry.EndTime = dotnettime.FromTicks(endTime)
 		if repeatUntil != nil {
-			value := dateTimeFromTicks(*repeatUntil)
+			value := dotnettime.FromTicks(*repeatUntil)
 			entry.RepeatUntil = &value
 		}
 		entries = append(entries, entry)
@@ -59,19 +60,4 @@ func List(ctx context.Context, pool *pgxpool.Pool) ([]ListEntry, error) {
 		return nil, fmt.Errorf("read reservations: %w", err)
 	}
 	return entries, nil
-}
-
-const (
-	unixEpochTicks = 621355968000000000
-	ticksPerSecond = 10_000_000
-	ticksPerDay    = 864_000_000_000
-)
-
-func dateTimeFromTicks(ticks int64) time.Time {
-	unixTicks := ticks - unixEpochTicks
-	return time.Unix(unixTicks/ticksPerSecond, unixTicks%ticksPerSecond*100).UTC()
-}
-
-func dateTimeTicks(value time.Time) int64 {
-	return unixEpochTicks + value.Unix()*ticksPerSecond + int64(value.Nanosecond())/100
 }

@@ -31,7 +31,9 @@ type sessionHandler struct {
 	development bool
 }
 
-func RegisterSessionRoutes(mux *http.ServeMux, service sessionService, reservationList http.Handler, createReservation reservationCreator, options SessionOptions) (http.Handler, error) {
+func RegisterSessionRoutes(mux *http.ServeMux, service sessionService, reservationList http.Handler,
+	createReservation reservationCreator, listWorkSchedules workScheduleLister, options SessionOptions,
+) (http.Handler, error) {
 	csrf := http.NewCrossOriginProtection()
 	origins := make(map[string]bool)
 	for _, origin := range options.FrontendOrigins {
@@ -65,6 +67,7 @@ func RegisterSessionRoutes(mux *http.ServeMux, service sessionService, reservati
 		reservationList.ServeHTTP(w, r)
 	}))
 	mux.Handle(reservationCreatePattern, csrf.Handler(h.requireSession(newReservationCreateHandler(createReservation))))
+	mux.Handle(workScheduleListPattern, h.requireSession(newWorkScheduleListHandler(listWorkSchedules)))
 
 	if len(origins) == 0 {
 		return mux, nil

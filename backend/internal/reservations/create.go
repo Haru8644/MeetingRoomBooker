@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/Haru8644/MeetingRoomBooker/backend/internal/dotnettime"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -21,10 +22,10 @@ func (c *ConflictError) Error() string {
 }
 
 func Create(ctx context.Context, pool *pgxpool.Pool, entry ListEntry, allowOverlap bool) (ListEntry, error) {
-	date := dateTimeTicks(entry.Date)
-	start := dateTimeTicks(entry.StartTime)
-	end := dateTimeTicks(entry.EndTime)
-	day := date / ticksPerDay
+	date := dotnettime.Ticks(entry.Date)
+	start := dotnettime.Ticks(entry.StartTime)
+	end := dotnettime.Ticks(entry.EndTime)
+	day := date / dotnettime.TicksPerDay
 	err := pgx.BeginTxFunc(ctx, pool, pgx.TxOptions{IsoLevel: pgx.ReadCommitted}, func(tx pgx.Tx) error {
 		// Check conflicts in a new statement after obtaining the lock so it sees the previous writer's commit.
 		if _, err := tx.Exec(ctx, `SELECT pg_advisory_xact_lock(hashtext($1), $2::integer)`, entry.Room, int32(day)); err != nil {
@@ -71,6 +72,6 @@ func checkConflict(ctx context.Context, tx pgx.Tx, room string, day, start, end 
 		label = name
 	}
 	return &ConflictError{Reservation: Reservation{
-		Room: room, Date: dateTimeFromTicks(date), StartTime: dateTimeFromTicks(existingStart), EndTime: dateTimeFromTicks(existingEnd),
+		Room: room, Date: dotnettime.FromTicks(date), StartTime: dotnettime.FromTicks(existingStart), EndTime: dotnettime.FromTicks(existingEnd),
 	}, Label: label}
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/Haru8644/MeetingRoomBooker/backend/internal/dotnettime"
 	"github.com/Haru8644/MeetingRoomBooker/backend/internal/reservations"
 )
 
@@ -60,10 +61,9 @@ type reservationResponse struct {
 }
 
 func newReservationResponse(entry reservations.ListEntry) reservationResponse {
-	const dateTimeFormat = "2006-01-02T15:04:05.9999999"
 	var repeatUntil *string
 	if entry.RepeatUntil != nil {
-		value := entry.RepeatUntil.Format(dateTimeFormat)
+		value := entry.RepeatUntil.Format(dotnettime.Layout)
 		repeatUntil = &value
 	}
 	participantIDs := entry.ParticipantIDs
@@ -83,9 +83,9 @@ func newReservationResponse(entry reservations.ListEntry) reservationResponse {
 		IsInternal:       entry.Type == "社内",
 		Purpose:          entry.Purpose,
 		SeriesID:         entry.SeriesID,
-		Date:             entry.Date.Format(dateTimeFormat),
-		StartTime:        entry.StartTime.Format(dateTimeFormat),
-		EndTime:          entry.EndTime.Format(dateTimeFormat),
+		Date:             entry.Date.Format(dotnettime.Layout),
+		StartTime:        entry.StartTime.Format(dotnettime.Layout),
+		EndTime:          entry.EndTime.Format(dotnettime.Layout),
 		ParticipantIDs:   participantIDs,
 		Participants:     entry.Participants,
 		RepeatType:       entry.RepeatType,
