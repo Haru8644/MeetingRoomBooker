@@ -1,0 +1,266 @@
+{
+  "created": {
+    "status": 201,
+    "body": {
+      "id": 1,
+      "userId": 2,
+      "name": "架空の予約者",
+      "userName": "架空の予約者",
+      "room": "大会議室",
+      "roomName": "大会議室",
+      "numberOfPeople": 3,
+      "participantCount": 3,
+      "type": "来客",
+      "isInternal": false,
+      "purpose": "架空の先行予約",
+      "seriesId": null,
+      "date": "2026-06-18T14:12:13.1234567",
+      "startTime": "2026-06-18T10:00:00.1234567",
+      "endTime": "2026-06-18T11:00:00",
+      "participantIds": [
+        2,
+        3
+      ],
+      "participants": "架空の参加者",
+      "repeatType": "しない",
+      "repeatUntil": null
+    },
+    "location": "/api/Reservations?id=1",
+    "request": {
+      "id": 0,
+      "userId": 999,
+      "name": "入力された名前",
+      "userName": "別名入力",
+      "room": "元の会議室",
+      "roomName": "大会議室",
+      "numberOfPeople": 2,
+      "participantCount": 3,
+      "type": "社内",
+      "isInternal": false,
+      "purpose": "架空の先行予約",
+      "date": "2026-06-18T14:12:13.1234567",
+      "startTime": "2026-06-01T10:00:00.1234567",
+      "endTime": "2026-06-02T11:00:00",
+      "participantIds": [
+        3,
+        -1,
+        3,
+        0
+      ],
+      "participants": "架空の参加者",
+      "repeatType": "   ",
+      "repeatUntil": "2026-06-30T00:00:00",
+      "seriesId": "cleared"
+    }
+  },
+  "invalid_time": {
+    "status": 400,
+    "body": "終了時刻は開始時刻より後にしてください。"
+  },
+  "missing_name": {
+    "status": 400,
+    "body": {
+      "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+      "title": "One or more validation errors occurred.",
+      "status": 400,
+      "errors": {
+        "Name": [
+          "名前は必須です。"
+        ]
+      }
+    }
+  },
+  "invalid_room": {
+    "status": 400,
+    "body": {
+      "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+      "title": "One or more validation errors occurred.",
+      "status": 400,
+      "errors": {
+        "Room": [
+          "会議室は必須です。"
+        ]
+      }
+    }
+  },
+  "invalid_count": {
+    "status": 400,
+    "body": {
+      "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+      "title": "One or more validation errors occurred.",
+      "status": 400,
+      "errors": {
+        "NumberOfPeople": [
+          "人数は1～20名の間で設定してください。"
+        ]
+      }
+    }
+  },
+  "invalid_query": {
+    "status": 400,
+    "body": {
+      "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+      "title": "One or more validation errors occurred.",
+      "status": 400,
+      "errors": {
+        "allowOverlap": [
+          "The value '1' is not valid."
+        ]
+      }
+    },
+    "query": "?allowOverlap=1"
+  },
+  "empty_query": {
+    "status": 400,
+    "body": {
+      "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+      "title": "One or more validation errors occurred.",
+      "status": 400,
+      "errors": {
+        "allowOverlap": [
+          "The value '' is invalid."
+        ]
+      }
+    },
+    "query": "?allowOverlap="
+  },
+  "null_participants": {
+    "status": 400,
+    "body": {
+      "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+      "title": "One or more validation errors occurred.",
+      "status": 400,
+      "errors": {
+        "ParticipantIds": [
+          "The ParticipantIds field is required."
+        ]
+      }
+    }
+  },
+  "conflict": {
+    "status": 409,
+    "body": "この時間帯には既に予約があります。会議室: 大会議室 / 利用日: 2026/06/18 / 時間: 10:00〜11:00 / 予約: 架空の先行予約",
+    "request": {
+      "id": 0,
+      "userId": 999,
+      "name": "入力された名前",
+      "room": "大会議室",
+      "numberOfPeople": 2,
+      "type": "社内",
+      "purpose": "架空の重複予約",
+      "date": "2026-06-18",
+      "startTime": "2026-06-18T10:30:00",
+      "endTime": "2026-06-18T11:30:00",
+      "participantIds": [
+        3,
+        -1,
+        3,
+        0
+      ],
+      "participants": "架空の参加者",
+      "repeatType": "しない",
+      "repeatUntil": null,
+      "seriesId": null
+    }
+  },
+  "adjacent": {
+    "status": 201,
+    "body": {
+      "id": 2,
+      "userId": 2,
+      "name": "架空の予約者",
+      "userName": "架空の予約者",
+      "room": "大会議室",
+      "roomName": "大会議室",
+      "numberOfPeople": 2,
+      "participantCount": 2,
+      "type": "社内",
+      "isInternal": true,
+      "purpose": "架空の隣接予約",
+      "seriesId": null,
+      "date": "2026-06-18T00:00:00",
+      "startTime": "2026-06-18T11:00:00",
+      "endTime": "2026-06-18T11:30:00",
+      "participantIds": [
+        3,
+        2
+      ],
+      "participants": "架空の参加者",
+      "repeatType": "しない",
+      "repeatUntil": null
+    },
+    "location": "/api/Reservations?id=2",
+    "request": {
+      "id": 0,
+      "userId": 999,
+      "name": "入力された名前",
+      "room": "大会議室",
+      "numberOfPeople": 2,
+      "type": "社内",
+      "purpose": "架空の隣接予約",
+      "date": "2026-06-18",
+      "startTime": "2026-06-18T11:00:00",
+      "endTime": "2026-06-18T11:30:00",
+      "participantIds": [
+        3,
+        2,
+        3
+      ],
+      "participants": "架空の参加者",
+      "repeatType": "しない",
+      "repeatUntil": null,
+      "seriesId": null
+    }
+  },
+  "overlap_allowed": {
+    "status": 201,
+    "body": {
+      "id": 3,
+      "userId": 2,
+      "name": "架空の予約者",
+      "userName": "架空の予約者",
+      "room": "大会議室",
+      "roomName": "大会議室",
+      "numberOfPeople": 2,
+      "participantCount": 2,
+      "type": "社内",
+      "isInternal": true,
+      "purpose": "架空の重複予約",
+      "seriesId": null,
+      "date": "2026-06-18T00:00:00",
+      "startTime": "2026-06-18T10:30:00",
+      "endTime": "2026-06-18T11:30:00",
+      "participantIds": [
+        2,
+        3
+      ],
+      "participants": "架空の参加者",
+      "repeatType": "しない",
+      "repeatUntil": null
+    },
+    "location": "/api/Reservations?id=3",
+    "request": {
+      "id": 0,
+      "userId": 999,
+      "name": "入力された名前",
+      "room": "大会議室",
+      "numberOfPeople": 2,
+      "type": "社内",
+      "purpose": "架空の重複予約",
+      "date": "2026-06-18",
+      "startTime": "2026-06-18T10:30:00",
+      "endTime": "2026-06-18T11:30:00",
+      "participantIds": [
+        3,
+        -1,
+        3,
+        0
+      ],
+      "participants": "架空の参加者",
+      "repeatType": "しない",
+      "repeatUntil": null,
+      "seriesId": null
+    },
+    "query": "?allowOverlap=true"
+  }
+}

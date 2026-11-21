@@ -133,6 +133,30 @@ AUTH_TEST_DATABASE_URL='postgres://meetingroombooker_dev:dev-password@127.0.0.1:
 
 **Verified in WSL with PostgreSQL 16.15.** The HTTP test passed for anonymous access before the reservations table existed, correct and incorrect credentials, both user profiles, reservation listing, session and persistent cookies, sliding renewal, logout, replay after logout, and expiry. The database-free tests cover input validation, the secure-cookie policy, and CSRF rejection on both login and logout.
 
+## Go single reservation creation
+
+Blazor sends `POST /api/Reservations` for a single reservation and appends `?allowOverlap=true` after confirmation. The C# reference at `d8fe3b7` ran with a disposable SQLite database and a recording Chatwork client. A successful request returned `201` with the reservation JSON and an absolute `Location` ending in `/api/Reservations?id=<id>`. Anonymous requests returned an empty `401`. Required fields, participant count, and an invalid overlap flag produced `400` Problem Details, while an end time at or before the start returned a Japanese string with `400`. The overlap response was `409` with the room, date, time, and existing reservation label. It was plain text by default and a JSON string for `Accept: application/json`. Adjacent times and explicitly allowed overlaps both returned `201`. The [C# HTTP fixtures](../backend/internal/httpapi/testdata/reservation_create_csharp.json) contain the measured responses used by the Go tests.
+
+Go reuses session authentication and origin protection, takes organizer details from the authenticated profile, and returns the same JSON projection as the reservation list. Request aliases share their canonical fields in JSON order. Nonpositive and duplicate participant IDs are removed. The organizer is prepended when absent, and an existing organizer entry keeps its position. The start and end retain their times of day and use the selected calendar date. The original `date` value is preserved even when it includes a time of day. Date-time values use the list's zone-free format. C# could include a time-zone suffix in the immediate POST response for zoned input and returned zone-free values on its subsequent GET. Go uses the latter serialization for both. Go returns stable Problem Details messages for malformed JSON and omits ASP.NET trace IDs. Requests that C# classifies as recurring receive `400` on this route until recurrence is ported.
+
+The PostgreSQL transaction takes an advisory lock for the room and calendar day, then performs the overlap read in a separate Read Committed statement so it sees the prior writer's commit. It uses strict start-before-end and end-after-start comparisons, including rows whose stored date has a time of day. The transaction inserts while holding the lock. Override requests take the same lock. The conflict query still matches the full room string, so a room hash collision only broadens lock contention and index candidates. A table-wide lock would serialize unrelated rooms and dates. A plain exclusion constraint would also reject the intentional overlaps. Future reservation write paths need to participate in the same locking protocol.
+
+Apply [migration `0003`](../backend/migrations/0003_enable_reservation_creation.sql) after `0001` and `0002` and after loading any existing reservation IDs. It adds an identity sequence initialized from the existing maximum and an index for the conflict lookup. The sequence supplies IDs even when the request contains an `id`. A later explicit ID import requires resynchronizing the sequence with writers stopped and accounting for the legacy ID high-water mark.
+
+```bash
+# WSL, from backend with DATABASE_URL set to the local database
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f migrations/0003_enable_reservation_creation.sql
+```
+
+C# persists the booking, writes in-app notices for participants other than the organizer, and invokes direct Chatwork delivery for configured stakeholders. Its messages can include room and participant schedule conflicts. The first synthetic C# booking produced one in-app notice and two successful fake Chatwork deliveries with delivery log rows. The Go transaction persists the reservation only. Notification and delivery parity remain part of the later notification slice.
+
+For verification, set `RESERVATION_CREATE_TEST_DATABASE_URL` to a disposable local PostgreSQL URL that permits creating schemas. The test uses the normal Go server, migrates a schema with existing IDs, and compares HTTP responses with the C# fixture. It holds the room/date lock until two requests are waiting to check that one returns `201`, one returns `409`, and one row is inserted.
+
+```bash
+# WSL, from backend
+go test -v -count=1 ./cmd/api -run '^TestSingleReservationCreatePostgres$'
+```
+
 ## Recovery to C# and SQLite
 
 Rehearse each stage in development with synthetic rows and a recording fake Chatwork sender. `scripts/deploy/deploy-prod.sh` uses SQLite's backup API and integrity check. `scripts/deploy/rollback-prod.sh` restores the earlier API, web assets and final SQLite snapshot. A rollback after Go accepts writes also needs the committed PostgreSQL state.

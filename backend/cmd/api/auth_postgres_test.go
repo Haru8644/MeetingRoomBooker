@@ -22,40 +22,13 @@ import (
 )
 
 func TestSessionAuthenticationPostgres(t *testing.T) {
-	databaseURL := os.Getenv("AUTH_TEST_DATABASE_URL")
-	if databaseURL == "" {
-		t.Skip("set AUTH_TEST_DATABASE_URL to run the session authentication smoke test")
-	}
 	ctx, cancel := context.WithTimeout(t.Context(), 30*time.Second)
 	defer cancel()
-	dsn, err := url.Parse(databaseURL)
-	if err != nil || (dsn.Scheme != "postgres" && dsn.Scheme != "postgresql") {
-		t.Fatal("AUTH_TEST_DATABASE_URL must be a PostgreSQL URL")
-	}
-	schema := "auth_test_" + strings.ToLower(rand.Text())
-	params := dsn.Query()
-	params.Set("search_path", schema)
-	dsn.RawQuery = params.Encode()
-	pool, err := pgxpool.New(ctx, dsn.String())
-	if err != nil {
-		t.Fatal("could not configure the PostgreSQL test database")
-	}
-	defer pool.Close()
-	quotedSchema := pgx.Identifier{schema}.Sanitize()
-	if _, err := pool.Exec(ctx, "CREATE SCHEMA "+quotedSchema); err != nil {
-		t.Fatal(err)
-	}
-	defer func() {
-		cleanupCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-		if _, err := pool.Exec(cleanupCtx, "DROP SCHEMA "+quotedSchema+" CASCADE"); err != nil {
-			t.Errorf("drop temporary test schema: %v", err)
-		}
-	}()
+	pool, dsn := newAPITestDatabase(t, ctx, "AUTH_TEST_DATABASE_URL")
 
 	applyAuthTestSQL(t, ctx, pool, "../../migrations/0002_create_users_and_sessions.sql")
 	credentials := seedAuthTestUsers(t, ctx, pool)
-	addr, stop := startAuthTestAPI(t, ctx, dsn.String())
+	addr, stop := startAuthTestAPI(t, ctx, dsn)
 	defer stop()
 	request := func(method, path string, payload any, cookie *http.Cookie, status int) (*http.Response, []byte) {
 		t.Helper()
@@ -143,6 +116,39 @@ func TestDevelopmentAPIRequiresLoopback(t *testing.T) {
 	if err := run(t.Context()); err == nil || err.Error() != "APP_ENV=development requires a loopback HTTP_ADDR" {
 		t.Fatalf("expected development binding to be rejected, got %v", err)
 	}
+}
+
+func newAPITestDatabase(t *testing.T, ctx context.Context, envName string) (*pgxpool.Pool, string) {
+	t.Helper()
+	databaseURL := os.Getenv(envName)
+	if databaseURL == "" {
+		t.Skipf("set %s to run the PostgreSQL test", envName)
+	}
+	dsn, err := url.Parse(databaseURL)
+	if err != nil || (dsn.Scheme != "postgres" && dsn.Scheme != "postgresql") {
+		t.Fatalf("%s must be a PostgreSQL URL", envName)
+	}
+	schema := "api_test_" + strings.ToLower(rand.Text())
+	params := dsn.Query()
+	params.Set("search_path", schema)
+	dsn.RawQuery = params.Encode()
+	pool, err := pgxpool.New(ctx, dsn.String())
+	if err != nil {
+		t.Fatal("could not configure the PostgreSQL test database")
+	}
+	t.Cleanup(pool.Close)
+	quotedSchema := pgx.Identifier{schema}.Sanitize()
+	if _, err := pool.Exec(ctx, "CREATE SCHEMA "+quotedSchema); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		cleanupCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if _, err := pool.Exec(cleanupCtx, "DROP SCHEMA "+quotedSchema+" CASCADE"); err != nil {
+			t.Errorf("drop temporary test schema: %v", err)
+		}
+	})
+	return pool, dsn.String()
 }
 
 func seedAuthTestUsers(t *testing.T, ctx context.Context, pool *pgxpool.Pool) map[string]string {
