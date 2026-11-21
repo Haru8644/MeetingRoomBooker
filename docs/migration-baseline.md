@@ -71,6 +71,29 @@ Direct tests live in `MeetingRoomBooker.Tests/ReservationOverlapCheckerTests.cs`
 
 **Verified in WSL.** All four rows above ran against the reference C# source in an isolated local runner. The existing checker and detection-service test classes passed (3 + 4 tests, including `MeetingRoomBooker.Tests/RoomConflictDetectionServiceTests.cs`). The first Go change should run the same rows through both languages and compare the booleans.
 
+## Go reservation list
+
+Blazor sends `GET /api/Reservations` with the session cookie. At `d8fe3b7`, the authorized controller reads all reservations without an ordering clause. For the WSL comparison, the reference app ran against a fresh SQLite database with the Chatwork and room conflict workers disabled. A synthetic member signed in through `/api/Auth/login`. The HTTP responses were `401` with an empty body and no redirect for anonymous access, `200` with `[]` for an empty table, and `200` with the four synthetic reservations captured in [the C# response fixture](../backend/internal/httpapi/testdata/reservation_list_csharp.json). Comparisons match reservations by ID and keep participant IDs in their original order.
+
+The [first PostgreSQL migration](../backend/migrations/0001_create_reservations.sql) uses the same integer IDs and stores participant IDs as an ordered `integer[]`, avoiding the parsing and validation needed for SQLite's comma-separated text. A participant join table would allow foreign keys and per-participant queries. The array is sufficient for reading the list and keeps user tables out of this migration. The response derives `userName`, `roomName`, `participantCount`, and `isInternal` from the stored fields as the C# model does. `seriesId` and `repeatUntil` allow nulls, including recurring reservations with no legacy series ID.
+
+The four date/time columns store .NET `DateTime` ticks, which are 100 ns intervals from `0001-01-01T00:00:00`. PostgreSQL `timestamp without time zone` would support native calendar operations and retain up to six fractional digits. The measured C# response includes `2026-06-10T08:00:00.1234567`. Tick values preserve that precision, retain chronological ordering, and require conversion for native calendar operations. The handler returns the stored wall-clock values with trailing fractional zeros trimmed and without a time-zone suffix.
+
+In WSL, set `DATABASE_URL` to the local development database and apply the migration once from `backend`.
+
+```bash
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f migrations/0001_create_reservations.sql
+```
+
+Run `go test -v ./...` from `backend` for HTTP tests with an injected reader and identity. For the PostgreSQL comparison, set `RESERVATION_TEST_DATABASE_URL` to a disposable local database with permission to create a schema and run the command below. The test creates and drops its own schema, applies the migration to it, and inserts the [same synthetic rows](../backend/internal/httpapi/testdata/reservation_list_seed.sql) used for the SQLite capture. The Go handler runs on an HTTP test server. Registering the route on the runnable API is part of the authentication follow-up.
+
+```bash
+RESERVATION_TEST_DATABASE_URL='postgres://meetingroombooker_dev:dev-password@127.0.0.1:5432/meetingroombooker_reservation_test?sslmode=disable' \
+  go test -v -count=1 ./internal/httpapi -run '^TestReservationListPostgres$'
+```
+
+**Verified in WSL with PostgreSQL 16.15.** The `401` response had an empty body and no redirect. The empty and populated responses matched the C# `200` responses, including every JSON field on all four reservations.
+
 ## Recovery to C# and SQLite
 
 Rehearse each stage in development with synthetic rows and a recording fake Chatwork sender. `scripts/deploy/deploy-prod.sh` uses SQLite's backup API and integrity check. `scripts/deploy/rollback-prod.sh` restores the earlier API, web assets and final SQLite snapshot. A rollback after Go accepts writes also needs the committed PostgreSQL state.
