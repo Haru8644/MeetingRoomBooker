@@ -271,6 +271,20 @@ Set `RESERVATION_CANCEL_TEST_DATABASE_URL` to a disposable PostgreSQL URL that p
 go test -v -count=1 ./cmd/api -run '^TestSingleReservationCancellationPostgres$'
 ```
 
+## Go reservation participation
+
+Blazor sends `POST /api/Reservations/{id}/join` and `POST /api/Reservations/{id}/leave`. An authenticated user changes their own membership. A repeated request already in the desired state returns `204` without changing data. The organizer's leave returns `400` with the C# message. Changes apply to the addressed booking, including when it belongs to a recurring series.
+
+Go locks the reservation row, normalizes the participant IDs and legacy reservation fields, and saves the membership and organizer's notice in one transaction. It preserves the booking's headcount and display text as C# does. A successful change by another user adds or refreshes an unread `Info` notice using the C# message prefix. Duplicate prefix matches are removed while retaining the newest notice ID.
+
+The [C# SQLite capture](../backend/internal/httpapi/testdata/reservation_participation_csharp.json) records eight cases. The PostgreSQL test compares the booking list and organizer's inbox through the Go API, and checks that concurrent joins keep both members and a forced notice write failure rolls back the membership change.
+
+Set `RESERVATION_PARTICIPATION_TEST_DATABASE_URL` to a disposable PostgreSQL URL that permits creating schemas and run from `backend`.
+
+```bash
+go test -v -count=1 ./cmd/api -run '^TestReservationParticipationPostgres$'
+```
+
 ## Recovery to C# and SQLite
 
 Rehearse each stage in development with synthetic rows and a recording fake Chatwork sender. `scripts/deploy/deploy-prod.sh` uses SQLite's backup API and integrity check. `scripts/deploy/rollback-prod.sh` restores the earlier API, web assets and final SQLite snapshot. A rollback after Go accepts writes also needs the committed PostgreSQL state.
