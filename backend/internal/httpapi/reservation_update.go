@@ -27,9 +27,7 @@ func newReservationUpdateHandler(update reservationUpdater) func(http.ResponseWr
 			return
 		}
 		if int(input.ID) != id {
-			writeProblemDetails(w, problemDetails{
-				Type: "https://tools.ietf.org/html/rfc9110#section-15.5.1", Title: "Bad Request", Status: http.StatusBadRequest,
-			})
+			writeReservationMutationResult(w, r, reservations.ErrIDMismatch)
 			return
 		}
 		writeReservationMutationResult(w, r, update(r.Context(), input.entry(int(input.UserID), *input.Name), user.ID, user.IsAdmin, notify))
@@ -47,6 +45,10 @@ func writeReservationMutationResult(w http.ResponseWriter, r *http.Request, err 
 		})
 	case errors.Is(err, reservations.ErrForbidden):
 		w.WriteHeader(http.StatusForbidden)
+	case errors.Is(err, reservations.ErrIDMismatch):
+		writeProblemDetails(w, problemDetails{
+			Type: "https://tools.ietf.org/html/rfc9110#section-15.5.1", Title: "Bad Request", Status: http.StatusBadRequest,
+		})
 	case errors.As(err, &invalid):
 		writeNegotiatedString(w, r, http.StatusBadRequest, invalid.Error())
 	default:

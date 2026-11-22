@@ -1,0 +1,2548 @@
+{
+  "datasets": {
+    "keyed": [
+      {
+        "id": 10,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "定例会議",
+        "seriesId": "series-A",
+        "date": "2026-06-01T00:00:00",
+        "startTime": "2026-06-01T09:00:00",
+        "endTime": "2026-06-01T10:00:00",
+        "participantIds": [
+          2,
+          3
+        ],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      },
+      {
+        "id": 11,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "定例会議",
+        "seriesId": "series-A",
+        "date": "2026-06-08T13:30:00",
+        "startTime": "2026-06-08T09:00:00",
+        "endTime": "2026-06-08T10:00:00",
+        "participantIds": [
+          2,
+          3
+        ],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      },
+      {
+        "id": 12,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "別の旧会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "定例会議",
+        "seriesId": "series-A",
+        "date": "2026-06-08T00:00:00",
+        "startTime": "2026-06-08T14:00:00",
+        "endTime": "2026-06-08T15:00:00",
+        "participantIds": [
+          2,
+          3
+        ],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      },
+      {
+        "id": 13,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "定例会議",
+        "seriesId": "series-A",
+        "date": "2026-06-15T00:00:00",
+        "startTime": "2026-06-15T09:00:00",
+        "endTime": "2026-06-15T10:00:00",
+        "participantIds": [
+          2,
+          3
+        ],
+        "participants": "旧表示",
+        "repeatType": "隔週",
+        "repeatUntil": "2026-06-30T22:00:00"
+      },
+      {
+        "id": 14,
+        "userId": 3,
+        "name": "架空の参加者",
+        "room": "旧会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "定例会議",
+        "seriesId": "series-A",
+        "date": "2026-06-15T00:00:00",
+        "startTime": "2026-06-15T09:00:00",
+        "endTime": "2026-06-15T10:00:00",
+        "participantIds": [
+          2,
+          3
+        ],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      },
+      {
+        "id": 15,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "定例会議",
+        "seriesId": "series-Z",
+        "date": "2026-06-22T00:00:00",
+        "startTime": "2026-06-22T09:00:00",
+        "endTime": "2026-06-22T10:00:00",
+        "participantIds": [
+          2,
+          3
+        ],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      },
+      {
+        "id": 16,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "新会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "既存の部分重複",
+        "seriesId": null,
+        "date": "2026-06-09T00:00:00",
+        "startTime": "2026-06-09T10:30:00",
+        "endTime": "2026-06-09T11:30:00",
+        "participantIds": [
+          2,
+          3
+        ],
+        "participants": "旧表示",
+        "repeatType": "しない",
+        "repeatUntil": null
+      },
+      {
+        "id": 17,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "新会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "既存の隣接枠",
+        "seriesId": null,
+        "date": "2026-06-16T00:00:00",
+        "startTime": "2026-06-16T11:00:00",
+        "endTime": "2026-06-16T11:30:00",
+        "participantIds": [
+          2,
+          3
+        ],
+        "participants": "旧表示",
+        "repeatType": "しない",
+        "repeatUntil": null
+      }
+    ],
+    "legacy": [
+      {
+        "id": 20,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "定例会議",
+        "seriesId": null,
+        "date": "2026-06-01T00:00:00",
+        "startTime": "2026-06-01T09:00:00",
+        "endTime": "2026-06-01T10:00:00",
+        "participantIds": [
+          2,
+          3
+        ],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      },
+      {
+        "id": 21,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "定例会議",
+        "seriesId": null,
+        "date": "2026-06-08T17:00:00",
+        "startTime": "2026-06-08T09:00:00",
+        "endTime": "2026-06-08T10:00:00",
+        "participantIds": [
+          2,
+          3
+        ],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      },
+      {
+        "id": 22,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "定例会議",
+        "seriesId": null,
+        "date": "2026-06-08T00:00:00",
+        "startTime": "2026-06-08T09:00:00",
+        "endTime": "2026-06-08T10:00:00",
+        "participantIds": [
+          2,
+          3
+        ],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T21:00:00"
+      },
+      {
+        "id": 23,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "定例会議",
+        "seriesId": "別キーでも旧検索に一致",
+        "date": "2026-06-15T00:00:00",
+        "startTime": "2026-06-15T09:00:00",
+        "endTime": "2026-06-15T10:00:00",
+        "participantIds": [
+          2,
+          3
+        ],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      },
+      {
+        "id": 24,
+        "userId": 3,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "定例会議",
+        "seriesId": null,
+        "date": "2026-06-15T00:00:00",
+        "startTime": "2026-06-15T09:00:00",
+        "endTime": "2026-06-15T10:00:00",
+        "participantIds": [
+          2,
+          3
+        ],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      },
+      {
+        "id": 25,
+        "userId": 2,
+        "name": "別表示名",
+        "room": "旧会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "定例会議",
+        "seriesId": null,
+        "date": "2026-06-15T00:00:00",
+        "startTime": "2026-06-15T09:00:00",
+        "endTime": "2026-06-15T10:00:00",
+        "participantIds": [
+          2,
+          3
+        ],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      },
+      {
+        "id": 26,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "別室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "定例会議",
+        "seriesId": null,
+        "date": "2026-06-15T00:00:00",
+        "startTime": "2026-06-15T09:00:00",
+        "endTime": "2026-06-15T10:00:00",
+        "participantIds": [
+          2,
+          3
+        ],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      },
+      {
+        "id": 27,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 2,
+        "type": "来客",
+        "purpose": "定例会議",
+        "seriesId": null,
+        "date": "2026-06-15T00:00:00",
+        "startTime": "2026-06-15T09:00:00",
+        "endTime": "2026-06-15T10:00:00",
+        "participantIds": [
+          2,
+          3
+        ],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      },
+      {
+        "id": 28,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "別の目的",
+        "seriesId": null,
+        "date": "2026-06-15T00:00:00",
+        "startTime": "2026-06-15T09:00:00",
+        "endTime": "2026-06-15T10:00:00",
+        "participantIds": [
+          2,
+          3
+        ],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      },
+      {
+        "id": 29,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "定例会議",
+        "seriesId": null,
+        "date": "2026-06-15T00:00:00",
+        "startTime": "2026-06-15T09:00:00",
+        "endTime": "2026-06-15T10:00:00",
+        "participantIds": [
+          2,
+          3
+        ],
+        "participants": "旧表示",
+        "repeatType": "隔週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      },
+      {
+        "id": 30,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "定例会議",
+        "seriesId": null,
+        "date": "2026-06-15T00:00:00",
+        "startTime": "2026-06-15T09:00:00",
+        "endTime": "2026-06-15T10:00:00",
+        "participantIds": [
+          2,
+          3
+        ],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-30T00:00:00"
+      },
+      {
+        "id": 31,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "定例会議",
+        "seriesId": null,
+        "date": "2026-06-15T00:00:00",
+        "startTime": "2026-06-15T09:00:00.0000001",
+        "endTime": "2026-06-15T10:00:00",
+        "participantIds": [
+          2,
+          3
+        ],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      },
+      {
+        "id": 32,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "定例会議",
+        "seriesId": null,
+        "date": "2026-06-15T00:00:00",
+        "startTime": "2026-06-15T09:00:00",
+        "endTime": "2026-06-15T10:00:00.0000001",
+        "participantIds": [
+          2,
+          3
+        ],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      }
+    ],
+    "padded": [
+      {
+        "id": 40,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "定例会議",
+        "seriesId": " padded ",
+        "date": "2026-06-08T00:00:00",
+        "startTime": "2026-06-08T09:00:00",
+        "endTime": "2026-06-08T10:00:00",
+        "participantIds": [
+          2,
+          3
+        ],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      },
+      {
+        "id": 41,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "定例会議",
+        "seriesId": "padded",
+        "date": "2026-06-15T00:00:00",
+        "startTime": "2026-06-15T09:00:00",
+        "endTime": "2026-06-15T10:00:00",
+        "participantIds": [
+          2,
+          3
+        ],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      },
+      {
+        "id": 42,
+        "userId": 3,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "定例会議",
+        "seriesId": "padded",
+        "date": "2026-06-22T00:00:00",
+        "startTime": "2026-06-22T09:00:00",
+        "endTime": "2026-06-22T10:00:00",
+        "participantIds": [
+          2,
+          3
+        ],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      }
+    ],
+    "no_matches": [
+      {
+        "id": 43,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "定例会議",
+        "seriesId": " missing ",
+        "date": "2026-06-08T00:00:00",
+        "startTime": "2026-06-08T09:00:00",
+        "endTime": "2026-06-08T10:00:00",
+        "participantIds": [
+          2,
+          3
+        ],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "single",
+      "dataset": "keyed",
+      "id": 11,
+      "actor": "owner",
+      "request": {
+        "originalReservation": {
+          "id": 11,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "旧会議室",
+          "numberOfPeople": 2,
+          "type": "社内",
+          "purpose": "定例会議",
+          "seriesId": "series-A",
+          "date": "2026-06-08T13:30:00",
+          "startTime": "2026-06-08T09:00:00",
+          "endTime": "2026-06-08T10:00:00",
+          "participantIds": [
+            2,
+            3
+          ],
+          "participants": "旧表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        "updatedReservation": {
+          "id": 11,
+          "userId": 2,
+          "name": "送信された名前",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "書き換え要求",
+          "date": "2026-06-09T00:00:00",
+          "startTime": "2026-06-01T10:00:00",
+          "endTime": "2026-06-01T11:00:00",
+          "participantIds": [
+            2,
+            4,
+            4,
+            -1,
+            0
+          ],
+          "participants": "新表示",
+          "repeatType": "毎日",
+          "repeatUntil": "2026-08-01T00:00:00"
+        },
+        "scope": "single",
+        "notifyParticipants": false
+      },
+      "status": 204,
+      "body": "",
+      "updated": [
+        {
+          "id": 11,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "series-A",
+          "date": "2026-06-09T00:00:00",
+          "startTime": "2026-06-09T10:00:00",
+          "endTime": "2026-06-09T11:00:00",
+          "participantIds": [
+            2,
+            4
+          ],
+          "participants": "新表示",
+          "repeatType": "毎日",
+          "repeatUntil": "2026-08-01T00:00:00"
+        }
+      ],
+      "notifications": []
+    },
+    {
+      "name": "scope_omitted",
+      "dataset": "keyed",
+      "id": 11,
+      "actor": "owner",
+      "request": {
+        "originalReservation": {
+          "id": 11,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "旧会議室",
+          "numberOfPeople": 2,
+          "type": "社内",
+          "purpose": "定例会議",
+          "seriesId": "series-A",
+          "date": "2026-06-08T13:30:00",
+          "startTime": "2026-06-08T09:00:00",
+          "endTime": "2026-06-08T10:00:00",
+          "participantIds": [
+            2,
+            3
+          ],
+          "participants": "旧表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        "updatedReservation": {
+          "id": 11,
+          "userId": 2,
+          "name": "送信された名前",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "書き換え要求",
+          "date": "2026-06-09T00:00:00",
+          "startTime": "2026-06-01T10:00:00",
+          "endTime": "2026-06-01T11:00:00",
+          "participantIds": [
+            2,
+            4,
+            4,
+            -1,
+            0
+          ],
+          "participants": "新表示",
+          "repeatType": "毎日",
+          "repeatUntil": "2026-08-01T00:00:00"
+        },
+        "notifyParticipants": false
+      },
+      "status": 204,
+      "body": "",
+      "updated": [
+        {
+          "id": 11,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "series-A",
+          "date": "2026-06-09T00:00:00",
+          "startTime": "2026-06-09T10:00:00",
+          "endTime": "2026-06-09T11:00:00",
+          "participantIds": [
+            2,
+            4
+          ],
+          "participants": "新表示",
+          "repeatType": "毎日",
+          "repeatUntil": "2026-08-01T00:00:00"
+        }
+      ],
+      "notifications": []
+    },
+    {
+      "name": "unknown_scope",
+      "dataset": "keyed",
+      "id": 11,
+      "actor": "owner",
+      "request": {
+        "originalReservation": {
+          "id": 11,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "旧会議室",
+          "numberOfPeople": 2,
+          "type": "社内",
+          "purpose": "定例会議",
+          "seriesId": "series-A",
+          "date": "2026-06-08T13:30:00",
+          "startTime": "2026-06-08T09:00:00",
+          "endTime": "2026-06-08T10:00:00",
+          "participantIds": [
+            2,
+            3
+          ],
+          "participants": "旧表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        "updatedReservation": {
+          "id": 11,
+          "userId": 2,
+          "name": "送信された名前",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "書き換え要求",
+          "date": "2026-06-09T00:00:00",
+          "startTime": "2026-06-01T10:00:00",
+          "endTime": "2026-06-01T11:00:00",
+          "participantIds": [
+            2,
+            4,
+            4,
+            -1,
+            0
+          ],
+          "participants": "新表示",
+          "repeatType": "毎日",
+          "repeatUntil": "2026-08-01T00:00:00"
+        },
+        "scope": "Following",
+        "notifyParticipants": false
+      },
+      "status": 204,
+      "body": "",
+      "updated": [
+        {
+          "id": 11,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "series-A",
+          "date": "2026-06-09T00:00:00",
+          "startTime": "2026-06-09T10:00:00",
+          "endTime": "2026-06-09T11:00:00",
+          "participantIds": [
+            2,
+            4
+          ],
+          "participants": "新表示",
+          "repeatType": "毎日",
+          "repeatUntil": "2026-08-01T00:00:00"
+        }
+      ],
+      "notifications": []
+    },
+    {
+      "name": "following_default_notify",
+      "dataset": "keyed",
+      "id": 11,
+      "actor": "owner",
+      "request": {
+        "originalReservation": {
+          "id": 11,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "旧会議室",
+          "numberOfPeople": 2,
+          "type": "社内",
+          "purpose": "定例会議",
+          "seriesId": "series-A",
+          "date": "2026-06-08T13:30:00",
+          "startTime": "2026-06-08T09:00:00",
+          "endTime": "2026-06-08T10:00:00",
+          "participantIds": [
+            2,
+            3
+          ],
+          "participants": "旧表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        "updatedReservation": {
+          "id": 11,
+          "userId": 2,
+          "name": "送信された名前",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "書き換え要求",
+          "date": "2026-06-09T00:00:00",
+          "startTime": "2026-06-01T10:00:00",
+          "endTime": "2026-06-01T11:00:00",
+          "participantIds": [
+            2,
+            4,
+            4,
+            -1,
+            0
+          ],
+          "participants": "新表示",
+          "repeatType": "毎日",
+          "repeatUntil": "2026-08-01T00:00:00"
+        },
+        "scope": "following"
+      },
+      "status": 204,
+      "body": "",
+      "updated": [
+        {
+          "id": 11,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "series-A",
+          "date": "2026-06-09T00:00:00",
+          "startTime": "2026-06-09T10:00:00",
+          "endTime": "2026-06-09T11:00:00",
+          "participantIds": [
+            2,
+            4
+          ],
+          "participants": "新表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        {
+          "id": 12,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "series-A",
+          "date": "2026-06-09T00:00:00",
+          "startTime": "2026-06-09T10:00:00",
+          "endTime": "2026-06-09T11:00:00",
+          "participantIds": [
+            2,
+            4
+          ],
+          "participants": "新表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        {
+          "id": 13,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "series-A",
+          "date": "2026-06-16T00:00:00",
+          "startTime": "2026-06-16T10:00:00",
+          "endTime": "2026-06-16T11:00:00",
+          "participantIds": [
+            2,
+            4
+          ],
+          "participants": "新表示",
+          "repeatType": "隔週",
+          "repeatUntil": "2026-06-30T22:00:00"
+        }
+      ],
+      "notifications": [
+        {
+          "userId": 3,
+          "message": "架空の予約者さんが予約「新しい定例」の参加メンバーからあなたを削除しました。",
+          "targetDate": "2026-06-09T00:00:00",
+          "isRead": false,
+          "type": "Info",
+          "targetReservationId": 11,
+          "targetWorkScheduleEntryId": null
+        },
+        {
+          "userId": 4,
+          "message": "架空の予約者さんが予約「新しい定例」の参加メンバーにあなたを追加しました。利用日: 2026/06/09 / 会議室: 新会議室 / 時間: 10:00〜11:00",
+          "targetDate": "2026-06-09T00:00:00",
+          "isRead": false,
+          "type": "Info",
+          "targetReservationId": 11,
+          "targetWorkScheduleEntryId": null
+        },
+        {
+          "userId": 3,
+          "message": "架空の予約者さんが予約「新しい定例」の参加メンバーからあなたを削除しました。",
+          "targetDate": "2026-06-09T00:00:00",
+          "isRead": false,
+          "type": "Info",
+          "targetReservationId": 12,
+          "targetWorkScheduleEntryId": null
+        },
+        {
+          "userId": 4,
+          "message": "架空の予約者さんが予約「新しい定例」の参加メンバーにあなたを追加しました。利用日: 2026/06/09 / 会議室: 新会議室 / 時間: 10:00〜11:00",
+          "targetDate": "2026-06-09T00:00:00",
+          "isRead": false,
+          "type": "Info",
+          "targetReservationId": 12,
+          "targetWorkScheduleEntryId": null
+        },
+        {
+          "userId": 3,
+          "message": "架空の予約者さんが予約「新しい定例」の参加メンバーからあなたを削除しました。",
+          "targetDate": "2026-06-16T00:00:00",
+          "isRead": false,
+          "type": "Info",
+          "targetReservationId": 13,
+          "targetWorkScheduleEntryId": null
+        },
+        {
+          "userId": 4,
+          "message": "架空の予約者さんが予約「新しい定例」の参加メンバーにあなたを追加しました。利用日: 2026/06/16 / 会議室: 新会議室 / 時間: 10:00〜11:00",
+          "targetDate": "2026-06-16T00:00:00",
+          "isRead": false,
+          "type": "Info",
+          "targetReservationId": 13,
+          "targetWorkScheduleEntryId": null
+        }
+      ]
+    },
+    {
+      "name": "all_admin_backward",
+      "dataset": "keyed",
+      "id": 11,
+      "actor": "admin",
+      "request": {
+        "originalReservation": {
+          "id": 11,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "旧会議室",
+          "numberOfPeople": 2,
+          "type": "社内",
+          "purpose": "定例会議",
+          "seriesId": "series-A",
+          "date": "2026-06-08T13:30:00",
+          "startTime": "2026-06-08T09:00:00",
+          "endTime": "2026-06-08T10:00:00",
+          "participantIds": [
+            2,
+            3
+          ],
+          "participants": "旧表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        "updatedReservation": {
+          "id": 11,
+          "userId": 2,
+          "name": "送信された名前",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "書き換え要求",
+          "date": "2026-06-06T00:00:00",
+          "startTime": "2026-06-01T10:00:00",
+          "endTime": "2026-06-01T11:00:00",
+          "participantIds": [
+            2,
+            4,
+            4,
+            -1,
+            0
+          ],
+          "participants": "新表示",
+          "repeatType": "毎日",
+          "repeatUntil": "2026-08-01T00:00:00",
+          "dateTimeIgnored": true
+        },
+        "scope": "all",
+        "notifyParticipants": false
+      },
+      "status": 204,
+      "body": "",
+      "updated": [
+        {
+          "id": 10,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "series-A",
+          "date": "2026-05-30T00:00:00",
+          "startTime": "2026-05-30T10:00:00",
+          "endTime": "2026-05-30T11:00:00",
+          "participantIds": [
+            2,
+            4
+          ],
+          "participants": "新表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        {
+          "id": 11,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "series-A",
+          "date": "2026-06-06T00:00:00",
+          "startTime": "2026-06-06T10:00:00",
+          "endTime": "2026-06-06T11:00:00",
+          "participantIds": [
+            2,
+            4
+          ],
+          "participants": "新表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        {
+          "id": 12,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "series-A",
+          "date": "2026-06-06T00:00:00",
+          "startTime": "2026-06-06T10:00:00",
+          "endTime": "2026-06-06T11:00:00",
+          "participantIds": [
+            2,
+            4
+          ],
+          "participants": "新表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        {
+          "id": 13,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "series-A",
+          "date": "2026-06-13T00:00:00",
+          "startTime": "2026-06-13T10:00:00",
+          "endTime": "2026-06-13T11:00:00",
+          "participantIds": [
+            2,
+            4
+          ],
+          "participants": "新表示",
+          "repeatType": "隔週",
+          "repeatUntil": "2026-06-30T22:00:00"
+        }
+      ],
+      "notifications": []
+    },
+    {
+      "name": "all_uses_route_and_ignores_template_id",
+      "dataset": "keyed",
+      "id": 11,
+      "actor": "owner",
+      "request": {
+        "originalReservation": {
+          "id": 14,
+          "userId": 3,
+          "name": "架空の参加者",
+          "room": "旧会議室",
+          "numberOfPeople": 2,
+          "type": "社内",
+          "purpose": "定例会議",
+          "seriesId": "series-A",
+          "date": "2026-06-15T00:00:00",
+          "startTime": "2026-06-15T09:00:00",
+          "endTime": "2026-06-15T10:00:00",
+          "participantIds": [
+            2,
+            3
+          ],
+          "participants": "旧表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        "updatedReservation": {
+          "id": 999,
+          "userId": 4,
+          "name": "送信された名前",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "書き換え要求",
+          "date": "2026-06-09T00:00:00",
+          "startTime": "2026-06-01T10:00:00",
+          "endTime": "2026-06-01T11:00:00",
+          "participantIds": [
+            3
+          ],
+          "participants": "新表示",
+          "repeatType": "毎日",
+          "repeatUntil": "2026-08-01T00:00:00"
+        },
+        "scope": "all",
+        "notifyParticipants": false
+      },
+      "status": 204,
+      "body": "",
+      "updated": [
+        {
+          "id": 10,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "series-A",
+          "date": "2026-06-02T00:00:00",
+          "startTime": "2026-06-02T10:00:00",
+          "endTime": "2026-06-02T11:00:00",
+          "participantIds": [
+            4,
+            3
+          ],
+          "participants": "新表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        {
+          "id": 11,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "series-A",
+          "date": "2026-06-09T00:00:00",
+          "startTime": "2026-06-09T10:00:00",
+          "endTime": "2026-06-09T11:00:00",
+          "participantIds": [
+            4,
+            3
+          ],
+          "participants": "新表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        {
+          "id": 12,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "series-A",
+          "date": "2026-06-09T00:00:00",
+          "startTime": "2026-06-09T10:00:00",
+          "endTime": "2026-06-09T11:00:00",
+          "participantIds": [
+            4,
+            3
+          ],
+          "participants": "新表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        {
+          "id": 13,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "series-A",
+          "date": "2026-06-16T00:00:00",
+          "startTime": "2026-06-16T10:00:00",
+          "endTime": "2026-06-16T11:00:00",
+          "participantIds": [
+            4,
+            3
+          ],
+          "participants": "新表示",
+          "repeatType": "隔週",
+          "repeatUntil": "2026-06-30T22:00:00"
+        }
+      ],
+      "notifications": []
+    },
+    {
+      "name": "single_mismatched_id",
+      "dataset": "keyed",
+      "id": 11,
+      "actor": "owner",
+      "request": {
+        "originalReservation": {
+          "id": 11,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "旧会議室",
+          "numberOfPeople": 2,
+          "type": "社内",
+          "purpose": "定例会議",
+          "seriesId": "series-A",
+          "date": "2026-06-08T13:30:00",
+          "startTime": "2026-06-08T09:00:00",
+          "endTime": "2026-06-08T10:00:00",
+          "participantIds": [
+            2,
+            3
+          ],
+          "participants": "旧表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        "updatedReservation": {
+          "id": 999,
+          "userId": 2,
+          "name": "送信された名前",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "書き換え要求",
+          "date": "2026-06-09T00:00:00",
+          "startTime": "2026-06-01T10:00:00",
+          "endTime": "2026-06-01T11:00:00",
+          "participantIds": [
+            2,
+            4,
+            4,
+            -1,
+            0
+          ],
+          "participants": "新表示",
+          "repeatType": "毎日",
+          "repeatUntil": "2026-08-01T00:00:00"
+        },
+        "scope": "single",
+        "notifyParticipants": false
+      },
+      "status": 400,
+      "body": {
+        "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+        "title": "Bad Request",
+        "status": 400
+      },
+      "updated": [],
+      "notifications": []
+    },
+    {
+      "name": "nonrecurring_all_falls_back",
+      "dataset": "keyed",
+      "id": 16,
+      "actor": "owner",
+      "request": {
+        "originalReservation": {
+          "id": 16,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 2,
+          "type": "社内",
+          "purpose": "既存の部分重複",
+          "seriesId": null,
+          "date": "2026-06-09T00:00:00",
+          "startTime": "2026-06-09T10:30:00",
+          "endTime": "2026-06-09T11:30:00",
+          "participantIds": [
+            2,
+            3
+          ],
+          "participants": "旧表示",
+          "repeatType": "しない",
+          "repeatUntil": null
+        },
+        "updatedReservation": {
+          "id": 16,
+          "userId": 2,
+          "name": "送信された名前",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "書き換え要求",
+          "date": "2026-06-09T00:00:00",
+          "startTime": "2026-06-01T10:00:00",
+          "endTime": "2026-06-01T11:00:00",
+          "participantIds": [
+            2,
+            4,
+            4,
+            -1,
+            0
+          ],
+          "participants": "新表示",
+          "repeatType": "しない",
+          "repeatUntil": null
+        },
+        "scope": "all",
+        "notifyParticipants": false
+      },
+      "status": 204,
+      "body": "",
+      "updated": [
+        {
+          "id": 16,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": null,
+          "date": "2026-06-09T00:00:00",
+          "startTime": "2026-06-09T10:00:00",
+          "endTime": "2026-06-09T11:00:00",
+          "participantIds": [
+            2,
+            4
+          ],
+          "participants": "新表示",
+          "repeatType": "しない",
+          "repeatUntil": null
+        }
+      ],
+      "notifications": []
+    },
+    {
+      "name": "legacy_following",
+      "dataset": "legacy",
+      "id": 21,
+      "actor": "owner",
+      "request": {
+        "originalReservation": {
+          "id": 21,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "旧会議室",
+          "numberOfPeople": 2,
+          "type": "社内",
+          "purpose": "定例会議",
+          "seriesId": null,
+          "date": "2026-06-08T17:00:00",
+          "startTime": "2026-06-08T09:00:00",
+          "endTime": "2026-06-08T10:00:00",
+          "participantIds": [
+            2,
+            3
+          ],
+          "participants": "旧表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        "updatedReservation": {
+          "id": 21,
+          "userId": 2,
+          "name": "送信された名前",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "書き換え要求",
+          "date": "2026-06-09T00:00:00",
+          "startTime": "2026-06-01T10:00:00",
+          "endTime": "2026-06-01T11:00:00",
+          "participantIds": [
+            2,
+            4,
+            4,
+            -1,
+            0
+          ],
+          "participants": "新表示",
+          "repeatType": "毎日",
+          "repeatUntil": "2026-08-01T00:00:00"
+        },
+        "scope": "following",
+        "notifyParticipants": false
+      },
+      "status": 204,
+      "body": "",
+      "updated": [
+        {
+          "id": 21,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": null,
+          "date": "2026-06-09T00:00:00",
+          "startTime": "2026-06-09T10:00:00",
+          "endTime": "2026-06-09T11:00:00",
+          "participantIds": [
+            2,
+            4
+          ],
+          "participants": "新表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        {
+          "id": 22,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": null,
+          "date": "2026-06-09T00:00:00",
+          "startTime": "2026-06-09T10:00:00",
+          "endTime": "2026-06-09T11:00:00",
+          "participantIds": [
+            2,
+            4
+          ],
+          "participants": "新表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T21:00:00"
+        },
+        {
+          "id": 23,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "別キーでも旧検索に一致",
+          "date": "2026-06-16T00:00:00",
+          "startTime": "2026-06-16T10:00:00",
+          "endTime": "2026-06-16T11:00:00",
+          "participantIds": [
+            2,
+            4
+          ],
+          "participants": "新表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        }
+      ],
+      "notifications": []
+    },
+    {
+      "name": "legacy_all",
+      "dataset": "legacy",
+      "id": 21,
+      "actor": "owner",
+      "request": {
+        "originalReservation": {
+          "id": 21,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "旧会議室",
+          "numberOfPeople": 2,
+          "type": "社内",
+          "purpose": "定例会議",
+          "seriesId": null,
+          "date": "2026-06-08T17:00:00",
+          "startTime": "2026-06-08T09:00:00",
+          "endTime": "2026-06-08T10:00:00",
+          "participantIds": [
+            2,
+            3
+          ],
+          "participants": "旧表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        "updatedReservation": {
+          "id": 21,
+          "userId": 2,
+          "name": "送信された名前",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "書き換え要求",
+          "date": "2026-06-09T00:00:00",
+          "startTime": "2026-06-01T10:00:00",
+          "endTime": "2026-06-01T11:00:00",
+          "participantIds": [
+            2,
+            4,
+            4,
+            -1,
+            0
+          ],
+          "participants": "新表示",
+          "repeatType": "毎日",
+          "repeatUntil": "2026-08-01T00:00:00"
+        },
+        "scope": "all",
+        "notifyParticipants": false
+      },
+      "status": 204,
+      "body": "",
+      "updated": [
+        {
+          "id": 20,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": null,
+          "date": "2026-06-02T00:00:00",
+          "startTime": "2026-06-02T10:00:00",
+          "endTime": "2026-06-02T11:00:00",
+          "participantIds": [
+            2,
+            4
+          ],
+          "participants": "新表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        {
+          "id": 21,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": null,
+          "date": "2026-06-09T00:00:00",
+          "startTime": "2026-06-09T10:00:00",
+          "endTime": "2026-06-09T11:00:00",
+          "participantIds": [
+            2,
+            4
+          ],
+          "participants": "新表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        {
+          "id": 22,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": null,
+          "date": "2026-06-09T00:00:00",
+          "startTime": "2026-06-09T10:00:00",
+          "endTime": "2026-06-09T11:00:00",
+          "participantIds": [
+            2,
+            4
+          ],
+          "participants": "新表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T21:00:00"
+        },
+        {
+          "id": 23,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "別キーでも旧検索に一致",
+          "date": "2026-06-16T00:00:00",
+          "startTime": "2026-06-16T10:00:00",
+          "endTime": "2026-06-16T11:00:00",
+          "participantIds": [
+            2,
+            4
+          ],
+          "participants": "新表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        }
+      ],
+      "notifications": []
+    },
+    {
+      "name": "trimmed_key",
+      "dataset": "padded",
+      "id": 40,
+      "actor": "owner",
+      "request": {
+        "originalReservation": {
+          "id": 40,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "旧会議室",
+          "numberOfPeople": 2,
+          "type": "社内",
+          "purpose": "定例会議",
+          "seriesId": " padded ",
+          "date": "2026-06-08T00:00:00",
+          "startTime": "2026-06-08T09:00:00",
+          "endTime": "2026-06-08T10:00:00",
+          "participantIds": [
+            2,
+            3
+          ],
+          "participants": "旧表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        "updatedReservation": {
+          "id": 40,
+          "userId": 2,
+          "name": "送信された名前",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "書き換え要求",
+          "date": "2026-06-09T00:00:00",
+          "startTime": "2026-06-01T10:00:00",
+          "endTime": "2026-06-01T11:00:00",
+          "participantIds": [
+            2,
+            4,
+            4,
+            -1,
+            0
+          ],
+          "participants": "新表示",
+          "repeatType": "毎日",
+          "repeatUntil": "2026-08-01T00:00:00"
+        },
+        "scope": "all",
+        "notifyParticipants": false
+      },
+      "status": 204,
+      "body": "",
+      "updated": [
+        {
+          "id": 41,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "padded",
+          "date": "2026-06-16T00:00:00",
+          "startTime": "2026-06-16T10:00:00",
+          "endTime": "2026-06-16T11:00:00",
+          "participantIds": [
+            2,
+            4
+          ],
+          "participants": "新表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        }
+      ],
+      "notifications": []
+    },
+    {
+      "name": "trimmed_key_no_targets",
+      "dataset": "no_matches",
+      "id": 43,
+      "actor": "owner",
+      "request": {
+        "originalReservation": {
+          "id": 43,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "旧会議室",
+          "numberOfPeople": 2,
+          "type": "社内",
+          "purpose": "定例会議",
+          "seriesId": " missing ",
+          "date": "2026-06-08T00:00:00",
+          "startTime": "2026-06-08T09:00:00",
+          "endTime": "2026-06-08T10:00:00",
+          "participantIds": [
+            2,
+            3
+          ],
+          "participants": "旧表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        "updatedReservation": {
+          "id": 43,
+          "userId": 2,
+          "name": "送信された名前",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "書き換え要求",
+          "date": "2026-06-09T00:00:00",
+          "startTime": "2026-06-01T10:00:00",
+          "endTime": "2026-06-01T11:00:00",
+          "participantIds": [
+            2,
+            4,
+            4,
+            -1,
+            0
+          ],
+          "participants": "新表示",
+          "repeatType": "毎日",
+          "repeatUntil": "2026-08-01T00:00:00"
+        },
+        "scope": "all",
+        "notifyParticipants": false
+      },
+      "status": 204,
+      "body": "",
+      "updated": [],
+      "notifications": []
+    },
+    {
+      "name": "forbidden",
+      "dataset": "keyed",
+      "id": 11,
+      "actor": "other",
+      "request": {
+        "originalReservation": {
+          "id": 11,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "旧会議室",
+          "numberOfPeople": 2,
+          "type": "社内",
+          "purpose": "定例会議",
+          "seriesId": "series-A",
+          "date": "2026-06-08T13:30:00",
+          "startTime": "2026-06-08T09:00:00",
+          "endTime": "2026-06-08T10:00:00",
+          "participantIds": [
+            2,
+            3
+          ],
+          "participants": "旧表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        "updatedReservation": {
+          "id": 11,
+          "userId": 2,
+          "name": "送信された名前",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "書き換え要求",
+          "date": "2026-06-09T00:00:00",
+          "startTime": "2026-06-01T10:00:00",
+          "endTime": "2026-06-01T11:00:00",
+          "participantIds": [
+            2,
+            4,
+            4,
+            -1,
+            0
+          ],
+          "participants": "新表示",
+          "repeatType": "毎日",
+          "repeatUntil": "2026-08-01T00:00:00"
+        },
+        "scope": "all"
+      },
+      "status": 403,
+      "body": "",
+      "updated": [],
+      "notifications": []
+    },
+    {
+      "name": "unauthenticated",
+      "dataset": "keyed",
+      "id": 11,
+      "actor": "anonymous",
+      "request": {
+        "originalReservation": {
+          "id": 11,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "旧会議室",
+          "numberOfPeople": 2,
+          "type": "社内",
+          "purpose": "定例会議",
+          "seriesId": "series-A",
+          "date": "2026-06-08T13:30:00",
+          "startTime": "2026-06-08T09:00:00",
+          "endTime": "2026-06-08T10:00:00",
+          "participantIds": [
+            2,
+            3
+          ],
+          "participants": "旧表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        "updatedReservation": {
+          "id": 11,
+          "userId": 2,
+          "name": "送信された名前",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "書き換え要求",
+          "date": "2026-06-09T00:00:00",
+          "startTime": "2026-06-01T10:00:00",
+          "endTime": "2026-06-01T11:00:00",
+          "participantIds": [
+            2,
+            4,
+            4,
+            -1,
+            0
+          ],
+          "participants": "新表示",
+          "repeatType": "毎日",
+          "repeatUntil": "2026-08-01T00:00:00"
+        },
+        "scope": "all"
+      },
+      "status": 401,
+      "body": "",
+      "updated": [],
+      "notifications": []
+    },
+    {
+      "name": "template_invalid_time",
+      "dataset": "keyed",
+      "id": 11,
+      "actor": "owner",
+      "request": {
+        "originalReservation": {
+          "id": 11,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "旧会議室",
+          "numberOfPeople": 2,
+          "type": "社内",
+          "purpose": "定例会議",
+          "seriesId": "series-A",
+          "date": "2026-06-08T13:30:00",
+          "startTime": "2026-06-08T09:00:00",
+          "endTime": "2026-06-08T10:00:00",
+          "participantIds": [
+            2,
+            3
+          ],
+          "participants": "旧表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        "updatedReservation": {
+          "id": 11,
+          "userId": 2,
+          "name": "送信された名前",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "書き換え要求",
+          "date": "2026-06-09T00:00:00",
+          "startTime": "2026-06-01T10:00:00",
+          "endTime": "2026-06-01T10:00:00",
+          "participantIds": [
+            2,
+            4,
+            4,
+            -1,
+            0
+          ],
+          "participants": "新表示",
+          "repeatType": "毎日",
+          "repeatUntil": "2026-08-01T00:00:00"
+        },
+        "scope": "all"
+      },
+      "status": 400,
+      "body": "終了時刻は開始時刻より後にしてください。",
+      "updated": [],
+      "notifications": []
+    },
+    {
+      "name": "template_repeat_end_before_date",
+      "dataset": "keyed",
+      "id": 11,
+      "actor": "owner",
+      "request": {
+        "originalReservation": {
+          "id": 11,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "旧会議室",
+          "numberOfPeople": 2,
+          "type": "社内",
+          "purpose": "定例会議",
+          "seriesId": "series-A",
+          "date": "2026-06-08T13:30:00",
+          "startTime": "2026-06-08T09:00:00",
+          "endTime": "2026-06-08T10:00:00",
+          "participantIds": [
+            2,
+            3
+          ],
+          "participants": "旧表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        "updatedReservation": {
+          "id": 11,
+          "userId": 2,
+          "name": "送信された名前",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "書き換え要求",
+          "date": "2026-06-09T00:00:00",
+          "startTime": "2026-06-01T10:00:00",
+          "endTime": "2026-06-01T11:00:00",
+          "participantIds": [
+            2,
+            4,
+            4,
+            -1,
+            0
+          ],
+          "participants": "新表示",
+          "repeatType": "毎日",
+          "repeatUntil": "2026-06-08T23:59:00"
+        },
+        "scope": "all"
+      },
+      "status": 400,
+      "body": "繰り返し終了日は予約日以降にしてください。",
+      "updated": [],
+      "notifications": []
+    },
+    {
+      "name": "target_repeat_end_before_date",
+      "dataset": "keyed",
+      "id": 11,
+      "actor": "owner",
+      "request": {
+        "originalReservation": {
+          "id": 11,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "旧会議室",
+          "numberOfPeople": 2,
+          "type": "社内",
+          "purpose": "定例会議",
+          "seriesId": "series-A",
+          "date": "2026-06-08T13:30:00",
+          "startTime": "2026-06-08T09:00:00",
+          "endTime": "2026-06-08T10:00:00",
+          "participantIds": [
+            2,
+            3
+          ],
+          "participants": "旧表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        "updatedReservation": {
+          "id": 11,
+          "userId": 2,
+          "name": "送信された名前",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "書き換え要求",
+          "date": "2026-06-25T00:00:00",
+          "startTime": "2026-06-01T10:00:00",
+          "endTime": "2026-06-01T11:00:00",
+          "participantIds": [
+            2,
+            4,
+            4,
+            -1,
+            0
+          ],
+          "participants": "新表示",
+          "repeatType": "毎日",
+          "repeatUntil": "2026-08-01T00:00:00"
+        },
+        "scope": "all"
+      },
+      "status": 400,
+      "body": "繰り返し終了日は予約日以降にしてください。",
+      "updated": [],
+      "notifications": []
+    },
+    {
+      "name": "invalid_nested_fields",
+      "dataset": "keyed",
+      "id": 11,
+      "actor": "owner",
+      "request": {
+        "originalReservation": {
+          "id": 11,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "旧会議室",
+          "numberOfPeople": 2,
+          "type": "社内",
+          "purpose": "定例会議",
+          "seriesId": "series-A",
+          "date": "2026-06-08T13:30:00",
+          "startTime": "2026-06-08T09:00:00",
+          "endTime": "2026-06-08T10:00:00",
+          "participantIds": [
+            2,
+            3
+          ],
+          "participants": "旧表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        "updatedReservation": {
+          "id": 11,
+          "userId": 2,
+          "name": "送信された名前",
+          "room": "",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "書き換え要求",
+          "date": "2026-06-09T00:00:00",
+          "startTime": "2026-06-01T10:00:00",
+          "endTime": "2026-06-01T11:00:00",
+          "participantIds": [
+            2,
+            4,
+            4,
+            -1,
+            0
+          ],
+          "participants": "新表示",
+          "repeatType": "毎日",
+          "repeatUntil": "2026-08-01T00:00:00"
+        },
+        "scope": "all"
+      },
+      "status": 400,
+      "body": {
+        "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+        "title": "One or more validation errors occurred.",
+        "status": 400,
+        "errors": {
+          "UpdatedReservation.Room": [
+            "会議室は必須です。"
+          ]
+        }
+      },
+      "updated": [],
+      "notifications": []
+    },
+    {
+      "name": "notification_failure",
+      "dataset": "keyed",
+      "id": 11,
+      "actor": "owner",
+      "request": {
+        "originalReservation": {
+          "id": 11,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "旧会議室",
+          "numberOfPeople": 2,
+          "type": "社内",
+          "purpose": "定例会議",
+          "seriesId": "series-A",
+          "date": "2026-06-08T13:30:00",
+          "startTime": "2026-06-08T09:00:00",
+          "endTime": "2026-06-08T10:00:00",
+          "participantIds": [
+            2,
+            3
+          ],
+          "participants": "旧表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        "updatedReservation": {
+          "id": 11,
+          "userId": 2,
+          "name": "送信された名前",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "書き換え要求",
+          "date": "2026-06-09T00:00:00",
+          "startTime": "2026-06-01T10:00:00",
+          "endTime": "2026-06-01T11:00:00",
+          "participantIds": [
+            2,
+            4,
+            4,
+            -1,
+            0
+          ],
+          "participants": "新表示",
+          "repeatType": "毎日",
+          "repeatUntil": "2026-08-01T00:00:00"
+        },
+        "scope": "all"
+      },
+      "status": 500,
+      "body": "",
+      "updated": [
+        {
+          "id": 10,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "series-A",
+          "date": "2026-06-02T00:00:00",
+          "startTime": "2026-06-02T10:00:00",
+          "endTime": "2026-06-02T11:00:00",
+          "participantIds": [
+            2,
+            4
+          ],
+          "participants": "新表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        {
+          "id": 11,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "series-A",
+          "date": "2026-06-09T00:00:00",
+          "startTime": "2026-06-09T10:00:00",
+          "endTime": "2026-06-09T11:00:00",
+          "participantIds": [
+            2,
+            4
+          ],
+          "participants": "新表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        {
+          "id": 12,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "series-A",
+          "date": "2026-06-09T00:00:00",
+          "startTime": "2026-06-09T10:00:00",
+          "endTime": "2026-06-09T11:00:00",
+          "participantIds": [
+            2,
+            4
+          ],
+          "participants": "新表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        {
+          "id": 13,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "series-A",
+          "date": "2026-06-16T00:00:00",
+          "startTime": "2026-06-16T10:00:00",
+          "endTime": "2026-06-16T11:00:00",
+          "participantIds": [
+            2,
+            4
+          ],
+          "participants": "新表示",
+          "repeatType": "隔週",
+          "repeatUntil": "2026-06-30T22:00:00"
+        }
+      ],
+      "notifications": [],
+      "trigger": "notice"
+    },
+    {
+      "name": "later_update_failure",
+      "dataset": "keyed",
+      "id": 11,
+      "actor": "owner",
+      "request": {
+        "originalReservation": {
+          "id": 11,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "旧会議室",
+          "numberOfPeople": 2,
+          "type": "社内",
+          "purpose": "定例会議",
+          "seriesId": "series-A",
+          "date": "2026-06-08T13:30:00",
+          "startTime": "2026-06-08T09:00:00",
+          "endTime": "2026-06-08T10:00:00",
+          "participantIds": [
+            2,
+            3
+          ],
+          "participants": "旧表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        "updatedReservation": {
+          "id": 11,
+          "userId": 2,
+          "name": "送信された名前",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "書き換え要求",
+          "date": "2026-06-09T00:00:00",
+          "startTime": "2026-06-01T10:00:00",
+          "endTime": "2026-06-01T11:00:00",
+          "participantIds": [
+            2,
+            4,
+            4,
+            -1,
+            0
+          ],
+          "participants": "新表示",
+          "repeatType": "毎日",
+          "repeatUntil": "2026-08-01T00:00:00"
+        },
+        "scope": "all",
+        "notifyParticipants": false
+      },
+      "status": 500,
+      "body": "",
+      "updated": [],
+      "notifications": [],
+      "trigger": "update"
+    },
+    {
+      "name": "missing",
+      "dataset": "keyed",
+      "id": 999,
+      "actor": "owner",
+      "request": {
+        "originalReservation": {
+          "id": 11,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "旧会議室",
+          "numberOfPeople": 2,
+          "type": "社内",
+          "purpose": "定例会議",
+          "seriesId": "series-A",
+          "date": "2026-06-08T13:30:00",
+          "startTime": "2026-06-08T09:00:00",
+          "endTime": "2026-06-08T10:00:00",
+          "participantIds": [
+            2,
+            3
+          ],
+          "participants": "旧表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        "updatedReservation": {
+          "id": 999,
+          "userId": 2,
+          "name": "送信された名前",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "書き換え要求",
+          "date": "2026-06-09T00:00:00",
+          "startTime": "2026-06-01T10:00:00",
+          "endTime": "2026-06-01T11:00:00",
+          "participantIds": [
+            2,
+            4,
+            4,
+            -1,
+            0
+          ],
+          "participants": "新表示",
+          "repeatType": "毎日",
+          "repeatUntil": "2026-08-01T00:00:00"
+        },
+        "scope": "all"
+      },
+      "status": 404,
+      "body": {
+        "type": "https://tools.ietf.org/html/rfc9110#section-15.5.5",
+        "title": "Not Found",
+        "status": 404
+      },
+      "updated": [],
+      "notifications": []
+    },
+    {
+      "name": "missing_original",
+      "dataset": "keyed",
+      "id": 11,
+      "actor": "owner",
+      "request": {
+        "updatedReservation": {
+          "id": 11,
+          "userId": 2,
+          "name": "送信された名前",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "書き換え要求",
+          "date": "2026-06-09T00:00:00",
+          "startTime": "2026-06-01T10:00:00",
+          "endTime": "2026-06-01T11:00:00",
+          "participantIds": [
+            2,
+            4,
+            4,
+            -1,
+            0
+          ],
+          "participants": "新表示",
+          "repeatType": "毎日",
+          "repeatUntil": "2026-08-01T00:00:00"
+        },
+        "scope": "all"
+      },
+      "status": 400,
+      "body": {
+        "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+        "title": "One or more validation errors occurred.",
+        "status": 400,
+        "errors": {
+          "OriginalReservation.Name": [
+            "名前は必須です。"
+          ],
+          "OriginalReservation.Room": [
+            "会議室は必須です。"
+          ]
+        }
+      },
+      "updated": [],
+      "notifications": []
+    },
+    {
+      "name": "explicit_null_scope",
+      "dataset": "keyed",
+      "id": 11,
+      "actor": "owner",
+      "request": {
+        "originalReservation": {
+          "id": 11,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "旧会議室",
+          "numberOfPeople": 2,
+          "type": "社内",
+          "purpose": "定例会議",
+          "seriesId": "series-A",
+          "date": "2026-06-08T13:30:00",
+          "startTime": "2026-06-08T09:00:00",
+          "endTime": "2026-06-08T10:00:00",
+          "participantIds": [
+            2,
+            3
+          ],
+          "participants": "旧表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        "updatedReservation": {
+          "id": 11,
+          "userId": 2,
+          "name": "送信された名前",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "書き換え要求",
+          "date": "2026-06-09T00:00:00",
+          "startTime": "2026-06-01T10:00:00",
+          "endTime": "2026-06-01T11:00:00",
+          "participantIds": [
+            2,
+            4,
+            4,
+            -1,
+            0
+          ],
+          "participants": "新表示",
+          "repeatType": "毎日",
+          "repeatUntil": "2026-08-01T00:00:00"
+        },
+        "scope": null
+      },
+      "status": 400,
+      "body": {
+        "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+        "title": "One or more validation errors occurred.",
+        "status": 400,
+        "errors": {
+          "Scope": [
+            "The Scope field is required."
+          ]
+        }
+      },
+      "updated": [],
+      "notifications": []
+    },
+    {
+      "name": "explicit_null_notify",
+      "dataset": "keyed",
+      "id": 11,
+      "actor": "owner",
+      "request": {
+        "originalReservation": {
+          "id": 11,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "旧会議室",
+          "numberOfPeople": 2,
+          "type": "社内",
+          "purpose": "定例会議",
+          "seriesId": "series-A",
+          "date": "2026-06-08T13:30:00",
+          "startTime": "2026-06-08T09:00:00",
+          "endTime": "2026-06-08T10:00:00",
+          "participantIds": [
+            2,
+            3
+          ],
+          "participants": "旧表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        "updatedReservation": {
+          "id": 11,
+          "userId": 2,
+          "name": "送信された名前",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新しい定例",
+          "seriesId": "書き換え要求",
+          "date": "2026-06-09T00:00:00",
+          "startTime": "2026-06-01T10:00:00",
+          "endTime": "2026-06-01T11:00:00",
+          "participantIds": [
+            2,
+            4,
+            4,
+            -1,
+            0
+          ],
+          "participants": "新表示",
+          "repeatType": "毎日",
+          "repeatUntil": "2026-08-01T00:00:00"
+        },
+        "scope": "all",
+        "notifyParticipants": null
+      },
+      "status": 400,
+      "body": {
+        "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+        "title": "One or more validation errors occurred.",
+        "status": 400,
+        "errors": {
+          "request": [
+            "The request field is required."
+          ],
+          "$.notifyParticipants": [
+            "The JSON value could not be converted to System.Boolean. Path: $.notifyParticipants | LineNumber: 0 | BytePositionInLine: 888."
+          ]
+        }
+      },
+      "updated": [],
+      "notifications": []
+    },
+    {
+      "name": "explicit_null_updated",
+      "dataset": "keyed",
+      "id": 11,
+      "actor": "owner",
+      "request": {
+        "originalReservation": {
+          "id": 11,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "旧会議室",
+          "numberOfPeople": 2,
+          "type": "社内",
+          "purpose": "定例会議",
+          "seriesId": "series-A",
+          "date": "2026-06-08T13:30:00",
+          "startTime": "2026-06-08T09:00:00",
+          "endTime": "2026-06-08T10:00:00",
+          "participantIds": [
+            2,
+            3
+          ],
+          "participants": "旧表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        "updatedReservation": null,
+        "scope": "all"
+      },
+      "status": 400,
+      "body": {
+        "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+        "title": "One or more validation errors occurred.",
+        "status": 400,
+        "errors": {
+          "UpdatedReservation": [
+            "The UpdatedReservation field is required."
+          ]
+        }
+      },
+      "updated": [],
+      "notifications": []
+    }
+  ]
+}

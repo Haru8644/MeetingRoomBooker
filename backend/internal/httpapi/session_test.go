@@ -37,7 +37,7 @@ func TestSessionRoutesWithoutDatabase(t *testing.T) {
 		t.Fatal("unauthenticated request read participants")
 		return nil, nil
 	}
-	handler, err := RegisterSessionRoutes(NewHandler(nil, time.Second), auth.NewService(nil), list, create, nil, nil, nil, nil, listWorkSchedules, listParticipants, nil,
+	handler, err := RegisterSessionRoutes(NewHandler(nil, time.Second), auth.NewService(nil), list, create, nil, nil, nil, nil, nil, listWorkSchedules, listParticipants, nil,
 		SessionOptions{Development: true, FrontendOrigins: []string{trusted}})
 	if err != nil {
 		t.Fatal(err)
@@ -46,6 +46,7 @@ func TestSessionRoutesWithoutDatabase(t *testing.T) {
 	for _, route := range []struct{ method, path string }{
 		{http.MethodGet, "/api/Auth/me"}, {http.MethodPost, logout}, {http.MethodGet, "/api/Reservations"}, {http.MethodPost, "/api/Reservations"},
 		{http.MethodPost, "/api/Reservations/series"},
+		{http.MethodPost, "/api/Reservations/7/series-update"},
 		{http.MethodGet, "/api/work-schedule-entries"},
 		{http.MethodGet, "/api/Users/participants"},
 		{http.MethodGet, "/api/Notifications/user/2"}, {http.MethodPut, "/api/Notifications/101/read"}, {http.MethodDelete, "/api/Notifications/101"},
@@ -180,7 +181,7 @@ func TestSessionCookieSecurePolicy(t *testing.T) {
 			t.Fatalf("unexpected cookie attributes (development=%t, URL=%s)", test.development, test.url)
 		}
 	}
-	if _, err := RegisterSessionRoutes(http.NewServeMux(), auth.NewService(nil), http.NotFoundHandler(), nil, nil, nil, nil, nil, nil, nil, nil,
+	if _, err := RegisterSessionRoutes(http.NewServeMux(), auth.NewService(nil), http.NotFoundHandler(), nil, nil, nil, nil, nil, nil, nil, nil, nil,
 		SessionOptions{FrontendOrigins: []string{"http://127.0.0.1:5168"}}); err == nil {
 		t.Fatal("HTTP frontend origin accepted outside development")
 	}
