@@ -1,0 +1,83 @@
+[
+  {
+    "name": "missing",
+    "actor": "owner",
+    "id": 999,
+    "status": 404,
+    "reservationIds": [
+      61,
+      62,
+      63
+    ],
+    "notices": [
+      {
+        "id": 5,
+        "targetReservationId": 61
+      }
+    ]
+  },
+  {
+    "name": "forbidden",
+    "actor": "other",
+    "id": 61,
+    "status": 403,
+    "reservationIds": [
+      61,
+      62,
+      63
+    ],
+    "notices": [
+      {
+        "id": 5,
+        "targetReservationId": 61
+      }
+    ]
+  },
+  {
+    "name": "owner_cancel",
+    "actor": "owner",
+    "id": 61,
+    "status": 204,
+    "reservationIds": [
+      62,
+      63
+    ],
+    "notices": [
+      {
+        "id": 5,
+        "targetReservationId": 61
+      }
+    ]
+  },
+  {
+    "name": "repeat_cancel",
+    "actor": "owner",
+    "id": 61,
+    "status": 404,
+    "reservationIds": [
+      62,
+      63
+    ],
+    "notices": [
+      {
+        "id": 5,
+        "targetReservationId": 61
+      }
+    ]
+  },
+  {
+    "name": "admin_cancel",
+    "actor": "admin",
+    "id": 63,
+    "status": 204,
+    "reservationIds": [
+      62
+    ],
+    "notices": [
+      {
+        "id": 5,
+        "targetReservationId": 61
+      }
+    ]
+  }
+]

@@ -21,15 +21,9 @@ func (e ValidationError) Error() string { return string(e) }
 
 func Update(ctx context.Context, pool *pgxpool.Pool, entry ListEntry, actorID int, isAdmin, notify bool) error {
 	return pgx.BeginFunc(ctx, pool, func(tx pgx.Tx) error {
-		previous, err := scanReservation(tx.QueryRow(ctx, reservationSelect+` WHERE id = $1 FOR UPDATE`, entry.ID))
-		if errors.Is(err, pgx.ErrNoRows) {
-			return ErrNotFound
-		}
+		previous, err := lockManagedReservation(ctx, tx, entry.ID, actorID, isAdmin)
 		if err != nil {
-			return fmt.Errorf("read reservation for update: %w", err)
-		}
-		if previous.UserID != actorID && !isAdmin {
-			return ErrForbidden
+			return err
 		}
 		entry.UserID, entry.Name, entry.SeriesID = previous.UserID, previous.Name, previous.SeriesID
 		if !entry.StartTime.Before(entry.EndTime) {
@@ -66,4 +60,18 @@ func Update(ctx context.Context, pool *pgxpool.Pool, entry ListEntry, actorID in
 		}
 		return nil
 	})
+}
+
+func lockManagedReservation(ctx context.Context, tx pgx.Tx, id, actorID int, isAdmin bool) (ListEntry, error) {
+	entry, err := scanReservation(tx.QueryRow(ctx, reservationSelect+` WHERE id = $1 FOR UPDATE`, id))
+	if errors.Is(err, pgx.ErrNoRows) {
+		return ListEntry{}, ErrNotFound
+	}
+	if err != nil {
+		return ListEntry{}, fmt.Errorf("lock reservation: %w", err)
+	}
+	if entry.UserID != actorID && !isAdmin {
+		return ListEntry{}, ErrForbidden
+	}
+	return entry, nil
 }
