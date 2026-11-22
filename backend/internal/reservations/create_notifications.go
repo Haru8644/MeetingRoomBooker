@@ -24,6 +24,35 @@ func notifyAddedParticipants(ctx context.Context, tx pgx.Tx, entry ListEntry) er
 	return saveReservationNotifications(ctx, tx, entry, recipients, notificationType(warning), addedParticipantMessage(entry, warning))
 }
 
+func notifyAddedSeriesParticipants(ctx context.Context, tx pgx.Tx, entries []ListEntry) error {
+	// The first saved row represents the series. Use the participants from
+	// every occurrence for its conflict warning and for the recipients.
+	first := entries[0]
+	first.ParticipantIDs = nil
+	recurringCount := 0
+	for _, entry := range entries {
+		first.ParticipantIDs = append(first.ParticipantIDs, entry.ParticipantIDs...)
+		if entry.SeriesID != nil {
+			recurringCount++
+		}
+	}
+	first.Normalize()
+	if first.SeriesID == nil {
+		return notifyAddedParticipants(ctx, tx, first)
+	}
+	recipients := notifiableParticipants(first)
+	if len(recipients) == 0 {
+		return nil
+	}
+	warning, err := participantConflictWarning(ctx, tx, first)
+	if err != nil {
+		return fmt.Errorf("check series participant conflicts: %w", err)
+	}
+	prefix := fmt.Sprintf("%sさんが繰り返し予約「%s」にあなたを追加しました。(", first.Name, reservationLabel(first))
+	message := fmt.Sprintf("%s%d件)%s", prefix, recurringCount, warning)
+	return saveMatchingReservationNotifications(ctx, tx, first, recipients, notificationType(warning), message, prefix)
+}
+
 func notifiableParticipants(entry ListEntry) []int {
 	recipients := make([]int, 0, len(entry.ParticipantIDs))
 	seen := make(map[int]bool, len(entry.ParticipantIDs))

@@ -49,15 +49,19 @@ func newReservationCreateHandler(create reservationCreator) func(http.ResponseWr
 		case err != nil:
 			w.WriteHeader(http.StatusInternalServerError)
 		default:
-			scheme := "http"
-			if r.TLS != nil {
-				scheme = "https"
-			}
-			location := url.URL{Scheme: scheme, Host: r.Host, Path: "/api/Reservations", RawQuery: "id=" + strconv.Itoa(created.ID)}
-			w.Header().Set("Location", location.String())
+			w.Header().Set("Location", reservationListLocation(r, "id="+strconv.Itoa(created.ID)))
 			writeJSON(w, http.StatusCreated, newReservationResponse(created))
 		}
 	}
+}
+
+func reservationListLocation(r *http.Request, query string) string {
+	scheme := "http"
+	if r.TLS != nil {
+		scheme = "https"
+	}
+	location := url.URL{Scheme: scheme, Host: r.Host, Path: "/api/Reservations", RawQuery: query}
+	return location.String()
 }
 
 func decodeReservationInput(w http.ResponseWriter, r *http.Request, update bool) (reservationInput, bool) {
