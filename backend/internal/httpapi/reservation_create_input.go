@@ -15,7 +15,9 @@ import (
 
 const noRepeat = "しない"
 
-type reservationCreateInput struct {
+type reservationInput struct {
+	ID             jsonInt32
+	UserID         jsonInt32
 	Name           *string
 	Room           *string
 	NumberOfPeople jsonInt32
@@ -31,18 +33,18 @@ type reservationCreateInput struct {
 	RepeatUntil    *reservationDateTime
 }
 
-func readReservationCreateInput(decoder *json.Decoder, now time.Time) (reservationCreateInput, error) {
+func readReservationInput(decoder *json.Decoder, now time.Time, update bool) (reservationInput, error) {
 	first, err := decoder.Token()
 	if err != nil {
-		return reservationCreateInput{}, err
+		return reservationInput{}, err
 	}
 	if first == nil {
 		if err := decoder.Decode(new(json.RawMessage)); err != nil {
-			return reservationCreateInput{}, err
+			return reservationInput{}, err
 		}
 	}
 	if first != json.Delim('{') {
-		return reservationCreateInput{}, errors.New("expected a JSON object")
+		return reservationInput{}, errors.New("expected a JSON object")
 	}
 
 	// C# aliases share setters, so the last occurrence of a field or its alias wins.
@@ -50,11 +52,11 @@ func readReservationCreateInput(decoder *json.Decoder, now time.Time) (reservati
 	for decoder.More() {
 		key, err := decoder.Token()
 		if err != nil {
-			return reservationCreateInput{}, err
+			return reservationInput{}, err
 		}
 		var value json.RawMessage
 		if err := decoder.Decode(&value); err != nil {
-			return reservationCreateInput{}, err
+			return reservationInput{}, err
 		}
 		field := strings.ToLower(key.(string))
 		switch field {
@@ -72,24 +74,28 @@ func readReservationCreateInput(decoder *json.Decoder, now time.Time) (reservati
 			case "false":
 				value = json.RawMessage(`"来客"`)
 			default:
-				return reservationCreateInput{}, errors.New("expected a boolean isInternal")
+				return reservationInput{}, errors.New("expected a boolean isInternal")
 			}
 		}
 		fields[field] = value
 	}
 	if _, err := decoder.Token(); err != nil {
-		return reservationCreateInput{}, err
+		return reservationInput{}, err
 	}
 	if err := decoder.Decode(new(json.RawMessage)); err == nil {
-		return reservationCreateInput{}, errors.New("expected one JSON object")
+		return reservationInput{}, errors.New("expected one JSON object")
 	} else if err != io.EOF {
-		return reservationCreateInput{}, err
+		return reservationInput{}, err
+	}
+	if !update {
+		delete(fields, "id")
+		delete(fields, "userid")
 	}
 	raw, err := json.Marshal(fields)
 	if err != nil {
-		return reservationCreateInput{}, err
+		return reservationInput{}, err
 	}
-	input := reservationCreateInput{
+	input := reservationInput{
 		NumberOfPeople: 1, Type: new("社内"), Purpose: new(""), Date: reservationDateTime{dotnettime.OnDate(now, time.Time{})},
 		ParticipantIDs: []jsonInt32{}, Participants: new(""), RepeatType: new(noRepeat),
 	}
@@ -97,7 +103,7 @@ func readReservationCreateInput(decoder *json.Decoder, now time.Time) (reservati
 	return input, err
 }
 
-func (input reservationCreateInput) validate() map[string][]string {
+func (input reservationInput) validate() map[string][]string {
 	problems := make(map[string][]string)
 	if input.Name == nil || strings.TrimSpace(*input.Name) == "" {
 		problems["Name"] = []string{"名前は必須です。"}
@@ -126,19 +132,28 @@ func (input reservationCreateInput) validate() map[string][]string {
 	return problems
 }
 
-func (input reservationCreateInput) normalize(user auth.User) (reservations.ListEntry, string) {
+func (input reservationInput) normalize(user auth.User) (reservations.ListEntry, string) {
+	entry := input.entry(user.ID, user.Name)
+	if !entry.StartTime.Before(entry.EndTime) {
+		return reservations.ListEntry{}, "終了時刻は開始時刻より後にしてください。"
+	}
+	if entry.RepeatUntil != nil {
+		return reservations.ListEntry{}, "繰り返し予約には対応していません。"
+	}
+	return entry, ""
+}
+
+func (input reservationInput) entry(userID int, name string) reservations.ListEntry {
 	date := input.Date.Time
 	start := dotnettime.OnDate(date, input.StartTime.Time)
 	end := dotnettime.OnDate(date, input.EndTime.Time)
-	if !start.Before(end) {
-		return reservations.ListEntry{}, "終了時刻は開始時刻より後にしてください。"
-	}
 	repeat := *input.RepeatType
 	if strings.TrimSpace(repeat) == "" {
 		repeat = noRepeat
 	}
+	var repeatUntil *time.Time
 	if repeat != noRepeat && input.RepeatUntil != nil {
-		return reservations.ListEntry{}, "繰り返し予約には対応していません。"
+		repeatUntil = &input.RepeatUntil.Time
 	}
 	participants := make([]int, 0, len(input.ParticipantIDs)+1)
 	seen := make(map[int]bool, len(input.ParticipantIDs))
@@ -148,14 +163,15 @@ func (input reservationCreateInput) normalize(user auth.User) (reservations.List
 			seen[int(id)] = true
 		}
 	}
-	if user.ID > 0 && !seen[user.ID] {
-		participants = append([]int{user.ID}, participants...)
+	if userID > 0 && !seen[userID] {
+		participants = append([]int{userID}, participants...)
 	}
 	return reservations.ListEntry{
 		Reservation: reservations.Reservation{Room: *input.Room, Date: date, StartTime: start, EndTime: end},
-		UserID:      user.ID, Name: user.Name, NumberOfPeople: int(input.NumberOfPeople), Type: *input.Type,
+		ID:          int(input.ID), UserID: userID, Name: name, NumberOfPeople: int(input.NumberOfPeople), Type: *input.Type,
 		Purpose: *input.Purpose, Participants: *input.Participants, ParticipantIDs: participants, RepeatType: repeat,
-	}, ""
+		RepeatUntil: repeatUntil,
+	}
 }
 
 type reservationDateTime struct{ time.Time }

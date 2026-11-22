@@ -245,6 +245,20 @@ go test -v -count=1 ./cmd/api -run '^Test(SingleReservationCreate|ReservationCre
 
 The PostgreSQL 16.2 checks exercised the real Go HTTP endpoints. The recipient inbox matched SQLite for the notice text, type, read flag and target date, including seven fractional digits. The tests also checked the generated reservation link, duplicate refresh, a rejected room overlap, concurrent creation, and a forced notification-write failure.
 
+## Go single reservation update
+
+Blazor sends `PUT /api/Reservations/{id}?notifyParticipants=true|false`. The Go route checks the body ID against the route ID and grants update access to the organizer and administrators. It preserves the stored organizer ID, name, and series ID. An update can save an overlapping booking as it does in C#. The row lock serializes edits to the same reservation, and the destination room/date lock coordinates the edit with concurrent creates.
+
+Notifications default to enabled. Added participants get an invitation, removed participants get an `Info` removal notice, and retained participants get a summary when tracked fields change or a timed external appointment overlaps. Go reuses the single-create notice formatting and upsert. The booking and its notices commit together. The C# reference saved them in separate operations.
+
+Set `RESERVATION_UPDATE_TEST_DATABASE_URL` to a disposable PostgreSQL URL that permits creating schemas and run the following from `backend`.
+
+```bash
+go test -v -count=1 ./cmd/api -run '^TestSingleReservationUpdatePostgres$'
+```
+
+The [C# `d8fe3b7` capture](../backend/internal/httpapi/testdata/reservation_update_csharp.json) records the rows from four controller calls with SQLite: participant changes, a warning-only edit, an admin edit with notices disabled, and an edit without changes or warnings. The Go HTTP test checks the resulting reservation and notices on PostgreSQL 16.2. It also verifies authentication, authorization, input errors and rollback after a forced notice write failure.
+
 ## Recovery to C# and SQLite
 
 Rehearse each stage in development with synthetic rows and a recording fake Chatwork sender. `scripts/deploy/deploy-prod.sh` uses SQLite's backup API and integrity check. `scripts/deploy/rollback-prod.sh` restores the earlier API, web assets and final SQLite snapshot. A rollback after Go accepts writes also needs the committed PostgreSQL state.

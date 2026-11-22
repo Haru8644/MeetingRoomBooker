@@ -20,7 +20,7 @@ type notificationInbox interface {
 
 func (h sessionHandler) registerNotificationRoutes(mux *http.ServeMux, origins *http.CrossOriginProtection, inbox notificationInbox) {
 	mux.Handle("POST /api/Notifications", origins.Handler(h.requireSession(newAdminNotificationCreateHandler(inbox))))
-	mux.Handle("GET /api/Notifications/user/{userId}", h.notificationRoute("userId", func(w http.ResponseWriter, r *http.Request, user auth.User, userID int) {
+	mux.Handle("GET /api/Notifications/user/{userId}", h.idRoute("userId", func(w http.ResponseWriter, r *http.Request, user auth.User, userID int) {
 		if user.ID != userID && !user.IsAdmin {
 			w.WriteHeader(http.StatusForbidden)
 			return
@@ -32,15 +32,15 @@ func (h sessionHandler) registerNotificationRoutes(mux *http.ServeMux, origins *
 		}
 		writeJSON(w, http.StatusOK, entries)
 	}))
-	mux.Handle("PUT /api/Notifications/{id}/read", origins.Handler(h.notificationRoute("id", func(w http.ResponseWriter, r *http.Request, user auth.User, id int) {
+	mux.Handle("PUT /api/Notifications/{id}/read", origins.Handler(h.idRoute("id", func(w http.ResponseWriter, r *http.Request, user auth.User, id int) {
 		writeNotificationMutation(w, inbox.MarkRead(r.Context(), id, user.ID, user.IsAdmin))
 	})))
-	mux.Handle("DELETE /api/Notifications/{id}", origins.Handler(h.notificationRoute("id", func(w http.ResponseWriter, r *http.Request, user auth.User, id int) {
+	mux.Handle("DELETE /api/Notifications/{id}", origins.Handler(h.idRoute("id", func(w http.ResponseWriter, r *http.Request, user auth.User, id int) {
 		writeNotificationMutation(w, inbox.Delete(r.Context(), id, user.ID, user.IsAdmin))
 	})))
 }
 
-func (h sessionHandler) notificationRoute(parameter string, next func(http.ResponseWriter, *http.Request, auth.User, int)) http.Handler {
+func (h sessionHandler) idRoute(parameter string, next func(http.ResponseWriter, *http.Request, auth.User, int)) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		id, err := strconv.ParseInt(strings.TrimSpace(r.PathValue(parameter)), 10, 32)
 		if err != nil {

@@ -33,7 +33,7 @@ type sessionHandler struct {
 }
 
 func RegisterSessionRoutes(mux *http.ServeMux, service sessionService, reservationList http.Handler,
-	createReservation reservationCreator, listWorkSchedules workScheduleLister,
+	createReservation reservationCreator, updateReservation reservationUpdater, listWorkSchedules workScheduleLister,
 	listParticipants func(context.Context) ([]users.Participant, error), inbox notificationInbox, options SessionOptions,
 ) (http.Handler, error) {
 	csrf := http.NewCrossOriginProtection()
@@ -69,6 +69,7 @@ func RegisterSessionRoutes(mux *http.ServeMux, service sessionService, reservati
 		reservationList.ServeHTTP(w, r)
 	}))
 	mux.Handle(reservationCreatePattern, csrf.Handler(h.requireSession(newReservationCreateHandler(createReservation))))
+	mux.Handle("PUT /api/Reservations/{id}", csrf.Handler(h.idRoute("id", newReservationUpdateHandler(updateReservation))))
 	mux.Handle(workScheduleListPattern, h.requireSession(newWorkScheduleListHandler(listWorkSchedules)))
 	mux.Handle("GET /api/Users/participants", h.requireSession(func(w http.ResponseWriter, r *http.Request, _ auth.User) {
 		participants, err := listParticipants(r.Context())
