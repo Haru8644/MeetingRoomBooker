@@ -34,6 +34,7 @@ type sessionHandler struct {
 
 func RegisterSessionRoutes(mux *http.ServeMux, service sessionService, reservationList http.Handler,
 	createReservation reservationCreator, createReservationSeries reservationSeriesCreator, updateReservation reservationUpdater,
+	updateReservationSeries reservationSeriesUpdater,
 	deleteReservation func(context.Context, int, int, bool) error,
 	changeParticipation func(context.Context, int, int, bool) error, listWorkSchedules workScheduleLister,
 	listParticipants func(context.Context) ([]users.Participant, error), inbox notificationInbox, options SessionOptions,
@@ -73,6 +74,7 @@ func RegisterSessionRoutes(mux *http.ServeMux, service sessionService, reservati
 	mux.Handle(reservationCreatePattern, csrf.Handler(h.requireSession(newReservationCreateHandler(createReservation))))
 	mux.Handle("POST /api/Reservations/series", csrf.Handler(h.requireSession(newReservationSeriesCreateHandler(createReservationSeries))))
 	mux.Handle("PUT /api/Reservations/{id}", csrf.Handler(h.idRoute("id", newReservationUpdateHandler(updateReservation))))
+	mux.Handle("POST /api/Reservations/{id}/series-update", csrf.Handler(h.idRoute("id", newReservationSeriesUpdateHandler(updateReservationSeries))))
 	mux.Handle("DELETE /api/Reservations/{id}", csrf.Handler(h.idRoute("id", func(w http.ResponseWriter, r *http.Request, user auth.User, id int) {
 		writeReservationMutationResult(w, r, deleteReservation(r.Context(), id, user.ID, user.IsAdmin))
 	})))

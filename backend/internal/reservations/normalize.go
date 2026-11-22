@@ -8,6 +8,10 @@ import (
 
 const NoRepeat = "しない"
 
+func isRecurringReservation(entry ListEntry) bool {
+	return entry.RepeatUntil != nil && strings.TrimSpace(entry.RepeatType) != "" && entry.RepeatType != NoRepeat
+}
+
 func (entry *ListEntry) Normalize() {
 	participants := make([]int, 0, len(entry.ParticipantIDs)+1)
 	seen := make(map[int]bool, len(entry.ParticipantIDs))

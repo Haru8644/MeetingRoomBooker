@@ -26,7 +26,7 @@ func CreateSeries(ctx context.Context, pool *pgxpool.Pool, entries []ListEntry, 
 	seriesID := hex.EncodeToString(uuid[:])
 
 	err := pgx.BeginTxFunc(ctx, pool, pgx.TxOptions{IsoLevel: pgx.ReadCommitted}, func(tx pgx.Tx) error {
-		if err := lockSeriesSlots(ctx, tx, entries); err != nil {
+		if err := lockReservationSlots(ctx, tx, entries); err != nil {
 			return err
 		}
 		earlier := make(map[reservationSlot][]ListEntry)
@@ -87,7 +87,7 @@ func reservationDay(date time.Time) int64 {
 	return dotnettime.Ticks(date) / dotnettime.TicksPerDay
 }
 
-func lockSeriesSlots(ctx context.Context, tx pgx.Tx, entries []ListEntry) error {
+func lockReservationSlots(ctx context.Context, tx pgx.Tx, entries []ListEntry) error {
 	rooms := make([]string, len(entries))
 	days := make([]int32, len(entries))
 	for i, entry := range entries {
