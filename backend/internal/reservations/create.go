@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strings"
 
 	"github.com/Haru8644/MeetingRoomBooker/backend/internal/dotnettime"
 	"github.com/jackc/pgx/v5"
@@ -36,13 +35,8 @@ func Create(ctx context.Context, pool *pgxpool.Pool, entry ListEntry, allowOverl
 				return err
 			}
 		}
-		if err := tx.QueryRow(ctx, `
-			INSERT INTO reservations (user_id, name, room, number_of_people, type, purpose,
-			    date_ticks, start_time_ticks, end_time_ticks, participant_ids, participants, repeat_type)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-			RETURNING id`, entry.UserID, entry.Name, entry.Room, entry.NumberOfPeople, entry.Type, entry.Purpose,
-			date, start, end, entry.ParticipantIDs, entry.Participants, entry.RepeatType).Scan(&entry.ID); err != nil {
-			return fmt.Errorf("insert reservation: %w", err)
+		if err := insertReservation(ctx, tx, &entry); err != nil {
+			return err
 		}
 		return notifyAddedParticipants(ctx, tx, entry)
 	})
@@ -50,6 +44,25 @@ func Create(ctx context.Context, pool *pgxpool.Pool, entry ListEntry, allowOverl
 		return ListEntry{}, err
 	}
 	return entry, nil
+}
+
+func insertReservation(ctx context.Context, tx pgx.Tx, entry *ListEntry) error {
+	var repeatUntil *int64
+	if entry.RepeatUntil != nil {
+		repeatUntil = new(dotnettime.Ticks(*entry.RepeatUntil))
+	}
+	err := tx.QueryRow(ctx, `
+		INSERT INTO reservations (user_id, name, room, number_of_people, type, purpose,
+		    date_ticks, start_time_ticks, end_time_ticks, participant_ids, participants, repeat_type,
+		    series_id, repeat_until_ticks)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+		RETURNING id`, entry.UserID, entry.Name, entry.Room, entry.NumberOfPeople, entry.Type, entry.Purpose,
+		dotnettime.Ticks(entry.Date), dotnettime.Ticks(entry.StartTime), dotnettime.Ticks(entry.EndTime),
+		entry.ParticipantIDs, entry.Participants, entry.RepeatType, entry.SeriesID, repeatUntil).Scan(&entry.ID)
+	if err != nil {
+		return fmt.Errorf("insert reservation: %w", err)
+	}
+	return nil
 }
 
 func lockReservationSlot(ctx context.Context, tx pgx.Tx, room string, day int64) error {
@@ -74,11 +87,14 @@ func checkConflict(ctx context.Context, tx pgx.Tx, room string, day, start, end 
 	if err != nil {
 		return fmt.Errorf("check reservation conflicts: %w", err)
 	}
-	label := purpose
-	if strings.TrimSpace(label) == "" {
-		label = name
-	}
-	return &ConflictError{Reservation: Reservation{
-		Room: room, Date: dotnettime.FromTicks(date), StartTime: dotnettime.FromTicks(existingStart), EndTime: dotnettime.FromTicks(existingEnd),
-	}, Label: label}
+	return reservationConflict(ListEntry{
+		Reservation: Reservation{
+			Room: room, Date: dotnettime.FromTicks(date), StartTime: dotnettime.FromTicks(existingStart), EndTime: dotnettime.FromTicks(existingEnd),
+		},
+		Name: name, Purpose: purpose,
+	})
+}
+
+func reservationConflict(entry ListEntry) *ConflictError {
+	return &ConflictError{Reservation: entry.Reservation, Label: reservationLabel(entry)}
 }
