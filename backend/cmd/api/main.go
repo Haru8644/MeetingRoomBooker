@@ -75,6 +75,9 @@ func run(ctx context.Context) error {
 	deleteReservation := func(ctx context.Context, id, actorID int, isAdmin bool) error {
 		return reservations.Delete(ctx, pool, id, actorID, isAdmin)
 	}
+	changeParticipation := func(ctx context.Context, id, actorID int, join bool) error {
+		return reservations.ChangeParticipation(ctx, pool, id, actorID, join)
+	}
 	listWorkSchedules := func(ctx context.Context, from, to time.Time) ([]workschedules.Entry, error) {
 		return workschedules.List(ctx, pool, from, to)
 	}
@@ -82,7 +85,7 @@ func run(ctx context.Context) error {
 		return users.ListParticipants(ctx, pool)
 	}
 	handler, err := httpapi.RegisterSessionRoutes(httpapi.NewHandler(ping, readinessTimeout), auth.NewService(pool),
-		reservationList, createReservation, updateReservation, deleteReservation, listWorkSchedules, listParticipants, notifications.NewInbox(pool),
+		reservationList, createReservation, updateReservation, deleteReservation, changeParticipation, listWorkSchedules, listParticipants, notifications.NewInbox(pool),
 		httpapi.SessionOptions{Development: development, FrontendOrigins: strings.Split(os.Getenv("FRONTEND_ORIGINS"), ",")})
 	if err != nil {
 		return err

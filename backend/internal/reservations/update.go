@@ -63,15 +63,23 @@ func Update(ctx context.Context, pool *pgxpool.Pool, entry ListEntry, actorID in
 }
 
 func lockManagedReservation(ctx context.Context, tx pgx.Tx, id, actorID int, isAdmin bool) (ListEntry, error) {
+	entry, err := lockReservation(ctx, tx, id)
+	if err != nil {
+		return ListEntry{}, err
+	}
+	if entry.UserID != actorID && !isAdmin {
+		return ListEntry{}, ErrForbidden
+	}
+	return entry, nil
+}
+
+func lockReservation(ctx context.Context, tx pgx.Tx, id int) (ListEntry, error) {
 	entry, err := scanReservation(tx.QueryRow(ctx, reservationSelect+` WHERE id = $1 FOR UPDATE`, id))
 	if errors.Is(err, pgx.ErrNoRows) {
 		return ListEntry{}, ErrNotFound
 	}
 	if err != nil {
 		return ListEntry{}, fmt.Errorf("lock reservation: %w", err)
-	}
-	if entry.UserID != actorID && !isAdmin {
-		return ListEntry{}, ErrForbidden
 	}
 	return entry, nil
 }

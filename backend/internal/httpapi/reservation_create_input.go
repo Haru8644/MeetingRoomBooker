@@ -13,8 +13,6 @@ import (
 	"github.com/Haru8644/MeetingRoomBooker/backend/internal/reservations"
 )
 
-const noRepeat = "しない"
-
 type reservationInput struct {
 	ID             jsonInt32
 	UserID         jsonInt32
@@ -97,7 +95,7 @@ func readReservationInput(decoder *json.Decoder, now time.Time, update bool) (re
 	}
 	input := reservationInput{
 		NumberOfPeople: 1, Type: new("社内"), Purpose: new(""), Date: reservationDateTime{dotnettime.OnDate(now, time.Time{})},
-		ParticipantIDs: []jsonInt32{}, Participants: new(""), RepeatType: new(noRepeat),
+		ParticipantIDs: []jsonInt32{}, Participants: new(""), RepeatType: new(reservations.NoRepeat),
 	}
 	err = json.Unmarshal(raw, &input)
 	return input, err
@@ -144,34 +142,22 @@ func (input reservationInput) normalize(user auth.User) (reservations.ListEntry,
 }
 
 func (input reservationInput) entry(userID int, name string) reservations.ListEntry {
-	date := input.Date.Time
-	start := dotnettime.OnDate(date, input.StartTime.Time)
-	end := dotnettime.OnDate(date, input.EndTime.Time)
-	repeat := *input.RepeatType
-	if strings.TrimSpace(repeat) == "" {
-		repeat = noRepeat
-	}
 	var repeatUntil *time.Time
-	if repeat != noRepeat && input.RepeatUntil != nil {
+	if input.RepeatUntil != nil {
 		repeatUntil = &input.RepeatUntil.Time
 	}
-	participants := make([]int, 0, len(input.ParticipantIDs)+1)
-	seen := make(map[int]bool, len(input.ParticipantIDs))
-	for _, id := range input.ParticipantIDs {
-		if id > 0 && !seen[int(id)] {
-			participants = append(participants, int(id))
-			seen[int(id)] = true
-		}
+	participants := make([]int, len(input.ParticipantIDs))
+	for i, id := range input.ParticipantIDs {
+		participants[i] = int(id)
 	}
-	if userID > 0 && !seen[userID] {
-		participants = append([]int{userID}, participants...)
-	}
-	return reservations.ListEntry{
-		Reservation: reservations.Reservation{Room: *input.Room, Date: date, StartTime: start, EndTime: end},
+	entry := reservations.ListEntry{
+		Reservation: reservations.Reservation{Room: *input.Room, Date: input.Date.Time, StartTime: input.StartTime.Time, EndTime: input.EndTime.Time},
 		ID:          int(input.ID), UserID: userID, Name: name, NumberOfPeople: int(input.NumberOfPeople), Type: *input.Type,
-		Purpose: *input.Purpose, Participants: *input.Participants, ParticipantIDs: participants, RepeatType: repeat,
+		Purpose: *input.Purpose, Participants: *input.Participants, ParticipantIDs: participants, RepeatType: *input.RepeatType,
 		RepeatUntil: repeatUntil,
 	}
+	entry.Normalize()
+	return entry
 }
 
 type reservationDateTime struct{ time.Time }

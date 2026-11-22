@@ -1,0 +1,600 @@
+[
+  {
+    "name": "join",
+    "actorId": 3,
+    "id": 61,
+    "join": true,
+    "markNoticeRead": false,
+    "status": 204,
+    "error": null,
+    "reservations": [
+      {
+        "id": 61,
+        "participantIds": [
+          2,
+          4,
+          3
+        ],
+        "participants": "既存の表示名",
+        "numberOfPeople": 4,
+        "startTime": "2026-07-10T10:00:00",
+        "endTime": "2026-07-10T11:00:00",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-24T00:00:00",
+        "seriesId": "shared-series"
+      },
+      {
+        "id": 62,
+        "participantIds": [
+          2
+        ],
+        "participants": "",
+        "numberOfPeople": 1,
+        "startTime": "2026-07-17T10:00:00",
+        "endTime": "2026-07-17T11:00:00",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-24T00:00:00",
+        "seriesId": "shared-series"
+      },
+      {
+        "id": 63,
+        "participantIds": [],
+        "participants": "",
+        "numberOfPeople": 1,
+        "startTime": "2026-07-10T10:00:00",
+        "endTime": "2026-07-10T11:00:00",
+        "repeatType": "しない",
+        "repeatUntil": null,
+        "seriesId": null
+      }
+    ],
+    "notices": [
+      {
+        "id": 6,
+        "userId": 2,
+        "type": "Info",
+        "message": "Synthetic Participantさんが予約「定例会議」への参加を追加しました。利用日: 2026/07/10 / 会議室: Room A / 時間: 10:00〜11:00",
+        "isRead": false,
+        "targetDate": "2026-07-10T00:00:00",
+        "targetReservationId": 61,
+        "targetWorkScheduleEntryId": null
+      },
+      {
+        "id": 7,
+        "userId": 2,
+        "type": "Warning",
+        "message": "Synthetic Participantさんが予約「定例会議」の既存通知",
+        "isRead": true,
+        "targetDate": "2026-07-10T00:00:00",
+        "targetReservationId": 61,
+        "targetWorkScheduleEntryId": null
+      }
+    ]
+  },
+  {
+    "name": "repeat_join",
+    "actorId": 3,
+    "id": 61,
+    "join": true,
+    "markNoticeRead": true,
+    "status": 204,
+    "error": null,
+    "reservations": [
+      {
+        "id": 61,
+        "participantIds": [
+          2,
+          4,
+          3
+        ],
+        "participants": "既存の表示名",
+        "numberOfPeople": 4,
+        "startTime": "2026-07-10T10:00:00",
+        "endTime": "2026-07-10T11:00:00",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-24T00:00:00",
+        "seriesId": "shared-series"
+      },
+      {
+        "id": 62,
+        "participantIds": [
+          2
+        ],
+        "participants": "",
+        "numberOfPeople": 1,
+        "startTime": "2026-07-17T10:00:00",
+        "endTime": "2026-07-17T11:00:00",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-24T00:00:00",
+        "seriesId": "shared-series"
+      },
+      {
+        "id": 63,
+        "participantIds": [],
+        "participants": "",
+        "numberOfPeople": 1,
+        "startTime": "2026-07-10T10:00:00",
+        "endTime": "2026-07-10T11:00:00",
+        "repeatType": "しない",
+        "repeatUntil": null,
+        "seriesId": null
+      }
+    ],
+    "notices": [
+      {
+        "id": 6,
+        "userId": 2,
+        "type": "Info",
+        "message": "Synthetic Participantさんが予約「定例会議」への参加を追加しました。利用日: 2026/07/10 / 会議室: Room A / 時間: 10:00〜11:00",
+        "isRead": true,
+        "targetDate": "2026-07-10T00:00:00",
+        "targetReservationId": 61,
+        "targetWorkScheduleEntryId": null
+      },
+      {
+        "id": 7,
+        "userId": 2,
+        "type": "Warning",
+        "message": "Synthetic Participantさんが予約「定例会議」の既存通知",
+        "isRead": true,
+        "targetDate": "2026-07-10T00:00:00",
+        "targetReservationId": 61,
+        "targetWorkScheduleEntryId": null
+      }
+    ]
+  },
+  {
+    "name": "leave",
+    "actorId": 3,
+    "id": 61,
+    "join": false,
+    "markNoticeRead": false,
+    "status": 204,
+    "error": null,
+    "reservations": [
+      {
+        "id": 61,
+        "participantIds": [
+          2,
+          4
+        ],
+        "participants": "既存の表示名",
+        "numberOfPeople": 4,
+        "startTime": "2026-07-10T10:00:00",
+        "endTime": "2026-07-10T11:00:00",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-24T00:00:00",
+        "seriesId": "shared-series"
+      },
+      {
+        "id": 62,
+        "participantIds": [
+          2
+        ],
+        "participants": "",
+        "numberOfPeople": 1,
+        "startTime": "2026-07-17T10:00:00",
+        "endTime": "2026-07-17T11:00:00",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-24T00:00:00",
+        "seriesId": "shared-series"
+      },
+      {
+        "id": 63,
+        "participantIds": [],
+        "participants": "",
+        "numberOfPeople": 1,
+        "startTime": "2026-07-10T10:00:00",
+        "endTime": "2026-07-10T11:00:00",
+        "repeatType": "しない",
+        "repeatUntil": null,
+        "seriesId": null
+      }
+    ],
+    "notices": [
+      {
+        "id": 6,
+        "userId": 2,
+        "type": "Info",
+        "message": "Synthetic Participantさんが予約「定例会議」への参加を取り消しました。利用日: 2026/07/10 / 会議室: Room A / 時間: 10:00〜11:00",
+        "isRead": false,
+        "targetDate": "2026-07-10T00:00:00",
+        "targetReservationId": 61,
+        "targetWorkScheduleEntryId": null
+      },
+      {
+        "id": 7,
+        "userId": 2,
+        "type": "Warning",
+        "message": "Synthetic Participantさんが予約「定例会議」の既存通知",
+        "isRead": true,
+        "targetDate": "2026-07-10T00:00:00",
+        "targetReservationId": 61,
+        "targetWorkScheduleEntryId": null
+      }
+    ]
+  },
+  {
+    "name": "repeat_leave",
+    "actorId": 3,
+    "id": 61,
+    "join": false,
+    "markNoticeRead": true,
+    "status": 204,
+    "error": null,
+    "reservations": [
+      {
+        "id": 61,
+        "participantIds": [
+          2,
+          4
+        ],
+        "participants": "既存の表示名",
+        "numberOfPeople": 4,
+        "startTime": "2026-07-10T10:00:00",
+        "endTime": "2026-07-10T11:00:00",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-24T00:00:00",
+        "seriesId": "shared-series"
+      },
+      {
+        "id": 62,
+        "participantIds": [
+          2
+        ],
+        "participants": "",
+        "numberOfPeople": 1,
+        "startTime": "2026-07-17T10:00:00",
+        "endTime": "2026-07-17T11:00:00",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-24T00:00:00",
+        "seriesId": "shared-series"
+      },
+      {
+        "id": 63,
+        "participantIds": [],
+        "participants": "",
+        "numberOfPeople": 1,
+        "startTime": "2026-07-10T10:00:00",
+        "endTime": "2026-07-10T11:00:00",
+        "repeatType": "しない",
+        "repeatUntil": null,
+        "seriesId": null
+      }
+    ],
+    "notices": [
+      {
+        "id": 6,
+        "userId": 2,
+        "type": "Info",
+        "message": "Synthetic Participantさんが予約「定例会議」への参加を取り消しました。利用日: 2026/07/10 / 会議室: Room A / 時間: 10:00〜11:00",
+        "isRead": true,
+        "targetDate": "2026-07-10T00:00:00",
+        "targetReservationId": 61,
+        "targetWorkScheduleEntryId": null
+      },
+      {
+        "id": 7,
+        "userId": 2,
+        "type": "Warning",
+        "message": "Synthetic Participantさんが予約「定例会議」の既存通知",
+        "isRead": true,
+        "targetDate": "2026-07-10T00:00:00",
+        "targetReservationId": 61,
+        "targetWorkScheduleEntryId": null
+      }
+    ]
+  },
+  {
+    "name": "owner_cannot_leave",
+    "actorId": 2,
+    "id": 61,
+    "join": false,
+    "markNoticeRead": false,
+    "status": 400,
+    "error": "予約者本人は参加メンバーから外せません。",
+    "reservations": [
+      {
+        "id": 61,
+        "participantIds": [
+          2,
+          4
+        ],
+        "participants": "既存の表示名",
+        "numberOfPeople": 4,
+        "startTime": "2026-07-10T10:00:00",
+        "endTime": "2026-07-10T11:00:00",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-24T00:00:00",
+        "seriesId": "shared-series"
+      },
+      {
+        "id": 62,
+        "participantIds": [
+          2
+        ],
+        "participants": "",
+        "numberOfPeople": 1,
+        "startTime": "2026-07-17T10:00:00",
+        "endTime": "2026-07-17T11:00:00",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-24T00:00:00",
+        "seriesId": "shared-series"
+      },
+      {
+        "id": 63,
+        "participantIds": [],
+        "participants": "",
+        "numberOfPeople": 1,
+        "startTime": "2026-07-10T10:00:00",
+        "endTime": "2026-07-10T11:00:00",
+        "repeatType": "しない",
+        "repeatUntil": null,
+        "seriesId": null
+      }
+    ],
+    "notices": [
+      {
+        "id": 6,
+        "userId": 2,
+        "type": "Info",
+        "message": "Synthetic Participantさんが予約「定例会議」への参加を取り消しました。利用日: 2026/07/10 / 会議室: Room A / 時間: 10:00〜11:00",
+        "isRead": true,
+        "targetDate": "2026-07-10T00:00:00",
+        "targetReservationId": 61,
+        "targetWorkScheduleEntryId": null
+      },
+      {
+        "id": 7,
+        "userId": 2,
+        "type": "Warning",
+        "message": "Synthetic Participantさんが予約「定例会議」の既存通知",
+        "isRead": true,
+        "targetDate": "2026-07-10T00:00:00",
+        "targetReservationId": 61,
+        "targetWorkScheduleEntryId": null
+      }
+    ]
+  },
+  {
+    "name": "owner_join",
+    "actorId": 2,
+    "id": 63,
+    "join": true,
+    "markNoticeRead": false,
+    "status": 204,
+    "error": null,
+    "reservations": [
+      {
+        "id": 61,
+        "participantIds": [
+          2,
+          4
+        ],
+        "participants": "既存の表示名",
+        "numberOfPeople": 4,
+        "startTime": "2026-07-10T10:00:00",
+        "endTime": "2026-07-10T11:00:00",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-24T00:00:00",
+        "seriesId": "shared-series"
+      },
+      {
+        "id": 62,
+        "participantIds": [
+          2
+        ],
+        "participants": "",
+        "numberOfPeople": 1,
+        "startTime": "2026-07-17T10:00:00",
+        "endTime": "2026-07-17T11:00:00",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-24T00:00:00",
+        "seriesId": "shared-series"
+      },
+      {
+        "id": 63,
+        "participantIds": [
+          2
+        ],
+        "participants": "",
+        "numberOfPeople": 1,
+        "startTime": "2026-07-10T10:00:00",
+        "endTime": "2026-07-10T11:00:00",
+        "repeatType": "しない",
+        "repeatUntil": null,
+        "seriesId": null
+      }
+    ],
+    "notices": [
+      {
+        "id": 6,
+        "userId": 2,
+        "type": "Info",
+        "message": "Synthetic Participantさんが予約「定例会議」への参加を取り消しました。利用日: 2026/07/10 / 会議室: Room A / 時間: 10:00〜11:00",
+        "isRead": true,
+        "targetDate": "2026-07-10T00:00:00",
+        "targetReservationId": 61,
+        "targetWorkScheduleEntryId": null
+      },
+      {
+        "id": 7,
+        "userId": 2,
+        "type": "Warning",
+        "message": "Synthetic Participantさんが予約「定例会議」の既存通知",
+        "isRead": true,
+        "targetDate": "2026-07-10T00:00:00",
+        "targetReservationId": 61,
+        "targetWorkScheduleEntryId": null
+      }
+    ]
+  },
+  {
+    "name": "admin_joins_self",
+    "actorId": 1,
+    "id": 61,
+    "join": true,
+    "markNoticeRead": false,
+    "status": 204,
+    "error": null,
+    "reservations": [
+      {
+        "id": 61,
+        "participantIds": [
+          2,
+          4,
+          1
+        ],
+        "participants": "既存の表示名",
+        "numberOfPeople": 4,
+        "startTime": "2026-07-10T10:00:00",
+        "endTime": "2026-07-10T11:00:00",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-24T00:00:00",
+        "seriesId": "shared-series"
+      },
+      {
+        "id": 62,
+        "participantIds": [
+          2
+        ],
+        "participants": "",
+        "numberOfPeople": 1,
+        "startTime": "2026-07-17T10:00:00",
+        "endTime": "2026-07-17T11:00:00",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-24T00:00:00",
+        "seriesId": "shared-series"
+      },
+      {
+        "id": 63,
+        "participantIds": [
+          2
+        ],
+        "participants": "",
+        "numberOfPeople": 1,
+        "startTime": "2026-07-10T10:00:00",
+        "endTime": "2026-07-10T11:00:00",
+        "repeatType": "しない",
+        "repeatUntil": null,
+        "seriesId": null
+      }
+    ],
+    "notices": [
+      {
+        "id": 6,
+        "userId": 2,
+        "type": "Info",
+        "message": "Synthetic Participantさんが予約「定例会議」への参加を取り消しました。利用日: 2026/07/10 / 会議室: Room A / 時間: 10:00〜11:00",
+        "isRead": true,
+        "targetDate": "2026-07-10T00:00:00",
+        "targetReservationId": 61,
+        "targetWorkScheduleEntryId": null
+      },
+      {
+        "id": 7,
+        "userId": 2,
+        "type": "Warning",
+        "message": "Synthetic Participantさんが予約「定例会議」の既存通知",
+        "isRead": true,
+        "targetDate": "2026-07-10T00:00:00",
+        "targetReservationId": 61,
+        "targetWorkScheduleEntryId": null
+      },
+      {
+        "id": 8,
+        "userId": 2,
+        "type": "Info",
+        "message": "Synthetic Adminさんが予約「定例会議」への参加を追加しました。利用日: 2026/07/10 / 会議室: Room A / 時間: 10:00〜11:00",
+        "isRead": false,
+        "targetDate": "2026-07-10T00:00:00",
+        "targetReservationId": 61,
+        "targetWorkScheduleEntryId": null
+      }
+    ]
+  },
+  {
+    "name": "missing",
+    "actorId": 3,
+    "id": 999,
+    "join": true,
+    "markNoticeRead": false,
+    "status": 404,
+    "error": null,
+    "reservations": [
+      {
+        "id": 61,
+        "participantIds": [
+          2,
+          4,
+          1
+        ],
+        "participants": "既存の表示名",
+        "numberOfPeople": 4,
+        "startTime": "2026-07-10T10:00:00",
+        "endTime": "2026-07-10T11:00:00",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-24T00:00:00",
+        "seriesId": "shared-series"
+      },
+      {
+        "id": 62,
+        "participantIds": [
+          2
+        ],
+        "participants": "",
+        "numberOfPeople": 1,
+        "startTime": "2026-07-17T10:00:00",
+        "endTime": "2026-07-17T11:00:00",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-24T00:00:00",
+        "seriesId": "shared-series"
+      },
+      {
+        "id": 63,
+        "participantIds": [
+          2
+        ],
+        "participants": "",
+        "numberOfPeople": 1,
+        "startTime": "2026-07-10T10:00:00",
+        "endTime": "2026-07-10T11:00:00",
+        "repeatType": "しない",
+        "repeatUntil": null,
+        "seriesId": null
+      }
+    ],
+    "notices": [
+      {
+        "id": 6,
+        "userId": 2,
+        "type": "Info",
+        "message": "Synthetic Participantさんが予約「定例会議」への参加を取り消しました。利用日: 2026/07/10 / 会議室: Room A / 時間: 10:00〜11:00",
+        "isRead": true,
+        "targetDate": "2026-07-10T00:00:00",
+        "targetReservationId": 61,
+        "targetWorkScheduleEntryId": null
+      },
+      {
+        "id": 7,
+        "userId": 2,
+        "type": "Warning",
+        "message": "Synthetic Participantさんが予約「定例会議」の既存通知",
+        "isRead": true,
+        "targetDate": "2026-07-10T00:00:00",
+        "targetReservationId": 61,
+        "targetWorkScheduleEntryId": null
+      },
+      {
+        "id": 8,
+        "userId": 2,
+        "type": "Info",
+        "message": "Synthetic Adminさんが予約「定例会議」への参加を追加しました。利用日: 2026/07/10 / 会議室: Room A / 時間: 10:00〜11:00",
+        "isRead": false,
+        "targetDate": "2026-07-10T00:00:00",
+        "targetReservationId": 61,
+        "targetWorkScheduleEntryId": null
+      }
+    ]
+  }
+]

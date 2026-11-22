@@ -60,12 +60,16 @@ func addedParticipantMessage(entry ListEntry, warning string) string {
 }
 
 func saveReservationNotifications(ctx context.Context, tx pgx.Tx, entry ListEntry, recipients []int, kind, message string) error {
+	return saveMatchingReservationNotifications(ctx, tx, entry, recipients, kind, message, "")
+}
+
+func saveMatchingReservationNotifications(ctx context.Context, tx pgx.Tx, entry ListEntry, recipients []int, kind, message, prefix string) error {
 	if len(recipients) == 0 {
 		return nil
 	}
 	now := time.Now()
 
-	// Match the legacy upsert when a recipient already has a notice with this type, reservation and message.
+	// Keep the newest matching notice. Participation uses a shared prefix for joins and leaves.
 	_, err := tx.Exec(ctx, `
 		WITH recipients AS (
 		    SELECT user_id FROM unnest($1::integer[]) AS recipient(user_id)
@@ -74,10 +78,11 @@ func saveReservationNotifications(ctx context.Context, tx pgx.Tx, entry ListEntr
 		        PARTITION BY n.user_id ORDER BY n.created_at_ticks DESC, n.id
 		    ) AS position
 		    FROM notifications n JOIN recipients r ON r.user_id = n.user_id
-		    WHERE n.target_reservation_id = $2 AND n.type = $3 AND n.message = $4
+		    WHERE n.target_reservation_id = $2 AND n.type = $3
+		      AND CASE WHEN $7::text = '' THEN n.message = $4 ELSE starts_with(n.message, $7) END
 		), refreshed AS (
 		    UPDATE notifications n
-		    SET created_at_ticks = $5, target_date_ticks = $6, is_read = false
+		    SET message = $4, created_at_ticks = $5, target_date_ticks = $6, is_read = false
 		    FROM matches m WHERE n.id = m.id AND m.position = 1
 		), removed AS (
 		    DELETE FROM notifications n USING matches m WHERE n.id = m.id AND m.position > 1
@@ -87,7 +92,7 @@ func saveReservationNotifications(ctx context.Context, tx pgx.Tx, entry ListEntr
 		SELECT r.user_id, $2, $3, $4, $5, $6 FROM recipients r
 		WHERE NOT EXISTS (SELECT 1 FROM matches m WHERE m.user_id = r.user_id)`,
 		recipients, entry.ID, kind, message,
-		dotnettime.Ticks(dotnettime.OnDate(now, now)), dotnettime.Ticks(entry.Date))
+		dotnettime.Ticks(dotnettime.OnDate(now, now)), dotnettime.Ticks(entry.Date), prefix)
 	if err != nil {
 		return fmt.Errorf("save reservation notifications: %w", err)
 	}
