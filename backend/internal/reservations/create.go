@@ -28,8 +28,8 @@ func Create(ctx context.Context, pool *pgxpool.Pool, entry ListEntry, allowOverl
 	day := date / dotnettime.TicksPerDay
 	err := pgx.BeginTxFunc(ctx, pool, pgx.TxOptions{IsoLevel: pgx.ReadCommitted}, func(tx pgx.Tx) error {
 		// Check conflicts in a new statement after obtaining the lock so it sees the previous writer's commit.
-		if _, err := tx.Exec(ctx, `SELECT pg_advisory_xact_lock(hashtext($1), $2::integer)`, entry.Room, int32(day)); err != nil {
-			return fmt.Errorf("lock room and date: %w", err)
+		if err := lockReservationSlot(ctx, tx, entry.Room, day); err != nil {
+			return err
 		}
 		if !allowOverlap {
 			if err := checkConflict(ctx, tx, entry.Room, day, start, end); err != nil {
@@ -50,6 +50,13 @@ func Create(ctx context.Context, pool *pgxpool.Pool, entry ListEntry, allowOverl
 		return ListEntry{}, err
 	}
 	return entry, nil
+}
+
+func lockReservationSlot(ctx context.Context, tx pgx.Tx, room string, day int64) error {
+	if _, err := tx.Exec(ctx, `SELECT pg_advisory_xact_lock(hashtext($1), $2::integer)`, room, int32(day)); err != nil {
+		return fmt.Errorf("lock room and date: %w", err)
+	}
+	return nil
 }
 
 func checkConflict(ctx context.Context, tx pgx.Tx, room string, day, start, end int64) error {

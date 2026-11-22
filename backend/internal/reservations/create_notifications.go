@@ -3,6 +3,7 @@ package reservations
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
@@ -11,12 +12,7 @@ import (
 )
 
 func notifyAddedParticipants(ctx context.Context, tx pgx.Tx, entry ListEntry) error {
-	recipients := make([]int, 0, len(entry.ParticipantIDs))
-	for _, id := range entry.ParticipantIDs {
-		if id != entry.UserID {
-			recipients = append(recipients, id)
-		}
-	}
+	recipients := notifiableParticipants(entry)
 	if len(recipients) == 0 {
 		return nil
 	}
@@ -25,21 +21,52 @@ func notifyAddedParticipants(ctx context.Context, tx pgx.Tx, entry ListEntry) er
 	if err != nil {
 		return fmt.Errorf("check participant conflicts: %w", err)
 	}
-	notificationType := "Info"
+	return saveReservationNotifications(ctx, tx, entry, recipients, notificationType(warning), addedParticipantMessage(entry, warning))
+}
+
+func notifiableParticipants(entry ListEntry) []int {
+	recipients := make([]int, 0, len(entry.ParticipantIDs))
+	seen := make(map[int]bool, len(entry.ParticipantIDs))
+	for _, id := range entry.ParticipantIDs {
+		if id > 0 && id != entry.UserID && !seen[id] {
+			recipients = append(recipients, id)
+			seen[id] = true
+		}
+	}
+	return recipients
+}
+
+func notificationType(warning string) string {
 	if warning != "" {
-		notificationType = "Warning"
+		return "Warning"
 	}
-	label := entry.Purpose
-	if strings.TrimSpace(label) == "" {
-		label = entry.Name
+	return "Info"
+}
+
+func reservationLabel(entry ListEntry) string {
+	if strings.TrimSpace(entry.Purpose) == "" {
+		return entry.Name
 	}
-	message := fmt.Sprintf("%sさんが予約「%s」の参加メンバーにあなたを追加しました。利用日: %s / 会議室: %s / 時間: %s〜%s%s",
-		entry.Name, label, entry.Date.Format("2006/01/02"), entry.Room,
-		entry.StartTime.Format("15:04"), entry.EndTime.Format("15:04"), warning)
+	return entry.Purpose
+}
+
+func reservationTimeRange(entry ListEntry) string {
+	return entry.StartTime.Format("15:04") + "〜" + entry.EndTime.Format("15:04")
+}
+
+func addedParticipantMessage(entry ListEntry, warning string) string {
+	return fmt.Sprintf("%sさんが予約「%s」の参加メンバーにあなたを追加しました。利用日: %s / 会議室: %s / 時間: %s%s",
+		entry.Name, reservationLabel(entry), entry.Date.Format("2006/01/02"), entry.Room, reservationTimeRange(entry), warning)
+}
+
+func saveReservationNotifications(ctx context.Context, tx pgx.Tx, entry ListEntry, recipients []int, kind, message string) error {
+	if len(recipients) == 0 {
+		return nil
+	}
 	now := time.Now()
 
-	// Match the legacy upsert if an administrator already created a matching notice for this ID.
-	_, err = tx.Exec(ctx, `
+	// Match the legacy upsert when a recipient already has a notice with this type, reservation and message.
+	_, err := tx.Exec(ctx, `
 		WITH recipients AS (
 		    SELECT user_id FROM unnest($1::integer[]) AS recipient(user_id)
 		), matches AS (
@@ -59,7 +86,7 @@ func notifyAddedParticipants(ctx context.Context, tx pgx.Tx, entry ListEntry) er
 		    (user_id, target_reservation_id, type, message, created_at_ticks, target_date_ticks)
 		SELECT r.user_id, $2, $3, $4, $5, $6 FROM recipients r
 		WHERE NOT EXISTS (SELECT 1 FROM matches m WHERE m.user_id = r.user_id)`,
-		recipients, entry.ID, notificationType, message,
+		recipients, entry.ID, kind, message,
 		dotnettime.Ticks(dotnettime.OnDate(now, now)), dotnettime.Ticks(entry.Date))
 	if err != nil {
 		return fmt.Errorf("save reservation notifications: %w", err)
@@ -71,6 +98,10 @@ func participantConflictWarning(ctx context.Context, tx pgx.Tx, entry ListEntry)
 	const externalAppointment = 0
 	dateTicks := dotnettime.Ticks(entry.Date)
 	midnightTicks := dateTicks - dateTicks%dotnettime.TicksPerDay
+	participants := entry.ParticipantIDs
+	if entry.UserID > 0 && !slices.Contains(participants, entry.UserID) {
+		participants = append(slices.Clone(participants), entry.UserID)
+	}
 	rows, err := tx.Query(ctx, `
 		SELECT COALESCE(u.name, 'ユーザー' || p.id::text) AS participant_name,
 		       e.title, e.start_time_ticks, e.end_time_ticks, count(*) OVER ()
@@ -80,7 +111,7 @@ func participantConflictWarning(ctx context.Context, tx pgx.Tx, entry ListEntry)
 		WHERE e.type = $2 AND e.date_ticks = $3
 		  AND e.start_time_ticks < $4 AND e.end_time_ticks > $5
 		ORDER BY e.start_time_ticks, participant_name, e.id, p.id
-		LIMIT 5`, entry.ParticipantIDs, externalAppointment, midnightTicks,
+		LIMIT 5`, participants, externalAppointment, midnightTicks,
 		dotnettime.Ticks(entry.EndTime), dotnettime.Ticks(entry.StartTime))
 	if err != nil {
 		return "", err

@@ -22,28 +22,11 @@ type reservationCreator func(context.Context, reservations.ListEntry, bool) (res
 
 func newReservationCreateHandler(create reservationCreator) func(http.ResponseWriter, *http.Request, auth.User) {
 	return func(w http.ResponseWriter, r *http.Request, user auth.User) {
-		if !hasJSONContentType(r) {
-			writeValidationProblem(w, http.StatusUnsupportedMediaType, nil)
+		input, ok := decodeReservationInput(w, r, false)
+		if !ok {
 			return
 		}
-		decoder := json.NewDecoder(http.MaxBytesReader(w, r.Body, 30_000_000))
-		input, err := readReservationCreateInput(decoder, time.Now())
-		var tooLarge *http.MaxBytesError
-		if errors.As(err, &tooLarge) {
-			w.WriteHeader(http.StatusRequestEntityTooLarge)
-			return
-		}
-		if err == io.EOF {
-			writeValidationProblem(w, http.StatusBadRequest, map[string][]string{
-				"": {"A non-empty request body is required."}, "reservation": {"The reservation field is required."},
-			})
-			return
-		}
-		if err != nil {
-			writeValidationProblem(w, http.StatusBadRequest, map[string][]string{"reservation": {"A valid reservation JSON object is required."}})
-			return
-		}
-		allowOverlap, message := readAllowOverlap(r.URL.RawQuery)
+		allowOverlap, message := readReservationBoolean(r.URL.RawQuery, "allowOverlap", false)
 		problems := input.validate()
 		if message != "" {
 			problems["allowOverlap"] = []string{message}
@@ -77,13 +60,36 @@ func newReservationCreateHandler(create reservationCreator) func(http.ResponseWr
 	}
 }
 
-func readAllowOverlap(query string) (bool, string) {
-	value, found, err := firstQueryValue(query, "allowOverlap")
+func decodeReservationInput(w http.ResponseWriter, r *http.Request, update bool) (reservationInput, bool) {
+	if !hasJSONContentType(r) {
+		writeValidationProblem(w, http.StatusUnsupportedMediaType, nil)
+		return reservationInput{}, false
+	}
+	decoder := json.NewDecoder(http.MaxBytesReader(w, r.Body, 30_000_000))
+	input, err := readReservationInput(decoder, time.Now(), update)
+	var tooLarge *http.MaxBytesError
+	switch {
+	case errors.As(err, &tooLarge):
+		w.WriteHeader(http.StatusRequestEntityTooLarge)
+	case err == io.EOF:
+		writeValidationProblem(w, http.StatusBadRequest, map[string][]string{
+			"": {"A non-empty request body is required."}, "reservation": {"The reservation field is required."},
+		})
+	case err != nil:
+		writeValidationProblem(w, http.StatusBadRequest, map[string][]string{"reservation": {"A valid reservation JSON object is required."}})
+	default:
+		return input, true
+	}
+	return reservationInput{}, false
+}
+
+func readReservationBoolean(query, field string, fallback bool) (bool, string) {
+	value, found, err := firstQueryValue(query, field)
 	if err != nil {
 		return false, fmt.Sprintf("The value '%s' is not valid.", value)
 	}
 	if !found {
-		return false, ""
+		return fallback, ""
 	}
 	switch strings.ToLower(strings.TrimSpace(value)) {
 	case "true":

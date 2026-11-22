@@ -69,6 +69,9 @@ func run(ctx context.Context) error {
 	createReservation := func(ctx context.Context, entry reservations.ListEntry, allowOverlap bool) (reservations.ListEntry, error) {
 		return reservations.Create(ctx, pool, entry, allowOverlap)
 	}
+	updateReservation := func(ctx context.Context, entry reservations.ListEntry, actorID int, isAdmin, notify bool) error {
+		return reservations.Update(ctx, pool, entry, actorID, isAdmin, notify)
+	}
 	listWorkSchedules := func(ctx context.Context, from, to time.Time) ([]workschedules.Entry, error) {
 		return workschedules.List(ctx, pool, from, to)
 	}
@@ -76,7 +79,7 @@ func run(ctx context.Context) error {
 		return users.ListParticipants(ctx, pool)
 	}
 	handler, err := httpapi.RegisterSessionRoutes(httpapi.NewHandler(ping, readinessTimeout), auth.NewService(pool),
-		reservationList, createReservation, listWorkSchedules, listParticipants, notifications.NewInbox(pool),
+		reservationList, createReservation, updateReservation, listWorkSchedules, listParticipants, notifications.NewInbox(pool),
 		httpapi.SessionOptions{Development: development, FrontendOrigins: strings.Split(os.Getenv("FRONTEND_ORIGINS"), ",")})
 	if err != nil {
 		return err
