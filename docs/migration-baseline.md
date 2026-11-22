@@ -259,6 +259,18 @@ go test -v -count=1 ./cmd/api -run '^TestSingleReservationUpdatePostgres$'
 
 The [C# `d8fe3b7` capture](../backend/internal/httpapi/testdata/reservation_update_csharp.json) records the rows from four controller calls with SQLite: participant changes, a warning-only edit, an admin edit with notices disabled, and an edit without changes or warnings. The Go HTTP test checks the resulting reservation and notices on PostgreSQL 16.2. It also verifies authentication, authorization, input errors and rollback after a forced notice write failure.
 
+## Go single reservation cancellation
+
+Blazor sends `DELETE /api/Reservations/{id}`. The organizer and administrators can cancel the addressed booking. The [C# SQLite capture](../backend/internal/httpapi/testdata/reservation_cancel_csharp.json) records successful, forbidden, missing, and repeated cancellations. The single-row delete preserves sibling rows with the same series ID and existing in-app notices. C# sends Chatwork cancellation notices after deletion. Delivery parity is covered by the Chatwork migration.
+
+Go uses the same row lock as updates for the authorization check and the same room/date lock as creates. A create that waits behind a cancellation checks the freed slot after the delete commits. The integration test also checks anonymous and untrusted-origin requests, concurrent cancellations of one row, and reuse of the freed slot.
+
+Set `RESERVATION_CANCEL_TEST_DATABASE_URL` to a disposable PostgreSQL URL that permits creating schemas and run the following from `backend`.
+
+```bash
+go test -v -count=1 ./cmd/api -run '^TestSingleReservationCancellationPostgres$'
+```
+
 ## Recovery to C# and SQLite
 
 Rehearse each stage in development with synthetic rows and a recording fake Chatwork sender. `scripts/deploy/deploy-prod.sh` uses SQLite's backup API and integrity check. `scripts/deploy/rollback-prod.sh` restores the earlier API, web assets and final SQLite snapshot. A rollback after Go accepts writes also needs the committed PostgreSQL state.

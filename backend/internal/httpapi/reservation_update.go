@@ -32,21 +32,24 @@ func newReservationUpdateHandler(update reservationUpdater) func(http.ResponseWr
 			})
 			return
 		}
-		err := update(r.Context(), input.entry(int(input.UserID), *input.Name), user.ID, user.IsAdmin, notify)
-		var invalid reservations.ValidationError
-		switch {
-		case err == nil:
-			w.WriteHeader(http.StatusNoContent)
-		case errors.Is(err, reservations.ErrNotFound):
-			writeProblemDetails(w, problemDetails{
-				Type: "https://tools.ietf.org/html/rfc9110#section-15.5.5", Title: "Not Found", Status: http.StatusNotFound,
-			})
-		case errors.Is(err, reservations.ErrForbidden):
-			w.WriteHeader(http.StatusForbidden)
-		case errors.As(err, &invalid):
-			writeNegotiatedString(w, r, http.StatusBadRequest, invalid.Error())
-		default:
-			w.WriteHeader(http.StatusInternalServerError)
-		}
+		writeReservationMutationResult(w, r, update(r.Context(), input.entry(int(input.UserID), *input.Name), user.ID, user.IsAdmin, notify))
+	}
+}
+
+func writeReservationMutationResult(w http.ResponseWriter, r *http.Request, err error) {
+	var invalid reservations.ValidationError
+	switch {
+	case err == nil:
+		w.WriteHeader(http.StatusNoContent)
+	case errors.Is(err, reservations.ErrNotFound):
+		writeProblemDetails(w, problemDetails{
+			Type: "https://tools.ietf.org/html/rfc9110#section-15.5.5", Title: "Not Found", Status: http.StatusNotFound,
+		})
+	case errors.Is(err, reservations.ErrForbidden):
+		w.WriteHeader(http.StatusForbidden)
+	case errors.As(err, &invalid):
+		writeNegotiatedString(w, r, http.StatusBadRequest, invalid.Error())
+	default:
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 }

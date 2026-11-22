@@ -33,7 +33,8 @@ type sessionHandler struct {
 }
 
 func RegisterSessionRoutes(mux *http.ServeMux, service sessionService, reservationList http.Handler,
-	createReservation reservationCreator, updateReservation reservationUpdater, listWorkSchedules workScheduleLister,
+	createReservation reservationCreator, updateReservation reservationUpdater,
+	deleteReservation func(context.Context, int, int, bool) error, listWorkSchedules workScheduleLister,
 	listParticipants func(context.Context) ([]users.Participant, error), inbox notificationInbox, options SessionOptions,
 ) (http.Handler, error) {
 	csrf := http.NewCrossOriginProtection()
@@ -70,6 +71,9 @@ func RegisterSessionRoutes(mux *http.ServeMux, service sessionService, reservati
 	}))
 	mux.Handle(reservationCreatePattern, csrf.Handler(h.requireSession(newReservationCreateHandler(createReservation))))
 	mux.Handle("PUT /api/Reservations/{id}", csrf.Handler(h.idRoute("id", newReservationUpdateHandler(updateReservation))))
+	mux.Handle("DELETE /api/Reservations/{id}", csrf.Handler(h.idRoute("id", func(w http.ResponseWriter, r *http.Request, user auth.User, id int) {
+		writeReservationMutationResult(w, r, deleteReservation(r.Context(), id, user.ID, user.IsAdmin))
+	})))
 	mux.Handle(workScheduleListPattern, h.requireSession(newWorkScheduleListHandler(listWorkSchedules)))
 	mux.Handle("GET /api/Users/participants", h.requireSession(func(w http.ResponseWriter, r *http.Request, _ auth.User) {
 		participants, err := listParticipants(r.Context())
