@@ -1,0 +1,766 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "架空の管理者",
+      "roomId": "900001"
+    },
+    {
+      "id": 2,
+      "name": "架空の予約者",
+      "roomId": "900002"
+    },
+    {
+      "id": 3,
+      "name": "架空の参加者",
+      "roomId": " 900003 "
+    },
+    {
+      "id": 4,
+      "name": "宛先未設定の参加者",
+      "roomId": null
+    },
+    {
+      "id": 5,
+      "name": "架空の追加参加者",
+      "roomId": "900005"
+    }
+  ],
+  "cases": [
+    {
+      "name": "external",
+      "actor": "owner",
+      "request": {"title": "  架空の訪問  ", "date": "2026-06-22T18:45:00", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3, 4, 3, 0, -7], "createdByUserId": 1, "leavePeriod": 3},
+      "response": {
+        "status": 201,
+        "body": {
+          "id": 324,
+          "createdByUserId": 2,
+          "type": 0,
+          "title": "架空の訪問",
+          "seriesId": null,
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T09:00:00.1234567",
+          "endTime": "2026-06-22T10:00:00",
+          "repeatType": null,
+          "repeatUntil": null,
+          "leavePeriod": 0,
+          "participantIds": [
+            2,
+            3,
+            4
+          ],
+          "participants": "架空の予約者、架空の参加者、宛先未設定の参加者",
+          "createdAt": "2026-11-24T05:02:47.3715889",
+          "updatedAt": "2026-11-24T05:02:47.3715889"
+        },
+        "location": "http://127.0.0.1:5095/api/work-schedule-entries/324",
+        "contentType": "application/json; charset=utf-8"
+      },
+      "saved": [{"id": 324, "createdByUserId": 2, "type": 0, "title": "架空の訪問", "seriesId": null, "date": "2026-06-22T00:00:00", "startTime": "2026-06-22T09:00:00.1234567", "endTime": "2026-06-22T10:00:00", "repeatType": null, "repeatUntil": null, "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の予約者、架空の参加者、宛先未設定の参加者", "createdAt": "2026-11-24T05:02:47.3715889", "updatedAt": "2026-11-24T05:02:47.3715889"}],
+      "notices": [{"userId": 2, "type": "Info", "message": "社外予定「架空の訪問」が登録されました。日付: 2026/06/22 / 時間: 09:00〜10:00 / 対象者: 架空の予約者、架空の参加者、宛先未設定の参加者", "targetDate": "2026-06-22T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 324, "isRead": false}, {"userId": 3, "type": "Info", "message": "社外予定「架空の訪問」が登録されました。日付: 2026/06/22 / 時間: 09:00〜10:00 / 対象者: 架空の予約者、架空の参加者、宛先未設定の参加者", "targetDate": "2026-06-22T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 324, "isRead": false}, {"userId": 4, "type": "Info", "message": "社外予定「架空の訪問」が登録されました。日付: 2026/06/22 / 時間: 09:00〜10:00 / 対象者: 架空の予約者、架空の参加者、宛先未設定の参加者", "targetDate": "2026-06-22T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 324, "isRead": false}],
+      "logs": [{"reservationId": 0, "workScheduleEntryId": 324, "deliveryType": "WorkScheduleCreated", "deliveryKey": "WorkScheduleCreated:work-schedule:324:user:2", "targetUserId": 2, "scheduledStartTime": "2026-06-22T09:00:00.1234567", "roomId": "900002", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T05:02:47.3816272", "sentAt": "2026-11-24T05:02:47.3881554", "message": "[info][title]社外予定が登録されました[/title]\n内容: 架空の訪問\n日付: 2026/06/22\n時間: 09:00〜10:00\n対象者: 架空の予約者、架空の参加者、宛先未設定の参加者\n[/info]", "createdAt": "2026-11-24T05:02:47.3816272"}, {"reservationId": 0, "workScheduleEntryId": 324, "deliveryType": "WorkScheduleCreated", "deliveryKey": "WorkScheduleCreated:work-schedule:324:user:3", "targetUserId": 3, "scheduledStartTime": "2026-06-22T09:00:00.1234567", "roomId": "900003", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T05:02:47.392804", "sentAt": "2026-11-24T05:02:47.3958089", "message": "[info][title]社外予定が登録されました[/title]\n内容: 架空の訪問\n日付: 2026/06/22\n時間: 09:00〜10:00\n対象者: 架空の予約者、架空の参加者、宛先未設定の参加者\n[/info]", "createdAt": "2026-11-24T05:02:47.392804"}, {"reservationId": 0, "workScheduleEntryId": 324, "deliveryType": "WorkScheduleCreated", "deliveryKey": "WorkScheduleCreated:work-schedule:324:user:4", "targetUserId": 4, "scheduledStartTime": "2026-06-22T09:00:00.1234567", "roomId": null, "status": "Skipped", "errorMessage": "ChatworkDirectRoomId is not configured.", "attemptedAt": "2026-11-24T05:02:47.3998599", "sentAt": null, "message": "[info][title]社外予定が登録されました[/title]\n内容: 架空の訪問\n日付: 2026/06/22\n時間: 09:00〜10:00\n対象者: 架空の予約者、架空の参加者、宛先未設定の参加者\n[/info]", "createdAt": "2026-11-24T05:02:47.3998599"}],
+      "requests": [{"roomId": "900002", "body": "[info][title]社外予定が登録されました[/title]\n内容: 架空の訪問\n日付: 2026/06/22\n時間: 09:00〜10:00\n対象者: 架空の予約者、架空の参加者、宛先未設定の参加者\n[/info]"}, {"roomId": "900003", "body": "[info][title]社外予定が登録されました[/title]\n内容: 架空の訪問\n日付: 2026/06/22\n時間: 09:00〜10:00\n対象者: 架空の予約者、架空の参加者、宛先未設定の参加者\n[/info]"}],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "overlap",
+      "actor": "owner",
+      "request": {"title": "  架空の訪問  ", "date": "2026-06-22T18:45:00", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3, 2, 3], "createdByUserId": 1, "leavePeriod": 3, "participants": "  表示する架空名  "},
+      "response": {
+        "status": 201,
+        "body": {
+          "id": 325,
+          "createdByUserId": 2,
+          "type": 0,
+          "title": "架空の訪問",
+          "seriesId": null,
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T09:00:00.1234567",
+          "endTime": "2026-06-22T10:00:00",
+          "repeatType": null,
+          "repeatUntil": null,
+          "leavePeriod": 0,
+          "participantIds": [
+            3,
+            2
+          ],
+          "participants": "表示する架空名",
+          "createdAt": "2026-11-24T05:02:47.4446225",
+          "updatedAt": "2026-11-24T05:02:47.4446225"
+        },
+        "location": "http://127.0.0.1:5095/api/work-schedule-entries/325",
+        "contentType": "application/json; charset=utf-8"
+      },
+      "saved": [{"id": 325, "createdByUserId": 2, "type": 0, "title": "架空の訪問", "seriesId": null, "date": "2026-06-22T00:00:00", "startTime": "2026-06-22T09:00:00.1234567", "endTime": "2026-06-22T10:00:00", "repeatType": null, "repeatUntil": null, "leavePeriod": 0, "participantIds": [3, 2], "participants": "表示する架空名", "createdAt": "2026-11-24T05:02:47.4446225", "updatedAt": "2026-11-24T05:02:47.4446225"}],
+      "notices": [{"userId": 3, "type": "Warning", "message": "社外予定「架空の訪問」が登録されました。日付: 2026/06/22 / 時間: 09:00〜10:00 / 対象者: 表示する架空名 注意: 参加者の予定重複があります。架空の予約者: 会議室予約「架空の会議名」 2026/06/22 08:50〜09:15 架空の参加者: 会議室予約「架空の会議名」 2026/06/22 08:50〜09:15 架空の参加者: 社外予定「既存の架空外出」 2026/06/22 09:15〜10:15 架空の参加者: 社外予定「架空の追加重複 1」 2026/06/22 09:30〜10:30 架空の参加者: 社外予定「架空の追加重複 2」 2026/06/22 09:31〜10:30 ほか2件", "targetDate": "2026-06-22T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 325, "isRead": false}, {"userId": 2, "type": "Warning", "message": "社外予定「架空の訪問」が登録されました。日付: 2026/06/22 / 時間: 09:00〜10:00 / 対象者: 表示する架空名 注意: 参加者の予定重複があります。架空の予約者: 会議室予約「架空の会議名」 2026/06/22 08:50〜09:15 架空の参加者: 会議室予約「架空の会議名」 2026/06/22 08:50〜09:15 架空の参加者: 社外予定「既存の架空外出」 2026/06/22 09:15〜10:15 架空の参加者: 社外予定「架空の追加重複 1」 2026/06/22 09:30〜10:30 架空の参加者: 社外予定「架空の追加重複 2」 2026/06/22 09:31〜10:30 ほか2件", "targetDate": "2026-06-22T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 325, "isRead": false}],
+      "logs": [{"reservationId": 0, "workScheduleEntryId": 325, "deliveryType": "WorkScheduleCreated", "deliveryKey": "WorkScheduleCreated:work-schedule:325:user:3", "targetUserId": 3, "scheduledStartTime": "2026-06-22T09:00:00.1234567", "roomId": "900003", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T05:02:47.4637581", "sentAt": "2026-11-24T05:02:47.4666164", "message": "[info][title]社外予定が登録されました[/title]\n内容: 架空の訪問\n日付: 2026/06/22\n時間: 09:00〜10:00\n対象者: 表示する架空名\n[hr]\n注意: 参加者の予定重複があります\n- 架空の予約者: 会議室予約「架空の会議名」 2026/06/22 08:50〜09:15\n- 架空の参加者: 会議室予約「架空の会議名」 2026/06/22 08:50〜09:15\n- 架空の参加者: 社外予定「既存の架空外出」 2026/06/22 09:15〜10:15\n- 架空の参加者: 社外予定「架空の追加重複 1」 2026/06/22 09:30〜10:30\n- 架空の参加者: 社外予定「架空の追加重複 2」 2026/06/22 09:31〜10:30\n- ほか 2件\n[/info]", "createdAt": "2026-11-24T05:02:47.4637581"}, {"reservationId": 0, "workScheduleEntryId": 325, "deliveryType": "WorkScheduleCreated", "deliveryKey": "WorkScheduleCreated:work-schedule:325:user:2", "targetUserId": 2, "scheduledStartTime": "2026-06-22T09:00:00.1234567", "roomId": "900002", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T05:02:47.4693907", "sentAt": "2026-11-24T05:02:47.4714603", "message": "[info][title]社外予定が登録されました[/title]\n内容: 架空の訪問\n日付: 2026/06/22\n時間: 09:00〜10:00\n対象者: 表示する架空名\n[hr]\n注意: 参加者の予定重複があります\n- 架空の予約者: 会議室予約「架空の会議名」 2026/06/22 08:50〜09:15\n- 架空の参加者: 会議室予約「架空の会議名」 2026/06/22 08:50〜09:15\n- 架空の参加者: 社外予定「既存の架空外出」 2026/06/22 09:15〜10:15\n- 架空の参加者: 社外予定「架空の追加重複 1」 2026/06/22 09:30〜10:30\n- 架空の参加者: 社外予定「架空の追加重複 2」 2026/06/22 09:31〜10:30\n- ほか 2件\n[/info]", "createdAt": "2026-11-24T05:02:47.4693907"}],
+      "requests": [{"roomId": "900003", "body": "[info][title]社外予定が登録されました[/title]\n内容: 架空の訪問\n日付: 2026/06/22\n時間: 09:00〜10:00\n対象者: 表示する架空名\n[hr]\n注意: 参加者の予定重複があります\n- 架空の予約者: 会議室予約「架空の会議名」 2026/06/22 08:50〜09:15\n- 架空の参加者: 会議室予約「架空の会議名」 2026/06/22 08:50〜09:15\n- 架空の参加者: 社外予定「既存の架空外出」 2026/06/22 09:15〜10:15\n- 架空の参加者: 社外予定「架空の追加重複 1」 2026/06/22 09:30〜10:30\n- 架空の参加者: 社外予定「架空の追加重複 2」 2026/06/22 09:31〜10:30\n- ほか 2件\n[/info]"}, {"roomId": "900002", "body": "[info][title]社外予定が登録されました[/title]\n内容: 架空の訪問\n日付: 2026/06/22\n時間: 09:00〜10:00\n対象者: 表示する架空名\n[hr]\n注意: 参加者の予定重複があります\n- 架空の予約者: 会議室予約「架空の会議名」 2026/06/22 08:50〜09:15\n- 架空の参加者: 会議室予約「架空の会議名」 2026/06/22 08:50〜09:15\n- 架空の参加者: 社外予定「既存の架空外出」 2026/06/22 09:15〜10:15\n- 架空の参加者: 社外予定「架空の追加重複 1」 2026/06/22 09:30〜10:30\n- 架空の参加者: 社外予定「架空の追加重複 2」 2026/06/22 09:31〜10:30\n- ほか 2件\n[/info]"}],
+      "seeds": [{"kind": "reservation", "id": 201, "title": "", "start": "08:50:00", "end": "09:15:00", "userId": 3, "participantIds": [3, 2]}, {"kind": "reservation", "id": 202, "title": "端点だけ", "start": "10:00:00", "end": "11:00:00", "userId": 3, "participantIds": []}, {"kind": "reservation", "id": 203, "title": "別の参加者", "start": "09:00:00", "end": "09:30:00", "userId": 5, "participantIds": []}, {"kind": "work", "id": 301, "title": "既存の架空外出", "start": "09:15:00", "end": "10:15:00", "userId": 5, "participantIds": [3, 3]}, {"kind": "work", "id": 302, "title": "休暇は対象外", "start": "09:20:00", "end": "09:40:00", "userId": 3, "participantIds": [3], "type": 2}, {"kind": "work", "id": 303, "title": "時刻なし", "start": null, "end": "10:30:00", "userId": 3, "participantIds": [3]}, {"kind": "work", "id": 310, "title": "架空の追加重複 1", "start": "09:30:00", "end": "10:30:00", "userId": 3, "participantIds": [3]}, {"kind": "work", "id": 311, "title": "架空の追加重複 2", "start": "09:31:00", "end": "10:30:00", "userId": 3, "participantIds": [3]}, {"kind": "work", "id": 312, "title": "架空の追加重複 3", "start": "09:32:00", "end": "10:30:00", "userId": 3, "participantIds": [3]}, {"kind": "work", "id": 313, "title": "架空の追加重複 4", "start": "09:33:00", "end": "10:30:00", "userId": 3, "participantIds": [3]}],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "remote_admin",
+      "actor": "admin",
+      "request": {"title": "  ", "date": "2026-06-22T18:45:00", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [], "createdByUserId": 1, "leavePeriod": 3, "type": 1},
+      "response": {
+        "status": 201,
+        "body": {
+          "id": 326,
+          "createdByUserId": 1,
+          "type": 1,
+          "title": "在宅",
+          "seriesId": null,
+          "date": "2026-06-22T00:00:00",
+          "startTime": null,
+          "endTime": null,
+          "repeatType": null,
+          "repeatUntil": null,
+          "leavePeriod": 0,
+          "participantIds": [
+            1
+          ],
+          "participants": "架空の管理者",
+          "createdAt": "2026-11-24T05:02:47.514963",
+          "updatedAt": "2026-11-24T05:02:47.514963"
+        },
+        "location": "http://127.0.0.1:5095/api/work-schedule-entries/326",
+        "contentType": "application/json; charset=utf-8"
+      },
+      "saved": [{"id": 326, "createdByUserId": 1, "type": 1, "title": "在宅", "seriesId": null, "date": "2026-06-22T00:00:00", "startTime": null, "endTime": null, "repeatType": null, "repeatUntil": null, "leavePeriod": 0, "participantIds": [1], "participants": "架空の管理者", "createdAt": "2026-11-24T05:02:47.514963", "updatedAt": "2026-11-24T05:02:47.514963"}],
+      "notices": [{"userId": 1, "type": "Info", "message": "在宅予定「在宅」が登録されました。日付: 2026/06/22 / 対象者: 架空の管理者", "targetDate": "2026-06-22T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 326, "isRead": false}],
+      "logs": [{"reservationId": 0, "workScheduleEntryId": 326, "deliveryType": "WorkScheduleCreated", "deliveryKey": "WorkScheduleCreated:work-schedule:326:user:1", "targetUserId": 1, "scheduledStartTime": "2026-06-22T00:00:00", "roomId": "900001", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T05:02:47.5212693", "sentAt": "2026-11-24T05:02:47.5239949", "message": "[info][title]在宅予定が登録されました[/title]\n内容: 在宅\n日付: 2026/06/22\n対象者: 架空の管理者\n[/info]", "createdAt": "2026-11-24T05:02:47.5212693"}],
+      "requests": [{"roomId": "900001", "body": "[info][title]在宅予定が登録されました[/title]\n内容: 在宅\n日付: 2026/06/22\n対象者: 架空の管理者\n[/info]"}],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "leave",
+      "actor": "owner",
+      "request": {"title": "", "date": "2026-06-22T18:45:00", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": null, "createdByUserId": 1, "leavePeriod": 2, "type": "2"},
+      "response": {
+        "status": 400,
+        "body": {
+          "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+          "title": "One or more validation errors occurred.",
+          "status": 400,
+          "errors": {
+            "request": [
+              "The request field is required."
+            ],
+            "$.type": [
+              "The JSON value could not be converted to MeetingRoomBooker.Shared.Models.WorkScheduleEntryType. Path: $.type | LineNumber: 0 | BytePositionInLine: 198."
+            ]
+          }
+        },
+        "location": null,
+        "contentType": "application/problem+json; charset=utf-8"
+      },
+      "saved": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "leave_ok",
+      "actor": "owner",
+      "request": {"title": "", "date": "2026-06-22T18:45:00", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": ["3"], "createdByUserId": 1, "leavePeriod": 2, "type": 2},
+      "response": {
+        "status": 201,
+        "body": {
+          "id": 327,
+          "createdByUserId": 2,
+          "type": 2,
+          "title": "休暇",
+          "seriesId": null,
+          "date": "2026-06-22T00:00:00",
+          "startTime": null,
+          "endTime": null,
+          "repeatType": null,
+          "repeatUntil": null,
+          "leavePeriod": 2,
+          "participantIds": [
+            2,
+            3
+          ],
+          "participants": "架空の予約者、架空の参加者",
+          "createdAt": "2026-11-24T05:02:47.5962402",
+          "updatedAt": "2026-11-24T05:02:47.5962402"
+        },
+        "location": "http://127.0.0.1:5095/api/work-schedule-entries/327",
+        "contentType": "application/json; charset=utf-8"
+      },
+      "saved": [{"id": 327, "createdByUserId": 2, "type": 2, "title": "休暇", "seriesId": null, "date": "2026-06-22T00:00:00", "startTime": null, "endTime": null, "repeatType": null, "repeatUntil": null, "leavePeriod": 2, "participantIds": [2, 3], "participants": "架空の予約者、架空の参加者", "createdAt": "2026-11-24T05:02:47.5962402", "updatedAt": "2026-11-24T05:02:47.5962402"}],
+      "notices": [{"userId": 2, "type": "Info", "message": "休暇予定「休暇」が登録されました。日付: 2026/06/22 / 休暇区分: 午後休 / 対象者: 架空の予約者、架空の参加者", "targetDate": "2026-06-22T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 327, "isRead": false}, {"userId": 3, "type": "Info", "message": "休暇予定「休暇」が登録されました。日付: 2026/06/22 / 休暇区分: 午後休 / 対象者: 架空の予約者、架空の参加者", "targetDate": "2026-06-22T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 327, "isRead": false}],
+      "logs": [{"reservationId": 0, "workScheduleEntryId": 327, "deliveryType": "WorkScheduleCreated", "deliveryKey": "WorkScheduleCreated:work-schedule:327:user:2", "targetUserId": 2, "scheduledStartTime": "2026-06-22T00:00:00", "roomId": "900002", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T05:02:47.6073303", "sentAt": "2026-11-24T05:02:47.6095139", "message": "[info][title]休暇予定が登録されました[/title]\n内容: 休暇\n日付: 2026/06/22\n休暇区分: 午後休\n対象者: 架空の予約者、架空の参加者\n[/info]", "createdAt": "2026-11-24T05:02:47.6073303"}, {"reservationId": 0, "workScheduleEntryId": 327, "deliveryType": "WorkScheduleCreated", "deliveryKey": "WorkScheduleCreated:work-schedule:327:user:3", "targetUserId": 3, "scheduledStartTime": "2026-06-22T00:00:00", "roomId": "900003", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T05:02:47.6123532", "sentAt": "2026-11-24T05:02:47.6143744", "message": "[info][title]休暇予定が登録されました[/title]\n内容: 休暇\n日付: 2026/06/22\n休暇区分: 午後休\n対象者: 架空の予約者、架空の参加者\n[/info]", "createdAt": "2026-11-24T05:02:47.6123532"}],
+      "requests": [{"roomId": "900002", "body": "[info][title]休暇予定が登録されました[/title]\n内容: 休暇\n日付: 2026/06/22\n休暇区分: 午後休\n対象者: 架空の予約者、架空の参加者\n[/info]"}, {"roomId": "900003", "body": "[info][title]休暇予定が登録されました[/title]\n内容: 休暇\n日付: 2026/06/22\n休暇区分: 午後休\n対象者: 架空の予約者、架空の参加者\n[/info]"}],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "null_participant_ids",
+      "actor": "owner",
+      "request": {"title": "  架空の訪問  ", "date": "2026-06-22T18:45:00", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": null, "createdByUserId": 1, "leavePeriod": 2, "type": 2},
+      "response": {
+        "status": 400,
+        "body": {
+          "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+          "title": "One or more validation errors occurred.",
+          "status": 400,
+          "errors": {
+            "ParticipantIds": [
+              "The ParticipantIds field is required."
+            ]
+          }
+        },
+        "location": null,
+        "contentType": "application/problem+json; charset=utf-8"
+      },
+      "saved": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "nullable_and_offsets",
+      "actor": "owner",
+      "request": {"title": "  架空の訪問  ", "date": "2026-06-21T23:05:00-03:00", "startTime": "2026-06-22T00:00:00Z", "endTime": "2026-06-22T01:00:00+09:00", "participantIds": [3], "createdByUserId": 1, "leavePeriod": 3, "repeatType": null, "repeatUntil": "2026-06-30", "participants": ""},
+      "response": {
+        "status": 201,
+        "body": {
+          "id": 328,
+          "createdByUserId": 2,
+          "type": 0,
+          "title": "架空の訪問",
+          "seriesId": null,
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T00:00:00",
+          "endTime": "2026-06-22T01:00:00",
+          "repeatType": null,
+          "repeatUntil": null,
+          "leavePeriod": 0,
+          "participantIds": [
+            2,
+            3
+          ],
+          "participants": "架空の予約者、架空の参加者",
+          "createdAt": "2026-11-24T05:02:47.8749633",
+          "updatedAt": "2026-11-24T05:02:47.8749633"
+        },
+        "location": "http://127.0.0.1:5095/api/work-schedule-entries/328",
+        "contentType": "application/json; charset=utf-8"
+      },
+      "saved": [{"id": 328, "createdByUserId": 2, "type": 0, "title": "架空の訪問", "seriesId": null, "date": "2026-06-22T00:00:00", "startTime": "2026-06-22T00:00:00", "endTime": "2026-06-22T01:00:00", "repeatType": null, "repeatUntil": null, "leavePeriod": 0, "participantIds": [2, 3], "participants": "架空の予約者、架空の参加者", "createdAt": "2026-11-24T05:02:47.8749633", "updatedAt": "2026-11-24T05:02:47.8749633"}],
+      "notices": [{"userId": 2, "type": "Info", "message": "社外予定「架空の訪問」が登録されました。日付: 2026/06/22 / 時間: 00:00〜01:00 / 対象者: 架空の予約者、架空の参加者", "targetDate": "2026-06-22T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 328, "isRead": false}, {"userId": 3, "type": "Info", "message": "社外予定「架空の訪問」が登録されました。日付: 2026/06/22 / 時間: 00:00〜01:00 / 対象者: 架空の予約者、架空の参加者", "targetDate": "2026-06-22T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 328, "isRead": false}],
+      "logs": [{"reservationId": 0, "workScheduleEntryId": 328, "deliveryType": "WorkScheduleCreated", "deliveryKey": "WorkScheduleCreated:work-schedule:328:user:2", "targetUserId": 2, "scheduledStartTime": "2026-06-22T00:00:00", "roomId": "900002", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T05:02:47.8888954", "sentAt": "2026-11-24T05:02:47.8916491", "message": "[info][title]社外予定が登録されました[/title]\n内容: 架空の訪問\n日付: 2026/06/22\n時間: 00:00〜01:00\n対象者: 架空の予約者、架空の参加者\n[/info]", "createdAt": "2026-11-24T05:02:47.8888954"}, {"reservationId": 0, "workScheduleEntryId": 328, "deliveryType": "WorkScheduleCreated", "deliveryKey": "WorkScheduleCreated:work-schedule:328:user:3", "targetUserId": 3, "scheduledStartTime": "2026-06-22T00:00:00", "roomId": "900003", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T05:02:47.8959273", "sentAt": "2026-11-24T05:02:47.897765", "message": "[info][title]社外予定が登録されました[/title]\n内容: 架空の訪問\n日付: 2026/06/22\n時間: 00:00〜01:00\n対象者: 架空の予約者、架空の参加者\n[/info]", "createdAt": "2026-11-24T05:02:47.8959273"}],
+      "requests": [{"roomId": "900002", "body": "[info][title]社外予定が登録されました[/title]\n内容: 架空の訪問\n日付: 2026/06/22\n時間: 00:00〜01:00\n対象者: 架空の予約者、架空の参加者\n[/info]"}, {"roomId": "900003", "body": "[info][title]社外予定が登録されました[/title]\n内容: 架空の訪問\n日付: 2026/06/22\n時間: 00:00〜01:00\n対象者: 架空の予約者、架空の参加者\n[/info]"}],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "omitted_defaults",
+      "actor": "owner",
+      "request": {"type": 1},
+      "response": {
+        "status": 201,
+        "body": {
+          "id": 329,
+          "createdByUserId": 2,
+          "type": 1,
+          "title": "在宅",
+          "seriesId": null,
+          "date": "2026-11-24T00:00:00",
+          "startTime": null,
+          "endTime": null,
+          "repeatType": null,
+          "repeatUntil": null,
+          "leavePeriod": 0,
+          "participantIds": [
+            2
+          ],
+          "participants": "架空の予約者",
+          "createdAt": "2026-11-24T05:02:47.9424027",
+          "updatedAt": "2026-11-24T05:02:47.9424027"
+        },
+        "location": "http://127.0.0.1:5095/api/work-schedule-entries/329",
+        "contentType": "application/json; charset=utf-8"
+      },
+      "saved": [{"id": 329, "createdByUserId": 2, "type": 1, "title": "在宅", "seriesId": null, "date": "2026-11-24T00:00:00", "startTime": null, "endTime": null, "repeatType": null, "repeatUntil": null, "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:02:47.9424027", "updatedAt": "2026-11-24T05:02:47.9424027"}],
+      "notices": [{"userId": 2, "type": "Info", "message": "在宅予定「在宅」が登録されました。日付: 2026/11/24 / 対象者: 架空の予約者", "targetDate": "2026-11-24T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 329, "isRead": false}],
+      "logs": [{"reservationId": 0, "workScheduleEntryId": 329, "deliveryType": "WorkScheduleCreated", "deliveryKey": "WorkScheduleCreated:work-schedule:329:user:2", "targetUserId": 2, "scheduledStartTime": "2026-11-24T00:00:00", "roomId": "900002", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T05:02:47.9540384", "sentAt": "2026-11-24T05:02:47.9567", "message": "[info][title]在宅予定が登録されました[/title]\n内容: 在宅\n日付: 2026/11/24\n対象者: 架空の予約者\n[/info]", "createdAt": "2026-11-24T05:02:47.9540384"}],
+      "requests": [{"roomId": "900002", "body": "[info][title]在宅予定が登録されました[/title]\n内容: 在宅\n日付: 2026/11/24\n対象者: 架空の予約者\n[/info]"}],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "missing_participants",
+      "actor": "owner",
+      "request": {"title": "  架空の訪問  ", "date": "2026-06-22T18:45:00", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [102, 0, 101, 102], "createdByUserId": 1, "leavePeriod": 3},
+      "response": {
+        "status": 400,
+        "body": "存在しない参加者が含まれています: 102, 101",
+        "location": null,
+        "contentType": "application/json; charset=utf-8"
+      },
+      "saved": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "unknown_type",
+      "actor": "owner",
+      "request": {"title": "  架空の訪問  ", "date": "2026-06-22T18:45:00", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3, 4, 3, 0, -7], "createdByUserId": 1, "leavePeriod": 3, "type": 7},
+      "response": {
+        "status": 400,
+        "body": "予定種別が不正です。",
+        "location": null,
+        "contentType": "application/json; charset=utf-8"
+      },
+      "saved": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "unknown_leave",
+      "actor": "owner",
+      "request": {"title": "  架空の訪問  ", "date": "2026-06-22T18:45:00", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3, 4, 3, 0, -7], "createdByUserId": 1, "leavePeriod": 9, "type": 1},
+      "response": {
+        "status": 400,
+        "body": "休暇区分が不正です。",
+        "location": null,
+        "contentType": "application/json; charset=utf-8"
+      },
+      "saved": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "zero_date",
+      "actor": "owner",
+      "request": {"title": "  架空の訪問  ", "date": "0001-01-01T00:00:00", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3, 4, 3, 0, -7], "createdByUserId": 1, "leavePeriod": 3},
+      "response": {
+        "status": 400,
+        "body": "日付を入力してください。",
+        "location": null,
+        "contentType": "application/json; charset=utf-8"
+      },
+      "saved": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "missing_leave",
+      "actor": "owner",
+      "request": {"title": "  架空の訪問  ", "date": "2026-06-22T18:45:00", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3, 4, 3, 0, -7], "createdByUserId": 1, "leavePeriod": 0, "type": 2},
+      "response": {
+        "status": 400,
+        "body": "休暇区分を選択してください。",
+        "location": null,
+        "contentType": "application/json; charset=utf-8"
+      },
+      "saved": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "blank_title",
+      "actor": "owner",
+      "request": {"title": " \t ", "date": "2026-06-22T18:45:00", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3, 4, 3, 0, -7], "createdByUserId": 1, "leavePeriod": 3},
+      "response": {
+        "status": 400,
+        "body": "社外予定の内容を入力してください。",
+        "location": null,
+        "contentType": "application/json; charset=utf-8"
+      },
+      "saved": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "missing_time",
+      "actor": "owner",
+      "request": {"title": "  架空の訪問  ", "date": "2026-06-22T18:45:00", "startTime": null, "endTime": "2001-05-07T10:00:00", "participantIds": [3, 4, 3, 0, -7], "createdByUserId": 1, "leavePeriod": 3},
+      "response": {
+        "status": 400,
+        "body": "社外予定の開始時刻と終了時刻を入力してください。",
+        "location": null,
+        "contentType": "application/json; charset=utf-8"
+      },
+      "saved": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "inverted_time",
+      "actor": "owner",
+      "request": {"title": "  架空の訪問  ", "date": "2026-06-22T18:45:00", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2000-01-02T08:00:00", "participantIds": [3, 4, 3, 0, -7], "createdByUserId": 1, "leavePeriod": 3},
+      "response": {
+        "status": 400,
+        "body": "終了時刻は開始時刻より後にしてください。",
+        "location": null,
+        "contentType": "application/json; charset=utf-8"
+      },
+      "saved": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "recurrence_external",
+      "actor": "owner",
+      "request": {"title": "  架空の訪問  ", "date": "2026-06-22T18:45:00", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3, 4, 3, 0, -7], "createdByUserId": 1, "leavePeriod": 3, "repeatType": "毎週", "repeatUntil": "2026-06-29"},
+      "response": {
+        "status": 400,
+        "body": "繰り返し作成は社外予定の一括作成APIを使用してください。",
+        "location": null,
+        "contentType": "application/json; charset=utf-8"
+      },
+      "saved": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "recurrence_remote",
+      "actor": "owner",
+      "request": {"title": "  架空の訪問  ", "date": "2026-06-22T18:45:00", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3, 4, 3, 0, -7], "createdByUserId": 1, "leavePeriod": 3, "type": 1, "repeatUntil": "2026-06-29"},
+      "response": {
+        "status": 400,
+        "body": "繰り返し作成は社外予定のみ指定できます。",
+        "location": null,
+        "contentType": "application/json; charset=utf-8"
+      },
+      "saved": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "recurrence_spaced_none",
+      "actor": "owner",
+      "request": {"title": "  架空の訪問  ", "date": "2026-06-22T18:45:00", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3, 4, 3, 0, -7], "createdByUserId": 1, "leavePeriod": 3, "repeatType": " しない "},
+      "response": {
+        "status": 400,
+        "body": "繰り返し作成は社外予定の一括作成APIを使用してください。",
+        "location": null,
+        "contentType": "application/json; charset=utf-8"
+      },
+      "saved": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "long_title",
+      "actor": "owner",
+      "request": {"title": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀", "date": "2026-06-22T18:45:00", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3, 4, 3, 0, -7], "createdByUserId": 1, "leavePeriod": 3},
+      "response": {
+        "status": 400,
+        "body": {
+          "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+          "title": "One or more validation errors occurred.",
+          "status": 400,
+          "errors": {
+            "Title": [
+              "内容は100文字以内で入力してください。"
+            ]
+          }
+        },
+        "location": null,
+        "contentType": "application/problem+json; charset=utf-8"
+      },
+      "saved": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "long_participants",
+      "actor": "owner",
+      "request": {"title": "  架空の訪問  ", "date": "2026-06-22T18:45:00", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3, 4, 3, 0, -7], "createdByUserId": 1, "leavePeriod": 3, "participants": "あああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああ"},
+      "response": {
+        "status": 400,
+        "body": "参加者は500文字以内で入力してください。",
+        "location": null,
+        "contentType": "application/json; charset=utf-8"
+      },
+      "saved": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "null_title",
+      "actor": "owner",
+      "request": {"title": null, "date": "2026-06-22T18:45:00", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3, 4, 3, 0, -7], "createdByUserId": 1, "leavePeriod": 3},
+      "response": {
+        "status": 400,
+        "body": {
+          "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+          "title": "One or more validation errors occurred.",
+          "status": 400,
+          "errors": {
+            "Title": [
+              "The Title field is required."
+            ]
+          }
+        },
+        "location": null,
+        "contentType": "application/problem+json; charset=utf-8"
+      },
+      "saved": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "null_participants",
+      "actor": "owner",
+      "request": {"title": "  架空の訪問  ", "date": "2026-06-22T18:45:00", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3, 4, 3, 0, -7], "createdByUserId": 1, "leavePeriod": 3, "participants": null},
+      "response": {
+        "status": 400,
+        "body": {
+          "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+          "title": "One or more validation errors occurred.",
+          "status": 400,
+          "errors": {
+            "Participants": [
+              "The Participants field is required."
+            ]
+          }
+        },
+        "location": null,
+        "contentType": "application/problem+json; charset=utf-8"
+      },
+      "saved": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "null_date",
+      "actor": "owner",
+      "request": {"title": "  架空の訪問  ", "date": null, "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3, 4, 3, 0, -7], "createdByUserId": 1, "leavePeriod": 3},
+      "response": {
+        "status": 400,
+        "body": {
+          "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+          "title": "One or more validation errors occurred.",
+          "status": 400,
+          "errors": {
+            "request": [
+              "The request field is required."
+            ],
+            "$.date": [
+              "The JSON value could not be converted to System.DateTime. Path: $.date | LineNumber: 0 | BytePositionInLine: 45."
+            ]
+          }
+        },
+        "location": null,
+        "contentType": "application/problem+json; charset=utf-8"
+      },
+      "saved": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "invalid_json_time",
+      "actor": "owner",
+      "request": {"title": "  架空の訪問  ", "date": "2026-06-22T18:45:00", "startTime": "09:00:00", "endTime": "2001-05-07T10:00:00", "participantIds": [3, 4, 3, 0, -7], "createdByUserId": 1, "leavePeriod": 3},
+      "response": {
+        "status": 400,
+        "body": {
+          "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+          "title": "One or more validation errors occurred.",
+          "status": 400,
+          "errors": {
+            "request": [
+              "The request field is required."
+            ],
+            "$.startTime": [
+              "The JSON value could not be converted to System.Nullable`1[System.DateTime]. Path: $.startTime | LineNumber: 0 | BytePositionInLine: 87."
+            ]
+          }
+        },
+        "location": null,
+        "contentType": "application/problem+json; charset=utf-8"
+      },
+      "saved": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "unauthenticated",
+      "actor": "anonymous",
+      "request": {"title": "  架空の訪問  ", "date": "2026-06-22T18:45:00", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3, 4, 3, 0, -7], "createdByUserId": 1, "leavePeriod": 3},
+      "response": {
+        "status": 401,
+        "body": "",
+        "location": null,
+        "contentType": null
+      },
+      "saved": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "provider_failure_and_timeout",
+      "actor": "owner",
+      "request": {"title": "  架空の訪問  ", "date": "2026-06-22T18:45:00", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3], "createdByUserId": 1, "leavePeriod": 3},
+      "response": {
+        "status": 201,
+        "body": {
+          "id": 330,
+          "createdByUserId": 2,
+          "type": 0,
+          "title": "架空の訪問",
+          "seriesId": null,
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T09:00:00.1234567",
+          "endTime": "2026-06-22T10:00:00",
+          "repeatType": null,
+          "repeatUntil": null,
+          "leavePeriod": 0,
+          "participantIds": [
+            2,
+            3
+          ],
+          "participants": "架空の予約者、架空の参加者",
+          "createdAt": "2026-11-24T05:02:48.6098226",
+          "updatedAt": "2026-11-24T05:02:48.6098226"
+        },
+        "location": "http://127.0.0.1:5095/api/work-schedule-entries/330",
+        "contentType": "application/json; charset=utf-8"
+      },
+      "saved": [{"id": 330, "createdByUserId": 2, "type": 0, "title": "架空の訪問", "seriesId": null, "date": "2026-06-22T00:00:00", "startTime": "2026-06-22T09:00:00.1234567", "endTime": "2026-06-22T10:00:00", "repeatType": null, "repeatUntil": null, "leavePeriod": 0, "participantIds": [2, 3], "participants": "架空の予約者、架空の参加者", "createdAt": "2026-11-24T05:02:48.6098226", "updatedAt": "2026-11-24T05:02:48.6098226"}],
+      "notices": [{"userId": 2, "type": "Info", "message": "社外予定「架空の訪問」が登録されました。日付: 2026/06/22 / 時間: 09:00〜10:00 / 対象者: 架空の予約者、架空の参加者", "targetDate": "2026-06-22T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 330, "isRead": false}, {"userId": 3, "type": "Info", "message": "社外予定「架空の訪問」が登録されました。日付: 2026/06/22 / 時間: 09:00〜10:00 / 対象者: 架空の予約者、架空の参加者", "targetDate": "2026-06-22T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 330, "isRead": false}],
+      "logs": [{"reservationId": 0, "workScheduleEntryId": 330, "deliveryType": "WorkScheduleCreated", "deliveryKey": "WorkScheduleCreated:work-schedule:330:user:2", "targetUserId": 2, "scheduledStartTime": "2026-06-22T09:00:00.1234567", "roomId": "900002", "status": "Failed", "errorMessage": "The request was canceled due to the configured HttpClient.Timeout of 0.5 seconds elapsing.", "attemptedAt": "2026-11-24T05:02:48.6357719", "sentAt": null, "message": "[info][title]社外予定が登録されました[/title]\n内容: 架空の訪問\n日付: 2026/06/22\n時間: 09:00〜10:00\n対象者: 架空の予約者、架空の参加者\n[/info]", "createdAt": "2026-11-24T05:02:48.6357719"}, {"reservationId": 0, "workScheduleEntryId": 330, "deliveryType": "WorkScheduleCreated", "deliveryKey": "WorkScheduleCreated:work-schedule:330:user:3", "targetUserId": 3, "scheduledStartTime": "2026-06-22T09:00:00.1234567", "roomId": "900003", "status": "Failed", "errorMessage": "Failed to send Chatwork message. StatusCode: 503, Response: {\"synthetic\":true}", "attemptedAt": "2026-11-24T05:02:49.1439091", "sentAt": null, "message": "[info][title]社外予定が登録されました[/title]\n内容: 架空の訪問\n日付: 2026/06/22\n時間: 09:00〜10:00\n対象者: 架空の予約者、架空の参加者\n[/info]", "createdAt": "2026-11-24T05:02:49.1439091"}],
+      "requests": [{"roomId": "900002", "body": "[info][title]社外予定が登録されました[/title]\n内容: 架空の訪問\n日付: 2026/06/22\n時間: 09:00〜10:00\n対象者: 架空の予約者、架空の参加者\n[/info]"}, {"roomId": "900003", "body": "[info][title]社外予定が登録されました[/title]\n内容: 架空の訪問\n日付: 2026/06/22\n時間: 09:00〜10:00\n対象者: 架空の予約者、架空の参加者\n[/info]"}],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {
+        "900003": 503,
+        "900002": "timeout"
+      }
+    },
+    {
+      "name": "notice_failure",
+      "actor": "owner",
+      "request": {"title": "  架空の訪問  ", "date": "2026-06-22T18:45:00", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3, 4, 3, 0, -7], "createdByUserId": 1, "leavePeriod": 3},
+      "response": {
+        "status": 500,
+        "body": "[development exception with synthetic notice failure]",
+        "location": null,
+        "contentType": "text/plain; charset=utf-8"
+      },
+      "saved": [{"id": 331, "createdByUserId": 2, "type": 0, "title": "架空の訪問", "seriesId": null, "date": "2026-06-22T00:00:00", "startTime": "2026-06-22T09:00:00.1234567", "endTime": "2026-06-22T10:00:00", "repeatType": null, "repeatUntil": null, "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の予約者、架空の参加者、宛先未設定の参加者", "createdAt": "2026-11-24T05:02:49.1846192", "updatedAt": "2026-11-24T05:02:49.1846192"}],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "forceNoticeFailure": true,
+      "fakeResponses": {}
+    }
+  ],
+  "gets": {
+    "/api/work-schedule-entries/2147483647": {
+      "status": 404,
+      "body": {
+        "type": "https://tools.ietf.org/html/rfc9110#section-15.5.5",
+        "title": "Not Found",
+        "status": 404
+      },
+      "location": null,
+      "contentType": "application/problem+json; charset=utf-8"
+    },
+    "/api/work-schedule-entries/not-a-number": {
+      "status": 404,
+      "body": "",
+      "location": null,
+      "contentType": null
+    },
+    "/api/work-schedule-entries/1": {
+      "status": 401,
+      "body": "",
+      "location": null,
+      "contentType": null
+    }
+  }
+}
