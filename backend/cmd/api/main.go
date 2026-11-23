@@ -100,10 +100,18 @@ func run(ctx context.Context) error {
 		return result.Entries, err
 	}
 	updateReservation := func(ctx context.Context, entry reservations.ListEntry, actorID int, isAdmin, notify bool) error {
-		return reservations.Update(ctx, pool, entry, actorID, isAdmin, notify)
+		result, err := reservations.Update(ctx, pool, entry, actorID, isAdmin, notify)
+		if err == nil && chatworkSender != nil {
+			chatworkSender.SendUpdate(ctx, result)
+		}
+		return err
 	}
 	updateReservationSeries := func(ctx context.Context, id int, entry reservations.ListEntry, actorID int, isAdmin bool, scope string, notify bool) error {
-		return reservations.UpdateSeries(ctx, pool, id, entry, actorID, isAdmin, scope, notify)
+		result, err := reservations.UpdateSeries(ctx, pool, id, entry, actorID, isAdmin, scope, notify)
+		if err == nil && chatworkSender != nil {
+			chatworkSender.SendUpdate(ctx, result)
+		}
+		return err
 	}
 	deleteReservation := func(ctx context.Context, id, actorID int, isAdmin bool) error {
 		deleted, err := reservations.Delete(ctx, pool, id, actorID, isAdmin)

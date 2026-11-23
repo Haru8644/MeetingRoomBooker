@@ -60,42 +60,49 @@ func splitParticipants(current, previous []int) (retained, added []int) {
 }
 
 func updatedReservationMessage(previous, current ListEntry, warning, addedNames, removedNames string) string {
-	const dateLayout = "2006/01/02"
-	var changes []string
-	if from, to := previous.Date.Format(dateLayout), current.Date.Format(dateLayout); from != to {
-		changes = append(changes, fmt.Sprintf("利用日が %s から %s に変更されました。", from, to))
-	}
-	if previous.Room != current.Room {
-		changes = append(changes, fmt.Sprintf("会議室が %s から %s に変更されました。", previous.Room, current.Room))
-	}
-	if previous.Type != current.Type {
-		changes = append(changes, fmt.Sprintf("区分が %s から %s に変更されました。", previous.Type, current.Type))
-	}
-	if timeOfDayTicks(previous.StartTime) != timeOfDayTicks(current.StartTime) ||
-		timeOfDayTicks(previous.EndTime) != timeOfDayTicks(current.EndTime) {
-		changes = append(changes, fmt.Sprintf("時間が %s から %s に変更されました。",
-			reservationTimeRange(previous), reservationTimeRange(current)))
-	}
-	label, currentLabel := reservationLabel(previous), reservationLabel(current)
-	if label != currentLabel {
-		changes = append(changes, fmt.Sprintf("予約名が「%s」から「%s」に変更されました。", label, currentLabel))
-	}
+	changes := UpdateChangeLines(previous, current, "予約名", addedNames, removedNames)
+	label := reservationLabel(previous)
 	if strings.TrimSpace(label) == "" {
-		label = currentLabel
-	}
-	if addedNames != "" {
-		changes = append(changes, fmt.Sprintf("参加メンバーに %s が追加されました。", addedNames))
-	}
-	if removedNames != "" {
-		changes = append(changes, fmt.Sprintf("参加メンバーから %s が削除されました。", removedNames))
+		label = reservationLabel(current)
 	}
 	if len(changes) != 0 {
-		return fmt.Sprintf("予約「%s」が更新されました。%s%s", label, strings.Join(changes, " "), warning)
+		return fmt.Sprintf("予約「%s」が更新されました。%s。%s", label, strings.Join(changes, "。 "), warning)
 	}
 	if warning != "" {
 		return fmt.Sprintf("予約「%s」に参加者の予定重複があります。%s", label, warning)
 	}
 	return ""
+}
+
+// UpdateChangeLines describes the tracked changes shared by in-app and Chatwork notices.
+func UpdateChangeLines(previous, current ListEntry, purposeField, addedNames, removedNames string) []string {
+	const dateLayout = "2006/01/02"
+	var changes []string
+	if from, to := previous.Date.Format(dateLayout), current.Date.Format(dateLayout); from != to {
+		changes = append(changes, fmt.Sprintf("利用日が %s から %s に変更されました", from, to))
+	}
+	if previous.Room != current.Room {
+		changes = append(changes, fmt.Sprintf("会議室が %s から %s に変更されました", previous.Room, current.Room))
+	}
+	if previous.Type != current.Type {
+		changes = append(changes, fmt.Sprintf("区分が %s から %s に変更されました", previous.Type, current.Type))
+	}
+	if timeOfDayTicks(previous.StartTime) != timeOfDayTicks(current.StartTime) ||
+		timeOfDayTicks(previous.EndTime) != timeOfDayTicks(current.EndTime) {
+		changes = append(changes, fmt.Sprintf("時間が %s から %s に変更されました",
+			reservationTimeRange(previous), reservationTimeRange(current)))
+	}
+	label, currentLabel := reservationLabel(previous), reservationLabel(current)
+	if label != currentLabel {
+		changes = append(changes, fmt.Sprintf("%sが「%s」から「%s」に変更されました", purposeField, label, currentLabel))
+	}
+	if addedNames != "" {
+		changes = append(changes, fmt.Sprintf("参加メンバーに %s が追加されました", addedNames))
+	}
+	if removedNames != "" {
+		changes = append(changes, fmt.Sprintf("参加メンバーから %s が削除されました", removedNames))
+	}
+	return changes
 }
 
 func timeOfDayTicks(value time.Time) int64 {

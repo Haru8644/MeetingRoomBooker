@@ -19,11 +19,7 @@ func CreateSeries(ctx context.Context, pool *pgxpool.Pool, entries []ListEntry, 
 		return Creation{}, ValidationError("登録する予約がありません。")
 	}
 	entries = slices.Clone(entries)
-	var uuid [16]byte
-	rand.Read(uuid[:])
-	uuid[6] = uuid[6]&0x0f | 0x40
-	uuid[8] = uuid[8]&0x3f | 0x80
-	seriesID := hex.EncodeToString(uuid[:])
+	seriesID := newReservationUUID()
 
 	var overlaps []ListEntry
 	err := pgx.BeginTxFunc(ctx, pool, pgx.TxOptions{IsoLevel: pgx.ReadCommitted}, func(tx pgx.Tx) error {
@@ -71,6 +67,14 @@ func CreateSeries(ctx context.Context, pool *pgxpool.Pool, entries []ListEntry, 
 		return Creation{}, err
 	}
 	return Creation{Entries: entries, Overlaps: overlaps}, nil
+}
+
+func newReservationUUID() string {
+	var uuid [16]byte
+	rand.Read(uuid[:])
+	uuid[6] = uuid[6]&0x0f | 0x40
+	uuid[8] = uuid[8]&0x3f | 0x80
+	return hex.EncodeToString(uuid[:])
 }
 
 func validateSeriesOccurrence(entry ListEntry) error {
