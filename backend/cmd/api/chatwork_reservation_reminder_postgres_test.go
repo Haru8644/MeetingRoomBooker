@@ -177,38 +177,7 @@ func TestChatworkReservationReminderPostgres(t *testing.T) {
 
 	t.Run("api_shutdown_cancels_in_flight_reminder", func(t *testing.T) {
 		seedReminderCase(t, ctx, pool, chatworkReminderCase{Reservations: []seriesEditRow{liveReminderRow(63, time.Now().Add(5*time.Minute))}})
-		started, canceled, release := make(chan struct{}, 1), make(chan struct{}, 1), make(chan struct{})
-		blocking := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if err := r.ParseForm(); err != nil {
-				t.Error(err)
-			}
-			started <- struct{}{}
-			select {
-			case <-r.Context().Done():
-				canceled <- struct{}{}
-			case <-release:
-			}
-		}))
-		defer blocking.Close()
-		defer close(release)
-		t.Setenv("CHATWORK_API_BASE_URL", blocking.URL+"/v2/")
-		t.Setenv("CHATWORK_ENABLED", "true")
-		stop := startReminderTestAPI(t, ctx, dsn)
-		select {
-		case <-started:
-		case <-time.After(5 * time.Second):
-			t.Fatal("API did not begin the initial reminder")
-		}
-		before := time.Now()
-		stop()
-		if elapsed := time.Since(before); elapsed >= 2*time.Second {
-			t.Fatalf("shutdown waited %s instead of canceling the HTTP request", elapsed)
-		}
-		select {
-		case <-canceled:
-		case <-time.After(time.Second):
-			t.Fatal("fake server did not observe cancellation")
-		}
+		stopAPIDuringReminder(t, ctx, dsn)
 		if rows := readChatworkLogs(t, ctx, pool); len(rows) != 1 || rows[0].Status != "Unknown" || rows[0].ReservationID != 63 {
 			t.Fatalf("expected one uncertain delivery claim after shutdown: %+v", rows)
 		}
@@ -227,7 +196,7 @@ func seedReminderCase(t *testing.T, ctx context.Context, pool *pgxpool.Pool, sce
 		}
 	}
 	if scenario.ExistingKey {
-		seedChatworkCancelLog(t, ctx, pool, scenario.Logs[0])
+		seedChatworkLog(t, ctx, pool, scenario.Logs[0])
 	}
 }
 
@@ -245,6 +214,42 @@ func startReminderTestAPI(t *testing.T, ctx context.Context, dsn string) func() 
 	once := sync.OnceFunc(stop)
 	t.Cleanup(once)
 	return once
+}
+
+func stopAPIDuringReminder(t *testing.T, ctx context.Context, dsn string) {
+	t.Helper()
+	started, canceled, release := make(chan struct{}, 1), make(chan struct{}, 1), make(chan struct{})
+	blocking := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if err := r.ParseForm(); err != nil {
+			t.Error(err)
+		}
+		started <- struct{}{}
+		select {
+		case <-r.Context().Done():
+			canceled <- struct{}{}
+		case <-release:
+		}
+	}))
+	defer blocking.Close()
+	defer close(release)
+	t.Setenv("CHATWORK_API_BASE_URL", blocking.URL+"/v2/")
+	t.Setenv("CHATWORK_ENABLED", "true")
+	stop := startReminderTestAPI(t, ctx, dsn)
+	select {
+	case <-started:
+	case <-time.After(5 * time.Second):
+		t.Fatal("API did not begin the initial reminder")
+	}
+	before := time.Now()
+	stop()
+	if elapsed := time.Since(before); elapsed >= 2*time.Second {
+		t.Fatalf("shutdown waited %s instead of canceling the HTTP request", elapsed)
+	}
+	select {
+	case <-canceled:
+	case <-time.After(time.Second):
+		t.Fatal("fake server did not observe cancellation")
+	}
 }
 
 func waitForSucceededReminders(t *testing.T, ctx context.Context, pool *pgxpool.Pool, count int) []chatworkTestLog {

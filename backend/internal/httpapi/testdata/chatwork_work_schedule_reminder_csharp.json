@@ -1,0 +1,605 @@
+{
+  "now": "2026-06-22T09:00:00.1234567+09:00",
+  "users": [
+    {
+      "id": 1,
+      "name": "架空の管理者",
+      "roomId": "900001"
+    },
+    {
+      "id": 2,
+      "name": "架空の予約者",
+      "roomId": "900002"
+    },
+    {
+      "id": 3,
+      "name": "架空の参加者",
+      "roomId": " 900003 "
+    },
+    {
+      "id": 4,
+      "name": "宛先未設定の参加者",
+      "roomId": null
+    },
+    {
+      "id": 5,
+      "name": "別枠の参加者",
+      "roomId": "900005"
+    }
+  ],
+  "cases": [
+    {
+      "name": "window",
+      "entries": [
+        {
+          "id": 21,
+          "createdByUserId": 2,
+          "type": 0,
+          "title": "開始済み",
+          "seriesId": null,
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T09:00:00.1234566",
+          "endTime": "2026-06-22T10:00:00",
+          "participantIds": [
+            2
+          ],
+          "participants": "表示",
+          "repeatType": null,
+          "repeatUntil": null,
+          "leavePeriod": 0,
+          "createdAt": "2026-06-22T08:00:00",
+          "updatedAt": "2026-06-22T08:00:00"
+        },
+        {
+          "id": 23,
+          "createdByUserId": 2,
+          "type": 0,
+          "title": "現在と同時",
+          "seriesId": null,
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T09:00:00.1234567",
+          "endTime": "2026-06-22T10:00:00",
+          "participantIds": [
+            2
+          ],
+          "participants": "表示",
+          "repeatType": null,
+          "repeatUntil": null,
+          "leavePeriod": 0,
+          "createdAt": "2026-06-22T08:00:00",
+          "updatedAt": "2026-06-22T08:00:00"
+        },
+        {
+          "id": 27,
+          "createdByUserId": 2,
+          "type": 0,
+          "title": "直後",
+          "seriesId": null,
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T09:00:00.1234568",
+          "endTime": "2026-06-22T10:00:00",
+          "participantIds": [
+            3,
+            0,
+            3,
+            2,
+            -1,
+            7
+          ],
+          "participants": "  保存済みの別表記  ",
+          "repeatType": null,
+          "repeatUntil": null,
+          "leavePeriod": 0,
+          "createdAt": "2026-06-22T08:00:00",
+          "updatedAt": "2026-06-22T08:00:00"
+        },
+        {
+          "id": 24,
+          "createdByUserId": 2,
+          "type": 0,
+          "title": "繰り返し枠 1",
+          "seriesId": "synthetic-work-series",
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T09:03:00.2",
+          "endTime": "2026-06-22T10:00:00",
+          "participantIds": [
+            3,
+            4,
+            3
+          ],
+          "participants": "　\t",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00",
+          "leavePeriod": 0,
+          "createdAt": "2026-06-22T08:00:00",
+          "updatedAt": "2026-06-22T08:00:00"
+        },
+        {
+          "id": 22,
+          "createdByUserId": 2,
+          "type": 0,
+          "title": "繰り返し枠 2",
+          "seriesId": "synthetic-work-series",
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T09:07:00",
+          "endTime": "2026-06-22T10:00:00",
+          "participantIds": [
+            5
+          ],
+          "participants": "保存済みの別枠表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00",
+          "leavePeriod": 0,
+          "createdAt": "2026-06-22T08:00:00",
+          "updatedAt": "2026-06-22T08:00:00"
+        },
+        {
+          "id": 30,
+          "createdByUserId": 2,
+          "type": 0,
+          "title": "ちょうど10分後",
+          "seriesId": null,
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T09:10:00.1234567",
+          "endTime": "2026-06-22T10:00:00",
+          "participantIds": [
+            2
+          ],
+          "participants": "",
+          "repeatType": null,
+          "repeatUntil": null,
+          "leavePeriod": 0,
+          "createdAt": "2026-06-22T08:00:00",
+          "updatedAt": "2026-06-22T08:00:00"
+        },
+        {
+          "id": 25,
+          "createdByUserId": 2,
+          "type": 0,
+          "title": "10分より後",
+          "seriesId": null,
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T09:10:00.1234568",
+          "endTime": "2026-06-22T10:00:00",
+          "participantIds": [
+            2
+          ],
+          "participants": "表示",
+          "repeatType": null,
+          "repeatUntil": null,
+          "leavePeriod": 0,
+          "createdAt": "2026-06-22T08:00:00",
+          "updatedAt": "2026-06-22T08:00:00"
+        },
+        {
+          "id": 26,
+          "createdByUserId": 2,
+          "type": 0,
+          "title": "削除済み",
+          "seriesId": null,
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T09:04:00",
+          "endTime": "2026-06-22T10:00:00",
+          "participantIds": [
+            2
+          ],
+          "participants": "表示",
+          "repeatType": null,
+          "repeatUntil": null,
+          "leavePeriod": 0,
+          "createdAt": "2026-06-22T08:00:00",
+          "updatedAt": "2026-06-22T08:00:00"
+        },
+        {
+          "id": 31,
+          "createdByUserId": 2,
+          "type": 2,
+          "title": "休暇",
+          "seriesId": null,
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T09:05:00",
+          "endTime": "2026-06-22T10:00:00",
+          "participantIds": [
+            2
+          ],
+          "participants": "表示",
+          "repeatType": null,
+          "repeatUntil": null,
+          "leavePeriod": 3,
+          "createdAt": "2026-06-22T08:00:00",
+          "updatedAt": "2026-06-22T08:00:00"
+        },
+        {
+          "id": 32,
+          "createdByUserId": 2,
+          "type": 1,
+          "title": "在宅勤務",
+          "seriesId": null,
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T09:05:00",
+          "endTime": "2026-06-22T10:00:00",
+          "participantIds": [
+            2
+          ],
+          "participants": "表示",
+          "repeatType": null,
+          "repeatUntil": null,
+          "leavePeriod": 0,
+          "createdAt": "2026-06-22T08:00:00",
+          "updatedAt": "2026-06-22T08:00:00"
+        },
+        {
+          "id": 33,
+          "createdByUserId": 2,
+          "type": 0,
+          "title": "開始時刻未設定",
+          "seriesId": null,
+          "date": "2026-06-22T00:00:00",
+          "startTime": null,
+          "endTime": "2026-06-22T10:00:00",
+          "participantIds": [
+            2
+          ],
+          "participants": "表示",
+          "repeatType": null,
+          "repeatUntil": null,
+          "leavePeriod": 0,
+          "createdAt": "2026-06-22T08:00:00",
+          "updatedAt": "2026-06-22T08:00:00"
+        },
+        {
+          "id": 34,
+          "createdByUserId": 2,
+          "type": 0,
+          "title": "終了時刻未設定",
+          "seriesId": null,
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T09:05:00",
+          "endTime": null,
+          "participantIds": [
+            2
+          ],
+          "participants": "表示",
+          "repeatType": null,
+          "repeatUntil": null,
+          "leavePeriod": 0,
+          "createdAt": "2026-06-22T08:00:00",
+          "updatedAt": "2026-06-22T08:00:00"
+        },
+        {
+          "id": 36,
+          "createdByUserId": 2,
+          "type": 0,
+          "title": "宛先なし",
+          "seriesId": null,
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T09:05:00",
+          "endTime": "2026-06-22T10:00:00",
+          "participantIds": [],
+          "participants": "表示のみ",
+          "repeatType": null,
+          "repeatUntil": null,
+          "leavePeriod": 0,
+          "createdAt": "2026-06-22T08:00:00",
+          "updatedAt": "2026-06-22T08:00:00"
+        }
+      ],
+      "deletedIds": [
+        26
+      ],
+      "reservations": [
+        {
+          "id": 24,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "大会議室",
+          "numberOfPeople": 1,
+          "type": "社内",
+          "purpose": "同じIDの会議室予約",
+          "seriesId": null,
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T09:09:00",
+          "endTime": "2026-06-22T10:00:00",
+          "participantIds": [
+            2
+          ],
+          "participants": "",
+          "repeatType": "しない",
+          "repeatUntil": null
+        }
+      ],
+      "existingKey": false,
+      "fakeResponses": {},
+      "requests": [
+        {
+          "roomId": "900002",
+          "body": "[info][title]会議開始10分前です[/title]\n対象: 架空の予約者\n対応: 10分後に開始します\n[hr]\n目的: 同じIDの会議室予約\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:09〜10:00\n予約者: 架空の予約者\n参加者: なし\n[/info]"
+        },
+        {
+          "roomId": "900003",
+          "body": "[info][title]社外予定リマインド[/title]\n10分後に開始します。\n内容: 直後\n日付: 2026/06/22\n時間: 09:00〜10:00\n対象者:   保存済みの別表記  \n[/info]"
+        },
+        {
+          "roomId": "900002",
+          "body": "[info][title]社外予定リマインド[/title]\n10分後に開始します。\n内容: 直後\n日付: 2026/06/22\n時間: 09:00〜10:00\n対象者:   保存済みの別表記  \n[/info]"
+        },
+        {
+          "roomId": "900003",
+          "body": "[info][title]社外予定リマインド[/title]\n10分後に開始します。\n内容: 繰り返し枠 1\n日付: 2026/06/22\n時間: 09:03〜10:00\n対象者: 未設定\n[/info]"
+        },
+        {
+          "roomId": "900005",
+          "body": "[info][title]社外予定リマインド[/title]\n10分後に開始します。\n内容: 繰り返し枠 2\n日付: 2026/06/22\n時間: 09:07〜10:00\n対象者: 保存済みの別枠表示\n[/info]"
+        },
+        {
+          "roomId": "900002",
+          "body": "[info][title]社外予定リマインド[/title]\n10分後に開始します。\n内容: ちょうど10分後\n日付: 2026/06/22\n時間: 09:10〜10:00\n対象者: 未設定\n[/info]"
+        }
+      ],
+      "logs": [
+        {
+          "reservationId": 24,
+          "workScheduleEntryId": null,
+          "deliveryType": "Reminder10Minutes",
+          "deliveryKey": "Reminder10Minutes:reservation:24:user:2:start:2026-06-22T09:09:00.0000000",
+          "targetUserId": 2,
+          "scheduledStartTime": "2026-06-22T09:09:00",
+          "roomId": "900002",
+          "status": "Succeeded",
+          "errorMessage": null,
+          "attemptedAt": "2026-11-24T04:30:01.5100923",
+          "sentAt": "2026-11-24T04:30:01.5552934",
+          "message": "[info][title]会議開始10分前です[/title]\n対象: 架空の予約者\n対応: 10分後に開始します\n[hr]\n目的: 同じIDの会議室予約\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:09〜10:00\n予約者: 架空の予約者\n参加者: なし\n[/info]",
+          "createdAt": "2026-11-24T04:30:01.5100923"
+        },
+        {
+          "reservationId": 0,
+          "workScheduleEntryId": 27,
+          "deliveryType": "WorkScheduleReminder10Minutes",
+          "deliveryKey": "WorkScheduleReminder10Minutes:work-schedule:27:user:3:start:2026-06-22T09:00:00.1234568",
+          "targetUserId": 3,
+          "scheduledStartTime": "2026-06-22T09:00:00.1234568",
+          "roomId": "900003",
+          "status": "Succeeded",
+          "errorMessage": null,
+          "attemptedAt": "2026-11-24T04:30:01.6405273",
+          "sentAt": "2026-11-24T04:30:01.6443906",
+          "message": "[info][title]社外予定リマインド[/title]\n10分後に開始します。\n内容: 直後\n日付: 2026/06/22\n時間: 09:00〜10:00\n対象者:   保存済みの別表記  \n[/info]",
+          "createdAt": "2026-11-24T04:30:01.6405273"
+        },
+        {
+          "reservationId": 0,
+          "workScheduleEntryId": 27,
+          "deliveryType": "WorkScheduleReminder10Minutes",
+          "deliveryKey": "WorkScheduleReminder10Minutes:work-schedule:27:user:2:start:2026-06-22T09:00:00.1234568",
+          "targetUserId": 2,
+          "scheduledStartTime": "2026-06-22T09:00:00.1234568",
+          "roomId": "900002",
+          "status": "Succeeded",
+          "errorMessage": null,
+          "attemptedAt": "2026-11-24T04:30:01.6521118",
+          "sentAt": "2026-11-24T04:30:01.6551847",
+          "message": "[info][title]社外予定リマインド[/title]\n10分後に開始します。\n内容: 直後\n日付: 2026/06/22\n時間: 09:00〜10:00\n対象者:   保存済みの別表記  \n[/info]",
+          "createdAt": "2026-11-24T04:30:01.6521118"
+        },
+        {
+          "reservationId": 0,
+          "workScheduleEntryId": 24,
+          "deliveryType": "WorkScheduleReminder10Minutes",
+          "deliveryKey": "WorkScheduleReminder10Minutes:work-schedule:24:user:3:start:2026-06-22T09:03:00.2000000",
+          "targetUserId": 3,
+          "scheduledStartTime": "2026-06-22T09:03:00.2",
+          "roomId": "900003",
+          "status": "Succeeded",
+          "errorMessage": null,
+          "attemptedAt": "2026-11-24T04:30:01.6634761",
+          "sentAt": "2026-11-24T04:30:01.6648243",
+          "message": "[info][title]社外予定リマインド[/title]\n10分後に開始します。\n内容: 繰り返し枠 1\n日付: 2026/06/22\n時間: 09:03〜10:00\n対象者: 未設定\n[/info]",
+          "createdAt": "2026-11-24T04:30:01.6634761"
+        },
+        {
+          "reservationId": 0,
+          "workScheduleEntryId": 24,
+          "deliveryType": "WorkScheduleReminder10Minutes",
+          "deliveryKey": "WorkScheduleReminder10Minutes:work-schedule:24:user:4:start:2026-06-22T09:03:00.2000000",
+          "targetUserId": 4,
+          "scheduledStartTime": "2026-06-22T09:03:00.2",
+          "roomId": null,
+          "status": "Skipped",
+          "errorMessage": "ChatworkDirectRoomId is not configured.",
+          "attemptedAt": "2026-11-24T04:30:01.6733497",
+          "sentAt": null,
+          "message": "[info][title]社外予定リマインド[/title]\n10分後に開始します。\n内容: 繰り返し枠 1\n日付: 2026/06/22\n時間: 09:03〜10:00\n対象者: 未設定\n[/info]",
+          "createdAt": "2026-11-24T04:30:01.6733497"
+        },
+        {
+          "reservationId": 0,
+          "workScheduleEntryId": 22,
+          "deliveryType": "WorkScheduleReminder10Minutes",
+          "deliveryKey": "WorkScheduleReminder10Minutes:work-schedule:22:user:5:start:2026-06-22T09:07:00.0000000",
+          "targetUserId": 5,
+          "scheduledStartTime": "2026-06-22T09:07:00",
+          "roomId": "900005",
+          "status": "Succeeded",
+          "errorMessage": null,
+          "attemptedAt": "2026-11-24T04:30:01.6834163",
+          "sentAt": "2026-11-24T04:30:01.6854905",
+          "message": "[info][title]社外予定リマインド[/title]\n10分後に開始します。\n内容: 繰り返し枠 2\n日付: 2026/06/22\n時間: 09:07〜10:00\n対象者: 保存済みの別枠表示\n[/info]",
+          "createdAt": "2026-11-24T04:30:01.6834163"
+        },
+        {
+          "reservationId": 0,
+          "workScheduleEntryId": 30,
+          "deliveryType": "WorkScheduleReminder10Minutes",
+          "deliveryKey": "WorkScheduleReminder10Minutes:work-schedule:30:user:2:start:2026-06-22T09:10:00.1234567",
+          "targetUserId": 2,
+          "scheduledStartTime": "2026-06-22T09:10:00.1234567",
+          "roomId": "900002",
+          "status": "Succeeded",
+          "errorMessage": null,
+          "attemptedAt": "2026-11-24T04:30:01.6908768",
+          "sentAt": "2026-11-24T04:30:01.6921029",
+          "message": "[info][title]社外予定リマインド[/title]\n10分後に開始します。\n内容: ちょうど10分後\n日付: 2026/06/22\n時間: 09:10〜10:00\n対象者: 未設定\n[/info]",
+          "createdAt": "2026-11-24T04:30:01.6908768"
+        }
+      ]
+    },
+    {
+      "name": "provider_failure_and_timeout",
+      "entries": [
+        {
+          "id": 40,
+          "createdByUserId": 2,
+          "type": 0,
+          "title": "送信失敗の検証",
+          "seriesId": null,
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T09:05:01.0123",
+          "endTime": "2026-06-22T10:00:00",
+          "participantIds": [
+            3,
+            4,
+            2
+          ],
+          "participants": "保存済",
+          "repeatType": null,
+          "repeatUntil": null,
+          "leavePeriod": 0,
+          "createdAt": "2026-06-22T08:00:00",
+          "updatedAt": "2026-06-22T08:00:00"
+        }
+      ],
+      "deletedIds": [],
+      "reservations": [],
+      "existingKey": false,
+      "fakeResponses": {
+        "900003": 503,
+        "900002": "timeout"
+      },
+      "requests": [
+        {
+          "roomId": "900003",
+          "body": "[info][title]社外予定リマインド[/title]\n10分後に開始します。\n内容: 送信失敗の検証\n日付: 2026/06/22\n時間: 09:05〜10:00\n対象者: 保存済\n[/info]"
+        },
+        {
+          "roomId": "900002",
+          "body": "[info][title]社外予定リマインド[/title]\n10分後に開始します。\n内容: 送信失敗の検証\n日付: 2026/06/22\n時間: 09:05〜10:00\n対象者: 保存済\n[/info]"
+        }
+      ],
+      "logs": [
+        {
+          "reservationId": 0,
+          "workScheduleEntryId": 40,
+          "deliveryType": "WorkScheduleReminder10Minutes",
+          "deliveryKey": "WorkScheduleReminder10Minutes:work-schedule:40:user:3:start:2026-06-22T09:05:01.0123000",
+          "targetUserId": 3,
+          "scheduledStartTime": "2026-06-22T09:05:01.0123",
+          "roomId": "900003",
+          "status": "Failed",
+          "errorMessage": "Failed to send Chatwork message. StatusCode: 503, Response: {\"synthetic\":true}",
+          "attemptedAt": "2026-11-24T04:30:01.7400238",
+          "sentAt": null,
+          "message": "[info][title]社外予定リマインド[/title]\n10分後に開始します。\n内容: 送信失敗の検証\n日付: 2026/06/22\n時間: 09:05〜10:00\n対象者: 保存済\n[/info]",
+          "createdAt": "2026-11-24T04:30:01.7400238"
+        },
+        {
+          "reservationId": 0,
+          "workScheduleEntryId": 40,
+          "deliveryType": "WorkScheduleReminder10Minutes",
+          "deliveryKey": "WorkScheduleReminder10Minutes:work-schedule:40:user:4:start:2026-06-22T09:05:01.0123000",
+          "targetUserId": 4,
+          "scheduledStartTime": "2026-06-22T09:05:01.0123",
+          "roomId": null,
+          "status": "Skipped",
+          "errorMessage": "ChatworkDirectRoomId is not configured.",
+          "attemptedAt": "2026-11-24T04:30:01.7631911",
+          "sentAt": null,
+          "message": "[info][title]社外予定リマインド[/title]\n10分後に開始します。\n内容: 送信失敗の検証\n日付: 2026/06/22\n時間: 09:05〜10:00\n対象者: 保存済\n[/info]",
+          "createdAt": "2026-11-24T04:30:01.7631911"
+        },
+        {
+          "reservationId": 0,
+          "workScheduleEntryId": 40,
+          "deliveryType": "WorkScheduleReminder10Minutes",
+          "deliveryKey": "WorkScheduleReminder10Minutes:work-schedule:40:user:2:start:2026-06-22T09:05:01.0123000",
+          "targetUserId": 2,
+          "scheduledStartTime": "2026-06-22T09:05:01.0123",
+          "roomId": "900002",
+          "status": "Failed",
+          "errorMessage": "The request was canceled due to the configured HttpClient.Timeout of 0.5 seconds elapsing.",
+          "attemptedAt": "2026-11-24T04:30:01.7677436",
+          "sentAt": null,
+          "message": "[info][title]社外予定リマインド[/title]\n10分後に開始します。\n内容: 送信失敗の検証\n日付: 2026/06/22\n時間: 09:05〜10:00\n対象者: 保存済\n[/info]",
+          "createdAt": "2026-11-24T04:30:01.7677436"
+        }
+      ]
+    },
+    {
+      "name": "existing_key",
+      "entries": [
+        {
+          "id": 41,
+          "createdByUserId": 2,
+          "type": 0,
+          "title": "既存キー",
+          "seriesId": null,
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T09:05:00.123",
+          "endTime": "2026-06-22T10:00:00",
+          "participantIds": [
+            3,
+            2
+          ],
+          "participants": "保存済",
+          "repeatType": null,
+          "repeatUntil": null,
+          "leavePeriod": 0,
+          "createdAt": "2026-06-22T08:00:00",
+          "updatedAt": "2026-06-22T08:00:00"
+        }
+      ],
+      "deletedIds": [],
+      "reservations": [],
+      "existingKey": true,
+      "fakeResponses": {},
+      "requests": [
+        {
+          "roomId": "900002",
+          "body": "[info][title]社外予定リマインド[/title]\n10分後に開始します。\n内容: 既存キー\n日付: 2026/06/22\n時間: 09:05〜10:00\n対象者: 保存済\n[/info]"
+        }
+      ],
+      "logs": [
+        {
+          "reservationId": 0,
+          "workScheduleEntryId": 41,
+          "deliveryType": "WorkScheduleReminder10Minutes",
+          "deliveryKey": "WorkScheduleReminder10Minutes:work-schedule:41:user:3:start:2026-06-22T09:05:00.1230000",
+          "targetUserId": 3,
+          "scheduledStartTime": "2026-06-22T09:05:00.123",
+          "roomId": "900003",
+          "status": "Failed",
+          "errorMessage": "previous synthetic failure",
+          "attemptedAt": "2026-06-22T08:56:00",
+          "sentAt": null,
+          "message": "過去の配信ログ",
+          "createdAt": "2026-06-22T08:56:00"
+        },
+        {
+          "reservationId": 0,
+          "workScheduleEntryId": 41,
+          "deliveryType": "WorkScheduleReminder10Minutes",
+          "deliveryKey": "WorkScheduleReminder10Minutes:work-schedule:41:user:2:start:2026-06-22T09:05:00.1230000",
+          "targetUserId": 2,
+          "scheduledStartTime": "2026-06-22T09:05:00.123",
+          "roomId": "900002",
+          "status": "Succeeded",
+          "errorMessage": null,
+          "attemptedAt": "2026-11-24T04:30:02.3143771",
+          "sentAt": "2026-11-24T04:30:02.3159904",
+          "message": "[info][title]社外予定リマインド[/title]\n10分後に開始します。\n内容: 既存キー\n日付: 2026/06/22\n時間: 09:05〜10:00\n対象者: 保存済\n[/info]",
+          "createdAt": "2026-11-24T04:30:02.3143771"
+        }
+      ]
+    }
+  ]
+}

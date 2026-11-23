@@ -12,15 +12,15 @@ import (
 
 const reminderType = "Reminder10Minutes"
 
-// RunReservationReminders polls immediately, then waits one minute between completed passes.
-func (sender *Sender) RunReservationReminders(ctx context.Context) {
-	runReminderLoop(ctx, sender.ProcessReservationReminders)
+// RunReminders polls immediately, then waits one minute between completed passes.
+func (sender *Sender) RunReminders(ctx context.Context) {
+	runReminderLoop(ctx, sender.ProcessReminders)
 }
 
 func runReminderLoop(ctx context.Context, process func(context.Context, time.Time) error) {
 	for ctx.Err() == nil {
 		if err := process(ctx, time.Now()); err != nil && ctx.Err() == nil {
-			log.Printf("Chatwork reservation reminders: could not process upcoming reservations")
+			log.Printf("Chatwork reminders: could not finish the reminder pass")
 		}
 		if ctx.Err() != nil {
 			return
@@ -35,11 +35,19 @@ func runReminderLoop(ctx context.Context, process func(context.Context, time.Tim
 	}
 }
 
+// ProcessReminders uses the same clock for both passes and sends reservation DMs first.
+func (sender *Sender) ProcessReminders(ctx context.Context, now time.Time) error {
+	if err := sender.ProcessReservationReminders(ctx, now); err != nil {
+		return err
+	}
+	return sender.processWorkScheduleReminders(ctx, now)
+}
+
 // ProcessReservationReminders runs one pass using the supplied local wall clock.
 func (sender *Sender) ProcessReservationReminders(ctx context.Context, now time.Time) error {
-	wallTime := dotnettime.OnDate(now, now)
+	after, through := reminderWindow(now)
 	queryCtx, cancel := context.WithTimeout(ctx, deliveryTimeout)
-	entries, err := reservations.StartingBetween(queryCtx, sender.pool, wallTime, wallTime.Add(10*time.Minute))
+	entries, err := reservations.StartingBetween(queryCtx, sender.pool, after, through)
 	cancel()
 	if err != nil {
 		return err
@@ -67,8 +75,17 @@ func (sender *Sender) sendReservationReminder(ctx context.Context, entry reserva
 		return
 	}
 	message := stakeholderMessage(entry, participants, stakeholders, recipients, "会議開始10分前です", "10分後に開始します", nil)
+	sender.sendToStakeholders(ctx, reminderType, reminderStartKey(entry.StartTime), entry, stakeholders, recipients, message)
+}
+
+func reminderWindow(now time.Time) (after, through time.Time) {
+	wallTime := dotnettime.OnDate(now, now)
+	return wallTime, wallTime.Add(10 * time.Minute)
+}
+
+func reminderStartKey(start time.Time) string {
 	// SQLite reloads the C# start as an Unspecified DateTime. Its round-trip
 	// format uses seven fractional digits and omits any timezone suffix.
 	const roundTripLayout = "2006-01-02T15:04:05.0000000"
-	sender.sendToStakeholders(ctx, reminderType, ":start:"+entry.StartTime.Format(roundTripLayout), entry, stakeholders, recipients, message)
+	return ":start:" + start.Format(roundTripLayout)
 }

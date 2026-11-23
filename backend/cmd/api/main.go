@@ -150,7 +150,7 @@ func run(ctx context.Context) error {
 		workerDone := make(chan struct{})
 		go func() {
 			defer close(workerDone)
-			chatworkSender.RunReservationReminders(workerCtx)
+			chatworkSender.RunReminders(workerCtx)
 		}()
 		// Join the worker on shutdown and on listen errors before closing the pool.
 		defer func() {
