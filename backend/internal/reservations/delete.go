@@ -8,20 +8,20 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func Delete(ctx context.Context, pool *pgxpool.Pool, id, actorID int, isAdmin bool) error {
-	return pgx.BeginFunc(ctx, pool, func(tx pgx.Tx) error {
-		entry, err := lockManagedReservation(ctx, tx, id, actorID, isAdmin)
-		if err != nil {
-			return err
-		}
-		return deleteSingleReservation(ctx, tx, entry)
-	})
+func Delete(ctx context.Context, pool *pgxpool.Pool, id, actorID int, isAdmin bool) ([]ListEntry, error) {
+	return DeleteSeries(ctx, pool, id, actorID, isAdmin, "single")
 }
 
-func DeleteSeries(ctx context.Context, pool *pgxpool.Pool, id, actorID int, isAdmin bool, scope string) error {
-	return mutateReservationSeries(ctx, pool, id, actorID, isAdmin, scope,
+// DeleteSeries returns the locked snapshots of the deleted rows after commit.
+func DeleteSeries(ctx context.Context, pool *pgxpool.Pool, id, actorID int, isAdmin bool, scope string) ([]ListEntry, error) {
+	var deleted []ListEntry
+	err := mutateReservationSeries(ctx, pool, id, actorID, isAdmin, scope,
 		func(tx pgx.Tx, base ListEntry) error {
-			return deleteSingleReservation(ctx, tx, base)
+			if err := deleteSingleReservation(ctx, tx, base); err != nil {
+				return err
+			}
+			deleted = []ListEntry{base}
+			return nil
 		},
 		func(tx pgx.Tx, _ ListEntry, targets []ListEntry) error {
 			if len(targets) == 0 {
@@ -34,8 +34,16 @@ func DeleteSeries(ctx context.Context, pool *pgxpool.Pool, id, actorID int, isAd
 			for i, target := range targets {
 				ids[i] = target.ID
 			}
-			return deleteReservationRows(ctx, tx, ids)
+			if err := deleteReservationRows(ctx, tx, ids); err != nil {
+				return err
+			}
+			deleted = targets
+			return nil
 		})
+	if err != nil {
+		return nil, err
+	}
+	return deleted, nil
 }
 
 func deleteSingleReservation(ctx context.Context, tx pgx.Tx, entry ListEntry) error {
@@ -47,8 +55,12 @@ func deleteSingleReservation(ctx context.Context, tx pgx.Tx, entry ListEntry) er
 }
 
 func deleteReservationRows(ctx context.Context, tx pgx.Tx, ids []int) error {
-	if _, err := tx.Exec(ctx, `DELETE FROM reservations WHERE id = ANY($1::integer[])`, ids); err != nil {
+	result, err := tx.Exec(ctx, `DELETE FROM reservations WHERE id = ANY($1::integer[])`, ids)
+	if err != nil {
 		return fmt.Errorf("delete reservations: %w", err)
+	}
+	if result.RowsAffected() != int64(len(ids)) {
+		return fmt.Errorf("deleted %d of %d locked reservations", result.RowsAffected(), len(ids))
 	}
 	return nil
 }
