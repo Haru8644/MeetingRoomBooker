@@ -2,7 +2,6 @@ package reservations
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/Haru8644/MeetingRoomBooker/backend/internal/dotnettime"
@@ -20,20 +19,23 @@ func (c *ConflictError) Error() string {
 		c.Room, c.Date.Format("2006/01/02"), c.StartTime.Format("15:04"), c.EndTime.Format("15:04"), c.Label)
 }
 
-func Create(ctx context.Context, pool *pgxpool.Pool, entry ListEntry, allowOverlap bool) (ListEntry, error) {
-	date := dotnettime.Ticks(entry.Date)
-	start := dotnettime.Ticks(entry.StartTime)
-	end := dotnettime.Ticks(entry.EndTime)
-	day := date / dotnettime.TicksPerDay
+// Creation describes committed reservations and their pre-insert room overlaps.
+type Creation struct {
+	Entries  []ListEntry
+	Overlaps []ListEntry
+}
+
+func Create(ctx context.Context, pool *pgxpool.Pool, entry ListEntry, allowOverlap, captureOverlaps bool) (Creation, error) {
+	var overlaps []ListEntry
 	err := pgx.BeginTxFunc(ctx, pool, pgx.TxOptions{IsoLevel: pgx.ReadCommitted}, func(tx pgx.Tx) error {
 		// Check conflicts in a new statement after obtaining the lock so it sees the previous writer's commit.
-		if err := lockReservationSlot(ctx, tx, entry.Room, day); err != nil {
+		if err := lockReservationSlot(ctx, tx, entry.Room, reservationDay(entry.Date)); err != nil {
 			return err
 		}
-		if !allowOverlap {
-			if err := checkConflict(ctx, tx, entry.Room, day, start, end); err != nil {
-				return err
-			}
+		var err error
+		overlaps, err = checkRoomConflicts(ctx, tx, entry, allowOverlap, captureOverlaps)
+		if err != nil {
+			return err
 		}
 		if err := insertReservation(ctx, tx, &entry); err != nil {
 			return err
@@ -41,9 +43,9 @@ func Create(ctx context.Context, pool *pgxpool.Pool, entry ListEntry, allowOverl
 		return notifyAddedParticipants(ctx, tx, entry)
 	})
 	if err != nil {
-		return ListEntry{}, err
+		return Creation{}, err
 	}
-	return entry, nil
+	return Creation{Entries: []ListEntry{entry}, Overlaps: overlaps}, nil
 }
 
 func insertReservation(ctx context.Context, tx pgx.Tx, entry *ListEntry) error {
@@ -72,27 +74,30 @@ func lockReservationSlot(ctx context.Context, tx pgx.Tx, room string, day int64)
 	return nil
 }
 
-func checkConflict(ctx context.Context, tx pgx.Tx, room string, day, start, end int64) error {
-	var date, existingStart, existingEnd int64
-	var name, purpose string
-	err := tx.QueryRow(ctx, `
-		SELECT date_ticks, start_time_ticks, end_time_ticks, name, purpose
-		FROM reservations
+func checkRoomConflicts(ctx context.Context, tx pgx.Tx, entry ListEntry, allowOverlap, captureOverlaps bool) ([]ListEntry, error) {
+	if allowOverlap && !captureOverlaps {
+		return nil, nil
+	}
+	var limit *int
+	if !allowOverlap {
+		limit = new(1)
+	}
+	rows, err := tx.Query(ctx, reservationSelect+`
 		WHERE hashtext(room) = hashtext($1) AND room = $1 AND date_ticks / 864000000000 = $2
 		  AND start_time_ticks < $3 AND end_time_ticks > $4
-		ORDER BY date_ticks, start_time_ticks, id LIMIT 1`, room, day, end, start).Scan(&date, &existingStart, &existingEnd, &name, &purpose)
-	if errors.Is(err, pgx.ErrNoRows) {
-		return nil
-	}
+		ORDER BY date_ticks, start_time_ticks, id LIMIT $5`, entry.Room, reservationDay(entry.Date),
+		dotnettime.Ticks(entry.EndTime), dotnettime.Ticks(entry.StartTime), limit)
 	if err != nil {
-		return fmt.Errorf("check reservation conflicts: %w", err)
+		return nil, fmt.Errorf("query reservation conflicts: %w", err)
 	}
-	return reservationConflict(ListEntry{
-		Reservation: Reservation{
-			Room: room, Date: dotnettime.FromTicks(date), StartTime: dotnettime.FromTicks(existingStart), EndTime: dotnettime.FromTicks(existingEnd),
-		},
-		Name: name, Purpose: purpose,
-	})
+	overlaps, err := pgx.CollectRows(rows, func(row pgx.CollectableRow) (ListEntry, error) { return scanReservation(row) })
+	if err != nil {
+		return nil, fmt.Errorf("read reservation conflicts: %w", err)
+	}
+	if !allowOverlap && len(overlaps) > 0 {
+		return nil, reservationConflict(overlaps[0])
+	}
+	return overlaps, nil
 }
 
 func reservationConflict(entry ListEntry) *ConflictError {

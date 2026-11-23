@@ -65,14 +65,14 @@ func run(ctx context.Context) error {
 		ping = pool.Ping
 	}
 
-	var cancellation *chatwork.CancellationSender
+	var chatworkSender *chatwork.Sender
 	if setting := os.Getenv("CHATWORK_ENABLED"); setting != "" {
 		enabled, err := strconv.ParseBool(setting)
 		if err != nil {
 			return errors.New("CHATWORK_ENABLED must be a boolean")
 		}
 		if enabled {
-			cancellation, err = chatwork.NewCancellationSender(pool, os.Getenv("CHATWORK_API_TOKEN"), os.Getenv("CHATWORK_API_BASE_URL"), development)
+			chatworkSender, err = chatwork.NewSender(pool, os.Getenv("CHATWORK_API_TOKEN"), os.Getenv("CHATWORK_API_BASE_URL"), development)
 			if err != nil {
 				return err
 			}
@@ -83,10 +83,21 @@ func run(ctx context.Context) error {
 		return reservations.List(ctx, pool)
 	})
 	createReservation := func(ctx context.Context, entry reservations.ListEntry, allowOverlap bool) (reservations.ListEntry, error) {
-		return reservations.Create(ctx, pool, entry, allowOverlap)
+		result, err := reservations.Create(ctx, pool, entry, allowOverlap, chatworkSender != nil)
+		if err != nil {
+			return reservations.ListEntry{}, err
+		}
+		if chatworkSender != nil {
+			chatworkSender.SendCreation(ctx, result)
+		}
+		return result.Entries[0], nil
 	}
 	createReservationSeries := func(ctx context.Context, entries []reservations.ListEntry, allowOverlap bool) ([]reservations.ListEntry, error) {
-		return reservations.CreateSeries(ctx, pool, entries, allowOverlap)
+		result, err := reservations.CreateSeries(ctx, pool, entries, allowOverlap, chatworkSender != nil)
+		if err == nil && chatworkSender != nil {
+			chatworkSender.SendCreation(ctx, result)
+		}
+		return result.Entries, err
 	}
 	updateReservation := func(ctx context.Context, entry reservations.ListEntry, actorID int, isAdmin, notify bool) error {
 		return reservations.Update(ctx, pool, entry, actorID, isAdmin, notify)
@@ -96,15 +107,15 @@ func run(ctx context.Context) error {
 	}
 	deleteReservation := func(ctx context.Context, id, actorID int, isAdmin bool) error {
 		deleted, err := reservations.Delete(ctx, pool, id, actorID, isAdmin)
-		if err == nil && cancellation != nil {
-			cancellation.Send(ctx, deleted)
+		if err == nil && chatworkSender != nil {
+			chatworkSender.SendCancellation(ctx, deleted)
 		}
 		return err
 	}
 	deleteReservationSeries := func(ctx context.Context, id, actorID int, isAdmin bool, scope string) error {
 		deleted, err := reservations.DeleteSeries(ctx, pool, id, actorID, isAdmin, scope)
-		if err == nil && cancellation != nil {
-			cancellation.Send(ctx, deleted)
+		if err == nil && chatworkSender != nil {
+			chatworkSender.SendCancellation(ctx, deleted)
 		}
 		return err
 	}

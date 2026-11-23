@@ -148,7 +148,7 @@ Apply [migration `0003`](../backend/migrations/0003_enable_reservation_creation.
 psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f migrations/0003_enable_reservation_creation.sql
 ```
 
-C# persists the booking, writes in-app notices for participants other than the organizer, and invokes direct Chatwork delivery for configured stakeholders. The first synthetic C# booking produced one in-app notice and two successful fake Chatwork deliveries with delivery log rows. See [Go notifications on single reservation creation](#go-notifications-on-single-reservation-creation) for in-app generation and its database requirements. Chatwork delivery is a later migration step.
+C# persists the booking, writes in-app notices for participants other than the organizer, and invokes direct Chatwork delivery for configured stakeholders. The first synthetic C# booking produced one in-app notice and two successful fake Chatwork deliveries with delivery log rows. See [Go notifications on single reservation creation](#go-notifications-on-single-reservation-creation) for in-app generation and [Go Chatwork creation DMs](#go-chatwork-creation-dms) for post-commit delivery.
 
 For verification, set `RESERVATION_CREATE_TEST_DATABASE_URL` to a disposable local PostgreSQL URL that permits creating schemas. The test uses the normal Go server, migrates a schema with existing IDs, and compares HTTP responses with the C# fixture. It holds the room/date lock until two requests are waiting to check that one returns `201`, one returns `409`, and the database contains one new reservation and one notification.
 
@@ -359,6 +359,22 @@ Set `CHATWORK_CANCELLATION_TEST_DATABASE_URL` to a disposable local PostgreSQL U
 
 ```bash
 TZ=Asia/Tokyo go test -v -count=1 ./cmd/api -run '^TestChatworkReservationCancellationPostgres$'
+```
+
+## Go Chatwork creation DMs
+
+`POST /api/Reservations` and `POST /api/Reservations/series` send creation DMs after the reservations and in-app notices commit. The representative is the first row by date and ID. Each existing user in the deduplicated union of organizers and participants across all created rows gets one delivery key, `ReservationCreated:reservation:{id}:user:{userId}`, using the representative ID. Users without a direct room get a `Skipped` log. The message uses the representative booking's details and includes the created count for a batch with multiple rows.
+
+Room conflicts for allowed overlaps are captured under the existing room/day locks before any inserts. The series query deduplicates the existing rows by reservation ID across all submitted slots. Reading room conflicts after insertion could include the new rows or observe a different writer's changes. Series entries that overlap only within the same request do not appear in the existing-reservation section. Both room and participant overlap checks use strict time boundaries. The participant warning checks external appointments at the representative slot against the union from all occurrences, including the organizer, even when there are no in-app recipients. This lookup runs after commit, as in C#. Each warning shows up to five details and the full count. For equal-time participant conflicts, Go uses the same PostgreSQL collation order as in-app notices.
+
+Creation uses the existing [Chatwork sender settings, migration `0007`, and retry policy](#go-chatwork-cancellation-dms). The shared sender claims the unique key before issuing an HTTP request. Delivery defaults to disabled. A `409` or a failed booking transaction produces no delivery attempts. An HTTP rejection records `Failed` with the status code and an unconfirmed response records `Unknown`. Either keeps the committed creation response at `201`. C# recorded the measured timeout as `Failed` and stored the provider response text on rejection. When notice persistence failed in the C# series case, three booking rows remained. Go rolled back all three along with the notices and made no HTTP calls.
+
+The [C# HTTP and SQLite capture](../backend/internal/httpapi/testdata/chatwork_reservation_create_csharp.json) records nine cases. Use the disposable `d8fe3b7` setup described for cancellation, point its Chatwork client at a loopback fake, and disable the reminder worker. Use the fixture's synthetic users, existing reservations, appointments, and request bodies. Start each case with empty reservations, notices, schedules, and delivery logs, then seed only its fixtures. For the failure case set room `900003` to return `503` and delay room `900002` beyond the client timeout. To reproduce the notice failure, raise an error in a SQLite `BEFORE INSERT` trigger on `Notifications`.
+
+Set `CHATWORK_CREATION_TEST_DATABASE_URL` to a disposable PostgreSQL URL with schema creation privileges. From `backend` in WSL, run the test below. It compares the fake HTTP requests and database logs against the capture, checks committed bookings, notices and delivery claims from inside the fake handler, and verifies rollback and replay of a previously claimed creation event.
+
+```bash
+TZ=Asia/Tokyo go test -v -count=1 ./cmd/api -run '^TestChatworkReservationCreationPostgres$'
 ```
 
 ## Recovery to C# and SQLite

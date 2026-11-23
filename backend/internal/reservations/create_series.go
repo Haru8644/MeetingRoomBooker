@@ -14,9 +14,9 @@ import (
 )
 
 // CreateSeries takes normalized occurrences in the order determined from the input dates and start times.
-func CreateSeries(ctx context.Context, pool *pgxpool.Pool, entries []ListEntry, allowOverlap bool) ([]ListEntry, error) {
+func CreateSeries(ctx context.Context, pool *pgxpool.Pool, entries []ListEntry, allowOverlap, captureOverlaps bool) (Creation, error) {
 	if len(entries) == 0 {
-		return nil, ValidationError("登録する予約がありません。")
+		return Creation{}, ValidationError("登録する予約がありません。")
 	}
 	entries = slices.Clone(entries)
 	var uuid [16]byte
@@ -25,11 +25,13 @@ func CreateSeries(ctx context.Context, pool *pgxpool.Pool, entries []ListEntry, 
 	uuid[8] = uuid[8]&0x3f | 0x80
 	seriesID := hex.EncodeToString(uuid[:])
 
+	var overlaps []ListEntry
 	err := pgx.BeginTxFunc(ctx, pool, pgx.TxOptions{IsoLevel: pgx.ReadCommitted}, func(tx pgx.Tx) error {
 		if err := lockReservationSlots(ctx, tx, entries); err != nil {
 			return err
 		}
 		earlier := make(map[reservationSlot][]ListEntry)
+		seenOverlaps := make(map[int]bool)
 		for i, entry := range entries {
 			if err := validateSeriesOccurrence(entry); err != nil {
 				return err
@@ -38,19 +40,25 @@ func CreateSeries(ctx context.Context, pool *pgxpool.Pool, entries []ListEntry, 
 			if entry.RepeatUntil != nil {
 				entries[i].SeriesID = &seriesID
 			}
-			if allowOverlap {
-				continue
-			}
-			slot := reservationSlot{entry.Room, reservationDay(entry.Date)}
-			for _, previous := range earlier[slot] {
-				if IsConflicting(previous.Reservation, entry.Reservation) {
-					return reservationConflict(previous)
+			if !allowOverlap {
+				slot := reservationSlot{entry.Room, reservationDay(entry.Date)}
+				for _, previous := range earlier[slot] {
+					if IsConflicting(previous.Reservation, entry.Reservation) {
+						return reservationConflict(previous)
+					}
 				}
+				earlier[slot] = append(earlier[slot], entry)
 			}
-			if err := checkConflict(ctx, tx, entry.Room, slot.Day, dotnettime.Ticks(entry.StartTime), dotnettime.Ticks(entry.EndTime)); err != nil {
+			matches, err := checkRoomConflicts(ctx, tx, entry, allowOverlap, captureOverlaps)
+			if err != nil {
 				return err
 			}
-			earlier[slot] = append(earlier[slot], entry)
+			for _, existing := range matches {
+				if !seenOverlaps[existing.ID] {
+					overlaps = append(overlaps, existing)
+					seenOverlaps[existing.ID] = true
+				}
+			}
 		}
 		for i := range entries {
 			if err := insertReservation(ctx, tx, &entries[i]); err != nil {
@@ -60,9 +68,9 @@ func CreateSeries(ctx context.Context, pool *pgxpool.Pool, entries []ListEntry, 
 		return notifyAddedSeriesParticipants(ctx, tx, entries)
 	})
 	if err != nil {
-		return nil, err
+		return Creation{}, err
 	}
-	return entries, nil
+	return Creation{Entries: entries, Overlaps: overlaps}, nil
 }
 
 func validateSeriesOccurrence(entry ListEntry) error {

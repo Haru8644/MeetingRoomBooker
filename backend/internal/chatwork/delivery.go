@@ -21,20 +21,20 @@ import (
 
 const cancellationType = "ReservationCanceled"
 
-type CancellationSender struct {
+type Sender struct {
 	pool    *pgxpool.Pool
 	client  *http.Client
 	baseURL string
 	token   string
 }
 
-func NewCancellationSender(pool *pgxpool.Pool, token, baseURL string, development bool) (*CancellationSender, error) {
+func NewSender(pool *pgxpool.Pool, token, baseURL string, development bool) (*Sender, error) {
 	if pool == nil {
-		return nil, errors.New("Chatwork cancellation requires DATABASE_URL")
+		return nil, errors.New("Chatwork delivery requires DATABASE_URL")
 	}
 	token = strings.TrimSpace(token)
 	if token == "" || strings.ContainsAny(token, "\r\n") {
-		return nil, errors.New("Chatwork cancellation requires a valid CHATWORK_API_TOKEN")
+		return nil, errors.New("Chatwork delivery requires a valid CHATWORK_API_TOKEN")
 	}
 	if baseURL == "" {
 		baseURL = "https://api.chatwork.com/v2/"
@@ -44,7 +44,7 @@ func NewCancellationSender(pool *pgxpool.Pool, token, baseURL string, developmen
 			return nil, errors.New("CHATWORK_API_BASE_URL must be a loopback HTTP or HTTPS URL in development")
 		}
 	}
-	return &CancellationSender{
+	return &Sender{
 		pool: pool, token: token, baseURL: strings.TrimRight(baseURL, "/"),
 		client: &http.Client{
 			Timeout:       3 * time.Second,
@@ -65,16 +65,19 @@ type recipient struct {
 	room string
 }
 
-// Send sends cancellation DMs for committed deletions. Failures are logged
-// independently of the reservation response.
-func (sender *CancellationSender) Send(ctx context.Context, deleted []reservations.ListEntry) {
-	if len(deleted) == 0 {
+// SendCancellation sends DMs for committed deletions.
+func (sender *Sender) SendCancellation(ctx context.Context, deleted []reservations.ListEntry) {
+	sender.send(ctx, cancellationType, deleted, nil)
+}
+
+func (sender *Sender) send(ctx context.Context, deliveryType string, entries, overlaps []reservations.ListEntry) {
+	if len(entries) == 0 {
 		return
 	}
 	// Finish a bounded delivery even if the caller disconnects after commit.
 	ctx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
 	defer cancel()
-	ordered := slices.Clone(deleted)
+	ordered := slices.Clone(entries)
 	slices.SortFunc(ordered, func(a, b reservations.ListEntry) int {
 		if order := a.Date.Compare(b.Date); order != 0 {
 			return order
@@ -82,36 +85,49 @@ func (sender *CancellationSender) Send(ctx context.Context, deleted []reservatio
 		return cmp.Compare(a.ID, b.ID)
 	})
 	first := ordered[0]
-	participants := canceledParticipants(ordered)
+	participants := reservationParticipants(ordered)
 	stakeholders := append(slices.Clone(participants), first.UserID)
 	recipients, err := sender.loadRecipients(ctx, stakeholders)
 	if err != nil {
-		log.Printf("Chatwork cancellation: could not load recipients for reservation %d", first.ID)
+		log.Printf("Chatwork %s: could not load recipients for reservation %d", deliveryType, first.ID)
 		return
 	}
-	message := cancellationMessage(first, len(ordered), participants, stakeholders, recipients)
+	var title, action string
+	var extra []string
+	if deliveryType == creationType {
+		first.ParticipantIDs = participants
+		conflicts, err := reservations.FindParticipantConflicts(ctx, sender.pool, first)
+		if err != nil {
+			log.Printf("Chatwork %s: could not load appointment conflicts for reservation %d", deliveryType, first.ID)
+			return
+		}
+		title, action, extra = creationDetails(len(ordered), overlaps, conflicts)
+	} else {
+		title, action, extra = cancellationDetails(len(ordered))
+	}
+	message := stakeholderMessage(first, participants, stakeholders, recipients, title, action, extra)
 	for _, id := range stakeholders {
 		if ctx.Err() != nil {
-			log.Printf("Chatwork cancellation: delivery budget expired for reservation %d", first.ID)
+			log.Printf("Chatwork %s: delivery budget expired for reservation %d", deliveryType, first.ID)
 			return
 		}
 		if target, found := recipients[id]; found {
-			sender.deliver(ctx, first, id, target.room, message)
+			sender.deliver(ctx, deliveryType, first, id, target.room, message)
 		}
 	}
 }
 
-func canceledParticipants(deleted []reservations.ListEntry) []int {
+func reservationParticipants(entries []reservations.ListEntry) []int {
 	var participants []int
 	seen := make(map[int]bool)
-	organizer := deleted[0].UserID
+	organizer := entries[0].UserID
 	add := func(id int) {
 		if id > 0 && id != organizer && !seen[id] {
 			participants = append(participants, id)
 			seen[id] = true
 		}
 	}
-	for _, entry := range deleted {
+	for _, entry := range entries {
 		for _, id := range entry.ParticipantIDs {
 			add(id)
 		}
@@ -120,7 +136,7 @@ func canceledParticipants(deleted []reservations.ListEntry) []int {
 	return participants
 }
 
-func (sender *CancellationSender) loadRecipients(ctx context.Context, ids []int) (map[int]recipient, error) {
+func (sender *Sender) loadRecipients(ctx context.Context, ids []int) (map[int]recipient, error) {
 	rows, err := sender.pool.Query(ctx, `
 		SELECT id, name, COALESCE(chatwork_direct_room_id, '') FROM users
 		WHERE id = ANY($1::integer[]) AND id > 0`, ids)
@@ -141,7 +157,9 @@ func (sender *CancellationSender) loadRecipients(ctx context.Context, ids []int)
 	return result, rows.Err()
 }
 
-func cancellationMessage(first reservations.ListEntry, count int, participants, stakeholders []int, recipients map[int]recipient) string {
+func stakeholderMessage(first reservations.ListEntry, participants, stakeholders []int, recipients map[int]recipient,
+	title, action string, extra []string,
+) string {
 	var targetNames, participantNames []string
 	seenNames := make(map[string]bool)
 	for _, id := range stakeholders {
@@ -173,28 +191,40 @@ func cancellationMessage(first reservations.ListEntry, count int, participants, 
 	if target, found := recipients[first.UserID]; found {
 		organizer = target.name
 	}
-	purpose := first.Purpose
-	if strings.TrimSpace(purpose) == "" {
-		purpose = first.Name
-	}
-	action := "この予約は無効です"
-	if count > 1 {
-		action = "繰り返し予約がまとめて削除されました"
-	}
 	lines := []string{
-		"[info][title]会議予約がキャンセルされました[/title]", "対象: " + targets, "対応: " + action, "[hr]",
-		"目的: " + purpose, "利用日: " + first.Date.Format("2006/01/02"), "会議室: " + first.Room,
-		"時間: " + first.StartTime.Format("15:04") + "〜" + first.EndTime.Format("15:04"),
+		"[info][title]" + title + "[/title]", "対象: " + targets, "対応: " + action, "[hr]",
+		"目的: " + reservationLabel(first), "利用日: " + first.Date.Format("2006/01/02"), "会議室: " + first.Room,
+		"時間: " + reservationTimeRange(first),
 		"予約者: " + organizer, "参加者: " + participantList,
 	}
-	if count > 1 {
-		lines = append(lines, "[hr]", fmt.Sprintf("削除件数: %d件", count))
+	if len(extra) > 0 {
+		lines = append(lines, "[hr]")
+		lines = append(lines, extra...)
 	}
 	return strings.Join(append(lines, "[/info]"), "\n")
 }
 
-func (sender *CancellationSender) deliver(ctx context.Context, first reservations.ListEntry, userID int, room, message string) {
-	deliveryKey := fmt.Sprintf("%s:reservation:%d:user:%d", cancellationType, first.ID, userID)
+func cancellationDetails(count int) (title, action string, extra []string) {
+	const heading = "会議予約がキャンセルされました"
+	if count <= 1 {
+		return heading, "この予約は無効です", nil
+	}
+	return heading, "繰り返し予約がまとめて削除されました", []string{fmt.Sprintf("削除件数: %d件", count)}
+}
+
+func reservationLabel(entry reservations.ListEntry) string {
+	if strings.TrimSpace(entry.Purpose) == "" {
+		return entry.Name
+	}
+	return entry.Purpose
+}
+
+func reservationTimeRange(entry reservations.ListEntry) string {
+	return entry.StartTime.Format("15:04") + "〜" + entry.EndTime.Format("15:04")
+}
+
+func (sender *Sender) deliver(ctx context.Context, deliveryType string, first reservations.ListEntry, userID int, room, message string) {
+	deliveryKey := fmt.Sprintf("%s:reservation:%d:user:%d", deliveryType, first.ID, userID)
 	status, reason := "Unknown", "Delivery claimed. Result not recorded."
 	if room == "" {
 		status, reason = "Skipped", "ChatworkDirectRoomId is not configured."
@@ -205,13 +235,13 @@ func (sender *CancellationSender) deliver(ctx context.Context, first reservation
 		    scheduled_start_time_ticks, room_id, status, error_message, attempted_at_ticks, message, created_at_ticks)
 		VALUES ($1, $2, $3, $4, $5, NULLIF($6, ''), $7, $8, $9, $10, $9)
 		ON CONFLICT (delivery_key) DO NOTHING RETURNING id`,
-		first.ID, cancellationType, deliveryKey, userID, dotnettime.Ticks(first.StartTime), room, status, reason,
+		first.ID, deliveryType, deliveryKey, userID, dotnettime.Ticks(first.StartTime), room, status, reason,
 		localTicks(), message).Scan(&id)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return
 	}
 	if err != nil {
-		log.Printf("Chatwork cancellation: could not claim delivery %s", deliveryKey)
+		log.Printf("Chatwork: could not claim delivery %s", deliveryKey)
 		return
 	}
 	if status == "Skipped" {
@@ -226,7 +256,7 @@ func (sender *CancellationSender) deliver(ctx context.Context, first reservation
 	if _, err := sender.pool.Exec(ctx, `
 		UPDATE chatwork_delivery_logs SET status = $2, error_message = NULLIF($3, ''), sent_at_ticks = $4
 		WHERE id = $1`, id, status, reason, sentAt); err != nil {
-		log.Printf("Chatwork cancellation: could not record result for %s", deliveryKey)
+		log.Printf("Chatwork: could not record result for %s", deliveryKey)
 	}
 }
 

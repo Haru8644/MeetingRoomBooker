@@ -129,6 +129,28 @@ func saveMatchingReservationNotifications(ctx context.Context, tx pgx.Tx, entry 
 }
 
 func participantConflictWarning(ctx context.Context, tx pgx.Tx, entry ListEntry) (string, error) {
+	conflicts, err := FindParticipantConflicts(ctx, tx, entry)
+	if err != nil || conflicts.Count == 0 {
+		return "", err
+	}
+	warning := " 注意: 参加者の予定重複があります。" + strings.Join(conflicts.Lines, " ")
+	if conflicts.Count > len(conflicts.Lines) {
+		warning += fmt.Sprintf(" ほか%d件", conflicts.Count-len(conflicts.Lines))
+	}
+	return warning, nil
+}
+
+type ParticipantConflicts struct {
+	Lines []string
+	Count int
+}
+
+type participantConflictQuerier interface {
+	Query(context.Context, string, ...any) (pgx.Rows, error)
+}
+
+// FindParticipantConflicts returns the total and the first five external appointment conflicts.
+func FindParticipantConflicts(ctx context.Context, db participantConflictQuerier, entry ListEntry) (ParticipantConflicts, error) {
 	const externalAppointment = 0
 	dateTicks := dotnettime.Ticks(entry.Date)
 	midnightTicks := dateTicks - dateTicks%dotnettime.TicksPerDay
@@ -136,7 +158,7 @@ func participantConflictWarning(ctx context.Context, tx pgx.Tx, entry ListEntry)
 	if entry.UserID > 0 && !slices.Contains(participants, entry.UserID) {
 		participants = append(slices.Clone(participants), entry.UserID)
 	}
-	rows, err := tx.Query(ctx, `
+	rows, err := db.Query(ctx, `
 		SELECT COALESCE(u.name, 'ユーザー' || p.id::text) AS participant_name,
 		       e.title, e.start_time_ticks, e.end_time_ticks, count(*) OVER ()
 		FROM work_schedule_entries e
@@ -148,30 +170,22 @@ func participantConflictWarning(ctx context.Context, tx pgx.Tx, entry ListEntry)
 		LIMIT 5`, participants, externalAppointment, midnightTicks,
 		dotnettime.Ticks(entry.EndTime), dotnettime.Ticks(entry.StartTime))
 	if err != nil {
-		return "", err
+		return ParticipantConflicts{}, err
 	}
 	defer rows.Close()
 
-	var lines []string
-	var total int
+	var result ParticipantConflicts
 	for rows.Next() {
 		var participant, title string
 		var start, end int64
-		if err := rows.Scan(&participant, &title, &start, &end, &total); err != nil {
-			return "", err
+		if err := rows.Scan(&participant, &title, &start, &end, &result.Count); err != nil {
+			return ParticipantConflicts{}, err
 		}
-		lines = append(lines, fmt.Sprintf("%s: 社外予定「%s」 %s %s〜%s", participant, title,
+		result.Lines = append(result.Lines, fmt.Sprintf("%s: 社外予定「%s」 %s %s〜%s", participant, title,
 			entry.Date.Format("2006/01/02"), dotnettime.FromTicks(start).Format("15:04"), dotnettime.FromTicks(end).Format("15:04")))
 	}
 	if err := rows.Err(); err != nil {
-		return "", err
+		return ParticipantConflicts{}, err
 	}
-	if len(lines) == 0 {
-		return "", nil
-	}
-	warning := " 注意: 参加者の予定重複があります。" + strings.Join(lines, " ")
-	if total > len(lines) {
-		warning += fmt.Sprintf(" ほか%d件", total-len(lines))
-	}
-	return warning, nil
+	return result, nil
 }
