@@ -395,6 +395,27 @@ Set `CHATWORK_UPDATE_TEST_DATABASE_URL` to a disposable local PostgreSQL URL wit
 TZ=Asia/Tokyo go test -v -count=1 ./cmd/api -run '^TestChatworkReservationUpdatePostgres$'
 ```
 
+## Go Chatwork reservation reminders
+
+With the existing Chatwork setting enabled, the reservation worker runs an immediate pass at API startup and waits one minute after each completed pass. It uses the server's local wall time and selects existing reservations with `now < start <= now + 10 minutes`. It sends in ascending start order. Go breaks ties by reservation ID. C# only specifies start order. Each occurrence is processed independently, including recurring bookings. The organizer and participants are deduplicated by user ID and the message uses the selected occurrence's details. A deletion committed before selection excludes the row. Like C#, a pass uses a snapshot of its selected rows, so an edit or deletion after selection can race with a send.
+
+The [C# HTTP and SQLite capture](../backend/internal/httpapi/testdata/chatwork_reservation_reminder_csharp.json) records the fixed wall clock, synthetic users and reservations, and actual loopback HTTP requests and delivery logs. It includes a booking set through a C# PUT with an explicit `+09:00` offset. SQLite reloaded the stored start as a zone-free .NET `DateTime`. Go uses the same key, `Reminder10Minutes:reservation:{id}:user:{userId}:start:{scheduledStartTime:O}`, with exactly seven fractional digits and no time-zone suffix. For example, the exact ten-minute boundary uses `2026-06-22T09:10:00.1234567`. Both zero and trailing fractional digits are significant in the key. Use the same server time zone as the C# booking calendar.
+
+The worker reuses the [Chatwork settings, client and unique delivery claims](#go-chatwork-cancellation-dms). Every existing status prevents another attempt for its key. A changed start changes the key. A user with no direct room is logged as `Skipped`. The measured `503` and timeout produced C# `Failed` rows. Go records the HTTP status for the `503` and leaves an unconfirmed send `Unknown`. There is no automatic resend. Shutdown cancels the worker's in-flight HTTP and DB operations and joins it before the PostgreSQL pool closes. An interrupted attempt retains its committed `Unknown` claim. The worker stays disabled with the default configuration.
+
+[Migration `0008`](../backend/migrations/0008_index_reservation_start_times.sql) adds a start-time and ID index so the scheduled range can be read in order. A repeated full-table read would inspect historical rows on every pass. PostgreSQL 16.15 picked an index scan for the ten-minute range with 50,000 synthetic rows. Each pass releases its query connection before sending HTTP and holds no reservation row lock during delivery.
+
+To reproduce the C# capture, use the disposable `d8fe3b7` SQLite and loopback Chatwork setup above. Disable its hosted reminder registration in the temporary copy and invoke `ChatworkReminderWorker.ProcessUpcomingRemindersAsync` once per pass with the fixture's `now` instead of using the real clock. Seed the recorded users and reservations, remove the case's deleted IDs, and preload the first log in the existing-key case. For the failure case return `503` for room `900003` and delay room `900002` past the C# HTTP timeout. Both polls of each case must preserve the first pass's delivery log count and HTTP calls.
+
+Set `CHATWORK_REMINDER_TEST_DATABASE_URL` to a disposable local PostgreSQL URL with schema creation privileges. Run from `backend` in WSL. The PostgreSQL test compares the C# keys byte for byte, verifies repeated and concurrent passes, a changed start time, and actual Go API startup, restart, and shutdown. The scheduler test uses a fake clock to verify the one-minute delay without a real-minute wait.
+
+```bash
+TZ=Asia/Tokyo go test -v -count=1 ./cmd/api ./internal/chatwork \
+  -run '^(TestChatworkReservationReminderPostgres|TestReminderLoopRunsImmediatelyAndWaitsAfterEachPass)$'
+```
+
+In WSL, the fixed-time C# window selected four reservations in order and produced seven HTTP calls and one skipped room. The PostgreSQL 16.15 reminder test passed all eight subcases, and all 18 PostgreSQL integration tests passed with the database URLs set. Without the URLs, `go test ./...` passed with those 18 tests skipped. `go vet ./...` and `git diff --check`, including the new files, passed.
+
 ## Recovery to C# and SQLite
 
 Rehearse each stage in development with synthetic rows and a recording fake Chatwork sender. `scripts/deploy/deploy-prod.sh` uses SQLite's backup API and integrity check. `scripts/deploy/rollback-prod.sh` restores the earlier API, web assets and final SQLite snapshot. A rollback after Go accepts writes also needs the committed PostgreSQL state.

@@ -31,6 +31,18 @@ const reservationSelect = `
 	       participants, repeat_type, repeat_until_ticks
 	FROM reservations`
 
+// StartingBetween selects live reservations in (after, through] in start order.
+// The arguments are wall times represented as zone-free .NET ticks.
+func StartingBetween(ctx context.Context, pool *pgxpool.Pool, after, through time.Time) ([]ListEntry, error) {
+	rows, err := pool.Query(ctx, reservationSelect+`
+		WHERE start_time_ticks > $1 AND start_time_ticks <= $2
+		ORDER BY start_time_ticks, id`, dotnettime.Ticks(after), dotnettime.Ticks(through))
+	if err != nil {
+		return nil, fmt.Errorf("query upcoming reservations: %w", err)
+	}
+	return pgx.CollectRows(rows, func(row pgx.CollectableRow) (ListEntry, error) { return scanReservation(row) })
+}
+
 func List(ctx context.Context, pool *pgxpool.Pool) ([]ListEntry, error) {
 	rows, err := pool.Query(ctx, reservationSelect)
 	if err != nil {

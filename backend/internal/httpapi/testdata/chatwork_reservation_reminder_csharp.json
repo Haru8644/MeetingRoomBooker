@@ -1,0 +1,514 @@
+{
+  "now": "2026-06-22T09:00:00.1234567+09:00",
+  "users": [
+    {
+      "id": 1,
+      "name": "架空の管理者",
+      "roomId": "900001"
+    },
+    {
+      "id": 2,
+      "name": "架空の予約者",
+      "roomId": "900002"
+    },
+    {
+      "id": 3,
+      "name": "架空の参加者",
+      "roomId": " 900003 "
+    },
+    {
+      "id": 4,
+      "name": "宛先未設定の参加者",
+      "roomId": null
+    },
+    {
+      "id": 5,
+      "name": "別枠の参加者",
+      "roomId": "900005"
+    }
+  ],
+  "cases": [
+    {
+      "name": "window",
+      "reservations": [
+        {
+          "id": 21,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "大会議室",
+          "numberOfPeople": 3,
+          "type": "社内",
+          "purpose": "開始済み",
+          "seriesId": null,
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T09:00:00.1234566",
+          "endTime": "2026-06-22T10:00:00",
+          "participantIds": [
+            2,
+            3
+          ],
+          "participants": "",
+          "repeatType": "しない",
+          "repeatUntil": null
+        },
+        {
+          "id": 23,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "大会議室",
+          "numberOfPeople": 3,
+          "type": "社内",
+          "purpose": "現在と同時",
+          "seriesId": null,
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T09:00:00.1234567",
+          "endTime": "2026-06-22T10:00:00",
+          "participantIds": [
+            2,
+            3
+          ],
+          "participants": "",
+          "repeatType": "しない",
+          "repeatUntil": null
+        },
+        {
+          "id": 27,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "大会議室",
+          "numberOfPeople": 3,
+          "type": "社内",
+          "purpose": "直後",
+          "seriesId": null,
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T09:00:00.1234568",
+          "endTime": "2026-06-22T10:00:00",
+          "participantIds": [
+            2,
+            3,
+            3,
+            0,
+            -1,
+            7
+          ],
+          "participants": "",
+          "repeatType": "しない",
+          "repeatUntil": null
+        },
+        {
+          "id": 24,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "大会議室",
+          "numberOfPeople": 3,
+          "type": "社内",
+          "purpose": "繰り返し枠 1",
+          "seriesId": "fake-series",
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T09:03:00.2",
+          "endTime": "2026-06-22T10:00:00",
+          "participantIds": [
+            2,
+            4,
+            4,
+            3
+          ],
+          "participants": "",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        {
+          "id": 22,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "大会議室",
+          "numberOfPeople": 3,
+          "type": "社内",
+          "purpose": "繰り返し枠 2",
+          "seriesId": "fake-series",
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T09:07:00",
+          "endTime": "2026-06-22T10:00:00",
+          "participantIds": [
+            2,
+            5
+          ],
+          "participants": "",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        {
+          "id": 30,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "大会議室",
+          "numberOfPeople": 3,
+          "type": "社内",
+          "purpose": "ちょうど10分後",
+          "seriesId": null,
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T09:10:00.1234567",
+          "endTime": "2026-06-22T10:00:00",
+          "participantIds": [
+            2
+          ],
+          "participants": "",
+          "repeatType": "しない",
+          "repeatUntil": null
+        },
+        {
+          "id": 25,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "大会議室",
+          "numberOfPeople": 3,
+          "type": "社内",
+          "purpose": "10分より後",
+          "seriesId": null,
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T09:10:00.1234568",
+          "endTime": "2026-06-22T10:00:00",
+          "participantIds": [
+            2,
+            3
+          ],
+          "participants": "",
+          "repeatType": "しない",
+          "repeatUntil": null
+        },
+        {
+          "id": 26,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "大会議室",
+          "numberOfPeople": 3,
+          "type": "社内",
+          "purpose": "削除済み",
+          "seriesId": null,
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T09:04:00",
+          "endTime": "2026-06-22T10:00:00",
+          "participantIds": [
+            2,
+            3
+          ],
+          "participants": "",
+          "repeatType": "しない",
+          "repeatUntil": null
+        }
+      ],
+      "deletedIds": [
+        26
+      ],
+      "existingKey": false,
+      "fakeResponses": {},
+      "requests": [
+        {
+          "roomId": "900003",
+          "body": "[info][title]会議開始10分前です[/title]\n対象: 架空の参加者、架空の予約者\n対応: 10分後に開始します\n[hr]\n目的: 直後\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:00〜10:00\n予約者: 架空の予約者\n参加者: 架空の参加者、ユーザー7\n[/info]"
+        },
+        {
+          "roomId": "900002",
+          "body": "[info][title]会議開始10分前です[/title]\n対象: 架空の参加者、架空の予約者\n対応: 10分後に開始します\n[hr]\n目的: 直後\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:00〜10:00\n予約者: 架空の予約者\n参加者: 架空の参加者、ユーザー7\n[/info]"
+        },
+        {
+          "roomId": "900003",
+          "body": "[info][title]会議開始10分前です[/title]\n対象: 宛先未設定の参加者、架空の参加者、架空の予約者\n対応: 10分後に開始します\n[hr]\n目的: 繰り返し枠 1\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:03〜10:00\n予約者: 架空の予約者\n参加者: 宛先未設定の参加者、架空の参加者\n[/info]"
+        },
+        {
+          "roomId": "900002",
+          "body": "[info][title]会議開始10分前です[/title]\n対象: 宛先未設定の参加者、架空の参加者、架空の予約者\n対応: 10分後に開始します\n[hr]\n目的: 繰り返し枠 1\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:03〜10:00\n予約者: 架空の予約者\n参加者: 宛先未設定の参加者、架空の参加者\n[/info]"
+        },
+        {
+          "roomId": "900005",
+          "body": "[info][title]会議開始10分前です[/title]\n対象: 別枠の参加者、架空の予約者\n対応: 10分後に開始します\n[hr]\n目的: 繰り返し枠 2\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:07〜10:00\n予約者: 架空の予約者\n参加者: 別枠の参加者\n[/info]"
+        },
+        {
+          "roomId": "900002",
+          "body": "[info][title]会議開始10分前です[/title]\n対象: 別枠の参加者、架空の予約者\n対応: 10分後に開始します\n[hr]\n目的: 繰り返し枠 2\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:07〜10:00\n予約者: 架空の予約者\n参加者: 別枠の参加者\n[/info]"
+        },
+        {
+          "roomId": "900002",
+          "body": "[info][title]会議開始10分前です[/title]\n対象: 架空の予約者\n対応: 10分後に開始します\n[hr]\n目的: ちょうど10分後\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:10〜10:00\n予約者: 架空の予約者\n参加者: なし\n[/info]"
+        }
+      ],
+      "logs": [
+        {
+          "reservationId": 27,
+          "workScheduleEntryId": null,
+          "deliveryType": "Reminder10Minutes",
+          "deliveryKey": "Reminder10Minutes:reservation:27:user:3:start:2026-06-22T09:00:00.1234568",
+          "targetUserId": 3,
+          "scheduledStartTime": "2026-06-22T09:00:00.1234568",
+          "roomId": "900003",
+          "status": "Succeeded",
+          "errorMessage": null,
+          "attemptedAt": "2026-11-24T03:45:21.8812581",
+          "sentAt": "2026-11-24T03:45:21.9253146",
+          "message": "[info][title]会議開始10分前です[/title]\n対象: 架空の参加者、架空の予約者\n対応: 10分後に開始します\n[hr]\n目的: 直後\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:00〜10:00\n予約者: 架空の予約者\n参加者: 架空の参加者、ユーザー7\n[/info]",
+          "createdAt": "2026-11-24T03:45:21.8812581"
+        },
+        {
+          "reservationId": 27,
+          "workScheduleEntryId": null,
+          "deliveryType": "Reminder10Minutes",
+          "deliveryKey": "Reminder10Minutes:reservation:27:user:2:start:2026-06-22T09:00:00.1234568",
+          "targetUserId": 2,
+          "scheduledStartTime": "2026-06-22T09:00:00.1234568",
+          "roomId": "900002",
+          "status": "Succeeded",
+          "errorMessage": null,
+          "attemptedAt": "2026-11-24T03:45:21.9711483",
+          "sentAt": "2026-11-24T03:45:21.9752468",
+          "message": "[info][title]会議開始10分前です[/title]\n対象: 架空の参加者、架空の予約者\n対応: 10分後に開始します\n[hr]\n目的: 直後\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:00〜10:00\n予約者: 架空の予約者\n参加者: 架空の参加者、ユーザー7\n[/info]",
+          "createdAt": "2026-11-24T03:45:21.9711483"
+        },
+        {
+          "reservationId": 24,
+          "workScheduleEntryId": null,
+          "deliveryType": "Reminder10Minutes",
+          "deliveryKey": "Reminder10Minutes:reservation:24:user:4:start:2026-06-22T09:03:00.2000000",
+          "targetUserId": 4,
+          "scheduledStartTime": "2026-06-22T09:03:00.2",
+          "roomId": null,
+          "status": "Skipped",
+          "errorMessage": "ChatworkDirectRoomId is not configured.",
+          "attemptedAt": "2026-11-24T03:45:21.9823505",
+          "sentAt": null,
+          "message": "[info][title]会議開始10分前です[/title]\n対象: 宛先未設定の参加者、架空の参加者、架空の予約者\n対応: 10分後に開始します\n[hr]\n目的: 繰り返し枠 1\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:03〜10:00\n予約者: 架空の予約者\n参加者: 宛先未設定の参加者、架空の参加者\n[/info]",
+          "createdAt": "2026-11-24T03:45:21.9823505"
+        },
+        {
+          "reservationId": 24,
+          "workScheduleEntryId": null,
+          "deliveryType": "Reminder10Minutes",
+          "deliveryKey": "Reminder10Minutes:reservation:24:user:3:start:2026-06-22T09:03:00.2000000",
+          "targetUserId": 3,
+          "scheduledStartTime": "2026-06-22T09:03:00.2",
+          "roomId": "900003",
+          "status": "Succeeded",
+          "errorMessage": null,
+          "attemptedAt": "2026-11-24T03:45:21.9874975",
+          "sentAt": "2026-11-24T03:45:21.9903194",
+          "message": "[info][title]会議開始10分前です[/title]\n対象: 宛先未設定の参加者、架空の参加者、架空の予約者\n対応: 10分後に開始します\n[hr]\n目的: 繰り返し枠 1\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:03〜10:00\n予約者: 架空の予約者\n参加者: 宛先未設定の参加者、架空の参加者\n[/info]",
+          "createdAt": "2026-11-24T03:45:21.9874975"
+        },
+        {
+          "reservationId": 24,
+          "workScheduleEntryId": null,
+          "deliveryType": "Reminder10Minutes",
+          "deliveryKey": "Reminder10Minutes:reservation:24:user:2:start:2026-06-22T09:03:00.2000000",
+          "targetUserId": 2,
+          "scheduledStartTime": "2026-06-22T09:03:00.2",
+          "roomId": "900002",
+          "status": "Succeeded",
+          "errorMessage": null,
+          "attemptedAt": "2026-11-24T03:45:21.9955263",
+          "sentAt": "2026-11-24T03:45:21.9972485",
+          "message": "[info][title]会議開始10分前です[/title]\n対象: 宛先未設定の参加者、架空の参加者、架空の予約者\n対応: 10分後に開始します\n[hr]\n目的: 繰り返し枠 1\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:03〜10:00\n予約者: 架空の予約者\n参加者: 宛先未設定の参加者、架空の参加者\n[/info]",
+          "createdAt": "2026-11-24T03:45:21.9955263"
+        },
+        {
+          "reservationId": 22,
+          "workScheduleEntryId": null,
+          "deliveryType": "Reminder10Minutes",
+          "deliveryKey": "Reminder10Minutes:reservation:22:user:5:start:2026-06-22T09:07:00.0000000",
+          "targetUserId": 5,
+          "scheduledStartTime": "2026-06-22T09:07:00",
+          "roomId": "900005",
+          "status": "Succeeded",
+          "errorMessage": null,
+          "attemptedAt": "2026-11-24T03:45:22.004113",
+          "sentAt": "2026-11-24T03:45:22.0057678",
+          "message": "[info][title]会議開始10分前です[/title]\n対象: 別枠の参加者、架空の予約者\n対応: 10分後に開始します\n[hr]\n目的: 繰り返し枠 2\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:07〜10:00\n予約者: 架空の予約者\n参加者: 別枠の参加者\n[/info]",
+          "createdAt": "2026-11-24T03:45:22.004113"
+        },
+        {
+          "reservationId": 22,
+          "workScheduleEntryId": null,
+          "deliveryType": "Reminder10Minutes",
+          "deliveryKey": "Reminder10Minutes:reservation:22:user:2:start:2026-06-22T09:07:00.0000000",
+          "targetUserId": 2,
+          "scheduledStartTime": "2026-06-22T09:07:00",
+          "roomId": "900002",
+          "status": "Succeeded",
+          "errorMessage": null,
+          "attemptedAt": "2026-11-24T03:45:22.0116868",
+          "sentAt": "2026-11-24T03:45:22.0138292",
+          "message": "[info][title]会議開始10分前です[/title]\n対象: 別枠の参加者、架空の予約者\n対応: 10分後に開始します\n[hr]\n目的: 繰り返し枠 2\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:07〜10:00\n予約者: 架空の予約者\n参加者: 別枠の参加者\n[/info]",
+          "createdAt": "2026-11-24T03:45:22.0116868"
+        },
+        {
+          "reservationId": 30,
+          "workScheduleEntryId": null,
+          "deliveryType": "Reminder10Minutes",
+          "deliveryKey": "Reminder10Minutes:reservation:30:user:2:start:2026-06-22T09:10:00.1234567",
+          "targetUserId": 2,
+          "scheduledStartTime": "2026-06-22T09:10:00.1234567",
+          "roomId": "900002",
+          "status": "Succeeded",
+          "errorMessage": null,
+          "attemptedAt": "2026-11-24T03:45:22.0207626",
+          "sentAt": "2026-11-24T03:45:22.0225795",
+          "message": "[info][title]会議開始10分前です[/title]\n対象: 架空の予約者\n対応: 10分後に開始します\n[hr]\n目的: ちょうど10分後\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:10〜10:00\n予約者: 架空の予約者\n参加者: なし\n[/info]",
+          "createdAt": "2026-11-24T03:45:22.0207626"
+        }
+      ]
+    },
+    {
+      "name": "provider_failure_and_timeout",
+      "reservations": [
+        {
+          "id": 40,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "大会議室",
+          "numberOfPeople": 3,
+          "type": "社内",
+          "purpose": "送信失敗の検証",
+          "seriesId": null,
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T09:05:01.0123",
+          "endTime": "2026-06-22T10:00:00",
+          "participantIds": [
+            2,
+            3,
+            4
+          ],
+          "participants": "",
+          "repeatType": "しない",
+          "repeatUntil": null
+        }
+      ],
+      "deletedIds": [],
+      "existingKey": false,
+      "fakeResponses": {
+        "900003": 503,
+        "900002": "timeout"
+      },
+      "requests": [
+        {
+          "roomId": "900003",
+          "body": "[info][title]会議開始10分前です[/title]\n対象: 架空の参加者、宛先未設定の参加者、架空の予約者\n対応: 10分後に開始します\n[hr]\n目的: 送信失敗の検証\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:05〜10:00\n予約者: 架空の予約者\n参加者: 架空の参加者、宛先未設定の参加者\n[/info]"
+        },
+        {
+          "roomId": "900002",
+          "body": "[info][title]会議開始10分前です[/title]\n対象: 架空の参加者、宛先未設定の参加者、架空の予約者\n対応: 10分後に開始します\n[hr]\n目的: 送信失敗の検証\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:05〜10:00\n予約者: 架空の予約者\n参加者: 架空の参加者、宛先未設定の参加者\n[/info]"
+        }
+      ],
+      "logs": [
+        {
+          "reservationId": 40,
+          "workScheduleEntryId": null,
+          "deliveryType": "Reminder10Minutes",
+          "deliveryKey": "Reminder10Minutes:reservation:40:user:3:start:2026-06-22T09:05:01.0123000",
+          "targetUserId": 3,
+          "scheduledStartTime": "2026-06-22T09:05:01.0123",
+          "roomId": "900003",
+          "status": "Failed",
+          "errorMessage": "Failed to send Chatwork message. StatusCode: 503, Response: {\"synthetic\":true}",
+          "attemptedAt": "2026-11-24T03:45:22.0799538",
+          "sentAt": null,
+          "message": "[info][title]会議開始10分前です[/title]\n対象: 架空の参加者、宛先未設定の参加者、架空の予約者\n対応: 10分後に開始します\n[hr]\n目的: 送信失敗の検証\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:05〜10:00\n予約者: 架空の予約者\n参加者: 架空の参加者、宛先未設定の参加者\n[/info]",
+          "createdAt": "2026-11-24T03:45:22.0799538"
+        },
+        {
+          "reservationId": 40,
+          "workScheduleEntryId": null,
+          "deliveryType": "Reminder10Minutes",
+          "deliveryKey": "Reminder10Minutes:reservation:40:user:4:start:2026-06-22T09:05:01.0123000",
+          "targetUserId": 4,
+          "scheduledStartTime": "2026-06-22T09:05:01.0123",
+          "roomId": null,
+          "status": "Skipped",
+          "errorMessage": "ChatworkDirectRoomId is not configured.",
+          "attemptedAt": "2026-11-24T03:45:22.09834",
+          "sentAt": null,
+          "message": "[info][title]会議開始10分前です[/title]\n対象: 架空の参加者、宛先未設定の参加者、架空の予約者\n対応: 10分後に開始します\n[hr]\n目的: 送信失敗の検証\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:05〜10:00\n予約者: 架空の予約者\n参加者: 架空の参加者、宛先未設定の参加者\n[/info]",
+          "createdAt": "2026-11-24T03:45:22.09834"
+        },
+        {
+          "reservationId": 40,
+          "workScheduleEntryId": null,
+          "deliveryType": "Reminder10Minutes",
+          "deliveryKey": "Reminder10Minutes:reservation:40:user:2:start:2026-06-22T09:05:01.0123000",
+          "targetUserId": 2,
+          "scheduledStartTime": "2026-06-22T09:05:01.0123",
+          "roomId": "900002",
+          "status": "Failed",
+          "errorMessage": "The request was canceled due to the configured HttpClient.Timeout of 0.5 seconds elapsing.",
+          "attemptedAt": "2026-11-24T03:45:22.1047816",
+          "sentAt": null,
+          "message": "[info][title]会議開始10分前です[/title]\n対象: 架空の参加者、宛先未設定の参加者、架空の予約者\n対応: 10分後に開始します\n[hr]\n目的: 送信失敗の検証\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:05〜10:00\n予約者: 架空の予約者\n参加者: 架空の参加者、宛先未設定の参加者\n[/info]",
+          "createdAt": "2026-11-24T03:45:22.1047816"
+        }
+      ]
+    },
+    {
+      "name": "existing_key",
+      "reservations": [
+        {
+          "id": 41,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "大会議室",
+          "numberOfPeople": 3,
+          "type": "社内",
+          "purpose": "既存キー",
+          "seriesId": null,
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T09:05:00.123",
+          "endTime": "2026-06-22T10:00:00",
+          "participantIds": [
+            2,
+            3
+          ],
+          "participants": "",
+          "repeatType": "しない",
+          "repeatUntil": null
+        }
+      ],
+      "deletedIds": [],
+      "existingKey": true,
+      "fakeResponses": {},
+      "requests": [
+        {
+          "roomId": "900002",
+          "body": "[info][title]会議開始10分前です[/title]\n対象: 架空の参加者、架空の予約者\n対応: 10分後に開始します\n[hr]\n目的: 既存キー\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:05〜10:00\n予約者: 架空の予約者\n参加者: 架空の参加者\n[/info]"
+        }
+      ],
+      "logs": [
+        {
+          "reservationId": 41,
+          "workScheduleEntryId": null,
+          "deliveryType": "Reminder10Minutes",
+          "deliveryKey": "Reminder10Minutes:reservation:41:user:3:start:2026-06-22T09:05:00.1230000",
+          "targetUserId": 3,
+          "scheduledStartTime": "2026-06-22T09:05:00.123",
+          "roomId": "900003",
+          "status": "Failed",
+          "errorMessage": "previous synthetic failure",
+          "attemptedAt": "2026-06-22T08:56:00",
+          "sentAt": null,
+          "message": "過去の配信ログ",
+          "createdAt": "2026-06-22T08:56:00"
+        },
+        {
+          "reservationId": 41,
+          "workScheduleEntryId": null,
+          "deliveryType": "Reminder10Minutes",
+          "deliveryKey": "Reminder10Minutes:reservation:41:user:2:start:2026-06-22T09:05:00.1230000",
+          "targetUserId": 2,
+          "scheduledStartTime": "2026-06-22T09:05:00.123",
+          "roomId": "900002",
+          "status": "Succeeded",
+          "errorMessage": null,
+          "attemptedAt": "2026-11-24T03:45:22.6505079",
+          "sentAt": "2026-11-24T03:45:22.6519468",
+          "message": "[info][title]会議開始10分前です[/title]\n対象: 架空の参加者、架空の予約者\n対応: 10分後に開始します\n[hr]\n目的: 既存キー\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:05〜10:00\n予約者: 架空の予約者\n参加者: 架空の参加者\n[/info]",
+          "createdAt": "2026-11-24T03:45:22.6505079"
+        }
+      ]
+    }
+  ]
+}

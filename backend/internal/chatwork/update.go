@@ -68,7 +68,7 @@ func (sender *Sender) SendUpdate(ctx context.Context, result reservations.Update
 	}
 	extra = appendParticipantConflictDetails(extra, conflicts)
 	message := stakeholderMessage(current, after, stakeholders, recipients, "会議予約が変更されました", action, extra)
-	sender.sendToStakeholders(ctx, updateType, result.ChangeID, current, stakeholders, recipients, message)
+	sender.sendToStakeholders(ctx, updateType, ":change:"+result.ChangeID, current, stakeholders, recipients, message)
 }
 
 func participantDifference(ids, other []int) []int {
