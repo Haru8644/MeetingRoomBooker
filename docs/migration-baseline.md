@@ -467,6 +467,32 @@ go vet ./...
 
 The integration test applies migrations in an isolated schema, starts the API and uses a loopback fake to inspect committed schedules, notices and delivery claims before receiving each DM. It reproduces 28 C# POST cases and the detail GET checks, and covers origin protection, rollback, replay and disabled delivery. All 20 PostgreSQL integration suites passed on PostgreSQL 16.15. With the database URLs unset, `go test ./...` passed with those suites skipped. `go vet ./...` and `git diff --check` passed.
 
+## Go recurring work schedule creation
+
+`POST /api/work-schedule-entries/series` uses the single-entry route's JSON binding, session authentication, and write origin protection. Its success response is a `200` array. Requests without recurrence use single-entry creation and return a one-element array with single-entry notifications and delivery keys. The route has no `Location` header. It preserves the series route's trim-and-dispatch behavior, including the single-entry validation of a padded `" しない "`.
+
+Only external appointments can recur. Daily recurrence steps by one day and weekly recurrence steps by seven days from the original weekday. Both include an eligible end date and skip Saturdays and Sundays. A weekend weekly anchor stays on that weekday and produces zero occurrences. The route rejects an empty result or more than 60 occurrences. It stops expanding at the 61st eligible date and can include `9999-12-31`. The C# capture returned `500` on that last date when the iterator tried to advance past `DateTime.MaxValue`.
+
+Each occurrence has an identity ID allocated by migration `0010`, shares a lowercase 32-digit UUIDv4 series ID, and uses the requested time of day on its own date. The response is ordered by date, start time, and ID, with one occurrence per date. For example, daily recurrence from Friday June 19 to Tuesday June 23, 2026 writes three rows for June 19, 22, and 23 with the same series ID. Existing list and detail reads return these stored values.
+
+All occurrences use the same normalized participants. One in-app notice and one DM attempt per participant reference the first saved occurrence. A single conflict query after insertion covers all occurrence dates and excludes each slot's own ID. It supplies one snapshot to both message formats, including overlaps that only occur later in the series. The measured warning contains the first five conflicts in date and start order and a count of the rest. The messages use the period between the first and last saved dates, the recurrence type, and the occurrence count. The DM also includes the time range.
+
+Go saves every occurrence and the in-app notices in one transaction. The [C# capture](../backend/internal/httpapi/testdata/work_schedule_series_create_csharp.json) returned `200`, kept three rows, and attempted DMs when the summary notification save failed. Go returns `500` and rolls back all rows without sending. A forced second INSERT failure rolls back all rows in both implementations. Keeping the external send after commit lets Go preserve `200` when the DM provider fails.
+
+The existing Chatwork settings default delivery to disabled. Each series delivery uses `WorkScheduleSeriesCreated:work-schedule-series:{seriesId}:user:{userId}`, `reservation_id=0`, and the representative row ID and start time. The unique claim prevents another attempt on replay. An HTTP `503` records a sanitized failure and an uncertain timeout keeps the existing `Unknown` behavior. C# recorded both failures as `Failed`.
+
+To reproduce the C# capture, use the temporary `d8fe3b7` SQLite and loopback Chatwork setup for [single work schedule creation](#go-single-work-schedule-creation). Register the synthetic users in fixture ID order and set their direct rooms. Clear schedule, reservation, notification, and delivery rows before each case, then apply its dated `seeds` and `fakeResponses`. POST its `request` body to `/api/work-schedule-entries/series` with the indicated session and `Accept: application/json`. Compare the array to the SQLite rows by date, start time, and ID. Follow the list and detail reads for the saved ID range and verify the series key and the representative ID in the notices and logs. For `notice_failure`, make a SQLite `BEFORE INSERT` trigger on `Notifications` fail for user 3. For `mid_series_insert_failure`, make the same kind of trigger abort the `WorkScheduleEntries` insert for June 22, the second occurrence. The capture includes 25 POST cases. It stores the matching successful POST arrays and SQLite rows once and replaces development exception stacks with markers.
+
+In WSL, set `WORK_SCHEDULE_SERIES_CREATE_TEST_DATABASE_URL` and `WORK_SCHEDULE_CREATE_TEST_DATABASE_URL` to a disposable local PostgreSQL URL with schema creation privileges. Run from `backend`:
+
+```bash
+go test -v -count=1 ./cmd/api -run '^TestWorkSchedule(Series)?CreationPostgres$'
+go test ./...
+go vet ./...
+```
+
+The integration test creates and drops an isolated schema, applies migrations through `0010`, and starts a loopback Go API and a fake Chatwork server. It checks all saved entries through the list and detail routes and verifies committed rows, notices, and delivery claims from inside the fake HTTP handler. The date expansion unit tests run without a database. All 21 PostgreSQL integration suites passed on PostgreSQL 16.15, including single-entry creation. The database-free `go test ./...` passed with those suites skipped. `go vet ./...` and `git diff --check` passed.
+
 ## Recovery to C# and SQLite
 
 Rehearse each stage in development with synthetic rows and a recording fake Chatwork sender. `scripts/deploy/deploy-prod.sh` uses SQLite's backup API and integrity check. `scripts/deploy/rollback-prod.sh` restores the earlier API, web assets and final SQLite snapshot. A rollback after Go accepts writes also needs the committed PostgreSQL state.

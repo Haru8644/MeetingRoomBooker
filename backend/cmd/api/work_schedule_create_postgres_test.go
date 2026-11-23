@@ -38,11 +38,11 @@ type workScheduleCreationNotice struct {
 }
 
 type workScheduleConflictSeed struct {
-	Kind, Title    string
-	ID, UserID     int
-	Type           int
-	Start, End     *string
-	ParticipantIDs []int
+	Kind, Title, Date string
+	ID, UserID        int
+	Type              int
+	Start, End        *string
+	ParticipantIDs    []int
 }
 
 func TestWorkScheduleCreationPostgres(t *testing.T) {
@@ -218,7 +218,7 @@ func TestWorkScheduleCreationPostgres(t *testing.T) {
 						row.DeliveryKey = fmt.Sprintf("WorkScheduleCreated:work-schedule:%d:user:%d", entry.ID, row.TargetUserID)
 					}
 					if scenario.Name == "external" {
-						verifyWorkScheduleDeliveryReplay(t, ctx, pool, fake, server.URL, entry, scenario.Logs[0])
+						verifyWorkScheduleDeliveryReplay(t, ctx, pool, fake, server.URL, []workschedules.Entry{entry}, scenario.Logs[0])
 					}
 				}
 				if got := readWorkScheduleCreationNotices(t, ctx, pool); !reflect.DeepEqual(got, scenario.Notices) {
@@ -367,15 +367,18 @@ func execWorkScheduleTestSQL(t *testing.T, ctx context.Context, pool *pgxpool.Po
 
 func seedWorkScheduleCreationConflicts(t *testing.T, ctx context.Context, pool *pgxpool.Pool, seeds []workScheduleConflictSeed) {
 	t.Helper()
-	const day = "2026-06-22T"
-	date := seriesTestTicks(t, day+"00:00:00")
-	toTicks := func(s *string) *int64 {
-		if s == nil {
-			return nil
-		}
-		return new(seriesTestTicks(t, day+*s))
-	}
 	for _, seed := range seeds {
+		day := seed.Date
+		if day == "" {
+			day = "2026-06-22"
+		}
+		date := seriesTestTicks(t, day+"T00:00:00")
+		toTicks := func(s *string) *int64 {
+			if s == nil {
+				return nil
+			}
+			return new(seriesTestTicks(t, day+"T"+*s))
+		}
 		if seed.Kind == "reservation" {
 			execWorkScheduleTestSQL(t, ctx, pool, `
 				INSERT INTO reservations
@@ -430,7 +433,7 @@ func readWorkScheduleCreationNotices(t *testing.T, ctx context.Context, pool *pg
 }
 
 func verifyWorkScheduleDeliveryReplay(t *testing.T, ctx context.Context, pool *pgxpool.Pool, fake *chatworkHTTPFake,
-	fakeURL string, entry workschedules.Entry, expected chatworkTestLog,
+	fakeURL string, entries []workschedules.Entry, expected chatworkTestLog,
 ) {
 	t.Helper()
 	sender, err := chatwork.NewSender(pool, fakeChatworkToken, fakeURL+"/v2/", true)
@@ -442,7 +445,7 @@ func verifyWorkScheduleDeliveryReplay(t *testing.T, ctx context.Context, pool *p
 		t.Fatal(err)
 	}
 	calls, logs := fake.recorded(), readChatworkLogs(t, ctx, pool)
-	sender.SendWorkScheduleCreation(ctx, workschedules.Creation{Entry: entry, ScheduledStart: start, ChatworkBody: expected.Message})
+	sender.SendWorkScheduleCreation(ctx, workschedules.Creation{Entries: entries, ScheduledStart: start, ChatworkBody: expected.Message})
 	if !slices.Equal(calls, fake.recorded()) || !reflect.DeepEqual(logs, readChatworkLogs(t, ctx, pool)) {
 		t.Fatal("replay duplicated a delivery attempt")
 	}

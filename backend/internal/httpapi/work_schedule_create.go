@@ -18,7 +18,7 @@ import (
 
 const workSchedulePath = "/api/work-schedule-entries"
 
-type workScheduleCreator func(context.Context, workschedules.CreateInput, int) (workschedules.Entry, error)
+type workScheduleCreator func(context.Context, workschedules.CreateInput, int, bool) ([]workschedules.Entry, error)
 type workScheduleGetter func(context.Context, int) (*workschedules.Entry, error)
 
 func newWorkScheduleGetHandler(get workScheduleGetter) func(http.ResponseWriter, *http.Request, auth.User, int) {
@@ -37,7 +37,7 @@ func newWorkScheduleGetHandler(get workScheduleGetter) func(http.ResponseWriter,
 	}
 }
 
-func newWorkScheduleCreateHandler(create workScheduleCreator) func(http.ResponseWriter, *http.Request, auth.User) {
+func newWorkScheduleCreateHandler(create workScheduleCreator, series bool) func(http.ResponseWriter, *http.Request, auth.User) {
 	return func(w http.ResponseWriter, r *http.Request, user auth.User) {
 		if !hasJSONContentType(r) {
 			writeValidationProblem(w, http.StatusUnsupportedMediaType, nil)
@@ -58,14 +58,17 @@ func newWorkScheduleCreateHandler(create workScheduleCreator) func(http.Response
 			return
 		}
 
-		entry, err := create(r.Context(), input, user.ID)
+		entries, err := create(r.Context(), input, user.ID, series)
 		var invalid workschedules.ValidationError
 		switch {
 		case errors.As(err, &invalid):
 			writeNegotiatedString(w, r, http.StatusBadRequest, invalid.Error())
 		case err != nil:
 			w.WriteHeader(http.StatusInternalServerError)
+		case series:
+			writeJSON(w, http.StatusOK, entries)
 		default:
+			entry := entries[0]
 			scheme := "http"
 			if r.TLS != nil {
 				scheme = "https"

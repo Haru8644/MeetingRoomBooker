@@ -36,15 +36,26 @@ type ValidationError string
 func (e ValidationError) Error() string { return string(e) }
 
 type Creation struct {
-	Entry          Entry
+	Entries        []Entry
 	ScheduledStart time.Time
 	ChatworkBody   string
 }
 
-// Create commits the entry and its in-app notifications together. The caller
-// can send the returned Chatwork message once the transaction has committed.
+// Create commits the entry and its in-app notifications together.
 func Create(ctx context.Context, pool *pgxpool.Pool, input CreateInput, creatorID int) (Creation, error) {
-	if err := input.validate(); err != nil {
+	noRepeat := strings.TrimSpace(input.RepeatType) == "" || input.RepeatType == noRepeatType
+	switch {
+	case input.Type != externalAppointment && (!noRepeat || input.RepeatUntil != nil):
+		return Creation{}, ValidationError("繰り返し作成は社外予定のみ指定できます。")
+	case !noRepeat:
+		return Creation{}, ValidationError("繰り返し作成は社外予定の一括作成APIを使用してください。")
+	}
+	dates := []time.Time{dotnettime.OnDate(input.Date, time.Time{})}
+	return createEntries(ctx, pool, input, creatorID, dates, nil)
+}
+
+func createEntries(ctx context.Context, pool *pgxpool.Pool, input CreateInput, creatorID int, dates []time.Time, seriesID *string) (Creation, error) {
+	if err := input.validateFields(); err != nil {
 		return Creation{}, err
 	}
 	var created Creation
@@ -55,35 +66,55 @@ func Create(ctx context.Context, pool *pgxpool.Pool, input CreateInput, creatorI
 		}
 		clock := time.Now()
 		now := dotnettime.Ticks(dotnettime.OnDate(clock, clock))
-		date := dotnettime.Ticks(input.Date)
-		var start, end *int64
-		scheduledStart := input.Date
-		if input.Start != nil {
-			start, end = new(dotnettime.Ticks(*input.Start)), new(dotnettime.Ticks(*input.End))
-			scheduledStart = *input.Start
+		var repeatType *string
+		var repeatUntil *int64
+		if seriesID != nil {
+			repeatType = &input.RepeatType
+			repeatUntil = new(dotnettime.Ticks(dotnettime.OnDate(*input.RepeatUntil, time.Time{})))
 		}
-		entry, err := scanEntry(tx.QueryRow(ctx, `
-			INSERT INTO work_schedule_entries
-			    (created_by_user_id, type, title, date_ticks, start_time_ticks, end_time_ticks,
-			     leave_period, participant_ids, participants, created_at_ticks, updated_at_ticks)
-			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $10)
-			RETURNING `+entryColumns, creatorID, input.Type, input.Title, date, start, end, input.LeavePeriod,
-			input.ParticipantIDs, input.Participants, now))
+
+		// Each occurrence has one distinct date. Inserting in date order also
+		// produces the response order (date, start time, then ID).
+		entries := make([]Entry, 0, len(dates))
+		for _, date := range dates {
+			var start, end *int64
+			if input.Start != nil {
+				start = new(dotnettime.Ticks(dotnettime.OnDate(date, *input.Start)))
+				end = new(dotnettime.Ticks(dotnettime.OnDate(date, *input.End)))
+			}
+			entry, err := scanEntry(tx.QueryRow(ctx, `
+				INSERT INTO work_schedule_entries
+				    (created_by_user_id, type, title, date_ticks, start_time_ticks, end_time_ticks,
+				     leave_period, participant_ids, participants, created_at_ticks, updated_at_ticks,
+				     series_id, repeat_type, repeat_until_ticks)
+				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $10, $11, $12, $13)
+				RETURNING `+entryColumns, creatorID, input.Type, input.Title, dotnettime.Ticks(date), start, end, input.LeavePeriod,
+				input.ParticipantIDs, input.Participants, now, seriesID, repeatType, repeatUntil))
+			if err != nil {
+				return err
+			}
+			entries = append(entries, entry)
+		}
+
+		notice, noticeType, dm, err := creationMessages(ctx, tx, entries, dates, input, names)
 		if err != nil {
 			return err
 		}
-		notice, noticeType, dm, err := creationMessages(ctx, tx, entry.ID, input, names)
-		if err != nil {
-			return err
-		}
+		first := entries[0]
+		// All occurrences share the same normalized participants.
 		if _, err := tx.Exec(ctx, `
 			INSERT INTO notifications
 			    (user_id, message, created_at_ticks, target_date_ticks, type, target_work_schedule_entry_id)
 			SELECT user_id, $2, $3, $4, $5, $6 FROM unnest($1::integer[]) AS recipient(user_id)`,
-			entry.ParticipantIDs, notice, now, date, noticeType, entry.ID); err != nil {
+			first.ParticipantIDs, notice, now, dotnettime.Ticks(dates[0]), noticeType, first.ID); err != nil {
 			return fmt.Errorf("save work schedule notifications: %w", err)
 		}
-		created = Creation{Entry: entry, ScheduledStart: scheduledStart, ChatworkBody: dm}
+
+		scheduledStart := dates[0]
+		if input.Start != nil {
+			scheduledStart = *input.Start
+		}
+		created = Creation{Entries: entries, ScheduledStart: scheduledStart, ChatworkBody: dm}
 		return nil
 	})
 	if err != nil {
@@ -92,13 +123,8 @@ func Create(ctx context.Context, pool *pgxpool.Pool, input CreateInput, creatorI
 	return created, nil
 }
 
-func (input CreateInput) validate() error {
-	noRepeat := strings.TrimSpace(input.RepeatType) == "" || input.RepeatType == "しない"
+func (input CreateInput) validateFields() error {
 	switch {
-	case input.Type != externalAppointment && (!noRepeat || input.RepeatUntil != nil):
-		return ValidationError("繰り返し作成は社外予定のみ指定できます。")
-	case !noRepeat:
-		return ValidationError("繰り返し作成は社外予定の一括作成APIを使用してください。")
 	case input.Type < externalAppointment || input.Type > leave:
 		return ValidationError("予定種別が不正です。")
 	case input.LeavePeriod < 0 || input.LeavePeriod > 3:
