@@ -133,13 +133,23 @@ func run(ctx context.Context) error {
 	listWorkSchedules := func(ctx context.Context, from, to time.Time) ([]workschedules.Entry, error) {
 		return workschedules.List(ctx, pool, from, to)
 	}
+	getWorkSchedule := func(ctx context.Context, id int) (*workschedules.Entry, error) {
+		return workschedules.Get(ctx, pool, id)
+	}
+	createWorkSchedule := func(ctx context.Context, input workschedules.CreateInput, creatorID int) (workschedules.Entry, error) {
+		result, err := workschedules.Create(ctx, pool, input, creatorID)
+		if err == nil && chatworkSender != nil {
+			chatworkSender.SendWorkScheduleCreation(ctx, result)
+		}
+		return result.Entry, err
+	}
 	listParticipants := func(ctx context.Context) ([]users.Participant, error) {
 		return users.ListParticipants(ctx, pool)
 	}
 	handler, err := httpapi.RegisterSessionRoutes(httpapi.NewHandler(ping, readinessTimeout), auth.NewService(pool),
 		reservationList, createReservation, createReservationSeries, updateReservation, updateReservationSeries,
 		deleteReservation, deleteReservationSeries, changeParticipation,
-		listWorkSchedules, listParticipants, notifications.NewInbox(pool),
+		listWorkSchedules, getWorkSchedule, createWorkSchedule, listParticipants, notifications.NewInbox(pool),
 		httpapi.SessionOptions{Development: development, FrontendOrigins: strings.Split(os.Getenv("FRONTEND_ORIGINS"), ",")})
 	if err != nil {
 		return err

@@ -12,7 +12,7 @@ import (
 	"github.com/Haru8644/MeetingRoomBooker/backend/internal/workschedules"
 )
 
-const workScheduleListPattern = "GET /api/work-schedule-entries"
+const workScheduleListPattern = "GET " + workSchedulePath
 
 type workScheduleLister func(context.Context, time.Time, time.Time) ([]workschedules.Entry, error)
 
