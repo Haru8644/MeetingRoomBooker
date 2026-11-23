@@ -136,12 +136,16 @@ func run(ctx context.Context) error {
 	getWorkSchedule := func(ctx context.Context, id int) (*workschedules.Entry, error) {
 		return workschedules.Get(ctx, pool, id)
 	}
-	createWorkSchedule := func(ctx context.Context, input workschedules.CreateInput, creatorID int) (workschedules.Entry, error) {
-		result, err := workschedules.Create(ctx, pool, input, creatorID)
+	createWorkSchedule := func(ctx context.Context, input workschedules.CreateInput, creatorID int, series bool) ([]workschedules.Entry, error) {
+		create := workschedules.Create
+		if series {
+			create = workschedules.CreateSeries
+		}
+		result, err := create(ctx, pool, input, creatorID)
 		if err == nil && chatworkSender != nil {
 			chatworkSender.SendWorkScheduleCreation(ctx, result)
 		}
-		return result.Entry, err
+		return result.Entries, err
 	}
 	listParticipants := func(ctx context.Context) ([]users.Participant, error) {
 		return users.ListParticipants(ctx, pool)

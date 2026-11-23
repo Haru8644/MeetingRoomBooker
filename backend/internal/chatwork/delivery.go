@@ -67,9 +67,10 @@ type recipient struct {
 }
 
 type deliverySubject struct {
-	reservationID       int
-	workScheduleEntryID *int
-	scheduledStart      time.Time
+	reservationID        int
+	workScheduleEntryID  *int
+	workScheduleSeriesID string
+	scheduledStart       time.Time
 }
 
 // SendCancellation sends DMs for committed deletions.
@@ -130,17 +131,22 @@ func (sender *Sender) sendToStakeholders(ctx context.Context, deliveryType, keyS
 func (sender *Sender) sendToRecipients(ctx context.Context, deliveryType, keySuffix string, subject deliverySubject,
 	userIDs []int, recipients map[int]recipient, message string,
 ) {
-	resource, subjectID := "reservation", subject.reservationID
-	if subject.workScheduleEntryID != nil {
-		resource, subjectID = "work-schedule", *subject.workScheduleEntryID
+	var keyTarget string
+	switch {
+	case subject.workScheduleSeriesID != "":
+		keyTarget = "work-schedule-series:" + subject.workScheduleSeriesID
+	case subject.workScheduleEntryID != nil:
+		keyTarget = fmt.Sprintf("work-schedule:%d", *subject.workScheduleEntryID)
+	default:
+		keyTarget = fmt.Sprintf("reservation:%d", subject.reservationID)
 	}
 	for _, id := range userIDs {
 		if ctx.Err() != nil {
-			log.Printf("Chatwork %s: delivery interrupted for %s %d", deliveryType, resource, subjectID)
+			log.Printf("Chatwork %s: delivery interrupted for %s", deliveryType, keyTarget)
 			return
 		}
 		if target, found := recipients[id]; found {
-			key := fmt.Sprintf("%s:%s:%d:user:%d%s", deliveryType, resource, subjectID, id, keySuffix)
+			key := fmt.Sprintf("%s:%s:user:%d%s", deliveryType, keyTarget, id, keySuffix)
 			sender.deliver(ctx, deliveryType, key, subject, id, target.room, message)
 		}
 	}

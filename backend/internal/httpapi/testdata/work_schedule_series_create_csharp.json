@@ -1,0 +1,532 @@
+{
+  "users": [
+    {"id": 1, "name": "架空の管理者", "roomId": "900001"},
+    {"id": 2, "name": "架空の予約者", "roomId": "900002"},
+    {"id": 3, "name": "架空の参加者", "roomId": " 900003 "},
+    {"id": 4, "name": "宛先未設定の参加者", "roomId": null},
+    {"id": 5, "name": "架空の追加参加者", "roomId": "900005"}
+  ],
+  "cases": [
+    {
+      "name": "daily_across_weekend",
+      "actor": "owner",
+      "request": {"title": "  架空の定期訪問  ", "date": "2026-06-19T18:45:00", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3, 4, 3, 0, -7], "createdByUserId": 1, "leavePeriod": 3, "repeatType": "毎日", "repeatUntil": "2026-06-23T07:12:05"},
+      "response": {"status": 200, "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": [
+        {"id": 1, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "ece1b95e6db0411ca0cbe3963542dbf9", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-23T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の予約者、架空の参加者、宛先未設定の参加者", "createdAt": "2026-11-24T05:54:07.6610305", "updatedAt": "2026-11-24T05:54:07.6610305"},
+        {"id": 2, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "ece1b95e6db0411ca0cbe3963542dbf9", "date": "2026-06-22T00:00:00", "startTime": "2026-06-22T09:00:00.1234567", "endTime": "2026-06-22T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-23T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の予約者、架空の参加者、宛先未設定の参加者", "createdAt": "2026-11-24T05:54:07.6610305", "updatedAt": "2026-11-24T05:54:07.6610305"},
+        {"id": 3, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "ece1b95e6db0411ca0cbe3963542dbf9", "date": "2026-06-23T00:00:00", "startTime": "2026-06-23T09:00:00.1234567", "endTime": "2026-06-23T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-23T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の予約者、架空の参加者、宛先未設定の参加者", "createdAt": "2026-11-24T05:54:07.6610305", "updatedAt": "2026-11-24T05:54:07.6610305"}
+      ],
+      "notices": [
+        {"userId": 2, "type": "Info", "message": "社外予定「架空の定期訪問」を繰り返し登録しました。期間: 2026/06/19〜2026/06/23 / 繰り返し: 毎日 / 件数: 3件 / 対象者: 架空の予約者、架空の参加者、宛先未設定の参加者", "targetDate": "2026-06-19T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 1, "isRead": false},
+        {"userId": 3, "type": "Info", "message": "社外予定「架空の定期訪問」を繰り返し登録しました。期間: 2026/06/19〜2026/06/23 / 繰り返し: 毎日 / 件数: 3件 / 対象者: 架空の予約者、架空の参加者、宛先未設定の参加者", "targetDate": "2026-06-19T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 1, "isRead": false},
+        {"userId": 4, "type": "Info", "message": "社外予定「架空の定期訪問」を繰り返し登録しました。期間: 2026/06/19〜2026/06/23 / 繰り返し: 毎日 / 件数: 3件 / 対象者: 架空の予約者、架空の参加者、宛先未設定の参加者", "targetDate": "2026-06-19T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 1, "isRead": false}
+      ],
+      "logs": [
+        {"reservationId": 0, "workScheduleEntryId": 1, "deliveryType": "WorkScheduleSeriesCreated", "deliveryKey": "WorkScheduleSeriesCreated:work-schedule-series:ece1b95e6db0411ca0cbe3963542dbf9:user:2", "targetUserId": 2, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": "900002", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T05:54:07.9768001", "sentAt": "2026-11-24T05:54:08.0213067", "message": "[info][title]社外予定を繰り返し登録しました[/title]\n内容: 架空の定期訪問\n期間: 2026/06/19〜2026/06/23\n繰り返し: 毎日\n件数: 3件\n時間: 09:00〜10:00\n対象者: 架空の予約者、架空の参加者、宛先未設定の参加者\n[/info]", "createdAt": "2026-11-24T05:54:07.9768001"},
+        {"reservationId": 0, "workScheduleEntryId": 1, "deliveryType": "WorkScheduleSeriesCreated", "deliveryKey": "WorkScheduleSeriesCreated:work-schedule-series:ece1b95e6db0411ca0cbe3963542dbf9:user:3", "targetUserId": 3, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": "900003", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T05:54:08.0623312", "sentAt": "2026-11-24T05:54:08.0675792", "message": "[info][title]社外予定を繰り返し登録しました[/title]\n内容: 架空の定期訪問\n期間: 2026/06/19〜2026/06/23\n繰り返し: 毎日\n件数: 3件\n時間: 09:00〜10:00\n対象者: 架空の予約者、架空の参加者、宛先未設定の参加者\n[/info]", "createdAt": "2026-11-24T05:54:08.0623312"},
+        {"reservationId": 0, "workScheduleEntryId": 1, "deliveryType": "WorkScheduleSeriesCreated", "deliveryKey": "WorkScheduleSeriesCreated:work-schedule-series:ece1b95e6db0411ca0cbe3963542dbf9:user:4", "targetUserId": 4, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": null, "status": "Skipped", "errorMessage": "ChatworkDirectRoomId is not configured.", "attemptedAt": "2026-11-24T05:54:08.0726165", "sentAt": null, "message": "[info][title]社外予定を繰り返し登録しました[/title]\n内容: 架空の定期訪問\n期間: 2026/06/19〜2026/06/23\n繰り返し: 毎日\n件数: 3件\n時間: 09:00〜10:00\n対象者: 架空の予約者、架空の参加者、宛先未設定の参加者\n[/info]", "createdAt": "2026-11-24T05:54:08.0726165"}
+      ],
+      "requests": [
+        {"roomId": "900002", "body": "[info][title]社外予定を繰り返し登録しました[/title]\n内容: 架空の定期訪問\n期間: 2026/06/19〜2026/06/23\n繰り返し: 毎日\n件数: 3件\n時間: 09:00〜10:00\n対象者: 架空の予約者、架空の参加者、宛先未設定の参加者\n[/info]"},
+        {"roomId": "900003", "body": "[info][title]社外予定を繰り返し登録しました[/title]\n内容: 架空の定期訪問\n期間: 2026/06/19〜2026/06/23\n繰り返し: 毎日\n件数: 3件\n時間: 09:00〜10:00\n対象者: 架空の予約者、架空の参加者、宛先未設定の参加者\n[/info]"}
+      ],
+      "seeds": [],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "weekly_inclusive",
+      "actor": "admin",
+      "request": {"title": "  架空の定期訪問  ", "date": "2026-06-22", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3, 4, 3, 0, -7], "createdByUserId": 1, "leavePeriod": 3, "repeatType": " 毎週 ", "repeatUntil": "2026-07-06"},
+      "response": {"status": 200, "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": [
+        {"id": 4, "createdByUserId": 1, "type": 0, "title": "架空の定期訪問", "seriesId": "3599734bc7b3419c937f1b0fb2946d01", "date": "2026-06-22T00:00:00", "startTime": "2026-06-22T09:00:00.1234567", "endTime": "2026-06-22T10:00:00", "repeatType": "毎週", "repeatUntil": "2026-07-06T00:00:00", "leavePeriod": 0, "participantIds": [1, 3, 4], "participants": "架空の管理者、架空の参加者、宛先未設定の参加者", "createdAt": "2026-11-24T05:54:08.1728755", "updatedAt": "2026-11-24T05:54:08.1728755"},
+        {"id": 5, "createdByUserId": 1, "type": 0, "title": "架空の定期訪問", "seriesId": "3599734bc7b3419c937f1b0fb2946d01", "date": "2026-06-29T00:00:00", "startTime": "2026-06-29T09:00:00.1234567", "endTime": "2026-06-29T10:00:00", "repeatType": "毎週", "repeatUntil": "2026-07-06T00:00:00", "leavePeriod": 0, "participantIds": [1, 3, 4], "participants": "架空の管理者、架空の参加者、宛先未設定の参加者", "createdAt": "2026-11-24T05:54:08.1728755", "updatedAt": "2026-11-24T05:54:08.1728755"},
+        {"id": 6, "createdByUserId": 1, "type": 0, "title": "架空の定期訪問", "seriesId": "3599734bc7b3419c937f1b0fb2946d01", "date": "2026-07-06T00:00:00", "startTime": "2026-07-06T09:00:00.1234567", "endTime": "2026-07-06T10:00:00", "repeatType": "毎週", "repeatUntil": "2026-07-06T00:00:00", "leavePeriod": 0, "participantIds": [1, 3, 4], "participants": "架空の管理者、架空の参加者、宛先未設定の参加者", "createdAt": "2026-11-24T05:54:08.1728755", "updatedAt": "2026-11-24T05:54:08.1728755"}
+      ],
+      "notices": [
+        {"userId": 1, "type": "Info", "message": "社外予定「架空の定期訪問」を繰り返し登録しました。期間: 2026/06/22〜2026/07/06 / 繰り返し: 毎週 / 件数: 3件 / 対象者: 架空の管理者、架空の参加者、宛先未設定の参加者", "targetDate": "2026-06-22T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 4, "isRead": false},
+        {"userId": 3, "type": "Info", "message": "社外予定「架空の定期訪問」を繰り返し登録しました。期間: 2026/06/22〜2026/07/06 / 繰り返し: 毎週 / 件数: 3件 / 対象者: 架空の管理者、架空の参加者、宛先未設定の参加者", "targetDate": "2026-06-22T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 4, "isRead": false},
+        {"userId": 4, "type": "Info", "message": "社外予定「架空の定期訪問」を繰り返し登録しました。期間: 2026/06/22〜2026/07/06 / 繰り返し: 毎週 / 件数: 3件 / 対象者: 架空の管理者、架空の参加者、宛先未設定の参加者", "targetDate": "2026-06-22T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 4, "isRead": false}
+      ],
+      "logs": [
+        {"reservationId": 0, "workScheduleEntryId": 4, "deliveryType": "WorkScheduleSeriesCreated", "deliveryKey": "WorkScheduleSeriesCreated:work-schedule-series:3599734bc7b3419c937f1b0fb2946d01:user:1", "targetUserId": 1, "scheduledStartTime": "2026-06-22T09:00:00.1234567", "roomId": "900001", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T05:54:08.2024686", "sentAt": "2026-11-24T05:54:08.206322", "message": "[info][title]社外予定を繰り返し登録しました[/title]\n内容: 架空の定期訪問\n期間: 2026/06/22〜2026/07/06\n繰り返し: 毎週\n件数: 3件\n時間: 09:00〜10:00\n対象者: 架空の管理者、架空の参加者、宛先未設定の参加者\n[/info]", "createdAt": "2026-11-24T05:54:08.2024686"},
+        {"reservationId": 0, "workScheduleEntryId": 4, "deliveryType": "WorkScheduleSeriesCreated", "deliveryKey": "WorkScheduleSeriesCreated:work-schedule-series:3599734bc7b3419c937f1b0fb2946d01:user:3", "targetUserId": 3, "scheduledStartTime": "2026-06-22T09:00:00.1234567", "roomId": "900003", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T05:54:08.2119283", "sentAt": "2026-11-24T05:54:08.2149181", "message": "[info][title]社外予定を繰り返し登録しました[/title]\n内容: 架空の定期訪問\n期間: 2026/06/22〜2026/07/06\n繰り返し: 毎週\n件数: 3件\n時間: 09:00〜10:00\n対象者: 架空の管理者、架空の参加者、宛先未設定の参加者\n[/info]", "createdAt": "2026-11-24T05:54:08.2119283"},
+        {"reservationId": 0, "workScheduleEntryId": 4, "deliveryType": "WorkScheduleSeriesCreated", "deliveryKey": "WorkScheduleSeriesCreated:work-schedule-series:3599734bc7b3419c937f1b0fb2946d01:user:4", "targetUserId": 4, "scheduledStartTime": "2026-06-22T09:00:00.1234567", "roomId": null, "status": "Skipped", "errorMessage": "ChatworkDirectRoomId is not configured.", "attemptedAt": "2026-11-24T05:54:08.2201103", "sentAt": null, "message": "[info][title]社外予定を繰り返し登録しました[/title]\n内容: 架空の定期訪問\n期間: 2026/06/22〜2026/07/06\n繰り返し: 毎週\n件数: 3件\n時間: 09:00〜10:00\n対象者: 架空の管理者、架空の参加者、宛先未設定の参加者\n[/info]", "createdAt": "2026-11-24T05:54:08.2201103"}
+      ],
+      "requests": [
+        {"roomId": "900001", "body": "[info][title]社外予定を繰り返し登録しました[/title]\n内容: 架空の定期訪問\n期間: 2026/06/22〜2026/07/06\n繰り返し: 毎週\n件数: 3件\n時間: 09:00〜10:00\n対象者: 架空の管理者、架空の参加者、宛先未設定の参加者\n[/info]"},
+        {"roomId": "900003", "body": "[info][title]社外予定を繰り返し登録しました[/title]\n内容: 架空の定期訪問\n期間: 2026/06/22〜2026/07/06\n繰り返し: 毎週\n件数: 3件\n時間: 09:00〜10:00\n対象者: 架空の管理者、架空の参加者、宛先未設定の参加者\n[/info]"}
+      ],
+      "seeds": [],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "daily_starts_on_weekend",
+      "actor": "owner",
+      "request": {"title": "  架空の定期訪問  ", "date": "2026-06-20", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3, 4, 3, 0, -7], "createdByUserId": 1, "leavePeriod": 3, "repeatType": "毎日", "repeatUntil": "2026-06-23T07:12:05"},
+      "response": {"status": 200, "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": [
+        {"id": 7, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "897fd460b10244c997693344d3229e84", "date": "2026-06-22T00:00:00", "startTime": "2026-06-22T09:00:00.1234567", "endTime": "2026-06-22T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-23T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の予約者、架空の参加者、宛先未設定の参加者", "createdAt": "2026-11-24T05:54:08.2819151", "updatedAt": "2026-11-24T05:54:08.2819151"},
+        {"id": 8, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "897fd460b10244c997693344d3229e84", "date": "2026-06-23T00:00:00", "startTime": "2026-06-23T09:00:00.1234567", "endTime": "2026-06-23T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-23T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の予約者、架空の参加者、宛先未設定の参加者", "createdAt": "2026-11-24T05:54:08.2819151", "updatedAt": "2026-11-24T05:54:08.2819151"}
+      ],
+      "notices": [
+        {"userId": 2, "type": "Info", "message": "社外予定「架空の定期訪問」を繰り返し登録しました。期間: 2026/06/22〜2026/06/23 / 繰り返し: 毎日 / 件数: 2件 / 対象者: 架空の予約者、架空の参加者、宛先未設定の参加者", "targetDate": "2026-06-22T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 7, "isRead": false},
+        {"userId": 3, "type": "Info", "message": "社外予定「架空の定期訪問」を繰り返し登録しました。期間: 2026/06/22〜2026/06/23 / 繰り返し: 毎日 / 件数: 2件 / 対象者: 架空の予約者、架空の参加者、宛先未設定の参加者", "targetDate": "2026-06-22T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 7, "isRead": false},
+        {"userId": 4, "type": "Info", "message": "社外予定「架空の定期訪問」を繰り返し登録しました。期間: 2026/06/22〜2026/06/23 / 繰り返し: 毎日 / 件数: 2件 / 対象者: 架空の予約者、架空の参加者、宛先未設定の参加者", "targetDate": "2026-06-22T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 7, "isRead": false}
+      ],
+      "logs": [
+        {"reservationId": 0, "workScheduleEntryId": 7, "deliveryType": "WorkScheduleSeriesCreated", "deliveryKey": "WorkScheduleSeriesCreated:work-schedule-series:897fd460b10244c997693344d3229e84:user:2", "targetUserId": 2, "scheduledStartTime": "2026-06-22T09:00:00.1234567", "roomId": "900002", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T05:54:08.3022521", "sentAt": "2026-11-24T05:54:08.3053677", "message": "[info][title]社外予定を繰り返し登録しました[/title]\n内容: 架空の定期訪問\n期間: 2026/06/22〜2026/06/23\n繰り返し: 毎日\n件数: 2件\n時間: 09:00〜10:00\n対象者: 架空の予約者、架空の参加者、宛先未設定の参加者\n[/info]", "createdAt": "2026-11-24T05:54:08.3022521"},
+        {"reservationId": 0, "workScheduleEntryId": 7, "deliveryType": "WorkScheduleSeriesCreated", "deliveryKey": "WorkScheduleSeriesCreated:work-schedule-series:897fd460b10244c997693344d3229e84:user:3", "targetUserId": 3, "scheduledStartTime": "2026-06-22T09:00:00.1234567", "roomId": "900003", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T05:54:08.3098299", "sentAt": "2026-11-24T05:54:08.3117815", "message": "[info][title]社外予定を繰り返し登録しました[/title]\n内容: 架空の定期訪問\n期間: 2026/06/22〜2026/06/23\n繰り返し: 毎日\n件数: 2件\n時間: 09:00〜10:00\n対象者: 架空の予約者、架空の参加者、宛先未設定の参加者\n[/info]", "createdAt": "2026-11-24T05:54:08.3098299"},
+        {"reservationId": 0, "workScheduleEntryId": 7, "deliveryType": "WorkScheduleSeriesCreated", "deliveryKey": "WorkScheduleSeriesCreated:work-schedule-series:897fd460b10244c997693344d3229e84:user:4", "targetUserId": 4, "scheduledStartTime": "2026-06-22T09:00:00.1234567", "roomId": null, "status": "Skipped", "errorMessage": "ChatworkDirectRoomId is not configured.", "attemptedAt": "2026-11-24T05:54:08.3162177", "sentAt": null, "message": "[info][title]社外予定を繰り返し登録しました[/title]\n内容: 架空の定期訪問\n期間: 2026/06/22〜2026/06/23\n繰り返し: 毎日\n件数: 2件\n時間: 09:00〜10:00\n対象者: 架空の予約者、架空の参加者、宛先未設定の参加者\n[/info]", "createdAt": "2026-11-24T05:54:08.3162177"}
+      ],
+      "requests": [
+        {"roomId": "900002", "body": "[info][title]社外予定を繰り返し登録しました[/title]\n内容: 架空の定期訪問\n期間: 2026/06/22〜2026/06/23\n繰り返し: 毎日\n件数: 2件\n時間: 09:00〜10:00\n対象者: 架空の予約者、架空の参加者、宛先未設定の参加者\n[/info]"},
+        {"roomId": "900003", "body": "[info][title]社外予定を繰り返し登録しました[/title]\n内容: 架空の定期訪問\n期間: 2026/06/22〜2026/06/23\n繰り返し: 毎日\n件数: 2件\n時間: 09:00〜10:00\n対象者: 架空の予約者、架空の参加者、宛先未設定の参加者\n[/info]"}
+      ],
+      "seeds": [],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "daily_ends_on_weekend_one_occurrence",
+      "actor": "owner",
+      "request": {"title": "  架空の定期訪問  ", "date": "2026-06-19T18:45:00", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3, 4, 3, 0, -7], "createdByUserId": 1, "leavePeriod": 3, "repeatType": "毎日", "repeatUntil": "2026-06-21"},
+      "response": {"status": 200, "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": [
+        {"id": 9, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "8a8e83eea21940d88ddbe0d2951dff3d", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-21T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の予約者、架空の参加者、宛先未設定の参加者", "createdAt": "2026-11-24T05:54:08.3754349", "updatedAt": "2026-11-24T05:54:08.3754349"}
+      ],
+      "notices": [
+        {"userId": 2, "type": "Info", "message": "社外予定「架空の定期訪問」を繰り返し登録しました。期間: 2026/06/19〜2026/06/19 / 繰り返し: 毎日 / 件数: 1件 / 対象者: 架空の予約者、架空の参加者、宛先未設定の参加者", "targetDate": "2026-06-19T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 9, "isRead": false},
+        {"userId": 3, "type": "Info", "message": "社外予定「架空の定期訪問」を繰り返し登録しました。期間: 2026/06/19〜2026/06/19 / 繰り返し: 毎日 / 件数: 1件 / 対象者: 架空の予約者、架空の参加者、宛先未設定の参加者", "targetDate": "2026-06-19T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 9, "isRead": false},
+        {"userId": 4, "type": "Info", "message": "社外予定「架空の定期訪問」を繰り返し登録しました。期間: 2026/06/19〜2026/06/19 / 繰り返し: 毎日 / 件数: 1件 / 対象者: 架空の予約者、架空の参加者、宛先未設定の参加者", "targetDate": "2026-06-19T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 9, "isRead": false}
+      ],
+      "logs": [
+        {"reservationId": 0, "workScheduleEntryId": 9, "deliveryType": "WorkScheduleSeriesCreated", "deliveryKey": "WorkScheduleSeriesCreated:work-schedule-series:8a8e83eea21940d88ddbe0d2951dff3d:user:2", "targetUserId": 2, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": "900002", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T05:54:08.41155", "sentAt": "2026-11-24T05:54:08.41471", "message": "[info][title]社外予定を繰り返し登録しました[/title]\n内容: 架空の定期訪問\n期間: 2026/06/19〜2026/06/19\n繰り返し: 毎日\n件数: 1件\n時間: 09:00〜10:00\n対象者: 架空の予約者、架空の参加者、宛先未設定の参加者\n[/info]", "createdAt": "2026-11-24T05:54:08.41155"},
+        {"reservationId": 0, "workScheduleEntryId": 9, "deliveryType": "WorkScheduleSeriesCreated", "deliveryKey": "WorkScheduleSeriesCreated:work-schedule-series:8a8e83eea21940d88ddbe0d2951dff3d:user:3", "targetUserId": 3, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": "900003", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T05:54:08.4207912", "sentAt": "2026-11-24T05:54:08.4236685", "message": "[info][title]社外予定を繰り返し登録しました[/title]\n内容: 架空の定期訪問\n期間: 2026/06/19〜2026/06/19\n繰り返し: 毎日\n件数: 1件\n時間: 09:00〜10:00\n対象者: 架空の予約者、架空の参加者、宛先未設定の参加者\n[/info]", "createdAt": "2026-11-24T05:54:08.4207912"},
+        {"reservationId": 0, "workScheduleEntryId": 9, "deliveryType": "WorkScheduleSeriesCreated", "deliveryKey": "WorkScheduleSeriesCreated:work-schedule-series:8a8e83eea21940d88ddbe0d2951dff3d:user:4", "targetUserId": 4, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": null, "status": "Skipped", "errorMessage": "ChatworkDirectRoomId is not configured.", "attemptedAt": "2026-11-24T05:54:08.429459", "sentAt": null, "message": "[info][title]社外予定を繰り返し登録しました[/title]\n内容: 架空の定期訪問\n期間: 2026/06/19〜2026/06/19\n繰り返し: 毎日\n件数: 1件\n時間: 09:00〜10:00\n対象者: 架空の予約者、架空の参加者、宛先未設定の参加者\n[/info]", "createdAt": "2026-11-24T05:54:08.429459"}
+      ],
+      "requests": [
+        {"roomId": "900002", "body": "[info][title]社外予定を繰り返し登録しました[/title]\n内容: 架空の定期訪問\n期間: 2026/06/19〜2026/06/19\n繰り返し: 毎日\n件数: 1件\n時間: 09:00〜10:00\n対象者: 架空の予約者、架空の参加者、宛先未設定の参加者\n[/info]"},
+        {"roomId": "900003", "body": "[info][title]社外予定を繰り返し登録しました[/title]\n内容: 架空の定期訪問\n期間: 2026/06/19〜2026/06/19\n繰り返し: 毎日\n件数: 1件\n時間: 09:00〜10:00\n対象者: 架空の予約者、架空の参加者、宛先未設定の参加者\n[/info]"}
+      ],
+      "seeds": [],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "sixty_occurrences",
+      "actor": "owner",
+      "request": {"title": "  架空の定期訪問  ", "date": "2026-06-22", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [], "createdByUserId": 1, "leavePeriod": 3, "repeatType": "毎日", "repeatUntil": "2026-09-11"},
+      "response": {"status": 200, "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": [
+        {"id": 10, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-06-22T00:00:00", "startTime": "2026-06-22T09:00:00.1234567", "endTime": "2026-06-22T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 11, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-06-23T00:00:00", "startTime": "2026-06-23T09:00:00.1234567", "endTime": "2026-06-23T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 12, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-06-24T00:00:00", "startTime": "2026-06-24T09:00:00.1234567", "endTime": "2026-06-24T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 13, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-06-25T00:00:00", "startTime": "2026-06-25T09:00:00.1234567", "endTime": "2026-06-25T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 14, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-06-26T00:00:00", "startTime": "2026-06-26T09:00:00.1234567", "endTime": "2026-06-26T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 15, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-06-29T00:00:00", "startTime": "2026-06-29T09:00:00.1234567", "endTime": "2026-06-29T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 16, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-06-30T00:00:00", "startTime": "2026-06-30T09:00:00.1234567", "endTime": "2026-06-30T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 17, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-07-01T00:00:00", "startTime": "2026-07-01T09:00:00.1234567", "endTime": "2026-07-01T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 18, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-07-02T00:00:00", "startTime": "2026-07-02T09:00:00.1234567", "endTime": "2026-07-02T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 19, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-07-03T00:00:00", "startTime": "2026-07-03T09:00:00.1234567", "endTime": "2026-07-03T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 20, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-07-06T00:00:00", "startTime": "2026-07-06T09:00:00.1234567", "endTime": "2026-07-06T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 21, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-07-07T00:00:00", "startTime": "2026-07-07T09:00:00.1234567", "endTime": "2026-07-07T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 22, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-07-08T00:00:00", "startTime": "2026-07-08T09:00:00.1234567", "endTime": "2026-07-08T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 23, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-07-09T00:00:00", "startTime": "2026-07-09T09:00:00.1234567", "endTime": "2026-07-09T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 24, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-07-10T00:00:00", "startTime": "2026-07-10T09:00:00.1234567", "endTime": "2026-07-10T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 25, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-07-13T00:00:00", "startTime": "2026-07-13T09:00:00.1234567", "endTime": "2026-07-13T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 26, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-07-14T00:00:00", "startTime": "2026-07-14T09:00:00.1234567", "endTime": "2026-07-14T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 27, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-07-15T00:00:00", "startTime": "2026-07-15T09:00:00.1234567", "endTime": "2026-07-15T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 28, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-07-16T00:00:00", "startTime": "2026-07-16T09:00:00.1234567", "endTime": "2026-07-16T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 29, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-07-17T00:00:00", "startTime": "2026-07-17T09:00:00.1234567", "endTime": "2026-07-17T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 30, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-07-20T00:00:00", "startTime": "2026-07-20T09:00:00.1234567", "endTime": "2026-07-20T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 31, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-07-21T00:00:00", "startTime": "2026-07-21T09:00:00.1234567", "endTime": "2026-07-21T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 32, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-07-22T00:00:00", "startTime": "2026-07-22T09:00:00.1234567", "endTime": "2026-07-22T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 33, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-07-23T00:00:00", "startTime": "2026-07-23T09:00:00.1234567", "endTime": "2026-07-23T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 34, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-07-24T00:00:00", "startTime": "2026-07-24T09:00:00.1234567", "endTime": "2026-07-24T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 35, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-07-27T00:00:00", "startTime": "2026-07-27T09:00:00.1234567", "endTime": "2026-07-27T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 36, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-07-28T00:00:00", "startTime": "2026-07-28T09:00:00.1234567", "endTime": "2026-07-28T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 37, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-07-29T00:00:00", "startTime": "2026-07-29T09:00:00.1234567", "endTime": "2026-07-29T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 38, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-07-30T00:00:00", "startTime": "2026-07-30T09:00:00.1234567", "endTime": "2026-07-30T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 39, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-07-31T00:00:00", "startTime": "2026-07-31T09:00:00.1234567", "endTime": "2026-07-31T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 40, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-08-03T00:00:00", "startTime": "2026-08-03T09:00:00.1234567", "endTime": "2026-08-03T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 41, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-08-04T00:00:00", "startTime": "2026-08-04T09:00:00.1234567", "endTime": "2026-08-04T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 42, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-08-05T00:00:00", "startTime": "2026-08-05T09:00:00.1234567", "endTime": "2026-08-05T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 43, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-08-06T00:00:00", "startTime": "2026-08-06T09:00:00.1234567", "endTime": "2026-08-06T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 44, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-08-07T00:00:00", "startTime": "2026-08-07T09:00:00.1234567", "endTime": "2026-08-07T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 45, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-08-10T00:00:00", "startTime": "2026-08-10T09:00:00.1234567", "endTime": "2026-08-10T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 46, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-08-11T00:00:00", "startTime": "2026-08-11T09:00:00.1234567", "endTime": "2026-08-11T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 47, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-08-12T00:00:00", "startTime": "2026-08-12T09:00:00.1234567", "endTime": "2026-08-12T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 48, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-08-13T00:00:00", "startTime": "2026-08-13T09:00:00.1234567", "endTime": "2026-08-13T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 49, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-08-14T00:00:00", "startTime": "2026-08-14T09:00:00.1234567", "endTime": "2026-08-14T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 50, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-08-17T00:00:00", "startTime": "2026-08-17T09:00:00.1234567", "endTime": "2026-08-17T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 51, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-08-18T00:00:00", "startTime": "2026-08-18T09:00:00.1234567", "endTime": "2026-08-18T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 52, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-08-19T00:00:00", "startTime": "2026-08-19T09:00:00.1234567", "endTime": "2026-08-19T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 53, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-08-20T00:00:00", "startTime": "2026-08-20T09:00:00.1234567", "endTime": "2026-08-20T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 54, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-08-21T00:00:00", "startTime": "2026-08-21T09:00:00.1234567", "endTime": "2026-08-21T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 55, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-08-24T00:00:00", "startTime": "2026-08-24T09:00:00.1234567", "endTime": "2026-08-24T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 56, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-08-25T00:00:00", "startTime": "2026-08-25T09:00:00.1234567", "endTime": "2026-08-25T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 57, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-08-26T00:00:00", "startTime": "2026-08-26T09:00:00.1234567", "endTime": "2026-08-26T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 58, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-08-27T00:00:00", "startTime": "2026-08-27T09:00:00.1234567", "endTime": "2026-08-27T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 59, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-08-28T00:00:00", "startTime": "2026-08-28T09:00:00.1234567", "endTime": "2026-08-28T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 60, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-08-31T00:00:00", "startTime": "2026-08-31T09:00:00.1234567", "endTime": "2026-08-31T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 61, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-09-01T00:00:00", "startTime": "2026-09-01T09:00:00.1234567", "endTime": "2026-09-01T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 62, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-09-02T00:00:00", "startTime": "2026-09-02T09:00:00.1234567", "endTime": "2026-09-02T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 63, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-09-03T00:00:00", "startTime": "2026-09-03T09:00:00.1234567", "endTime": "2026-09-03T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 64, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-09-04T00:00:00", "startTime": "2026-09-04T09:00:00.1234567", "endTime": "2026-09-04T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 65, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-09-07T00:00:00", "startTime": "2026-09-07T09:00:00.1234567", "endTime": "2026-09-07T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 66, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-09-08T00:00:00", "startTime": "2026-09-08T09:00:00.1234567", "endTime": "2026-09-08T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 67, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-09-09T00:00:00", "startTime": "2026-09-09T09:00:00.1234567", "endTime": "2026-09-09T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 68, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-09-10T00:00:00", "startTime": "2026-09-10T09:00:00.1234567", "endTime": "2026-09-10T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"},
+        {"id": 69, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "b63eeada7b234fde9364b59e77592fc7", "date": "2026-09-11T00:00:00", "startTime": "2026-09-11T09:00:00.1234567", "endTime": "2026-09-11T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-09-11T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の予約者", "createdAt": "2026-11-24T05:54:08.4895756", "updatedAt": "2026-11-24T05:54:08.4895756"}
+      ],
+      "notices": [
+        {"userId": 2, "type": "Info", "message": "社外予定「架空の定期訪問」を繰り返し登録しました。期間: 2026/06/22〜2026/09/11 / 繰り返し: 毎日 / 件数: 60件 / 対象者: 架空の予約者", "targetDate": "2026-06-22T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 10, "isRead": false}
+      ],
+      "logs": [
+        {"reservationId": 0, "workScheduleEntryId": 10, "deliveryType": "WorkScheduleSeriesCreated", "deliveryKey": "WorkScheduleSeriesCreated:work-schedule-series:b63eeada7b234fde9364b59e77592fc7:user:2", "targetUserId": 2, "scheduledStartTime": "2026-06-22T09:00:00.1234567", "roomId": "900002", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T05:54:08.6611827", "sentAt": "2026-11-24T05:54:08.6637606", "message": "[info][title]社外予定を繰り返し登録しました[/title]\n内容: 架空の定期訪問\n期間: 2026/06/22〜2026/09/11\n繰り返し: 毎日\n件数: 60件\n時間: 09:00〜10:00\n対象者: 架空の予約者\n[/info]", "createdAt": "2026-11-24T05:54:08.6611827"}
+      ],
+      "requests": [
+        {"roomId": "900002", "body": "[info][title]社外予定を繰り返し登録しました[/title]\n内容: 架空の定期訪問\n期間: 2026/06/22〜2026/09/11\n繰り返し: 毎日\n件数: 60件\n時間: 09:00〜10:00\n対象者: 架空の予約者\n[/info]"}
+      ],
+      "seeds": [],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "sixty_one_occurrences",
+      "actor": "owner",
+      "request": {"title": "  架空の定期訪問  ", "date": "2026-06-22", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3, 4, 3, 0, -7], "createdByUserId": 1, "leavePeriod": 3, "repeatType": "毎日", "repeatUntil": "2026-09-14"},
+      "response": {"status": 400, "body": "繰り返し作成は最大60件までです。", "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "daily_weekend_only",
+      "actor": "owner",
+      "request": {"title": "  架空の定期訪問  ", "date": "2026-06-20", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3, 4, 3, 0, -7], "createdByUserId": 1, "leavePeriod": 3, "repeatType": "毎日", "repeatUntil": "2026-06-21"},
+      "response": {"status": 400, "body": "作成対象の日付がありません。", "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "weekly_from_saturday",
+      "actor": "owner",
+      "request": {"title": "  架空の定期訪問  ", "date": "2026-06-20", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3, 4, 3, 0, -7], "createdByUserId": 1, "leavePeriod": 3, "repeatType": "毎週", "repeatUntil": "2026-07-20"},
+      "response": {"status": 400, "body": "作成対象の日付がありません。", "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "weekly_from_sunday",
+      "actor": "owner",
+      "request": {"title": "  架空の定期訪問  ", "date": "2026-06-21", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3, 4, 3, 0, -7], "createdByUserId": 1, "leavePeriod": 3, "repeatType": "毎週", "repeatUntil": "2026-07-20"},
+      "response": {"status": 400, "body": "作成対象の日付がありません。", "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "until_missing",
+      "actor": "owner",
+      "request": {"title": "  架空の定期訪問  ", "date": "2026-06-19T18:45:00", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3, 4, 3, 0, -7], "createdByUserId": 1, "leavePeriod": 3, "repeatType": "毎日"},
+      "response": {"status": 400, "body": "繰り返し終了日を入力してください。", "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "until_inverted",
+      "actor": "owner",
+      "request": {"title": "  架空の定期訪問  ", "date": "2026-06-19T18:45:00", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3, 4, 3, 0, -7], "createdByUserId": 1, "leavePeriod": 3, "repeatType": "毎日", "repeatUntil": "2026-06-18"},
+      "response": {"status": 400, "body": "繰り返し終了日は開始日以降にしてください。", "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "unknown_repeat",
+      "actor": "owner",
+      "request": {"title": "  架空の定期訪問  ", "date": "2026-06-19T18:45:00", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3, 4, 3, 0, -7], "createdByUserId": 1, "leavePeriod": 3, "repeatType": "隔週", "repeatUntil": "2026-06-23T07:12:05"},
+      "response": {"status": 400, "body": "繰り返しの種類が不正です。", "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "remote_with_repeat",
+      "actor": "owner",
+      "request": {"title": "  架空の定期訪問  ", "date": "2026-06-19T18:45:00", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3, 4, 3, 0, -7], "createdByUserId": 1, "leavePeriod": 3, "repeatType": "毎日", "repeatUntil": "2026-06-23T07:12:05", "type": 1},
+      "response": {"status": 400, "body": "繰り返し作成は社外予定のみ指定できます。", "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "leave_with_repeat",
+      "actor": "owner",
+      "request": {"title": "  架空の定期訪問  ", "date": "2026-06-19T18:45:00", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3, 4, 3, 0, -7], "createdByUserId": 1, "leavePeriod": 3, "repeatType": "毎週", "repeatUntil": "2026-06-23T07:12:05", "type": 2},
+      "response": {"status": 400, "body": "繰り返し作成は社外予定のみ指定できます。", "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "fallback_remote_no_repeat",
+      "actor": "owner",
+      "request": {"title": "", "date": "2026-06-19T18:45:00", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3], "createdByUserId": 1, "leavePeriod": 3, "repeatType": null, "repeatUntil": null, "type": 1},
+      "response": {"status": 200, "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": [
+        {"id": 70, "createdByUserId": 2, "type": 1, "title": "在宅", "seriesId": null, "date": "2026-06-19T00:00:00", "startTime": null, "endTime": null, "repeatType": null, "repeatUntil": null, "leavePeriod": 0, "participantIds": [2, 3], "participants": "架空の予約者、架空の参加者", "createdAt": "2026-11-24T05:54:09.0959765", "updatedAt": "2026-11-24T05:54:09.0959765"}
+      ],
+      "notices": [
+        {"userId": 2, "type": "Info", "message": "在宅予定「在宅」が登録されました。日付: 2026/06/19 / 対象者: 架空の予約者、架空の参加者", "targetDate": "2026-06-19T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 70, "isRead": false},
+        {"userId": 3, "type": "Info", "message": "在宅予定「在宅」が登録されました。日付: 2026/06/19 / 対象者: 架空の予約者、架空の参加者", "targetDate": "2026-06-19T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 70, "isRead": false}
+      ],
+      "logs": [
+        {"reservationId": 0, "workScheduleEntryId": 70, "deliveryType": "WorkScheduleCreated", "deliveryKey": "WorkScheduleCreated:work-schedule:70:user:2", "targetUserId": 2, "scheduledStartTime": "2026-06-19T00:00:00", "roomId": "900002", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T05:54:09.1136799", "sentAt": "2026-11-24T05:54:09.1163959", "message": "[info][title]在宅予定が登録されました[/title]\n内容: 在宅\n日付: 2026/06/19\n対象者: 架空の予約者、架空の参加者\n[/info]", "createdAt": "2026-11-24T05:54:09.1136799"},
+        {"reservationId": 0, "workScheduleEntryId": 70, "deliveryType": "WorkScheduleCreated", "deliveryKey": "WorkScheduleCreated:work-schedule:70:user:3", "targetUserId": 3, "scheduledStartTime": "2026-06-19T00:00:00", "roomId": "900003", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T05:54:09.1197929", "sentAt": "2026-11-24T05:54:09.1221461", "message": "[info][title]在宅予定が登録されました[/title]\n内容: 在宅\n日付: 2026/06/19\n対象者: 架空の予約者、架空の参加者\n[/info]", "createdAt": "2026-11-24T05:54:09.1197929"}
+      ],
+      "requests": [
+        {"roomId": "900002", "body": "[info][title]在宅予定が登録されました[/title]\n内容: 在宅\n日付: 2026/06/19\n対象者: 架空の予約者、架空の参加者\n[/info]"},
+        {"roomId": "900003", "body": "[info][title]在宅予定が登録されました[/title]\n内容: 在宅\n日付: 2026/06/19\n対象者: 架空の予約者、架空の参加者\n[/info]"}
+      ],
+      "seeds": [],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "fallback_external_until_only",
+      "actor": "owner",
+      "request": {"title": "  架空の定期訪問  ", "date": "2026-06-19T18:45:00", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3, 4, 3, 0, -7], "createdByUserId": 1, "leavePeriod": 3, "repeatType": "しない", "repeatUntil": "2026-06-23T07:12:05"},
+      "response": {"status": 200, "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": [
+        {"id": 71, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": null, "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "repeatType": null, "repeatUntil": null, "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の予約者、架空の参加者、宛先未設定の参加者", "createdAt": "2026-11-24T05:54:09.1753924", "updatedAt": "2026-11-24T05:54:09.1753924"}
+      ],
+      "notices": [
+        {"userId": 2, "type": "Info", "message": "社外予定「架空の定期訪問」が登録されました。日付: 2026/06/19 / 時間: 09:00〜10:00 / 対象者: 架空の予約者、架空の参加者、宛先未設定の参加者", "targetDate": "2026-06-19T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 71, "isRead": false},
+        {"userId": 3, "type": "Info", "message": "社外予定「架空の定期訪問」が登録されました。日付: 2026/06/19 / 時間: 09:00〜10:00 / 対象者: 架空の予約者、架空の参加者、宛先未設定の参加者", "targetDate": "2026-06-19T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 71, "isRead": false},
+        {"userId": 4, "type": "Info", "message": "社外予定「架空の定期訪問」が登録されました。日付: 2026/06/19 / 時間: 09:00〜10:00 / 対象者: 架空の予約者、架空の参加者、宛先未設定の参加者", "targetDate": "2026-06-19T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 71, "isRead": false}
+      ],
+      "logs": [
+        {"reservationId": 0, "workScheduleEntryId": 71, "deliveryType": "WorkScheduleCreated", "deliveryKey": "WorkScheduleCreated:work-schedule:71:user:2", "targetUserId": 2, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": "900002", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T05:54:09.1916711", "sentAt": "2026-11-24T05:54:09.1945691", "message": "[info][title]社外予定が登録されました[/title]\n内容: 架空の定期訪問\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の予約者、架空の参加者、宛先未設定の参加者\n[/info]", "createdAt": "2026-11-24T05:54:09.1916711"},
+        {"reservationId": 0, "workScheduleEntryId": 71, "deliveryType": "WorkScheduleCreated", "deliveryKey": "WorkScheduleCreated:work-schedule:71:user:3", "targetUserId": 3, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": "900003", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T05:54:09.1995183", "sentAt": "2026-11-24T05:54:09.2024835", "message": "[info][title]社外予定が登録されました[/title]\n内容: 架空の定期訪問\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の予約者、架空の参加者、宛先未設定の参加者\n[/info]", "createdAt": "2026-11-24T05:54:09.1995183"},
+        {"reservationId": 0, "workScheduleEntryId": 71, "deliveryType": "WorkScheduleCreated", "deliveryKey": "WorkScheduleCreated:work-schedule:71:user:4", "targetUserId": 4, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": null, "status": "Skipped", "errorMessage": "ChatworkDirectRoomId is not configured.", "attemptedAt": "2026-11-24T05:54:09.2068368", "sentAt": null, "message": "[info][title]社外予定が登録されました[/title]\n内容: 架空の定期訪問\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の予約者、架空の参加者、宛先未設定の参加者\n[/info]", "createdAt": "2026-11-24T05:54:09.2068368"}
+      ],
+      "requests": [
+        {"roomId": "900002", "body": "[info][title]社外予定が登録されました[/title]\n内容: 架空の定期訪問\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の予約者、架空の参加者、宛先未設定の参加者\n[/info]"},
+        {"roomId": "900003", "body": "[info][title]社外予定が登録されました[/title]\n内容: 架空の定期訪問\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の予約者、架空の参加者、宛先未設定の参加者\n[/info]"}
+      ],
+      "seeds": [],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "spaced_no_repeat",
+      "actor": "owner",
+      "request": {"title": "  架空の定期訪問  ", "date": "2026-06-19T18:45:00", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3, 4, 3, 0, -7], "createdByUserId": 1, "leavePeriod": 3, "repeatType": " しない ", "repeatUntil": "2026-06-23T07:12:05"},
+      "response": {"status": 400, "body": "繰り返し作成は社外予定の一括作成APIを使用してください。", "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "missing_participants",
+      "actor": "owner",
+      "request": {"title": "  架空の定期訪問  ", "date": "2026-06-19T18:45:00", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [102, 0, 101, 102], "createdByUserId": 1, "leavePeriod": 3, "repeatType": "毎日", "repeatUntil": "2026-06-23T07:12:05"},
+      "response": {"status": 400, "body": "存在しない参加者が含まれています: 102, 101", "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "missing_time",
+      "actor": "owner",
+      "request": {"title": "  架空の定期訪問  ", "date": "2026-06-19T18:45:00", "startTime": null, "endTime": "2001-05-07T10:00:00", "participantIds": [3, 4, 3, 0, -7], "createdByUserId": 1, "leavePeriod": 3, "repeatType": "毎日", "repeatUntil": "2026-06-23T07:12:05"},
+      "response": {"status": 400, "body": "社外予定の開始時刻と終了時刻を入力してください。", "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "unauthenticated",
+      "actor": "anonymous",
+      "request": {"title": "  架空の定期訪問  ", "date": "2026-06-19T18:45:00", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3, 4, 3, 0, -7], "createdByUserId": 1, "leavePeriod": 3, "repeatType": "毎日", "repeatUntil": "2026-06-23T07:12:05"},
+      "response": {"status": 401, "body": "", "location": null, "contentType": null},
+      "saved": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "conflicts_after_first",
+      "actor": "owner",
+      "request": {"title": "  架空の定期訪問  ", "date": "2026-06-19T18:45:00", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3, 2, 3], "createdByUserId": 1, "leavePeriod": 3, "repeatType": "毎日", "repeatUntil": "2026-06-23T07:12:05", "participants": "  架空の表示名  "},
+      "response": {"status": 200, "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": [
+        {"id": 314, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "9037ad0eb2c94d339047ad0a68e5989a", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-23T00:00:00", "leavePeriod": 0, "participantIds": [3, 2], "participants": "架空の表示名", "createdAt": "2026-11-24T05:54:09.4645937", "updatedAt": "2026-11-24T05:54:09.4645937"},
+        {"id": 315, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "9037ad0eb2c94d339047ad0a68e5989a", "date": "2026-06-22T00:00:00", "startTime": "2026-06-22T09:00:00.1234567", "endTime": "2026-06-22T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-23T00:00:00", "leavePeriod": 0, "participantIds": [3, 2], "participants": "架空の表示名", "createdAt": "2026-11-24T05:54:09.4645937", "updatedAt": "2026-11-24T05:54:09.4645937"},
+        {"id": 316, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "9037ad0eb2c94d339047ad0a68e5989a", "date": "2026-06-23T00:00:00", "startTime": "2026-06-23T09:00:00.1234567", "endTime": "2026-06-23T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-23T00:00:00", "leavePeriod": 0, "participantIds": [3, 2], "participants": "架空の表示名", "createdAt": "2026-11-24T05:54:09.4645937", "updatedAt": "2026-11-24T05:54:09.4645937"}
+      ],
+      "notices": [
+        {"userId": 3, "type": "Warning", "message": "社外予定「架空の定期訪問」を繰り返し登録しました。期間: 2026/06/19〜2026/06/23 / 繰り返し: 毎日 / 件数: 3件 / 対象者: 架空の表示名 注意: 参加者の予定重複があります。架空の予約者: 会議室予約「架空の会議名」 2026/06/22 08:50〜09:15 架空の参加者: 会議室予約「架空の会議名」 2026/06/22 08:50〜09:15 架空の参加者: 社外予定「後半の架空外出」 2026/06/23 09:15〜10:15 架空の参加者: 社外予定「架空の追加重複 1」 2026/06/23 09:30〜10:30 架空の参加者: 社外予定「架空の追加重複 2」 2026/06/23 09:31〜10:30 ほか2件", "targetDate": "2026-06-19T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 314, "isRead": false},
+        {"userId": 2, "type": "Warning", "message": "社外予定「架空の定期訪問」を繰り返し登録しました。期間: 2026/06/19〜2026/06/23 / 繰り返し: 毎日 / 件数: 3件 / 対象者: 架空の表示名 注意: 参加者の予定重複があります。架空の予約者: 会議室予約「架空の会議名」 2026/06/22 08:50〜09:15 架空の参加者: 会議室予約「架空の会議名」 2026/06/22 08:50〜09:15 架空の参加者: 社外予定「後半の架空外出」 2026/06/23 09:15〜10:15 架空の参加者: 社外予定「架空の追加重複 1」 2026/06/23 09:30〜10:30 架空の参加者: 社外予定「架空の追加重複 2」 2026/06/23 09:31〜10:30 ほか2件", "targetDate": "2026-06-19T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 314, "isRead": false}
+      ],
+      "logs": [
+        {"reservationId": 0, "workScheduleEntryId": 314, "deliveryType": "WorkScheduleSeriesCreated", "deliveryKey": "WorkScheduleSeriesCreated:work-schedule-series:9037ad0eb2c94d339047ad0a68e5989a:user:3", "targetUserId": 3, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": "900003", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T05:54:09.515579", "sentAt": "2026-11-24T05:54:09.5181892", "message": "[info][title]社外予定を繰り返し登録しました[/title]\n内容: 架空の定期訪問\n期間: 2026/06/19〜2026/06/23\n繰り返し: 毎日\n件数: 3件\n時間: 09:00〜10:00\n対象者: 架空の表示名\n[hr]\n注意: 参加者の予定重複があります\n- 架空の予約者: 会議室予約「架空の会議名」 2026/06/22 08:50〜09:15\n- 架空の参加者: 会議室予約「架空の会議名」 2026/06/22 08:50〜09:15\n- 架空の参加者: 社外予定「後半の架空外出」 2026/06/23 09:15〜10:15\n- 架空の参加者: 社外予定「架空の追加重複 1」 2026/06/23 09:30〜10:30\n- 架空の参加者: 社外予定「架空の追加重複 2」 2026/06/23 09:31〜10:30\n- ほか 2件\n[/info]", "createdAt": "2026-11-24T05:54:09.515579"},
+        {"reservationId": 0, "workScheduleEntryId": 314, "deliveryType": "WorkScheduleSeriesCreated", "deliveryKey": "WorkScheduleSeriesCreated:work-schedule-series:9037ad0eb2c94d339047ad0a68e5989a:user:2", "targetUserId": 2, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": "900002", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T05:54:09.5231257", "sentAt": "2026-11-24T05:54:09.5262868", "message": "[info][title]社外予定を繰り返し登録しました[/title]\n内容: 架空の定期訪問\n期間: 2026/06/19〜2026/06/23\n繰り返し: 毎日\n件数: 3件\n時間: 09:00〜10:00\n対象者: 架空の表示名\n[hr]\n注意: 参加者の予定重複があります\n- 架空の予約者: 会議室予約「架空の会議名」 2026/06/22 08:50〜09:15\n- 架空の参加者: 会議室予約「架空の会議名」 2026/06/22 08:50〜09:15\n- 架空の参加者: 社外予定「後半の架空外出」 2026/06/23 09:15〜10:15\n- 架空の参加者: 社外予定「架空の追加重複 1」 2026/06/23 09:30〜10:30\n- 架空の参加者: 社外予定「架空の追加重複 2」 2026/06/23 09:31〜10:30\n- ほか 2件\n[/info]", "createdAt": "2026-11-24T05:54:09.5231257"}
+      ],
+      "requests": [
+        {"roomId": "900003", "body": "[info][title]社外予定を繰り返し登録しました[/title]\n内容: 架空の定期訪問\n期間: 2026/06/19〜2026/06/23\n繰り返し: 毎日\n件数: 3件\n時間: 09:00〜10:00\n対象者: 架空の表示名\n[hr]\n注意: 参加者の予定重複があります\n- 架空の予約者: 会議室予約「架空の会議名」 2026/06/22 08:50〜09:15\n- 架空の参加者: 会議室予約「架空の会議名」 2026/06/22 08:50〜09:15\n- 架空の参加者: 社外予定「後半の架空外出」 2026/06/23 09:15〜10:15\n- 架空の参加者: 社外予定「架空の追加重複 1」 2026/06/23 09:30〜10:30\n- 架空の参加者: 社外予定「架空の追加重複 2」 2026/06/23 09:31〜10:30\n- ほか 2件\n[/info]"},
+        {"roomId": "900002", "body": "[info][title]社外予定を繰り返し登録しました[/title]\n内容: 架空の定期訪問\n期間: 2026/06/19〜2026/06/23\n繰り返し: 毎日\n件数: 3件\n時間: 09:00〜10:00\n対象者: 架空の表示名\n[hr]\n注意: 参加者の予定重複があります\n- 架空の予約者: 会議室予約「架空の会議名」 2026/06/22 08:50〜09:15\n- 架空の参加者: 会議室予約「架空の会議名」 2026/06/22 08:50〜09:15\n- 架空の参加者: 社外予定「後半の架空外出」 2026/06/23 09:15〜10:15\n- 架空の参加者: 社外予定「架空の追加重複 1」 2026/06/23 09:30〜10:30\n- 架空の参加者: 社外予定「架空の追加重複 2」 2026/06/23 09:31〜10:30\n- ほか 2件\n[/info]"}
+      ],
+      "seeds": [
+        {"kind": "reservation", "id": 201, "date": "2026-06-22", "title": "", "start": "08:50:00", "end": "09:15:00", "userId": 3, "participantIds": [3, 2]},
+        {"kind": "reservation", "id": 202, "date": "2026-06-19", "title": "初回の端点のみ", "start": "10:00:00", "end": "11:00:00", "userId": 3, "participantIds": []},
+        {"kind": "reservation", "id": 203, "date": "2026-06-22", "title": "別の参加者", "start": "09:00:00", "end": "09:30:00", "userId": 5, "participantIds": []},
+        {"kind": "work", "id": 301, "date": "2026-06-23", "title": "後半の架空外出", "start": "09:15:00", "end": "10:15:00", "userId": 5, "participantIds": [3, 3]},
+        {"kind": "work", "id": 302, "date": "2026-06-23", "title": "休暇は対象外", "start": "09:20:00", "end": "09:40:00", "userId": 3, "participantIds": [3], "type": 2},
+        {"kind": "work", "id": 303, "date": "2026-06-23", "title": "時刻なし", "start": null, "end": "10:30:00", "userId": 3, "participantIds": [3]},
+        {"kind": "work", "id": 310, "date": "2026-06-23", "title": "架空の追加重複 1", "start": "09:30:00", "end": "10:30:00", "userId": 3, "participantIds": [3]},
+        {"kind": "work", "id": 311, "date": "2026-06-23", "title": "架空の追加重複 2", "start": "09:31:00", "end": "10:30:00", "userId": 3, "participantIds": [3]},
+        {"kind": "work", "id": 312, "date": "2026-06-23", "title": "架空の追加重複 3", "start": "09:32:00", "end": "10:30:00", "userId": 3, "participantIds": [3]},
+        {"kind": "work", "id": 313, "date": "2026-06-23", "title": "架空の追加重複 4", "start": "09:33:00", "end": "10:30:00", "userId": 3, "participantIds": [3]}
+      ],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "provider_failure_and_timeout",
+      "actor": "owner",
+      "request": {"title": "  架空の定期訪問  ", "date": "2026-06-19T18:45:00", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3], "createdByUserId": 1, "leavePeriod": 3, "repeatType": "毎日", "repeatUntil": "2026-06-23T07:12:05"},
+      "response": {"status": 200, "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": [
+        {"id": 317, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "5711e8dd55cd44be8d46f7215b5640f0", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-23T00:00:00", "leavePeriod": 0, "participantIds": [2, 3], "participants": "架空の予約者、架空の参加者", "createdAt": "2026-11-24T05:54:09.5841285", "updatedAt": "2026-11-24T05:54:09.5841285"},
+        {"id": 318, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "5711e8dd55cd44be8d46f7215b5640f0", "date": "2026-06-22T00:00:00", "startTime": "2026-06-22T09:00:00.1234567", "endTime": "2026-06-22T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-23T00:00:00", "leavePeriod": 0, "participantIds": [2, 3], "participants": "架空の予約者、架空の参加者", "createdAt": "2026-11-24T05:54:09.5841285", "updatedAt": "2026-11-24T05:54:09.5841285"},
+        {"id": 319, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "5711e8dd55cd44be8d46f7215b5640f0", "date": "2026-06-23T00:00:00", "startTime": "2026-06-23T09:00:00.1234567", "endTime": "2026-06-23T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-23T00:00:00", "leavePeriod": 0, "participantIds": [2, 3], "participants": "架空の予約者、架空の参加者", "createdAt": "2026-11-24T05:54:09.5841285", "updatedAt": "2026-11-24T05:54:09.5841285"}
+      ],
+      "notices": [
+        {"userId": 2, "type": "Info", "message": "社外予定「架空の定期訪問」を繰り返し登録しました。期間: 2026/06/19〜2026/06/23 / 繰り返し: 毎日 / 件数: 3件 / 対象者: 架空の予約者、架空の参加者", "targetDate": "2026-06-19T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 317, "isRead": false},
+        {"userId": 3, "type": "Info", "message": "社外予定「架空の定期訪問」を繰り返し登録しました。期間: 2026/06/19〜2026/06/23 / 繰り返し: 毎日 / 件数: 3件 / 対象者: 架空の予約者、架空の参加者", "targetDate": "2026-06-19T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 317, "isRead": false}
+      ],
+      "logs": [
+        {"reservationId": 0, "workScheduleEntryId": 317, "deliveryType": "WorkScheduleSeriesCreated", "deliveryKey": "WorkScheduleSeriesCreated:work-schedule-series:5711e8dd55cd44be8d46f7215b5640f0:user:2", "targetUserId": 2, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": "900002", "status": "Failed", "errorMessage": "The request was canceled due to the configured HttpClient.Timeout of 0.5 seconds elapsing.", "attemptedAt": "2026-11-24T05:54:09.6143485", "sentAt": null, "message": "[info][title]社外予定を繰り返し登録しました[/title]\n内容: 架空の定期訪問\n期間: 2026/06/19〜2026/06/23\n繰り返し: 毎日\n件数: 3件\n時間: 09:00〜10:00\n対象者: 架空の予約者、架空の参加者\n[/info]", "createdAt": "2026-11-24T05:54:09.6143485"},
+        {"reservationId": 0, "workScheduleEntryId": 317, "deliveryType": "WorkScheduleSeriesCreated", "deliveryKey": "WorkScheduleSeriesCreated:work-schedule-series:5711e8dd55cd44be8d46f7215b5640f0:user:3", "targetUserId": 3, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": "900003", "status": "Failed", "errorMessage": "Failed to send Chatwork message. StatusCode: 503, Response: {\"synthetic\":true}", "attemptedAt": "2026-11-24T05:54:10.1532094", "sentAt": null, "message": "[info][title]社外予定を繰り返し登録しました[/title]\n内容: 架空の定期訪問\n期間: 2026/06/19〜2026/06/23\n繰り返し: 毎日\n件数: 3件\n時間: 09:00〜10:00\n対象者: 架空の予約者、架空の参加者\n[/info]", "createdAt": "2026-11-24T05:54:10.1532094"}
+      ],
+      "requests": [
+        {"roomId": "900002", "body": "[info][title]社外予定を繰り返し登録しました[/title]\n内容: 架空の定期訪問\n期間: 2026/06/19〜2026/06/23\n繰り返し: 毎日\n件数: 3件\n時間: 09:00〜10:00\n対象者: 架空の予約者、架空の参加者\n[/info]"},
+        {"roomId": "900003", "body": "[info][title]社外予定を繰り返し登録しました[/title]\n内容: 架空の定期訪問\n期間: 2026/06/19〜2026/06/23\n繰り返し: 毎日\n件数: 3件\n時間: 09:00〜10:00\n対象者: 架空の予約者、架空の参加者\n[/info]"}
+      ],
+      "seeds": [],
+      "failure": null,
+      "fakeResponses": {"900003": 503, "900002": "timeout"}
+    },
+    {
+      "name": "notice_failure",
+      "actor": "owner",
+      "request": {"title": "  架空の定期訪問  ", "date": "2026-06-19T18:45:00", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3, 4, 3, 0, -7], "createdByUserId": 1, "leavePeriod": 3, "repeatType": "毎日", "repeatUntil": "2026-06-23T07:12:05"},
+      "response": {"status": 200, "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": [
+        {"id": 320, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "e967bd067c654dd1be0c6db451528938", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-23T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の予約者、架空の参加者、宛先未設定の参加者", "createdAt": "2026-11-24T05:54:10.216153", "updatedAt": "2026-11-24T05:54:10.216153"},
+        {"id": 321, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "e967bd067c654dd1be0c6db451528938", "date": "2026-06-22T00:00:00", "startTime": "2026-06-22T09:00:00.1234567", "endTime": "2026-06-22T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-23T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の予約者、架空の参加者、宛先未設定の参加者", "createdAt": "2026-11-24T05:54:10.216153", "updatedAt": "2026-11-24T05:54:10.216153"},
+        {"id": 322, "createdByUserId": 2, "type": 0, "title": "架空の定期訪問", "seriesId": "e967bd067c654dd1be0c6db451528938", "date": "2026-06-23T00:00:00", "startTime": "2026-06-23T09:00:00.1234567", "endTime": "2026-06-23T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-23T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の予約者、架空の参加者、宛先未設定の参加者", "createdAt": "2026-11-24T05:54:10.216153", "updatedAt": "2026-11-24T05:54:10.216153"}
+      ],
+      "notices": [],
+      "logs": [
+        {"reservationId": 0, "workScheduleEntryId": 320, "deliveryType": "WorkScheduleSeriesCreated", "deliveryKey": "WorkScheduleSeriesCreated:work-schedule-series:e967bd067c654dd1be0c6db451528938:user:2", "targetUserId": 2, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": "900002", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T05:54:10.2538221", "sentAt": "2026-11-24T05:54:10.2652453", "message": "[info][title]社外予定を繰り返し登録しました[/title]\n内容: 架空の定期訪問\n期間: 2026/06/19〜2026/06/23\n繰り返し: 毎日\n件数: 3件\n時間: 09:00〜10:00\n対象者: 架空の予約者、架空の参加者、宛先未設定の参加者\n[/info]", "createdAt": "2026-11-24T05:54:10.2538221"},
+        {"reservationId": 0, "workScheduleEntryId": 320, "deliveryType": "WorkScheduleSeriesCreated", "deliveryKey": "WorkScheduleSeriesCreated:work-schedule-series:e967bd067c654dd1be0c6db451528938:user:3", "targetUserId": 3, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": "900003", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T05:54:10.2709445", "sentAt": "2026-11-24T05:54:10.2740787", "message": "[info][title]社外予定を繰り返し登録しました[/title]\n内容: 架空の定期訪問\n期間: 2026/06/19〜2026/06/23\n繰り返し: 毎日\n件数: 3件\n時間: 09:00〜10:00\n対象者: 架空の予約者、架空の参加者、宛先未設定の参加者\n[/info]", "createdAt": "2026-11-24T05:54:10.2709445"},
+        {"reservationId": 0, "workScheduleEntryId": 320, "deliveryType": "WorkScheduleSeriesCreated", "deliveryKey": "WorkScheduleSeriesCreated:work-schedule-series:e967bd067c654dd1be0c6db451528938:user:4", "targetUserId": 4, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": null, "status": "Skipped", "errorMessage": "ChatworkDirectRoomId is not configured.", "attemptedAt": "2026-11-24T05:54:10.280991", "sentAt": null, "message": "[info][title]社外予定を繰り返し登録しました[/title]\n内容: 架空の定期訪問\n期間: 2026/06/19〜2026/06/23\n繰り返し: 毎日\n件数: 3件\n時間: 09:00〜10:00\n対象者: 架空の予約者、架空の参加者、宛先未設定の参加者\n[/info]", "createdAt": "2026-11-24T05:54:10.280991"}
+      ],
+      "requests": [
+        {"roomId": "900002", "body": "[info][title]社外予定を繰り返し登録しました[/title]\n内容: 架空の定期訪問\n期間: 2026/06/19〜2026/06/23\n繰り返し: 毎日\n件数: 3件\n時間: 09:00〜10:00\n対象者: 架空の予約者、架空の参加者、宛先未設定の参加者\n[/info]"},
+        {"roomId": "900003", "body": "[info][title]社外予定を繰り返し登録しました[/title]\n内容: 架空の定期訪問\n期間: 2026/06/19〜2026/06/23\n繰り返し: 毎日\n件数: 3件\n時間: 09:00〜10:00\n対象者: 架空の予約者、架空の参加者、宛先未設定の参加者\n[/info]"}
+      ],
+      "seeds": [],
+      "failure": "notice",
+      "fakeResponses": {}
+    },
+    {
+      "name": "mid_series_insert_failure",
+      "actor": "owner",
+      "request": {"title": "  架空の定期訪問  ", "date": "2026-06-19T18:45:00", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3, 4, 3, 0, -7], "createdByUserId": 1, "leavePeriod": 3, "repeatType": "毎日", "repeatUntil": "2026-06-23T07:12:05"},
+      "response": {"status": 500, "body": "[development exception]", "location": null, "contentType": "text/plain; charset=utf-8"},
+      "saved": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "failure": "insert",
+      "fakeResponses": {}
+    },
+    {
+      "name": "max_calendar_day",
+      "actor": "owner",
+      "request": {"title": "  架空の定期訪問  ", "date": "9999-12-31", "startTime": "2001-05-06T09:00:00.1234567", "endTime": "2001-05-07T10:00:00", "participantIds": [3, 4, 3, 0, -7], "createdByUserId": 1, "leavePeriod": 3, "repeatType": "毎日", "repeatUntil": "9999-12-31"},
+      "response": {"status": 500, "body": "[development exception]", "location": null, "contentType": "text/plain; charset=utf-8"},
+      "saved": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "failure": "calendar",
+      "fakeResponses": {}
+    }
+  ]
+}
