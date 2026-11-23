@@ -325,6 +325,24 @@ Set `RESERVATION_SERIES_UPDATE_TEST_DATABASE_URL` to a disposable local PostgreS
 TZ=Asia/Tokyo go test -v -count=1 ./cmd/api -run '^TestRecurringReservationUpdatePostgres$'
 ```
 
+## Go recurring reservation deletion
+
+Blazor sends `POST /api/Reservations/{id}/series-delete` with `originalReservation` and `scope`. The stored route ID determines both authorization and the targets. The owner and administrators can delete. Another member receives an empty `403`, an anonymous user receives an empty `401`, a missing numeric ID returns `404` Problem Details, and a nonnumeric route returns an empty `404`. The original snapshot still undergoes model validation. Omission yields the missing-name and missing-room errors on the default snapshot, and explicit null yields a required-field error. Snapshot start and end times are deserialized without applying booking business rules.
+
+`single`, an omitted scope, an unknown string, and all scopes on non-recurring bookings use the same deletion as `DELETE /api/Reservations/{id}`. For recurring bookings, `all` and `following` reuse the series update lookup. A nonblank key is trimmed on the base, compared against stored keys, and restricted to the same organizer. The legacy lookup uses organizer ID, name, room, type, purpose, repeat type, repeat-end calendar day, and start and end times of day. `following` includes every matching row on the base calendar day. An empty result and a successful deletion both return an empty `204`. Existing notifications retain all values, including links to deleted bookings.
+
+Go acquires the row locks in ascending ID order, resolves the selection again after waiting, and retries if new target rows require locks. It then takes the same ordered room/day locks as series edits and creates. One PostgreSQL statement deletes the locked targets in the same transaction. This avoids a lock-order inversion between edits and deletes and lets waiting creates use committed slot occupancy. The tests covered an edit expanding the subsequent deletion scope, a deletion followed by an edit returning `404`, a create accepted in a freed slot, a create rejected while the overlap still existed, and an adjacent create preserved after deletion. A forced failure on the second delete returned `500` and preserved every booking and notice in both databases. No schema change was needed.
+
+The [C# HTTP and SQLite capture](../backend/internal/httpapi/testdata/reservation_series_delete_csharp.json) records 24 cases. Reuse the reservation datasets from the [series update capture](../backend/internal/httpapi/testdata/reservation_series_update_csharp.json) in the disposable `d8fe3b7` setup above. Assign the fake direct room IDs `900001`, `900002`, and `900003` to users 1, 2, and 3 with a fake `IChatworkClient`. Before each case, clear bookings, notices, and Chatwork delivery logs, then seed the case's reservations, one notice per reservation, and one notice without a reservation target. Submit the recorded request and use its role's cookie and `Accept: application/json`. Compare the HTTP result, remaining reservation IDs and values, and preexisting notice rows. To reproduce the SQLite failure, raise an error in a `BEFORE DELETE` trigger for ID 12 once ID 10 has been removed within the transaction.
+
+C# also attempted Chatwork delivery to the fake rooms on successful cancellations with recipients. The Go port leaves Chatwork delivery and its logs to a separate migration. Go uses its shared JSON diagnostics for conversion errors, omitting ASP.NET's trace ID and parser byte position.
+
+Set `RESERVATION_SERIES_DELETE_TEST_DATABASE_URL` to a disposable local PostgreSQL URL that permits creating schemas. From `backend` in WSL, run the command below. The test applies migrations `0001`–`0006`, starts the normal Go HTTP server, and runs the captured, failure, and concurrency cases. With the URL unset, the database integration test is skipped.
+
+```bash
+TZ=Asia/Tokyo go test -v -count=1 ./cmd/api -run '^TestRecurringReservationDeletePostgres$'
+```
+
 ## Recovery to C# and SQLite
 
 Rehearse each stage in development with synthetic rows and a recording fake Chatwork sender. `scripts/deploy/deploy-prod.sh` uses SQLite's backup API and integrity check. `scripts/deploy/rollback-prod.sh` restores the earlier API, web assets and final SQLite snapshot. A rollback after Go accepts writes also needs the committed PostgreSQL state.

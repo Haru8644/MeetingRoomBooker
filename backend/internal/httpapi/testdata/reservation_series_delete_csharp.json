@@ -1,0 +1,745 @@
+[
+  {
+    "name": "single",
+    "dataset": "keyed",
+    "id": "11",
+    "actor": "owner",
+    "request": {
+      "originalReservation": {
+        "id": 11,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "定例会議",
+        "seriesId": "series-A",
+        "date": "2026-06-08T13:30:00",
+        "startTime": "2026-06-08T09:00:00",
+        "endTime": "2026-06-08T10:00:00",
+        "participantIds": [2, 3],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      },
+      "scope": "single"
+    },
+    "status": 204,
+    "body": "",
+    "remaining": [10, 12, 13, 14, 15, 16, 17],
+    "notifications": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    "fakeChatworkRooms": ["900003", "900002"]
+  },
+  {
+    "name": "omitted_scope",
+    "dataset": "keyed",
+    "id": "11",
+    "actor": "owner",
+    "request": {
+      "originalReservation": {
+        "id": 11,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "定例会議",
+        "seriesId": "series-A",
+        "date": "2026-06-08T13:30:00",
+        "startTime": "2026-06-08T09:00:00",
+        "endTime": "2026-06-08T10:00:00",
+        "participantIds": [2, 3],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      }
+    },
+    "status": 204,
+    "body": "",
+    "remaining": [10, 12, 13, 14, 15, 16, 17],
+    "notifications": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    "fakeChatworkRooms": ["900003", "900002"]
+  },
+  {
+    "name": "unknown_scope",
+    "dataset": "keyed",
+    "id": "11",
+    "actor": "owner",
+    "request": {
+      "originalReservation": {
+        "id": 11,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "定例会議",
+        "seriesId": "series-A",
+        "date": "2026-06-08T13:30:00",
+        "startTime": "2026-06-08T09:00:00",
+        "endTime": "2026-06-08T10:00:00",
+        "participantIds": [2, 3],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      },
+      "scope": "Following"
+    },
+    "status": 204,
+    "body": "",
+    "remaining": [10, 12, 13, 14, 15, 16, 17],
+    "notifications": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    "fakeChatworkRooms": ["900003", "900002"]
+  },
+  {
+    "name": "empty_scope",
+    "dataset": "keyed",
+    "id": "11",
+    "actor": "owner",
+    "request": {
+      "originalReservation": {
+        "id": 11,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "定例会議",
+        "seriesId": "series-A",
+        "date": "2026-06-08T13:30:00",
+        "startTime": "2026-06-08T09:00:00",
+        "endTime": "2026-06-08T10:00:00",
+        "participantIds": [2, 3],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      },
+      "scope": ""
+    },
+    "status": 204,
+    "body": "",
+    "remaining": [10, 12, 13, 14, 15, 16, 17],
+    "notifications": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    "fakeChatworkRooms": ["900003", "900002"]
+  },
+  {
+    "name": "following_includes_same_day",
+    "dataset": "keyed",
+    "id": "11",
+    "actor": "owner",
+    "request": {
+      "originalReservation": {
+        "id": 11,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "定例会議",
+        "seriesId": "series-A",
+        "date": "2026-06-08T13:30:00",
+        "startTime": "2026-06-08T09:00:00",
+        "endTime": "2026-06-08T10:00:00",
+        "participantIds": [2, 3],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      },
+      "scope": "following"
+    },
+    "status": 204,
+    "body": "",
+    "remaining": [10, 14, 15, 16, 17],
+    "notifications": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    "fakeChatworkRooms": ["900003", "900002"]
+  },
+  {
+    "name": "all_owner_scope",
+    "dataset": "keyed",
+    "id": "11",
+    "actor": "owner",
+    "request": {
+      "originalReservation": {
+        "id": 11,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "定例会議",
+        "seriesId": "series-A",
+        "date": "2026-06-08T13:30:00",
+        "startTime": "2026-06-08T09:00:00",
+        "endTime": "2026-06-08T10:00:00",
+        "participantIds": [2, 3],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      },
+      "scope": "all"
+    },
+    "status": 204,
+    "body": "",
+    "remaining": [14, 15, 16, 17],
+    "notifications": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    "fakeChatworkRooms": ["900003", "900002"]
+  },
+  {
+    "name": "all_admin_uses_route_id",
+    "dataset": "keyed",
+    "id": "11",
+    "actor": "admin",
+    "request": {
+      "originalReservation": {
+        "id": 14,
+        "userId": 3,
+        "name": "架空の参加者",
+        "room": "旧会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "定例会議",
+        "seriesId": "series-A",
+        "date": "2026-06-15T00:00:00",
+        "startTime": "2026-06-15T09:00:00",
+        "endTime": "2026-06-15T10:00:00",
+        "participantIds": [2, 3],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      },
+      "scope": "all"
+    },
+    "status": 204,
+    "body": "",
+    "remaining": [14, 15, 16, 17],
+    "notifications": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    "fakeChatworkRooms": ["900003", "900002"]
+  },
+  {
+    "name": "non_recurring_all",
+    "dataset": "keyed",
+    "id": "16",
+    "actor": "owner",
+    "request": {
+      "originalReservation": {
+        "id": 16,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "新会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "既存の部分重複",
+        "seriesId": null,
+        "date": "2026-06-09T00:00:00",
+        "startTime": "2026-06-09T10:30:00",
+        "endTime": "2026-06-09T11:30:00",
+        "participantIds": [2, 3],
+        "participants": "旧表示",
+        "repeatType": "しない",
+        "repeatUntil": null
+      },
+      "scope": "all"
+    },
+    "status": 204,
+    "body": "",
+    "remaining": [10, 11, 12, 13, 14, 15, 17],
+    "notifications": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    "fakeChatworkRooms": ["900003", "900002"]
+  },
+  {
+    "name": "legacy_following",
+    "dataset": "legacy",
+    "id": "21",
+    "actor": "owner",
+    "request": {
+      "originalReservation": {
+        "id": 21,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "定例会議",
+        "seriesId": null,
+        "date": "2026-06-08T17:00:00",
+        "startTime": "2026-06-08T09:00:00",
+        "endTime": "2026-06-08T10:00:00",
+        "participantIds": [2, 3],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      },
+      "scope": "following"
+    },
+    "status": 204,
+    "body": "",
+    "remaining": [20, 24, 25, 26, 27, 28, 29, 30, 31, 32],
+    "notifications": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+    "fakeChatworkRooms": ["900003", "900002"]
+  },
+  {
+    "name": "legacy_all",
+    "dataset": "legacy",
+    "id": "21",
+    "actor": "owner",
+    "request": {
+      "originalReservation": {
+        "id": 21,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "定例会議",
+        "seriesId": null,
+        "date": "2026-06-08T17:00:00",
+        "startTime": "2026-06-08T09:00:00",
+        "endTime": "2026-06-08T10:00:00",
+        "participantIds": [2, 3],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      },
+      "scope": "all"
+    },
+    "status": 204,
+    "body": "",
+    "remaining": [24, 25, 26, 27, 28, 29, 30, 31, 32],
+    "notifications": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14],
+    "fakeChatworkRooms": ["900003", "900002"]
+  },
+  {
+    "name": "trimmed_key",
+    "dataset": "padded",
+    "id": "40",
+    "actor": "owner",
+    "request": {
+      "originalReservation": {
+        "id": 40,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "定例会議",
+        "seriesId": " padded ",
+        "date": "2026-06-08T00:00:00",
+        "startTime": "2026-06-08T09:00:00",
+        "endTime": "2026-06-08T10:00:00",
+        "participantIds": [2, 3],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      },
+      "scope": "all"
+    },
+    "status": 204,
+    "body": "",
+    "remaining": [40, 42],
+    "notifications": [1, 2, 3, 4],
+    "fakeChatworkRooms": ["900003", "900002"]
+  },
+  {
+    "name": "empty_target_set",
+    "dataset": "no_matches",
+    "id": "43",
+    "actor": "owner",
+    "request": {
+      "originalReservation": {
+        "id": 43,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "定例会議",
+        "seriesId": " missing ",
+        "date": "2026-06-08T00:00:00",
+        "startTime": "2026-06-08T09:00:00",
+        "endTime": "2026-06-08T10:00:00",
+        "participantIds": [2, 3],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      },
+      "scope": "all"
+    },
+    "status": 204,
+    "body": "",
+    "remaining": [43],
+    "notifications": [1, 2],
+    "fakeChatworkRooms": []
+  },
+  {
+    "name": "other_claiming_owner",
+    "dataset": "keyed",
+    "id": "11",
+    "actor": "other",
+    "request": {
+      "originalReservation": {
+        "id": 11,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "定例会議",
+        "seriesId": "series-A",
+        "date": "2026-06-08T13:30:00",
+        "startTime": "2026-06-08T09:00:00",
+        "endTime": "2026-06-08T10:00:00",
+        "participantIds": [2, 3],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      },
+      "scope": "all"
+    },
+    "status": 403,
+    "body": "",
+    "remaining": [10, 11, 12, 13, 14, 15, 16, 17],
+    "notifications": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    "fakeChatworkRooms": []
+  },
+  {
+    "name": "unauthenticated",
+    "dataset": "keyed",
+    "id": "11",
+    "actor": "anonymous",
+    "request": {
+      "originalReservation": {
+        "id": 11,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "定例会議",
+        "seriesId": "series-A",
+        "date": "2026-06-08T13:30:00",
+        "startTime": "2026-06-08T09:00:00",
+        "endTime": "2026-06-08T10:00:00",
+        "participantIds": [2, 3],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      },
+      "scope": "all"
+    },
+    "status": 401,
+    "body": "",
+    "remaining": [10, 11, 12, 13, 14, 15, 16, 17],
+    "notifications": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    "fakeChatworkRooms": []
+  },
+  {
+    "name": "invalid_original_fields",
+    "dataset": "keyed",
+    "id": "11",
+    "actor": "owner",
+    "request": {
+      "originalReservation": {
+        "name": "",
+        "room": "",
+        "numberOfPeople": 21
+      },
+      "scope": "all"
+    },
+    "status": 400,
+    "body": {
+      "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+      "title": "One or more validation errors occurred.",
+      "status": 400,
+      "errors": {
+        "OriginalReservation.Name": [
+          "名前は必須です。"
+        ],
+        "OriginalReservation.Room": [
+          "会議室は必須です。"
+        ],
+        "OriginalReservation.NumberOfPeople": [
+          "人数は1～20名の間で設定してください。"
+        ]
+      }
+    },
+    "remaining": [10, 11, 12, 13, 14, 15, 16, 17],
+    "notifications": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    "fakeChatworkRooms": []
+  },
+  {
+    "name": "business_rules_do_not_validate_snapshot",
+    "dataset": "keyed",
+    "id": "11",
+    "actor": "owner",
+    "request": {
+      "originalReservation": {
+        "name": "無関係なスナップショット",
+        "room": "別室",
+        "date": "2026-06-08",
+        "startTime": "2026-06-08T10:00:00",
+        "endTime": "2026-06-08T09:00:00"
+      },
+      "scope": "single"
+    },
+    "status": 204,
+    "body": "",
+    "remaining": [10, 12, 13, 14, 15, 16, 17],
+    "notifications": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    "fakeChatworkRooms": ["900003", "900002"]
+  },
+  {
+    "name": "null_scope",
+    "dataset": "keyed",
+    "id": "11",
+    "actor": "owner",
+    "request": {
+      "originalReservation": {
+        "id": 11,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "定例会議",
+        "seriesId": "series-A",
+        "date": "2026-06-08T13:30:00",
+        "startTime": "2026-06-08T09:00:00",
+        "endTime": "2026-06-08T10:00:00",
+        "participantIds": [2, 3],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      },
+      "scope": null
+    },
+    "status": 400,
+    "body": {
+      "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+      "title": "One or more validation errors occurred.",
+      "status": 400,
+      "errors": {
+        "Scope": [
+          "The Scope field is required."
+        ]
+      }
+    },
+    "remaining": [10, 11, 12, 13, 14, 15, 16, 17],
+    "notifications": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    "fakeChatworkRooms": []
+  },
+  {
+    "name": "later_delete_fails",
+    "dataset": "keyed",
+    "id": "11",
+    "actor": "owner",
+    "request": {
+      "originalReservation": {
+        "id": 11,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "定例会議",
+        "seriesId": "series-A",
+        "date": "2026-06-08T13:30:00",
+        "startTime": "2026-06-08T09:00:00",
+        "endTime": "2026-06-08T10:00:00",
+        "participantIds": [2, 3],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      },
+      "scope": "all"
+    },
+    "status": 500,
+    "body": "",
+    "remaining": [10, 11, 12, 13, 14, 15, 16, 17],
+    "notifications": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    "fakeChatworkRooms": [],
+    "forceFailure": true
+  },
+  {
+    "name": "missing_id",
+    "dataset": "keyed",
+    "id": "999",
+    "actor": "owner",
+    "request": {
+      "scope": "all",
+      "originalReservation": {
+        "id": 11,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "定例会議",
+        "seriesId": "series-A",
+        "date": "2026-06-08T13:30:00",
+        "startTime": "2026-06-08T09:00:00",
+        "endTime": "2026-06-08T10:00:00",
+        "participantIds": [2, 3],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      }
+    },
+    "status": 404,
+    "body": {
+      "type": "https://tools.ietf.org/html/rfc9110#section-15.5.5",
+      "title": "Not Found",
+      "status": 404
+    },
+    "remaining": [10, 11, 12, 13, 14, 15, 16, 17],
+    "notifications": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    "fakeChatworkRooms": []
+  },
+  {
+    "name": "invalid_route_id",
+    "dataset": "keyed",
+    "id": "bad",
+    "actor": "owner",
+    "request": {
+      "scope": "all",
+      "originalReservation": {
+        "id": 11,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "定例会議",
+        "seriesId": "series-A",
+        "date": "2026-06-08T13:30:00",
+        "startTime": "2026-06-08T09:00:00",
+        "endTime": "2026-06-08T10:00:00",
+        "participantIds": [2, 3],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      }
+    },
+    "status": 404,
+    "body": "",
+    "remaining": [10, 11, 12, 13, 14, 15, 16, 17],
+    "notifications": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    "fakeChatworkRooms": []
+  },
+  {
+    "name": "omitted_original",
+    "dataset": "keyed",
+    "id": "11",
+    "actor": "owner",
+    "request": {
+      "scope": "all"
+    },
+    "status": 400,
+    "body": {
+      "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+      "title": "One or more validation errors occurred.",
+      "status": 400,
+      "errors": {
+        "OriginalReservation.Name": [
+          "名前は必須です。"
+        ],
+        "OriginalReservation.Room": [
+          "会議室は必須です。"
+        ]
+      }
+    },
+    "remaining": [10, 11, 12, 13, 14, 15, 16, 17],
+    "notifications": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    "fakeChatworkRooms": []
+  },
+  {
+    "name": "null_original",
+    "dataset": "keyed",
+    "id": "11",
+    "actor": "owner",
+    "request": {
+      "scope": "all",
+      "originalReservation": null
+    },
+    "status": 400,
+    "body": {
+      "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+      "title": "One or more validation errors occurred.",
+      "status": 400,
+      "errors": {
+        "OriginalReservation": [
+          "The OriginalReservation field is required."
+        ]
+      }
+    },
+    "remaining": [10, 11, 12, 13, 14, 15, 16, 17],
+    "notifications": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    "fakeChatworkRooms": []
+  },
+  {
+    "name": "null_document",
+    "dataset": "keyed",
+    "id": "11",
+    "actor": "owner",
+    "request": null,
+    "status": 400,
+    "body": {
+      "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+      "title": "One or more validation errors occurred.",
+      "status": 400,
+      "errors": {
+        "": [
+          "A non-empty request body is required."
+        ],
+        "request": [
+          "The request field is required."
+        ]
+      }
+    },
+    "remaining": [10, 11, 12, 13, 14, 15, 16, 17],
+    "notifications": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    "fakeChatworkRooms": []
+  },
+  {
+    "name": "invalid_scope_type",
+    "dataset": "keyed",
+    "id": "11",
+    "actor": "owner",
+    "request": {
+      "scope": 3,
+      "originalReservation": {
+        "id": 11,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 2,
+        "type": "社内",
+        "purpose": "定例会議",
+        "seriesId": "series-A",
+        "date": "2026-06-08T13:30:00",
+        "startTime": "2026-06-08T09:00:00",
+        "endTime": "2026-06-08T10:00:00",
+        "participantIds": [2, 3],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      }
+    },
+    "status": 400,
+    "body": {
+      "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+      "title": "One or more validation errors occurred.",
+      "status": 400,
+      "errors": {
+        "request": [
+          "The request field is required."
+        ],
+        "$.scope": [
+          "The JSON value could not be converted to System.String. Path: $.scope | LineNumber: 0 | BytePositionInLine: 11."
+        ]
+      }
+    },
+    "remaining": [10, 11, 12, 13, 14, 15, 16, 17],
+    "notifications": [1, 2, 3, 4, 5, 6, 7, 8, 9],
+    "fakeChatworkRooms": []
+  }
+]
