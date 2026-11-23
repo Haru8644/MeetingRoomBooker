@@ -66,6 +66,12 @@ type recipient struct {
 	room string
 }
 
+type deliverySubject struct {
+	reservationID       int
+	workScheduleEntryID *int
+	scheduledStart      time.Time
+}
+
 // SendCancellation sends DMs for committed deletions.
 func (sender *Sender) SendCancellation(ctx context.Context, deleted []reservations.ListEntry) {
 	sender.send(ctx, cancellationType, deleted, nil)
@@ -117,14 +123,25 @@ func deliveryContext(ctx context.Context) (context.Context, context.CancelFunc) 
 func (sender *Sender) sendToStakeholders(ctx context.Context, deliveryType, keySuffix string, entry reservations.ListEntry,
 	stakeholders []int, recipients map[int]recipient, message string,
 ) {
-	for _, id := range stakeholders {
+	subject := deliverySubject{reservationID: entry.ID, scheduledStart: entry.StartTime}
+	sender.sendToRecipients(ctx, deliveryType, keySuffix, subject, stakeholders, recipients, message)
+}
+
+func (sender *Sender) sendToRecipients(ctx context.Context, deliveryType, keySuffix string, subject deliverySubject,
+	userIDs []int, recipients map[int]recipient, message string,
+) {
+	resource, subjectID := "reservation", subject.reservationID
+	if subject.workScheduleEntryID != nil {
+		resource, subjectID = "work-schedule", *subject.workScheduleEntryID
+	}
+	for _, id := range userIDs {
 		if ctx.Err() != nil {
-			log.Printf("Chatwork %s: delivery budget expired for reservation %d", deliveryType, entry.ID)
+			log.Printf("Chatwork %s: delivery interrupted for %s %d", deliveryType, resource, subjectID)
 			return
 		}
 		if target, found := recipients[id]; found {
-			key := fmt.Sprintf("%s:reservation:%d:user:%d%s", deliveryType, entry.ID, id, keySuffix)
-			sender.deliver(ctx, deliveryType, key, entry, id, target.room, message)
+			key := fmt.Sprintf("%s:%s:%d:user:%d%s", deliveryType, resource, subjectID, id, keySuffix)
+			sender.deliver(ctx, deliveryType, key, subject, id, target.room, message)
 		}
 	}
 }
@@ -240,18 +257,19 @@ func reservationTimeRange(entry reservations.ListEntry) string {
 	return entry.StartTime.Format("15:04") + "〜" + entry.EndTime.Format("15:04")
 }
 
-func (sender *Sender) deliver(ctx context.Context, deliveryType, deliveryKey string, first reservations.ListEntry, userID int, room, message string) {
+func (sender *Sender) deliver(ctx context.Context, deliveryType, deliveryKey string, subject deliverySubject, userID int, room, message string) {
 	status, reason := "Unknown", "Delivery claimed. Result not recorded."
 	if room == "" {
 		status, reason = "Skipped", "ChatworkDirectRoomId is not configured."
 	}
 	var id int
 	err := sender.pool.QueryRow(ctx, `
-		INSERT INTO chatwork_delivery_logs (reservation_id, delivery_type, delivery_key, target_user_id,
+		INSERT INTO chatwork_delivery_logs (reservation_id, work_schedule_entry_id, delivery_type, delivery_key, target_user_id,
 		    scheduled_start_time_ticks, room_id, status, error_message, attempted_at_ticks, message, created_at_ticks)
-		VALUES ($1, $2, $3, $4, $5, NULLIF($6, ''), $7, $8, $9, $10, $9)
+		VALUES ($1, $2, $3, $4, $5, $6, NULLIF($7, ''), $8, $9, $10, $11, $10)
 		ON CONFLICT (delivery_key) DO NOTHING RETURNING id`,
-		first.ID, deliveryType, deliveryKey, userID, dotnettime.Ticks(first.StartTime), room, status, reason,
+		subject.reservationID, subject.workScheduleEntryID, deliveryType, deliveryKey, userID,
+		dotnettime.Ticks(subject.scheduledStart), room, status, reason,
 		localTicks(), message).Scan(&id)
 	if errors.Is(err, pgx.ErrNoRows) {
 		return

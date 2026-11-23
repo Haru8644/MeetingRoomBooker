@@ -124,7 +124,7 @@ func TestChatworkReservationCancellationPostgres(t *testing.T) {
 				t.Fatal(err)
 			}
 			if scenario.ExistingKey {
-				seedChatworkCancelLog(t, ctx, pool, scenario.Logs[0])
+				seedChatworkLog(t, ctx, pool, scenario.Logs[0])
 			}
 			if scenario.ForceDeleteFailure {
 				rejectChatworkCancelCommit(t, ctx, pool)
@@ -288,14 +288,19 @@ func (fake *chatworkHTTPFake) serveHTTP(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-func seedChatworkCancelLog(t *testing.T, ctx context.Context, pool *pgxpool.Pool, row chatworkTestLog) {
+func seedChatworkLog(t *testing.T, ctx context.Context, pool *pgxpool.Pool, row chatworkTestLog) {
 	t.Helper()
+	var sentAt *int64
+	if row.SentAt != nil {
+		sentAt = new(seriesTestTicks(t, *row.SentAt))
+	}
 	if _, err := pool.Exec(ctx, `
-		INSERT INTO chatwork_delivery_logs (reservation_id,delivery_type,delivery_key,target_user_id,scheduled_start_time_ticks,
-		    room_id,status,error_message,attempted_at_ticks,message,created_at_ticks)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
-		row.ReservationID, row.DeliveryType, row.DeliveryKey, row.TargetUserID, seriesTestTicks(t, row.ScheduledStartTime),
-		row.RoomID, row.Status, row.ErrorMessage, seriesTestTicks(t, row.AttemptedAt), row.Message, seriesTestTicks(t, row.CreatedAt)); err != nil {
+		INSERT INTO chatwork_delivery_logs (reservation_id,work_schedule_entry_id,delivery_type,delivery_key,target_user_id,
+		    scheduled_start_time_ticks,room_id,status,error_message,attempted_at_ticks,sent_at_ticks,message,created_at_ticks)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`,
+		row.ReservationID, row.WorkScheduleEntryID, row.DeliveryType, row.DeliveryKey, row.TargetUserID,
+		seriesTestTicks(t, row.ScheduledStartTime), row.RoomID, row.Status, row.ErrorMessage,
+		seriesTestTicks(t, row.AttemptedAt), sentAt, row.Message, seriesTestTicks(t, row.CreatedAt)); err != nil {
 		t.Fatal(err)
 	}
 }

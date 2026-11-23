@@ -416,6 +416,29 @@ TZ=Asia/Tokyo go test -v -count=1 ./cmd/api ./internal/chatwork \
 
 In WSL, the fixed-time C# window selected four reservations in order and produced seven HTTP calls and one skipped room. The PostgreSQL 16.15 reminder test passed all eight subcases, and all 18 PostgreSQL integration tests passed with the database URLs set. Without the URLs, `go test ./...` passed with those 18 tests skipped. `go vet ./...` and `git diff --check`, including the new files, passed.
 
+## Go Chatwork external appointment reminders
+
+The [existing reminder worker](#go-chatwork-reservation-reminders) processes meeting room reservations before work schedules, as in C#. Both passes use the same server-local clock. The worker runs immediately at startup and waits a minute after both passes finish. The work schedule pass selects `ExternalAppointment` rows with both times set and `now < start <= now + 10 minutes`. It processes each occurrence in start order, using ID as the tie-breaker in Go. C# specifies start order only. Rows deleted before the poll are excluded. An edit or deletion after selection can race with delivery in either implementation.
+
+Positive participant IDs are deduplicated in their stored order. The creator receives a DM only if their ID is listed. Missing users receive no DM. The message uses the stored `Participants` text as-is when it contains a non-whitespace character, including its leading and trailing whitespace. A blank value displays `未設定`. This text is independent of the recipient IDs.
+
+The [C# capture](../backend/internal/httpapi/testdata/chatwork_work_schedule_reminder_csharp.json) records three fixed-time SQLite cases, their loopback requests and logs. The key is `WorkScheduleReminder10Minutes:work-schedule:{id}:user:{userId}:start:{scheduledStartTime:O}`. Reloading start times from SQLite produced seven fractional digits and no timezone suffix. For example, the ten-minute boundary key ends in `2026-06-22T09:10:00.1234567`, and a whole second uses `.0000000`. A work schedule log stores `reservation_id=0` and the corresponding `work_schedule_entry_id`. A reservation and a work schedule with the same numeric ID have distinct keys and each produced its own DM in the same pass.
+
+The existing [Chatwork settings, HTTP client and unique claims](#go-chatwork-cancellation-dms) apply. Delivery defaults to disabled. Existing keys suppress retries across restarts and concurrent passes. Changing the start generates a new key. C# recorded the measured HTTP `503` and timeout as `Failed`. Go records the HTTP status for the rejection and leaves an unconfirmed send `Unknown`, including when shutdown interrupts delivery. The shared worker cancels the active HTTP request and joins before the database pool closes. The existing reconciliation policy applies.
+
+[Migration `0009`](../backend/migrations/0009_index_work_schedule_reminder_start_times.sql) adds a partial index on start time and ID for timed external appointments. It keeps other work schedule types out of the poll index. PostgreSQL 16.15 used it for the reminder query over 50,000 synthetic rows with mixed appointment types. The polling query releases its connection before issuing HTTP requests.
+
+To reproduce the C# capture, use the temporary `d8fe3b7` SQLite and loopback setup described for reservation reminders. Insert the fixture's users, work schedules and any seeded room reservation. Remove the recorded deleted IDs and preload the first log in the existing-key case. In the failure case, return `503` from fake room `900003` and delay room `900002` beyond the C# timeout. Invoke `ChatworkReminderWorker.ProcessUpcomingRemindersAsync` twice with the captured `now` and compare both pass results.
+
+Set `CHATWORK_WORK_SCHEDULE_REMINDER_TEST_DATABASE_URL` and `CHATWORK_REMINDER_TEST_DATABASE_URL` to a disposable local PostgreSQL URL with schema creation privileges. Run from `backend` in WSL. The tests verify the SQLite fixtures, replay and concurrent claims, rescheduling, real API startup and restart, and cancellation during HTTP delivery. The existing scheduler test covers the elapsed minute between passes.
+
+```bash
+TZ=Asia/Tokyo go test -v -count=1 ./cmd/api ./internal/chatwork \
+  -run '^(TestChatwork(Reservation|WorkSchedule)ReminderPostgres|TestReminderLoopRunsImmediatelyAndWaitsAfterEachPass)$'
+```
+
+The C# window produced five work schedule HTTP requests, one skipped work schedule room, and one reservation HTTP request. All eight new PostgreSQL subcases and all 19 PostgreSQL integration tests passed in WSL. With the database URLs unset, `go test ./...` passed with the 19 integration tests skipped. `go vet ./...` and `git diff --check` passed.
+
 ## Recovery to C# and SQLite
 
 Rehearse each stage in development with synthetic rows and a recording fake Chatwork sender. `scripts/deploy/deploy-prod.sh` uses SQLite's backup API and integrity check. `scripts/deploy/rollback-prod.sh` restores the earlier API, web assets and final SQLite snapshot. A rollback after Go accepts writes also needs the committed PostgreSQL state.
