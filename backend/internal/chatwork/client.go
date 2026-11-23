@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-func (sender *CancellationSender) postMessage(ctx context.Context, room, message string) (status, reason string) {
+func (sender *Sender) postMessage(ctx context.Context, room, message string) (status, reason string) {
 	form := url.Values{"body": {message}}
 	request, err := http.NewRequestWithContext(ctx, http.MethodPost,
 		sender.baseURL+"/rooms/"+url.PathEscape(room)+"/messages", strings.NewReader(form.Encode()))

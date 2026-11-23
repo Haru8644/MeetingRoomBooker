@@ -33,10 +33,12 @@ type seriesCreateCase struct {
 	Request, Body         json.RawMessage
 	Existing              []map[string]any
 	Notifications         []notifications.Entry
-	Appointments          []struct {
-		ID, ParticipantID       int
-		Date, Start, End, Title string
-	}
+	Appointments          []seriesTestAppointment
+}
+
+type seriesTestAppointment struct {
+	ID, ParticipantID       int
+	Date, Start, End, Title string
 }
 
 func TestRecurringReservationCreatePostgres(t *testing.T) {
@@ -320,7 +322,12 @@ func seedSeriesTestData(t *testing.T, ctx context.Context, pool *pgxpool.Pool, s
 			t.Fatal(err)
 		}
 	}
-	for _, a := range scenario.Appointments {
+	seedSeriesTestAppointments(t, ctx, pool, scenario.Appointments)
+}
+
+func seedSeriesTestAppointments(t *testing.T, ctx context.Context, pool *pgxpool.Pool, appointments []seriesTestAppointment) {
+	t.Helper()
+	for _, a := range appointments {
 		date := seriesTestTicks(t, a.Date+"T00:00:00")
 		_, err := pool.Exec(ctx, `
 			INSERT INTO work_schedule_entries
