@@ -145,6 +145,20 @@ func run(ctx context.Context) error {
 		return err
 	}
 
+	if chatworkSender != nil {
+		workerCtx, stopWorker := context.WithCancel(ctx)
+		workerDone := make(chan struct{})
+		go func() {
+			defer close(workerDone)
+			chatworkSender.RunReservationReminders(workerCtx)
+		}()
+		// Join the worker on shutdown and on listen errors before closing the pool.
+		defer func() {
+			stopWorker()
+			<-workerDone
+		}()
+	}
+
 	server := &http.Server{
 		Addr:              addr,
 		Handler:           handler,

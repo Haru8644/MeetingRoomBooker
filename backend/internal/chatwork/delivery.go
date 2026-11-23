@@ -20,6 +20,7 @@ import (
 )
 
 const cancellationType = "ReservationCanceled"
+const deliveryTimeout = 10 * time.Second
 
 type Sender struct {
 	pool    *pgxpool.Pool
@@ -110,10 +111,10 @@ func (sender *Sender) send(ctx context.Context, deliveryType string, entries, ov
 
 func deliveryContext(ctx context.Context) (context.Context, context.CancelFunc) {
 	// Finish a bounded delivery even if the caller disconnects after commit.
-	return context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
+	return context.WithTimeout(context.WithoutCancel(ctx), deliveryTimeout)
 }
 
-func (sender *Sender) sendToStakeholders(ctx context.Context, deliveryType, changeID string, entry reservations.ListEntry,
+func (sender *Sender) sendToStakeholders(ctx context.Context, deliveryType, keySuffix string, entry reservations.ListEntry,
 	stakeholders []int, recipients map[int]recipient, message string,
 ) {
 	for _, id := range stakeholders {
@@ -122,10 +123,7 @@ func (sender *Sender) sendToStakeholders(ctx context.Context, deliveryType, chan
 			return
 		}
 		if target, found := recipients[id]; found {
-			key := fmt.Sprintf("%s:reservation:%d:user:%d", deliveryType, entry.ID, id)
-			if changeID != "" {
-				key += ":change:" + changeID
-			}
+			key := fmt.Sprintf("%s:reservation:%d:user:%d%s", deliveryType, entry.ID, id, keySuffix)
 			sender.deliver(ctx, deliveryType, key, entry, id, target.room, message)
 		}
 	}
