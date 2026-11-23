@@ -74,8 +74,7 @@ func (sender *Sender) send(ctx context.Context, deliveryType string, entries, ov
 	if len(entries) == 0 {
 		return
 	}
-	// Finish a bounded delivery even if the caller disconnects after commit.
-	ctx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
+	ctx, cancel := deliveryContext(ctx)
 	defer cancel()
 	ordered := slices.Clone(entries)
 	slices.SortFunc(ordered, func(a, b reservations.ListEntry) int {
@@ -106,13 +105,28 @@ func (sender *Sender) send(ctx context.Context, deliveryType string, entries, ov
 		title, action, extra = cancellationDetails(len(ordered))
 	}
 	message := stakeholderMessage(first, participants, stakeholders, recipients, title, action, extra)
+	sender.sendToStakeholders(ctx, deliveryType, "", first, stakeholders, recipients, message)
+}
+
+func deliveryContext(ctx context.Context) (context.Context, context.CancelFunc) {
+	// Finish a bounded delivery even if the caller disconnects after commit.
+	return context.WithTimeout(context.WithoutCancel(ctx), 10*time.Second)
+}
+
+func (sender *Sender) sendToStakeholders(ctx context.Context, deliveryType, changeID string, entry reservations.ListEntry,
+	stakeholders []int, recipients map[int]recipient, message string,
+) {
 	for _, id := range stakeholders {
 		if ctx.Err() != nil {
-			log.Printf("Chatwork %s: delivery budget expired for reservation %d", deliveryType, first.ID)
+			log.Printf("Chatwork %s: delivery budget expired for reservation %d", deliveryType, entry.ID)
 			return
 		}
 		if target, found := recipients[id]; found {
-			sender.deliver(ctx, deliveryType, first, id, target.room, message)
+			key := fmt.Sprintf("%s:reservation:%d:user:%d", deliveryType, entry.ID, id)
+			if changeID != "" {
+				key += ":change:" + changeID
+			}
+			sender.deliver(ctx, deliveryType, key, entry, id, target.room, message)
 		}
 	}
 }
@@ -160,7 +174,7 @@ func (sender *Sender) loadRecipients(ctx context.Context, ids []int) (map[int]re
 func stakeholderMessage(first reservations.ListEntry, participants, stakeholders []int, recipients map[int]recipient,
 	title, action string, extra []string,
 ) string {
-	var targetNames, participantNames []string
+	var targetNames []string
 	seenNames := make(map[string]bool)
 	for _, id := range stakeholders {
 		name := recipients[id].name
@@ -169,23 +183,13 @@ func stakeholderMessage(first reservations.ListEntry, participants, stakeholders
 			seenNames[name] = true
 		}
 	}
-	for _, id := range participants {
-		target, found := recipients[id]
-		name := target.name
-		if !found {
-			name = fmt.Sprintf("ユーザー%d", id)
-		}
-		if strings.TrimSpace(name) != "" {
-			participantNames = append(participantNames, name)
-		}
-	}
 	targets := "関係者"
 	if len(targetNames) > 0 {
 		targets = strings.Join(targetNames, "、")
 	}
-	participantList := "なし"
-	if len(participantNames) > 0 {
-		participantList = strings.Join(participantNames, "、")
+	participantList := participantDisplayNames(participants, recipients)
+	if participantList == "" {
+		participantList = "なし"
 	}
 	organizer := first.Name
 	if target, found := recipients[first.UserID]; found {
@@ -202,6 +206,21 @@ func stakeholderMessage(first reservations.ListEntry, participants, stakeholders
 		lines = append(lines, extra...)
 	}
 	return strings.Join(append(lines, "[/info]"), "\n")
+}
+
+func participantDisplayNames(ids []int, recipients map[int]recipient) string {
+	var names []string
+	for _, id := range ids {
+		target, found := recipients[id]
+		name := target.name
+		if !found {
+			name = fmt.Sprintf("ユーザー%d", id)
+		}
+		if strings.TrimSpace(name) != "" {
+			names = append(names, name)
+		}
+	}
+	return strings.Join(names, "、")
 }
 
 func cancellationDetails(count int) (title, action string, extra []string) {
@@ -223,8 +242,7 @@ func reservationTimeRange(entry reservations.ListEntry) string {
 	return entry.StartTime.Format("15:04") + "〜" + entry.EndTime.Format("15:04")
 }
 
-func (sender *Sender) deliver(ctx context.Context, deliveryType string, first reservations.ListEntry, userID int, room, message string) {
-	deliveryKey := fmt.Sprintf("%s:reservation:%d:user:%d", deliveryType, first.ID, userID)
+func (sender *Sender) deliver(ctx context.Context, deliveryType, deliveryKey string, first reservations.ListEntry, userID int, room, message string) {
 	status, reason := "Unknown", "Delivery claimed. Result not recorded."
 	if room == "" {
 		status, reason = "Skipped", "ChatworkDirectRoomId is not configured."

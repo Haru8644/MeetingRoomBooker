@@ -377,6 +377,24 @@ Set `CHATWORK_CREATION_TEST_DATABASE_URL` to a disposable PostgreSQL URL with sc
 TZ=Asia/Tokyo go test -v -count=1 ./cmd/api -run '^TestChatworkReservationCreationPostgres$'
 ```
 
+## Go Chatwork update DMs
+
+`PUT /api/Reservations/{id}` sends update DMs using the addressed booking's before and after values. `POST /api/Reservations/{id}/series-update` selects the first affected row by its updated date and ID and uses that row's before and after values. The recipient IDs are the union of the representative's previous and current organizer and participant IDs. Removed participants can still receive a DM, and participants found only in other occurrences are outside this recipient set.
+
+The message describes changes to the calendar date, room, category, time of day, purpose, and participant membership. The external appointment warning uses the representative's updated slot and current participants, including the organizer. The existing PostgreSQL collation orders equal-time participant names. If neither the tracked fields nor external appointment conflicts produce any details, there is no DM even if another series row changed. A warning can produce a DM without an edit to those fields. An empty target set produces no delivery. Both the single-route query flag and the series body flag `notifyParticipants=false` suppress in-app notices while the same Chatwork rules apply. The C# loopback runs verified these cases.
+
+Go captures the before and after values under the existing locks and dispatches only after the update and in-app notices commit. Reading the booking again after commit could show a later writer's update. Go assigns one fresh change ID per committed update result and shares it across the recipients' keys `ReservationUpdated:reservation:{id}:user:{userId}:change:{changeId}`. Reprocessing the same result reuses the key. A separate committed edit receives a new change ID. This does not provide HTTP request idempotency.
+
+The shared [Chatwork settings, delivery log and retry policy](#go-chatwork-cancellation-dms) apply, including default-disabled delivery, a unique claim before HTTP, and no automatic resend. An HTTP rejection records the status code and `Failed`. An unconfirmed response records `Unknown`. Neither changes the committed `204` response. C# recorded the fake timeout as `Failed` and retained the provider response text on rejection. When the notification write was forced to fail, C# kept the edited rows with no DM. Go rolled back the edits and notices together and made zero HTTP calls.
+
+The [C# HTTP and SQLite capture](../backend/internal/httpapi/testdata/chatwork_reservation_update_csharp.json) records 11 cases. Reuse the disposable `d8fe3b7` setup and loopback HTTP fake from [creation DMs](#go-chatwork-creation-dms). Seed the capture's synthetic users, original booking dataset, and appointments for each case. Clear bookings, appointments, notices and delivery logs between cases. For the failure case return `503` from room `900003` and delay room `900002` beyond the configured client timeout. A SQLite trigger that aborts a notification insert reproduces the C# persistence failure.
+
+Set `CHATWORK_UPDATE_TEST_DATABASE_URL` to a disposable local PostgreSQL URL with schema creation privileges. From `backend` in WSL, run the command below. It checks stored reservation values, notice counts, committed state from within the fake HTTP handler, message and log parity, replay of one event, and delivery for a second edit to the same reservation.
+
+```bash
+TZ=Asia/Tokyo go test -v -count=1 ./cmd/api -run '^TestChatworkReservationUpdatePostgres$'
+```
+
 ## Recovery to C# and SQLite
 
 Rehearse each stage in development with synthetic rows and a recording fake Chatwork sender. `scripts/deploy/deploy-prod.sh` uses SQLite's backup API and integrity check. `scripts/deploy/rollback-prod.sh` restores the earlier API, web assets and final SQLite snapshot. A rollback after Go accepts writes also needs the committed PostgreSQL state.

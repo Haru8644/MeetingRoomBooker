@@ -80,7 +80,7 @@ func TestChatworkReservationCreationPostgres(t *testing.T) {
 			}
 			wantRows := len(scenario.SeedReservations) + scenario.CreatedCount
 			if scenario.ForceNoticeFailure {
-				failCreationNoticeCommit(t, ctx, pool)
+				failChatworkNoticeCommit(t, ctx, pool)
 				// C# commits the reservations separately. Go rolls back both writes.
 				wantRows = len(scenario.SeedReservations)
 			}
@@ -164,22 +164,22 @@ func creationResponseRepresentative(t *testing.T, body []byte, wantCount int) in
 	return first.ID
 }
 
-func failCreationNoticeCommit(t *testing.T, ctx context.Context, pool *pgxpool.Pool) {
+func failChatworkNoticeCommit(t *testing.T, ctx context.Context, pool *pgxpool.Pool) {
 	t.Helper()
 	if _, err := pool.Exec(ctx, `
-		CREATE FUNCTION reject_creation_notice_commit() RETURNS trigger LANGUAGE plpgsql AS $$
+		CREATE FUNCTION reject_chatwork_notice_commit() RETURNS trigger LANGUAGE plpgsql AS $$
 		BEGIN
 			RAISE EXCEPTION 'synthetic notice commit failure';
 		END;
 		$$;
-		CREATE CONSTRAINT TRIGGER creation_notice_commit_failure AFTER INSERT ON notifications
-		    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION reject_creation_notice_commit();`); err != nil {
+		CREATE CONSTRAINT TRIGGER chatwork_notice_commit_failure AFTER INSERT ON notifications
+		    DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION reject_chatwork_notice_commit();`); err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() {
 		if _, err := pool.Exec(ctx, `
-			DROP TRIGGER creation_notice_commit_failure ON notifications;
-			DROP FUNCTION reject_creation_notice_commit();`); err != nil {
+			DROP TRIGGER chatwork_notice_commit_failure ON notifications;
+			DROP FUNCTION reject_chatwork_notice_commit();`); err != nil {
 			t.Error(err)
 		}
 	})

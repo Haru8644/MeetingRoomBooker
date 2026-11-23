@@ -20,35 +20,40 @@ type ValidationError string
 
 func (e ValidationError) Error() string { return string(e) }
 
-func Update(ctx context.Context, pool *pgxpool.Pool, entry ListEntry, actorID int, isAdmin, notify bool) error {
-	return pgx.BeginFunc(ctx, pool, func(tx pgx.Tx) error {
-		previous, err := lockManagedReservation(ctx, tx, entry.ID, actorID, isAdmin)
-		if err != nil {
-			return err
-		}
-		return updateSingleReservation(ctx, tx, previous, entry, notify)
-	})
+// UpdateResult carries the representative before and after snapshots and the
+// event ID for a committed update. An empty selection has a zero count.
+type UpdateResult struct {
+	Previous ListEntry
+	Current  ListEntry
+	Count    int
+	ChangeID string
 }
 
-func updateSingleReservation(ctx context.Context, tx pgx.Tx, previous, entry ListEntry, notify bool) error {
+func Update(ctx context.Context, pool *pgxpool.Pool, entry ListEntry, actorID int, isAdmin, notify bool) (UpdateResult, error) {
+	return UpdateSeries(ctx, pool, entry.ID, entry, actorID, isAdmin, "single", notify)
+}
+
+func updateSingleReservation(ctx context.Context, tx pgx.Tx, previous, entry ListEntry, notify bool) (UpdateResult, error) {
 	if previous.ID != entry.ID {
-		return ErrIDMismatch
+		return UpdateResult{}, ErrIDMismatch
 	}
 	entry.UserID, entry.Name, entry.SeriesID = previous.UserID, previous.Name, previous.SeriesID
 	if err := validateReservationUpdate(entry); err != nil {
-		return err
+		return UpdateResult{}, err
 	}
 	// Edits allow overlaps. A create waiting on the destination checks after the edit commits.
 	if err := lockReservationSlot(ctx, tx, entry.Room, reservationDay(entry.Date)); err != nil {
-		return err
+		return UpdateResult{}, err
 	}
 	if err := saveReservationUpdate(ctx, tx, entry); err != nil {
-		return err
+		return UpdateResult{}, err
 	}
 	if notify {
-		return notifyUpdatedParticipants(ctx, tx, previous, entry)
+		if err := notifyUpdatedParticipants(ctx, tx, previous, entry); err != nil {
+			return UpdateResult{}, err
+		}
 	}
-	return nil
+	return UpdateResult{Previous: previous, Current: entry, Count: 1}, nil
 }
 
 func validateReservationUpdate(entry ListEntry) error {
@@ -66,7 +71,7 @@ func saveReservationUpdate(ctx context.Context, tx pgx.Tx, entry ListEntry) erro
 	if entry.RepeatUntil != nil {
 		repeatUntil = new(dotnettime.Ticks(*entry.RepeatUntil))
 	}
-	_, err := tx.Exec(ctx, `
+	result, err := tx.Exec(ctx, `
 		UPDATE reservations
 		SET room = $2, number_of_people = $3, type = $4, purpose = $5,
 		    date_ticks = $6, start_time_ticks = $7, end_time_ticks = $8,
@@ -76,6 +81,9 @@ func saveReservationUpdate(ctx context.Context, tx pgx.Tx, entry ListEntry) erro
 		entry.ParticipantIDs, entry.Participants, entry.RepeatType, repeatUntil)
 	if err != nil {
 		return fmt.Errorf("update reservation: %w", err)
+	}
+	if result.RowsAffected() != 1 {
+		return fmt.Errorf("updated %d rows for locked reservation %d", result.RowsAffected(), entry.ID)
 	}
 	return nil
 }

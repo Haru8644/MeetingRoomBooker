@@ -40,17 +40,22 @@ func creationDetails(count int, overlaps []reservations.ListEntry, conflicts res
 			extra = append(extra, fmt.Sprintf("- ほか %d件", len(sorted)-maxDetails))
 		}
 	}
-	if conflicts.Count > 0 {
-		if len(extra) > 0 {
-			extra = append(extra, "[hr]")
-		}
-		extra = append(extra, "注意: 参加者の予定が社外予定と重複しています", fmt.Sprintf("重複件数: %d件", conflicts.Count))
-		for _, line := range conflicts.Lines {
-			extra = append(extra, "- "+line)
-		}
-		if conflicts.Count > len(conflicts.Lines) {
-			extra = append(extra, fmt.Sprintf("- ほか %d件", conflicts.Count-len(conflicts.Lines)))
-		}
+	return "会議予約を受け付けました", action, appendParticipantConflictDetails(extra, conflicts)
+}
+
+func appendParticipantConflictDetails(extra []string, conflicts reservations.ParticipantConflicts) []string {
+	if conflicts.Count == 0 {
+		return extra
 	}
-	return "会議予約を受け付けました", action, extra
+	if len(extra) > 0 {
+		extra = append(extra, "[hr]")
+	}
+	extra = append(extra, "注意: 参加者の予定が社外予定と重複しています", fmt.Sprintf("重複件数: %d件", conflicts.Count))
+	for _, line := range conflicts.Lines {
+		extra = append(extra, "- "+line)
+	}
+	if conflicts.Count > len(conflicts.Lines) {
+		extra = append(extra, fmt.Sprintf("- ほか %d件", conflicts.Count-len(conflicts.Lines)))
+	}
+	return extra
 }

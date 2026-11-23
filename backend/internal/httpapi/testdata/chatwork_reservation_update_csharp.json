@@ -1,0 +1,1714 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "架空の管理者",
+      "roomId": "900001"
+    },
+    {
+      "id": 2,
+      "name": "架空の予約者",
+      "roomId": "900002"
+    },
+    {
+      "id": 3,
+      "name": "外れた参加者",
+      "roomId": " 900003 "
+    },
+    {
+      "id": 4,
+      "name": "継続参加者",
+      "roomId": null
+    },
+    {
+      "id": 5,
+      "name": "追加参加者",
+      "roomId": "900005"
+    },
+    {
+      "id": 6,
+      "name": "別枠の参加者",
+      "roomId": "900006"
+    }
+  ],
+  "datasets": {
+    "single": [
+      {
+        "id": 51,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 3,
+        "type": "社内",
+        "purpose": "旧会議",
+        "seriesId": null,
+        "date": "2026-06-22T00:00:00",
+        "startTime": "2026-06-22T09:00:00",
+        "endTime": "2026-06-22T10:00:00",
+        "participantIds": [
+          2,
+          3,
+          4
+        ],
+        "participants": "旧表示",
+        "repeatType": "しない",
+        "repeatUntil": null
+      }
+    ],
+    "series": [
+      {
+        "id": 73,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 3,
+        "type": "社内",
+        "purpose": "旧会議",
+        "seriesId": "update-series",
+        "date": "2026-06-29T00:00:00",
+        "startTime": "2026-06-29T09:00:00",
+        "endTime": "2026-06-29T10:00:00",
+        "participantIds": [
+          2,
+          6
+        ],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      },
+      {
+        "id": 72,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 3,
+        "type": "社内",
+        "purpose": "旧会議",
+        "seriesId": "update-series",
+        "date": "2026-06-22T00:00:00",
+        "startTime": "2026-06-22T09:00:00",
+        "endTime": "2026-06-22T10:00:00",
+        "participantIds": [
+          2,
+          6
+        ],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      },
+      {
+        "id": 71,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 3,
+        "type": "社内",
+        "purpose": "旧会議",
+        "seriesId": "update-series",
+        "date": "2026-06-22T13:00:00",
+        "startTime": "2026-06-22T09:00:00",
+        "endTime": "2026-06-22T10:00:00",
+        "participantIds": [
+          2,
+          3,
+          4
+        ],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      },
+      {
+        "id": 74,
+        "userId": 6,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 3,
+        "type": "社内",
+        "purpose": "旧会議",
+        "seriesId": "update-series",
+        "date": "2026-06-22T00:00:00",
+        "startTime": "2026-06-22T09:00:00",
+        "endTime": "2026-06-22T10:00:00",
+        "participantIds": [
+          6
+        ],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      }
+    ],
+    "empty": [
+      {
+        "id": 78,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 3,
+        "type": "社内",
+        "purpose": "旧会議",
+        "seriesId": "missing ",
+        "date": "2026-06-22T00:00:00",
+        "startTime": "2026-06-22T09:00:00",
+        "endTime": "2026-06-22T10:00:00",
+        "participantIds": [
+          2,
+          3,
+          4
+        ],
+        "participants": "旧表示",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "single_all_changes",
+      "method": "PUT",
+      "path": "/api/Reservations/51",
+      "request": {
+        "id": 51,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "新会議室",
+        "numberOfPeople": 3,
+        "type": "来客",
+        "purpose": "新会議",
+        "seriesId": null,
+        "date": "2026-06-23T00:00:00",
+        "startTime": "2026-06-23T10:00:00",
+        "endTime": "2026-06-23T11:00:00",
+        "participantIds": [
+          2,
+          4,
+          5
+        ],
+        "participants": "新表示",
+        "repeatType": "しない",
+        "repeatUntil": null
+      },
+      "dataset": "single",
+      "rows": [
+        {
+          "id": 51,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新会議",
+          "seriesId": null,
+          "date": "2026-06-23T00:00:00",
+          "startTime": "2026-06-23T10:00:00",
+          "endTime": "2026-06-23T11:00:00",
+          "participantIds": [
+            2,
+            4,
+            5
+          ],
+          "participants": "新表示",
+          "repeatType": "しない",
+          "repeatUntil": null
+        }
+      ],
+      "appointments": [
+        {
+          "id": 301,
+          "date": "2026-06-23",
+          "start": "10:20:00",
+          "end": "10:35:00",
+          "participantId": 5,
+          "title": "新時刻の外出"
+        },
+        {
+          "id": 302,
+          "date": "2026-06-23",
+          "start": "10:00:00",
+          "end": "10:30:00",
+          "participantId": 3,
+          "title": "外れた参加者の外出"
+        },
+        {
+          "id": 303,
+          "date": "2026-06-23",
+          "start": "11:00:00",
+          "end": "11:30:00",
+          "participantId": 4,
+          "title": "隣接の外出"
+        },
+        {
+          "id": 304,
+          "date": "2026-06-30",
+          "start": "10:00:00",
+          "end": "10:30:00",
+          "participantId": 5,
+          "title": "別枠の外出"
+        }
+      ],
+      "status": 204,
+      "noticeCount": 3,
+      "forceNoticeFailure": false,
+      "fakeResponses": {},
+      "requests": [
+        {
+          "roomId": "900003",
+          "body": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者、追加参加者\n対応: 変更内容を確認してください\n[hr]\n目的: 新会議\n利用日: 2026/06/23\n会議室: 新会議室\n時間: 10:00〜11:00\n予約者: 架空の予約者\n参加者: 継続参加者、追加参加者\n[hr]\n変更点:\n- 利用日が 2026/06/22 から 2026/06/23 に変更されました\n- 会議室が 旧会議室 から 新会議室 に変更されました\n- 区分が 社内 から 来客 に変更されました\n- 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました\n- 目的が「旧会議」から「新会議」に変更されました\n- 参加メンバーに 追加参加者 が追加されました\n- 参加メンバーから 外れた参加者 が削除されました\n[hr]\n注意: 参加者の予定が社外予定と重複しています\n重複件数: 1件\n- 追加参加者: 社外予定「新時刻の外出」 2026/06/23 10:20〜10:35\n[/info]"
+        },
+        {
+          "roomId": "900002",
+          "body": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者、追加参加者\n対応: 変更内容を確認してください\n[hr]\n目的: 新会議\n利用日: 2026/06/23\n会議室: 新会議室\n時間: 10:00〜11:00\n予約者: 架空の予約者\n参加者: 継続参加者、追加参加者\n[hr]\n変更点:\n- 利用日が 2026/06/22 から 2026/06/23 に変更されました\n- 会議室が 旧会議室 から 新会議室 に変更されました\n- 区分が 社内 から 来客 に変更されました\n- 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました\n- 目的が「旧会議」から「新会議」に変更されました\n- 参加メンバーに 追加参加者 が追加されました\n- 参加メンバーから 外れた参加者 が削除されました\n[hr]\n注意: 参加者の予定が社外予定と重複しています\n重複件数: 1件\n- 追加参加者: 社外予定「新時刻の外出」 2026/06/23 10:20〜10:35\n[/info]"
+        },
+        {
+          "roomId": "900005",
+          "body": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者、追加参加者\n対応: 変更内容を確認してください\n[hr]\n目的: 新会議\n利用日: 2026/06/23\n会議室: 新会議室\n時間: 10:00〜11:00\n予約者: 架空の予約者\n参加者: 継続参加者、追加参加者\n[hr]\n変更点:\n- 利用日が 2026/06/22 から 2026/06/23 に変更されました\n- 会議室が 旧会議室 から 新会議室 に変更されました\n- 区分が 社内 から 来客 に変更されました\n- 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました\n- 目的が「旧会議」から「新会議」に変更されました\n- 参加メンバーに 追加参加者 が追加されました\n- 参加メンバーから 外れた参加者 が削除されました\n[hr]\n注意: 参加者の予定が社外予定と重複しています\n重複件数: 1件\n- 追加参加者: 社外予定「新時刻の外出」 2026/06/23 10:20〜10:35\n[/info]"
+        }
+      ],
+      "logs": [
+        {
+          "reservationId": 51,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationUpdated",
+          "deliveryKey": "ReservationUpdated:reservation:51:user:3:change:4c42f118cc44480195a001460376e045",
+          "targetUserId": 3,
+          "scheduledStartTime": "2026-06-23T10:00:00",
+          "roomId": "900003",
+          "status": "Succeeded",
+          "errorMessage": null,
+          "attemptedAt": "2026-11-24T02:17:10.0449016",
+          "sentAt": "2026-11-24T02:17:10.0509921",
+          "message": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者、追加参加者\n対応: 変更内容を確認してください\n[hr]\n目的: 新会議\n利用日: 2026/06/23\n会議室: 新会議室\n時間: 10:00〜11:00\n予約者: 架空の予約者\n参加者: 継続参加者、追加参加者\n[hr]\n変更点:\n- 利用日が 2026/06/22 から 2026/06/23 に変更されました\n- 会議室が 旧会議室 から 新会議室 に変更されました\n- 区分が 社内 から 来客 に変更されました\n- 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました\n- 目的が「旧会議」から「新会議」に変更されました\n- 参加メンバーに 追加参加者 が追加されました\n- 参加メンバーから 外れた参加者 が削除されました\n[hr]\n注意: 参加者の予定が社外予定と重複しています\n重複件数: 1件\n- 追加参加者: 社外予定「新時刻の外出」 2026/06/23 10:20〜10:35\n[/info]",
+          "createdAt": "2026-11-24T02:17:10.0449016"
+        },
+        {
+          "reservationId": 51,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationUpdated",
+          "deliveryKey": "ReservationUpdated:reservation:51:user:4:change:4c42f118cc44480195a001460376e045",
+          "targetUserId": 4,
+          "scheduledStartTime": "2026-06-23T10:00:00",
+          "roomId": null,
+          "status": "Skipped",
+          "errorMessage": "ChatworkDirectRoomId is not configured.",
+          "attemptedAt": "2026-11-24T02:17:10.058051",
+          "sentAt": null,
+          "message": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者、追加参加者\n対応: 変更内容を確認してください\n[hr]\n目的: 新会議\n利用日: 2026/06/23\n会議室: 新会議室\n時間: 10:00〜11:00\n予約者: 架空の予約者\n参加者: 継続参加者、追加参加者\n[hr]\n変更点:\n- 利用日が 2026/06/22 から 2026/06/23 に変更されました\n- 会議室が 旧会議室 から 新会議室 に変更されました\n- 区分が 社内 から 来客 に変更されました\n- 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました\n- 目的が「旧会議」から「新会議」に変更されました\n- 参加メンバーに 追加参加者 が追加されました\n- 参加メンバーから 外れた参加者 が削除されました\n[hr]\n注意: 参加者の予定が社外予定と重複しています\n重複件数: 1件\n- 追加参加者: 社外予定「新時刻の外出」 2026/06/23 10:20〜10:35\n[/info]",
+          "createdAt": "2026-11-24T02:17:10.058051"
+        },
+        {
+          "reservationId": 51,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationUpdated",
+          "deliveryKey": "ReservationUpdated:reservation:51:user:2:change:4c42f118cc44480195a001460376e045",
+          "targetUserId": 2,
+          "scheduledStartTime": "2026-06-23T10:00:00",
+          "roomId": "900002",
+          "status": "Succeeded",
+          "errorMessage": null,
+          "attemptedAt": "2026-11-24T02:17:10.0662343",
+          "sentAt": "2026-11-24T02:17:10.0684943",
+          "message": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者、追加参加者\n対応: 変更内容を確認してください\n[hr]\n目的: 新会議\n利用日: 2026/06/23\n会議室: 新会議室\n時間: 10:00〜11:00\n予約者: 架空の予約者\n参加者: 継続参加者、追加参加者\n[hr]\n変更点:\n- 利用日が 2026/06/22 から 2026/06/23 に変更されました\n- 会議室が 旧会議室 から 新会議室 に変更されました\n- 区分が 社内 から 来客 に変更されました\n- 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました\n- 目的が「旧会議」から「新会議」に変更されました\n- 参加メンバーに 追加参加者 が追加されました\n- 参加メンバーから 外れた参加者 が削除されました\n[hr]\n注意: 参加者の予定が社外予定と重複しています\n重複件数: 1件\n- 追加参加者: 社外予定「新時刻の外出」 2026/06/23 10:20〜10:35\n[/info]",
+          "createdAt": "2026-11-24T02:17:10.0662343"
+        },
+        {
+          "reservationId": 51,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationUpdated",
+          "deliveryKey": "ReservationUpdated:reservation:51:user:5:change:4c42f118cc44480195a001460376e045",
+          "targetUserId": 5,
+          "scheduledStartTime": "2026-06-23T10:00:00",
+          "roomId": "900005",
+          "status": "Succeeded",
+          "errorMessage": null,
+          "attemptedAt": "2026-11-24T02:17:10.0762226",
+          "sentAt": "2026-11-24T02:17:10.0793947",
+          "message": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者、追加参加者\n対応: 変更内容を確認してください\n[hr]\n目的: 新会議\n利用日: 2026/06/23\n会議室: 新会議室\n時間: 10:00〜11:00\n予約者: 架空の予約者\n参加者: 継続参加者、追加参加者\n[hr]\n変更点:\n- 利用日が 2026/06/22 から 2026/06/23 に変更されました\n- 会議室が 旧会議室 から 新会議室 に変更されました\n- 区分が 社内 から 来客 に変更されました\n- 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました\n- 目的が「旧会議」から「新会議」に変更されました\n- 参加メンバーに 追加参加者 が追加されました\n- 参加メンバーから 外れた参加者 が削除されました\n[hr]\n注意: 参加者の予定が社外予定と重複しています\n重複件数: 1件\n- 追加参加者: 社外予定「新時刻の外出」 2026/06/23 10:20〜10:35\n[/info]",
+          "createdAt": "2026-11-24T02:17:10.0762226"
+        }
+      ]
+    },
+    {
+      "name": "removed_participant",
+      "method": "PUT",
+      "path": "/api/Reservations/51",
+      "request": {
+        "id": 51,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 3,
+        "type": "社内",
+        "purpose": "旧会議",
+        "seriesId": null,
+        "date": "2026-06-22T00:00:00",
+        "startTime": "2026-06-22T09:00:00",
+        "endTime": "2026-06-22T10:00:00",
+        "participantIds": [
+          2,
+          4
+        ],
+        "participants": "旧表示",
+        "repeatType": "しない",
+        "repeatUntil": null
+      },
+      "dataset": "single",
+      "rows": [
+        {
+          "id": 51,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "旧会議室",
+          "numberOfPeople": 3,
+          "type": "社内",
+          "purpose": "旧会議",
+          "seriesId": null,
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T09:00:00",
+          "endTime": "2026-06-22T10:00:00",
+          "participantIds": [
+            2,
+            4
+          ],
+          "participants": "旧表示",
+          "repeatType": "しない",
+          "repeatUntil": null
+        }
+      ],
+      "appointments": [],
+      "status": 204,
+      "noticeCount": 2,
+      "forceNoticeFailure": false,
+      "fakeResponses": {},
+      "requests": [
+        {
+          "roomId": "900003",
+          "body": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者\n対応: 変更内容を確認してください\n[hr]\n目的: 旧会議\n利用日: 2026/06/22\n会議室: 旧会議室\n時間: 09:00〜10:00\n予約者: 架空の予約者\n参加者: 継続参加者\n[hr]\n変更点:\n- 参加メンバーから 外れた参加者 が削除されました\n[/info]"
+        },
+        {
+          "roomId": "900002",
+          "body": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者\n対応: 変更内容を確認してください\n[hr]\n目的: 旧会議\n利用日: 2026/06/22\n会議室: 旧会議室\n時間: 09:00〜10:00\n予約者: 架空の予約者\n参加者: 継続参加者\n[hr]\n変更点:\n- 参加メンバーから 外れた参加者 が削除されました\n[/info]"
+        }
+      ],
+      "logs": [
+        {
+          "reservationId": 51,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationUpdated",
+          "deliveryKey": "ReservationUpdated:reservation:51:user:3:change:cd8e1368a29044d4a3bf2ddd8be18b90",
+          "targetUserId": 3,
+          "scheduledStartTime": "2026-06-22T09:00:00",
+          "roomId": "900003",
+          "status": "Succeeded",
+          "errorMessage": null,
+          "attemptedAt": "2026-11-24T02:17:10.1371939",
+          "sentAt": "2026-11-24T02:17:10.1397392",
+          "message": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者\n対応: 変更内容を確認してください\n[hr]\n目的: 旧会議\n利用日: 2026/06/22\n会議室: 旧会議室\n時間: 09:00〜10:00\n予約者: 架空の予約者\n参加者: 継続参加者\n[hr]\n変更点:\n- 参加メンバーから 外れた参加者 が削除されました\n[/info]",
+          "createdAt": "2026-11-24T02:17:10.1371939"
+        },
+        {
+          "reservationId": 51,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationUpdated",
+          "deliveryKey": "ReservationUpdated:reservation:51:user:4:change:cd8e1368a29044d4a3bf2ddd8be18b90",
+          "targetUserId": 4,
+          "scheduledStartTime": "2026-06-22T09:00:00",
+          "roomId": null,
+          "status": "Skipped",
+          "errorMessage": "ChatworkDirectRoomId is not configured.",
+          "attemptedAt": "2026-11-24T02:17:10.1457253",
+          "sentAt": null,
+          "message": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者\n対応: 変更内容を確認してください\n[hr]\n目的: 旧会議\n利用日: 2026/06/22\n会議室: 旧会議室\n時間: 09:00〜10:00\n予約者: 架空の予約者\n参加者: 継続参加者\n[hr]\n変更点:\n- 参加メンバーから 外れた参加者 が削除されました\n[/info]",
+          "createdAt": "2026-11-24T02:17:10.1457253"
+        },
+        {
+          "reservationId": 51,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationUpdated",
+          "deliveryKey": "ReservationUpdated:reservation:51:user:2:change:cd8e1368a29044d4a3bf2ddd8be18b90",
+          "targetUserId": 2,
+          "scheduledStartTime": "2026-06-22T09:00:00",
+          "roomId": "900002",
+          "status": "Succeeded",
+          "errorMessage": null,
+          "attemptedAt": "2026-11-24T02:17:10.1516432",
+          "sentAt": "2026-11-24T02:17:10.1543596",
+          "message": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者\n対応: 変更内容を確認してください\n[hr]\n目的: 旧会議\n利用日: 2026/06/22\n会議室: 旧会議室\n時間: 09:00〜10:00\n予約者: 架空の予約者\n参加者: 継続参加者\n[hr]\n変更点:\n- 参加メンバーから 外れた参加者 が削除されました\n[/info]",
+          "createdAt": "2026-11-24T02:17:10.1516432"
+        }
+      ]
+    },
+    {
+      "name": "no_change",
+      "method": "PUT",
+      "path": "/api/Reservations/51",
+      "request": {
+        "id": 51,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 3,
+        "type": "社内",
+        "purpose": "旧会議",
+        "seriesId": null,
+        "date": "2026-06-22T00:00:00",
+        "startTime": "2026-06-22T09:00:00",
+        "endTime": "2026-06-22T10:00:00",
+        "participantIds": [
+          2,
+          3,
+          4
+        ],
+        "participants": "旧表示",
+        "repeatType": "しない",
+        "repeatUntil": null
+      },
+      "dataset": "single",
+      "rows": [
+        {
+          "id": 51,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "旧会議室",
+          "numberOfPeople": 3,
+          "type": "社内",
+          "purpose": "旧会議",
+          "seriesId": null,
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T09:00:00",
+          "endTime": "2026-06-22T10:00:00",
+          "participantIds": [
+            2,
+            3,
+            4
+          ],
+          "participants": "旧表示",
+          "repeatType": "しない",
+          "repeatUntil": null
+        }
+      ],
+      "appointments": [],
+      "status": 204,
+      "noticeCount": 0,
+      "forceNoticeFailure": false,
+      "fakeResponses": {},
+      "requests": [],
+      "logs": []
+    },
+    {
+      "name": "warning_without_changes",
+      "method": "PUT",
+      "path": "/api/Reservations/51",
+      "request": {
+        "id": 51,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "旧会議室",
+        "numberOfPeople": 3,
+        "type": "社内",
+        "purpose": "旧会議",
+        "seriesId": null,
+        "date": "2026-06-22T00:00:00",
+        "startTime": "2026-06-22T09:00:00",
+        "endTime": "2026-06-22T10:00:00",
+        "participantIds": [
+          2,
+          3,
+          4
+        ],
+        "participants": "旧表示",
+        "repeatType": "しない",
+        "repeatUntil": null
+      },
+      "dataset": "single",
+      "rows": [
+        {
+          "id": 51,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "旧会議室",
+          "numberOfPeople": 3,
+          "type": "社内",
+          "purpose": "旧会議",
+          "seriesId": null,
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T09:00:00",
+          "endTime": "2026-06-22T10:00:00",
+          "participantIds": [
+            2,
+            3,
+            4
+          ],
+          "participants": "旧表示",
+          "repeatType": "しない",
+          "repeatUntil": null
+        }
+      ],
+      "appointments": [
+        {
+          "id": 305,
+          "date": "2026-06-22",
+          "start": "09:30:00",
+          "end": "09:45:00",
+          "participantId": 3,
+          "title": "未変更の外出"
+        }
+      ],
+      "status": 204,
+      "noticeCount": 2,
+      "forceNoticeFailure": false,
+      "fakeResponses": {},
+      "requests": [
+        {
+          "roomId": "900003",
+          "body": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者\n対応: 変更内容を確認してください\n[hr]\n目的: 旧会議\n利用日: 2026/06/22\n会議室: 旧会議室\n時間: 09:00〜10:00\n予約者: 架空の予約者\n参加者: 外れた参加者、継続参加者\n[hr]\n注意: 参加者の予定が社外予定と重複しています\n重複件数: 1件\n- 外れた参加者: 社外予定「未変更の外出」 2026/06/22 09:30〜09:45\n[/info]"
+        },
+        {
+          "roomId": "900002",
+          "body": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者\n対応: 変更内容を確認してください\n[hr]\n目的: 旧会議\n利用日: 2026/06/22\n会議室: 旧会議室\n時間: 09:00〜10:00\n予約者: 架空の予約者\n参加者: 外れた参加者、継続参加者\n[hr]\n注意: 参加者の予定が社外予定と重複しています\n重複件数: 1件\n- 外れた参加者: 社外予定「未変更の外出」 2026/06/22 09:30〜09:45\n[/info]"
+        }
+      ],
+      "logs": [
+        {
+          "reservationId": 51,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationUpdated",
+          "deliveryKey": "ReservationUpdated:reservation:51:user:3:change:94c5fda54cda4ddd83a41998f1b9f2c3",
+          "targetUserId": 3,
+          "scheduledStartTime": "2026-06-22T09:00:00",
+          "roomId": "900003",
+          "status": "Succeeded",
+          "errorMessage": null,
+          "attemptedAt": "2026-11-24T02:17:10.2230737",
+          "sentAt": "2026-11-24T02:17:10.2248939",
+          "message": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者\n対応: 変更内容を確認してください\n[hr]\n目的: 旧会議\n利用日: 2026/06/22\n会議室: 旧会議室\n時間: 09:00〜10:00\n予約者: 架空の予約者\n参加者: 外れた参加者、継続参加者\n[hr]\n注意: 参加者の予定が社外予定と重複しています\n重複件数: 1件\n- 外れた参加者: 社外予定「未変更の外出」 2026/06/22 09:30〜09:45\n[/info]",
+          "createdAt": "2026-11-24T02:17:10.2230737"
+        },
+        {
+          "reservationId": 51,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationUpdated",
+          "deliveryKey": "ReservationUpdated:reservation:51:user:4:change:94c5fda54cda4ddd83a41998f1b9f2c3",
+          "targetUserId": 4,
+          "scheduledStartTime": "2026-06-22T09:00:00",
+          "roomId": null,
+          "status": "Skipped",
+          "errorMessage": "ChatworkDirectRoomId is not configured.",
+          "attemptedAt": "2026-11-24T02:17:10.2297965",
+          "sentAt": null,
+          "message": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者\n対応: 変更内容を確認してください\n[hr]\n目的: 旧会議\n利用日: 2026/06/22\n会議室: 旧会議室\n時間: 09:00〜10:00\n予約者: 架空の予約者\n参加者: 外れた参加者、継続参加者\n[hr]\n注意: 参加者の予定が社外予定と重複しています\n重複件数: 1件\n- 外れた参加者: 社外予定「未変更の外出」 2026/06/22 09:30〜09:45\n[/info]",
+          "createdAt": "2026-11-24T02:17:10.2297965"
+        },
+        {
+          "reservationId": 51,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationUpdated",
+          "deliveryKey": "ReservationUpdated:reservation:51:user:2:change:94c5fda54cda4ddd83a41998f1b9f2c3",
+          "targetUserId": 2,
+          "scheduledStartTime": "2026-06-22T09:00:00",
+          "roomId": "900002",
+          "status": "Succeeded",
+          "errorMessage": null,
+          "attemptedAt": "2026-11-24T02:17:10.2349431",
+          "sentAt": "2026-11-24T02:17:10.2473852",
+          "message": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者\n対応: 変更内容を確認してください\n[hr]\n目的: 旧会議\n利用日: 2026/06/22\n会議室: 旧会議室\n時間: 09:00〜10:00\n予約者: 架空の予約者\n参加者: 外れた参加者、継続参加者\n[hr]\n注意: 参加者の予定が社外予定と重複しています\n重複件数: 1件\n- 外れた参加者: 社外予定「未変更の外出」 2026/06/22 09:30〜09:45\n[/info]",
+          "createdAt": "2026-11-24T02:17:10.2349431"
+        }
+      ]
+    },
+    {
+      "name": "single_notify_false",
+      "method": "PUT",
+      "path": "/api/Reservations/51?notifyParticipants=false",
+      "request": {
+        "id": 51,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "新会議室",
+        "numberOfPeople": 3,
+        "type": "来客",
+        "purpose": "新会議",
+        "seriesId": null,
+        "date": "2026-06-23T00:00:00",
+        "startTime": "2026-06-23T10:00:00",
+        "endTime": "2026-06-23T11:00:00",
+        "participantIds": [
+          2,
+          4,
+          5
+        ],
+        "participants": "新表示",
+        "repeatType": "しない",
+        "repeatUntil": null
+      },
+      "dataset": "single",
+      "rows": [
+        {
+          "id": 51,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新会議",
+          "seriesId": null,
+          "date": "2026-06-23T00:00:00",
+          "startTime": "2026-06-23T10:00:00",
+          "endTime": "2026-06-23T11:00:00",
+          "participantIds": [
+            2,
+            4,
+            5
+          ],
+          "participants": "新表示",
+          "repeatType": "しない",
+          "repeatUntil": null
+        }
+      ],
+      "appointments": [],
+      "status": 204,
+      "noticeCount": 0,
+      "forceNoticeFailure": false,
+      "fakeResponses": {},
+      "requests": [
+        {
+          "roomId": "900003",
+          "body": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者、追加参加者\n対応: 変更内容を確認してください\n[hr]\n目的: 新会議\n利用日: 2026/06/23\n会議室: 新会議室\n時間: 10:00〜11:00\n予約者: 架空の予約者\n参加者: 継続参加者、追加参加者\n[hr]\n変更点:\n- 利用日が 2026/06/22 から 2026/06/23 に変更されました\n- 会議室が 旧会議室 から 新会議室 に変更されました\n- 区分が 社内 から 来客 に変更されました\n- 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました\n- 目的が「旧会議」から「新会議」に変更されました\n- 参加メンバーに 追加参加者 が追加されました\n- 参加メンバーから 外れた参加者 が削除されました\n[/info]"
+        },
+        {
+          "roomId": "900002",
+          "body": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者、追加参加者\n対応: 変更内容を確認してください\n[hr]\n目的: 新会議\n利用日: 2026/06/23\n会議室: 新会議室\n時間: 10:00〜11:00\n予約者: 架空の予約者\n参加者: 継続参加者、追加参加者\n[hr]\n変更点:\n- 利用日が 2026/06/22 から 2026/06/23 に変更されました\n- 会議室が 旧会議室 から 新会議室 に変更されました\n- 区分が 社内 から 来客 に変更されました\n- 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました\n- 目的が「旧会議」から「新会議」に変更されました\n- 参加メンバーに 追加参加者 が追加されました\n- 参加メンバーから 外れた参加者 が削除されました\n[/info]"
+        },
+        {
+          "roomId": "900005",
+          "body": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者、追加参加者\n対応: 変更内容を確認してください\n[hr]\n目的: 新会議\n利用日: 2026/06/23\n会議室: 新会議室\n時間: 10:00〜11:00\n予約者: 架空の予約者\n参加者: 継続参加者、追加参加者\n[hr]\n変更点:\n- 利用日が 2026/06/22 から 2026/06/23 に変更されました\n- 会議室が 旧会議室 から 新会議室 に変更されました\n- 区分が 社内 から 来客 に変更されました\n- 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました\n- 目的が「旧会議」から「新会議」に変更されました\n- 参加メンバーに 追加参加者 が追加されました\n- 参加メンバーから 外れた参加者 が削除されました\n[/info]"
+        }
+      ],
+      "logs": [
+        {
+          "reservationId": 51,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationUpdated",
+          "deliveryKey": "ReservationUpdated:reservation:51:user:3:change:993bb4fa934945f983e8c699d893a44c",
+          "targetUserId": 3,
+          "scheduledStartTime": "2026-06-23T10:00:00",
+          "roomId": "900003",
+          "status": "Succeeded",
+          "errorMessage": null,
+          "attemptedAt": "2026-11-24T02:17:10.2820181",
+          "sentAt": "2026-11-24T02:17:10.2851988",
+          "message": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者、追加参加者\n対応: 変更内容を確認してください\n[hr]\n目的: 新会議\n利用日: 2026/06/23\n会議室: 新会議室\n時間: 10:00〜11:00\n予約者: 架空の予約者\n参加者: 継続参加者、追加参加者\n[hr]\n変更点:\n- 利用日が 2026/06/22 から 2026/06/23 に変更されました\n- 会議室が 旧会議室 から 新会議室 に変更されました\n- 区分が 社内 から 来客 に変更されました\n- 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました\n- 目的が「旧会議」から「新会議」に変更されました\n- 参加メンバーに 追加参加者 が追加されました\n- 参加メンバーから 外れた参加者 が削除されました\n[/info]",
+          "createdAt": "2026-11-24T02:17:10.2820181"
+        },
+        {
+          "reservationId": 51,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationUpdated",
+          "deliveryKey": "ReservationUpdated:reservation:51:user:4:change:993bb4fa934945f983e8c699d893a44c",
+          "targetUserId": 4,
+          "scheduledStartTime": "2026-06-23T10:00:00",
+          "roomId": null,
+          "status": "Skipped",
+          "errorMessage": "ChatworkDirectRoomId is not configured.",
+          "attemptedAt": "2026-11-24T02:17:10.2901093",
+          "sentAt": null,
+          "message": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者、追加参加者\n対応: 変更内容を確認してください\n[hr]\n目的: 新会議\n利用日: 2026/06/23\n会議室: 新会議室\n時間: 10:00〜11:00\n予約者: 架空の予約者\n参加者: 継続参加者、追加参加者\n[hr]\n変更点:\n- 利用日が 2026/06/22 から 2026/06/23 に変更されました\n- 会議室が 旧会議室 から 新会議室 に変更されました\n- 区分が 社内 から 来客 に変更されました\n- 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました\n- 目的が「旧会議」から「新会議」に変更されました\n- 参加メンバーに 追加参加者 が追加されました\n- 参加メンバーから 外れた参加者 が削除されました\n[/info]",
+          "createdAt": "2026-11-24T02:17:10.2901093"
+        },
+        {
+          "reservationId": 51,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationUpdated",
+          "deliveryKey": "ReservationUpdated:reservation:51:user:2:change:993bb4fa934945f983e8c699d893a44c",
+          "targetUserId": 2,
+          "scheduledStartTime": "2026-06-23T10:00:00",
+          "roomId": "900002",
+          "status": "Succeeded",
+          "errorMessage": null,
+          "attemptedAt": "2026-11-24T02:17:10.2940828",
+          "sentAt": "2026-11-24T02:17:10.2973856",
+          "message": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者、追加参加者\n対応: 変更内容を確認してください\n[hr]\n目的: 新会議\n利用日: 2026/06/23\n会議室: 新会議室\n時間: 10:00〜11:00\n予約者: 架空の予約者\n参加者: 継続参加者、追加参加者\n[hr]\n変更点:\n- 利用日が 2026/06/22 から 2026/06/23 に変更されました\n- 会議室が 旧会議室 から 新会議室 に変更されました\n- 区分が 社内 から 来客 に変更されました\n- 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました\n- 目的が「旧会議」から「新会議」に変更されました\n- 参加メンバーに 追加参加者 が追加されました\n- 参加メンバーから 外れた参加者 が削除されました\n[/info]",
+          "createdAt": "2026-11-24T02:17:10.2940828"
+        },
+        {
+          "reservationId": 51,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationUpdated",
+          "deliveryKey": "ReservationUpdated:reservation:51:user:5:change:993bb4fa934945f983e8c699d893a44c",
+          "targetUserId": 5,
+          "scheduledStartTime": "2026-06-23T10:00:00",
+          "roomId": "900005",
+          "status": "Succeeded",
+          "errorMessage": null,
+          "attemptedAt": "2026-11-24T02:17:10.3030802",
+          "sentAt": "2026-11-24T02:17:10.3066245",
+          "message": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者、追加参加者\n対応: 変更内容を確認してください\n[hr]\n目的: 新会議\n利用日: 2026/06/23\n会議室: 新会議室\n時間: 10:00〜11:00\n予約者: 架空の予約者\n参加者: 継続参加者、追加参加者\n[hr]\n変更点:\n- 利用日が 2026/06/22 から 2026/06/23 に変更されました\n- 会議室が 旧会議室 から 新会議室 に変更されました\n- 区分が 社内 から 来客 に変更されました\n- 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました\n- 目的が「旧会議」から「新会議」に変更されました\n- 参加メンバーに 追加参加者 が追加されました\n- 参加メンバーから 外れた参加者 が削除されました\n[/info]",
+          "createdAt": "2026-11-24T02:17:10.3030802"
+        }
+      ]
+    },
+    {
+      "name": "series_representative",
+      "method": "POST",
+      "path": "/api/Reservations/73/series-update",
+      "request": {
+        "originalReservation": {
+          "id": 73,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "旧会議室",
+          "numberOfPeople": 3,
+          "type": "社内",
+          "purpose": "旧会議",
+          "seriesId": "update-series",
+          "date": "2026-06-29T00:00:00",
+          "startTime": "2026-06-29T09:00:00",
+          "endTime": "2026-06-29T10:00:00",
+          "participantIds": [
+            2,
+            6
+          ],
+          "participants": "旧表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        "updatedReservation": {
+          "id": 73,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新会議",
+          "seriesId": null,
+          "date": "2026-06-30T00:00:00",
+          "startTime": "2026-06-23T10:00:00",
+          "endTime": "2026-06-23T11:00:00",
+          "participantIds": [
+            2,
+            4,
+            5
+          ],
+          "participants": "新表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        "scope": "all",
+        "notifyParticipants": true
+      },
+      "dataset": "series",
+      "rows": [
+        {
+          "id": 71,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新会議",
+          "seriesId": "update-series",
+          "date": "2026-06-23T00:00:00",
+          "startTime": "2026-06-23T10:00:00",
+          "endTime": "2026-06-23T11:00:00",
+          "participantIds": [
+            2,
+            4,
+            5
+          ],
+          "participants": "新表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        {
+          "id": 72,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新会議",
+          "seriesId": "update-series",
+          "date": "2026-06-23T00:00:00",
+          "startTime": "2026-06-23T10:00:00",
+          "endTime": "2026-06-23T11:00:00",
+          "participantIds": [
+            2,
+            4,
+            5
+          ],
+          "participants": "新表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        {
+          "id": 73,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新会議",
+          "seriesId": "update-series",
+          "date": "2026-06-30T00:00:00",
+          "startTime": "2026-06-30T10:00:00",
+          "endTime": "2026-06-30T11:00:00",
+          "participantIds": [
+            2,
+            4,
+            5
+          ],
+          "participants": "新表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        {
+          "id": 74,
+          "userId": 6,
+          "name": "架空の予約者",
+          "room": "旧会議室",
+          "numberOfPeople": 3,
+          "type": "社内",
+          "purpose": "旧会議",
+          "seriesId": "update-series",
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T09:00:00",
+          "endTime": "2026-06-22T10:00:00",
+          "participantIds": [
+            6
+          ],
+          "participants": "旧表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        }
+      ],
+      "appointments": [
+        {
+          "id": 301,
+          "date": "2026-06-23",
+          "start": "10:20:00",
+          "end": "10:35:00",
+          "participantId": 5,
+          "title": "新時刻の外出"
+        },
+        {
+          "id": 302,
+          "date": "2026-06-23",
+          "start": "10:00:00",
+          "end": "10:30:00",
+          "participantId": 3,
+          "title": "外れた参加者の外出"
+        },
+        {
+          "id": 303,
+          "date": "2026-06-23",
+          "start": "11:00:00",
+          "end": "11:30:00",
+          "participantId": 4,
+          "title": "隣接の外出"
+        },
+        {
+          "id": 304,
+          "date": "2026-06-30",
+          "start": "10:00:00",
+          "end": "10:30:00",
+          "participantId": 5,
+          "title": "別枠の外出"
+        }
+      ],
+      "status": 204,
+      "noticeCount": 9,
+      "forceNoticeFailure": false,
+      "fakeResponses": {},
+      "requests": [
+        {
+          "roomId": "900003",
+          "body": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者、追加参加者\n対応: 繰り返し予約がまとめて変更されました\n[hr]\n目的: 新会議\n利用日: 2026/06/23\n会議室: 新会議室\n時間: 10:00〜11:00\n予約者: 架空の予約者\n参加者: 継続参加者、追加参加者\n[hr]\n変更点:\n- 利用日が 2026/06/22 から 2026/06/23 に変更されました\n- 会議室が 旧会議室 から 新会議室 に変更されました\n- 区分が 社内 から 来客 に変更されました\n- 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました\n- 目的が「旧会議」から「新会議」に変更されました\n- 参加メンバーに 追加参加者 が追加されました\n- 参加メンバーから 外れた参加者 が削除されました\n[hr]\n更新件数: 3件\n[hr]\n注意: 参加者の予定が社外予定と重複しています\n重複件数: 1件\n- 追加参加者: 社外予定「新時刻の外出」 2026/06/23 10:20〜10:35\n[/info]"
+        },
+        {
+          "roomId": "900002",
+          "body": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者、追加参加者\n対応: 繰り返し予約がまとめて変更されました\n[hr]\n目的: 新会議\n利用日: 2026/06/23\n会議室: 新会議室\n時間: 10:00〜11:00\n予約者: 架空の予約者\n参加者: 継続参加者、追加参加者\n[hr]\n変更点:\n- 利用日が 2026/06/22 から 2026/06/23 に変更されました\n- 会議室が 旧会議室 から 新会議室 に変更されました\n- 区分が 社内 から 来客 に変更されました\n- 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました\n- 目的が「旧会議」から「新会議」に変更されました\n- 参加メンバーに 追加参加者 が追加されました\n- 参加メンバーから 外れた参加者 が削除されました\n[hr]\n更新件数: 3件\n[hr]\n注意: 参加者の予定が社外予定と重複しています\n重複件数: 1件\n- 追加参加者: 社外予定「新時刻の外出」 2026/06/23 10:20〜10:35\n[/info]"
+        },
+        {
+          "roomId": "900005",
+          "body": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者、追加参加者\n対応: 繰り返し予約がまとめて変更されました\n[hr]\n目的: 新会議\n利用日: 2026/06/23\n会議室: 新会議室\n時間: 10:00〜11:00\n予約者: 架空の予約者\n参加者: 継続参加者、追加参加者\n[hr]\n変更点:\n- 利用日が 2026/06/22 から 2026/06/23 に変更されました\n- 会議室が 旧会議室 から 新会議室 に変更されました\n- 区分が 社内 から 来客 に変更されました\n- 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました\n- 目的が「旧会議」から「新会議」に変更されました\n- 参加メンバーに 追加参加者 が追加されました\n- 参加メンバーから 外れた参加者 が削除されました\n[hr]\n更新件数: 3件\n[hr]\n注意: 参加者の予定が社外予定と重複しています\n重複件数: 1件\n- 追加参加者: 社外予定「新時刻の外出」 2026/06/23 10:20〜10:35\n[/info]"
+        }
+      ],
+      "logs": [
+        {
+          "reservationId": 71,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationUpdated",
+          "deliveryKey": "ReservationUpdated:reservation:71:user:3:change:971197646bb2485c9b13ed08c8306d17",
+          "targetUserId": 3,
+          "scheduledStartTime": "2026-06-23T10:00:00",
+          "roomId": "900003",
+          "status": "Succeeded",
+          "errorMessage": null,
+          "attemptedAt": "2026-11-24T02:17:10.3612164",
+          "sentAt": "2026-11-24T02:17:10.3633856",
+          "message": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者、追加参加者\n対応: 繰り返し予約がまとめて変更されました\n[hr]\n目的: 新会議\n利用日: 2026/06/23\n会議室: 新会議室\n時間: 10:00〜11:00\n予約者: 架空の予約者\n参加者: 継続参加者、追加参加者\n[hr]\n変更点:\n- 利用日が 2026/06/22 から 2026/06/23 に変更されました\n- 会議室が 旧会議室 から 新会議室 に変更されました\n- 区分が 社内 から 来客 に変更されました\n- 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました\n- 目的が「旧会議」から「新会議」に変更されました\n- 参加メンバーに 追加参加者 が追加されました\n- 参加メンバーから 外れた参加者 が削除されました\n[hr]\n更新件数: 3件\n[hr]\n注意: 参加者の予定が社外予定と重複しています\n重複件数: 1件\n- 追加参加者: 社外予定「新時刻の外出」 2026/06/23 10:20〜10:35\n[/info]",
+          "createdAt": "2026-11-24T02:17:10.3612164"
+        },
+        {
+          "reservationId": 71,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationUpdated",
+          "deliveryKey": "ReservationUpdated:reservation:71:user:4:change:971197646bb2485c9b13ed08c8306d17",
+          "targetUserId": 4,
+          "scheduledStartTime": "2026-06-23T10:00:00",
+          "roomId": null,
+          "status": "Skipped",
+          "errorMessage": "ChatworkDirectRoomId is not configured.",
+          "attemptedAt": "2026-11-24T02:17:10.3688494",
+          "sentAt": null,
+          "message": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者、追加参加者\n対応: 繰り返し予約がまとめて変更されました\n[hr]\n目的: 新会議\n利用日: 2026/06/23\n会議室: 新会議室\n時間: 10:00〜11:00\n予約者: 架空の予約者\n参加者: 継続参加者、追加参加者\n[hr]\n変更点:\n- 利用日が 2026/06/22 から 2026/06/23 に変更されました\n- 会議室が 旧会議室 から 新会議室 に変更されました\n- 区分が 社内 から 来客 に変更されました\n- 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました\n- 目的が「旧会議」から「新会議」に変更されました\n- 参加メンバーに 追加参加者 が追加されました\n- 参加メンバーから 外れた参加者 が削除されました\n[hr]\n更新件数: 3件\n[hr]\n注意: 参加者の予定が社外予定と重複しています\n重複件数: 1件\n- 追加参加者: 社外予定「新時刻の外出」 2026/06/23 10:20〜10:35\n[/info]",
+          "createdAt": "2026-11-24T02:17:10.3688494"
+        },
+        {
+          "reservationId": 71,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationUpdated",
+          "deliveryKey": "ReservationUpdated:reservation:71:user:2:change:971197646bb2485c9b13ed08c8306d17",
+          "targetUserId": 2,
+          "scheduledStartTime": "2026-06-23T10:00:00",
+          "roomId": "900002",
+          "status": "Succeeded",
+          "errorMessage": null,
+          "attemptedAt": "2026-11-24T02:17:10.3752083",
+          "sentAt": "2026-11-24T02:17:10.3785727",
+          "message": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者、追加参加者\n対応: 繰り返し予約がまとめて変更されました\n[hr]\n目的: 新会議\n利用日: 2026/06/23\n会議室: 新会議室\n時間: 10:00〜11:00\n予約者: 架空の予約者\n参加者: 継続参加者、追加参加者\n[hr]\n変更点:\n- 利用日が 2026/06/22 から 2026/06/23 に変更されました\n- 会議室が 旧会議室 から 新会議室 に変更されました\n- 区分が 社内 から 来客 に変更されました\n- 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました\n- 目的が「旧会議」から「新会議」に変更されました\n- 参加メンバーに 追加参加者 が追加されました\n- 参加メンバーから 外れた参加者 が削除されました\n[hr]\n更新件数: 3件\n[hr]\n注意: 参加者の予定が社外予定と重複しています\n重複件数: 1件\n- 追加参加者: 社外予定「新時刻の外出」 2026/06/23 10:20〜10:35\n[/info]",
+          "createdAt": "2026-11-24T02:17:10.3752083"
+        },
+        {
+          "reservationId": 71,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationUpdated",
+          "deliveryKey": "ReservationUpdated:reservation:71:user:5:change:971197646bb2485c9b13ed08c8306d17",
+          "targetUserId": 5,
+          "scheduledStartTime": "2026-06-23T10:00:00",
+          "roomId": "900005",
+          "status": "Succeeded",
+          "errorMessage": null,
+          "attemptedAt": "2026-11-24T02:17:10.3845494",
+          "sentAt": "2026-11-24T02:17:10.3868947",
+          "message": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者、追加参加者\n対応: 繰り返し予約がまとめて変更されました\n[hr]\n目的: 新会議\n利用日: 2026/06/23\n会議室: 新会議室\n時間: 10:00〜11:00\n予約者: 架空の予約者\n参加者: 継続参加者、追加参加者\n[hr]\n変更点:\n- 利用日が 2026/06/22 から 2026/06/23 に変更されました\n- 会議室が 旧会議室 から 新会議室 に変更されました\n- 区分が 社内 から 来客 に変更されました\n- 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました\n- 目的が「旧会議」から「新会議」に変更されました\n- 参加メンバーに 追加参加者 が追加されました\n- 参加メンバーから 外れた参加者 が削除されました\n[hr]\n更新件数: 3件\n[hr]\n注意: 参加者の予定が社外予定と重複しています\n重複件数: 1件\n- 追加参加者: 社外予定「新時刻の外出」 2026/06/23 10:20〜10:35\n[/info]",
+          "createdAt": "2026-11-24T02:17:10.3845494"
+        }
+      ]
+    },
+    {
+      "name": "series_notify_false",
+      "method": "POST",
+      "path": "/api/Reservations/73/series-update",
+      "request": {
+        "originalReservation": {
+          "id": 73,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "旧会議室",
+          "numberOfPeople": 3,
+          "type": "社内",
+          "purpose": "旧会議",
+          "seriesId": "update-series",
+          "date": "2026-06-29T00:00:00",
+          "startTime": "2026-06-29T09:00:00",
+          "endTime": "2026-06-29T10:00:00",
+          "participantIds": [
+            2,
+            6
+          ],
+          "participants": "旧表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        "updatedReservation": {
+          "id": 73,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新会議",
+          "seriesId": null,
+          "date": "2026-06-30T00:00:00",
+          "startTime": "2026-06-23T10:00:00",
+          "endTime": "2026-06-23T11:00:00",
+          "participantIds": [
+            2,
+            4,
+            5
+          ],
+          "participants": "新表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        "scope": "all",
+        "notifyParticipants": false
+      },
+      "dataset": "series",
+      "rows": [
+        {
+          "id": 71,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新会議",
+          "seriesId": "update-series",
+          "date": "2026-06-23T00:00:00",
+          "startTime": "2026-06-23T10:00:00",
+          "endTime": "2026-06-23T11:00:00",
+          "participantIds": [
+            2,
+            4,
+            5
+          ],
+          "participants": "新表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        {
+          "id": 72,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新会議",
+          "seriesId": "update-series",
+          "date": "2026-06-23T00:00:00",
+          "startTime": "2026-06-23T10:00:00",
+          "endTime": "2026-06-23T11:00:00",
+          "participantIds": [
+            2,
+            4,
+            5
+          ],
+          "participants": "新表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        {
+          "id": 73,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新会議",
+          "seriesId": "update-series",
+          "date": "2026-06-30T00:00:00",
+          "startTime": "2026-06-30T10:00:00",
+          "endTime": "2026-06-30T11:00:00",
+          "participantIds": [
+            2,
+            4,
+            5
+          ],
+          "participants": "新表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        {
+          "id": 74,
+          "userId": 6,
+          "name": "架空の予約者",
+          "room": "旧会議室",
+          "numberOfPeople": 3,
+          "type": "社内",
+          "purpose": "旧会議",
+          "seriesId": "update-series",
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T09:00:00",
+          "endTime": "2026-06-22T10:00:00",
+          "participantIds": [
+            6
+          ],
+          "participants": "旧表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        }
+      ],
+      "appointments": [],
+      "status": 204,
+      "noticeCount": 0,
+      "forceNoticeFailure": false,
+      "fakeResponses": {},
+      "requests": [
+        {
+          "roomId": "900003",
+          "body": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者、追加参加者\n対応: 繰り返し予約がまとめて変更されました\n[hr]\n目的: 新会議\n利用日: 2026/06/23\n会議室: 新会議室\n時間: 10:00〜11:00\n予約者: 架空の予約者\n参加者: 継続参加者、追加参加者\n[hr]\n変更点:\n- 利用日が 2026/06/22 から 2026/06/23 に変更されました\n- 会議室が 旧会議室 から 新会議室 に変更されました\n- 区分が 社内 から 来客 に変更されました\n- 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました\n- 目的が「旧会議」から「新会議」に変更されました\n- 参加メンバーに 追加参加者 が追加されました\n- 参加メンバーから 外れた参加者 が削除されました\n[hr]\n更新件数: 3件\n[/info]"
+        },
+        {
+          "roomId": "900002",
+          "body": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者、追加参加者\n対応: 繰り返し予約がまとめて変更されました\n[hr]\n目的: 新会議\n利用日: 2026/06/23\n会議室: 新会議室\n時間: 10:00〜11:00\n予約者: 架空の予約者\n参加者: 継続参加者、追加参加者\n[hr]\n変更点:\n- 利用日が 2026/06/22 から 2026/06/23 に変更されました\n- 会議室が 旧会議室 から 新会議室 に変更されました\n- 区分が 社内 から 来客 に変更されました\n- 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました\n- 目的が「旧会議」から「新会議」に変更されました\n- 参加メンバーに 追加参加者 が追加されました\n- 参加メンバーから 外れた参加者 が削除されました\n[hr]\n更新件数: 3件\n[/info]"
+        },
+        {
+          "roomId": "900005",
+          "body": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者、追加参加者\n対応: 繰り返し予約がまとめて変更されました\n[hr]\n目的: 新会議\n利用日: 2026/06/23\n会議室: 新会議室\n時間: 10:00〜11:00\n予約者: 架空の予約者\n参加者: 継続参加者、追加参加者\n[hr]\n変更点:\n- 利用日が 2026/06/22 から 2026/06/23 に変更されました\n- 会議室が 旧会議室 から 新会議室 に変更されました\n- 区分が 社内 から 来客 に変更されました\n- 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました\n- 目的が「旧会議」から「新会議」に変更されました\n- 参加メンバーに 追加参加者 が追加されました\n- 参加メンバーから 外れた参加者 が削除されました\n[hr]\n更新件数: 3件\n[/info]"
+        }
+      ],
+      "logs": [
+        {
+          "reservationId": 71,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationUpdated",
+          "deliveryKey": "ReservationUpdated:reservation:71:user:3:change:92818b4af7d54e98b22ebc9e17d794d9",
+          "targetUserId": 3,
+          "scheduledStartTime": "2026-06-23T10:00:00",
+          "roomId": "900003",
+          "status": "Succeeded",
+          "errorMessage": null,
+          "attemptedAt": "2026-11-24T02:17:10.4384265",
+          "sentAt": "2026-11-24T02:17:10.4427093",
+          "message": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者、追加参加者\n対応: 繰り返し予約がまとめて変更されました\n[hr]\n目的: 新会議\n利用日: 2026/06/23\n会議室: 新会議室\n時間: 10:00〜11:00\n予約者: 架空の予約者\n参加者: 継続参加者、追加参加者\n[hr]\n変更点:\n- 利用日が 2026/06/22 から 2026/06/23 に変更されました\n- 会議室が 旧会議室 から 新会議室 に変更されました\n- 区分が 社内 から 来客 に変更されました\n- 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました\n- 目的が「旧会議」から「新会議」に変更されました\n- 参加メンバーに 追加参加者 が追加されました\n- 参加メンバーから 外れた参加者 が削除されました\n[hr]\n更新件数: 3件\n[/info]",
+          "createdAt": "2026-11-24T02:17:10.4384265"
+        },
+        {
+          "reservationId": 71,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationUpdated",
+          "deliveryKey": "ReservationUpdated:reservation:71:user:4:change:92818b4af7d54e98b22ebc9e17d794d9",
+          "targetUserId": 4,
+          "scheduledStartTime": "2026-06-23T10:00:00",
+          "roomId": null,
+          "status": "Skipped",
+          "errorMessage": "ChatworkDirectRoomId is not configured.",
+          "attemptedAt": "2026-11-24T02:17:10.44907",
+          "sentAt": null,
+          "message": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者、追加参加者\n対応: 繰り返し予約がまとめて変更されました\n[hr]\n目的: 新会議\n利用日: 2026/06/23\n会議室: 新会議室\n時間: 10:00〜11:00\n予約者: 架空の予約者\n参加者: 継続参加者、追加参加者\n[hr]\n変更点:\n- 利用日が 2026/06/22 から 2026/06/23 に変更されました\n- 会議室が 旧会議室 から 新会議室 に変更されました\n- 区分が 社内 から 来客 に変更されました\n- 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました\n- 目的が「旧会議」から「新会議」に変更されました\n- 参加メンバーに 追加参加者 が追加されました\n- 参加メンバーから 外れた参加者 が削除されました\n[hr]\n更新件数: 3件\n[/info]",
+          "createdAt": "2026-11-24T02:17:10.44907"
+        },
+        {
+          "reservationId": 71,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationUpdated",
+          "deliveryKey": "ReservationUpdated:reservation:71:user:2:change:92818b4af7d54e98b22ebc9e17d794d9",
+          "targetUserId": 2,
+          "scheduledStartTime": "2026-06-23T10:00:00",
+          "roomId": "900002",
+          "status": "Succeeded",
+          "errorMessage": null,
+          "attemptedAt": "2026-11-24T02:17:10.4538866",
+          "sentAt": "2026-11-24T02:17:10.4565111",
+          "message": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者、追加参加者\n対応: 繰り返し予約がまとめて変更されました\n[hr]\n目的: 新会議\n利用日: 2026/06/23\n会議室: 新会議室\n時間: 10:00〜11:00\n予約者: 架空の予約者\n参加者: 継続参加者、追加参加者\n[hr]\n変更点:\n- 利用日が 2026/06/22 から 2026/06/23 に変更されました\n- 会議室が 旧会議室 から 新会議室 に変更されました\n- 区分が 社内 から 来客 に変更されました\n- 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました\n- 目的が「旧会議」から「新会議」に変更されました\n- 参加メンバーに 追加参加者 が追加されました\n- 参加メンバーから 外れた参加者 が削除されました\n[hr]\n更新件数: 3件\n[/info]",
+          "createdAt": "2026-11-24T02:17:10.4538866"
+        },
+        {
+          "reservationId": 71,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationUpdated",
+          "deliveryKey": "ReservationUpdated:reservation:71:user:5:change:92818b4af7d54e98b22ebc9e17d794d9",
+          "targetUserId": 5,
+          "scheduledStartTime": "2026-06-23T10:00:00",
+          "roomId": "900005",
+          "status": "Succeeded",
+          "errorMessage": null,
+          "attemptedAt": "2026-11-24T02:17:10.463269",
+          "sentAt": "2026-11-24T02:17:10.4675157",
+          "message": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者、追加参加者\n対応: 繰り返し予約がまとめて変更されました\n[hr]\n目的: 新会議\n利用日: 2026/06/23\n会議室: 新会議室\n時間: 10:00〜11:00\n予約者: 架空の予約者\n参加者: 継続参加者、追加参加者\n[hr]\n変更点:\n- 利用日が 2026/06/22 から 2026/06/23 に変更されました\n- 会議室が 旧会議室 から 新会議室 に変更されました\n- 区分が 社内 から 来客 に変更されました\n- 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました\n- 目的が「旧会議」から「新会議」に変更されました\n- 参加メンバーに 追加参加者 が追加されました\n- 参加メンバーから 外れた参加者 が削除されました\n[hr]\n更新件数: 3件\n[/info]",
+          "createdAt": "2026-11-24T02:17:10.463269"
+        }
+      ]
+    },
+    {
+      "name": "changes_outside_representative",
+      "method": "POST",
+      "path": "/api/Reservations/73/series-update",
+      "request": {
+        "originalReservation": {
+          "id": 73,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "旧会議室",
+          "numberOfPeople": 3,
+          "type": "社内",
+          "purpose": "旧会議",
+          "seriesId": "update-series",
+          "date": "2026-06-29T00:00:00",
+          "startTime": "2026-06-29T09:00:00",
+          "endTime": "2026-06-29T10:00:00",
+          "participantIds": [
+            2,
+            6
+          ],
+          "participants": "旧表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        "updatedReservation": {
+          "id": 73,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "旧会議室",
+          "numberOfPeople": 3,
+          "type": "社内",
+          "purpose": "旧会議",
+          "seriesId": "update-series",
+          "date": "2026-06-29T00:00:00",
+          "startTime": "2026-06-29T09:00:00",
+          "endTime": "2026-06-29T10:00:00",
+          "participantIds": [
+            2,
+            3,
+            4
+          ],
+          "participants": "旧表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        "scope": "all",
+        "notifyParticipants": true
+      },
+      "dataset": "series",
+      "rows": [
+        {
+          "id": 71,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "旧会議室",
+          "numberOfPeople": 3,
+          "type": "社内",
+          "purpose": "旧会議",
+          "seriesId": "update-series",
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T09:00:00",
+          "endTime": "2026-06-22T10:00:00",
+          "participantIds": [
+            2,
+            3,
+            4
+          ],
+          "participants": "旧表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        {
+          "id": 72,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "旧会議室",
+          "numberOfPeople": 3,
+          "type": "社内",
+          "purpose": "旧会議",
+          "seriesId": "update-series",
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T09:00:00",
+          "endTime": "2026-06-22T10:00:00",
+          "participantIds": [
+            2,
+            3,
+            4
+          ],
+          "participants": "旧表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        {
+          "id": 73,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "旧会議室",
+          "numberOfPeople": 3,
+          "type": "社内",
+          "purpose": "旧会議",
+          "seriesId": "update-series",
+          "date": "2026-06-29T00:00:00",
+          "startTime": "2026-06-29T09:00:00",
+          "endTime": "2026-06-29T10:00:00",
+          "participantIds": [
+            2,
+            3,
+            4
+          ],
+          "participants": "旧表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        {
+          "id": 74,
+          "userId": 6,
+          "name": "架空の予約者",
+          "room": "旧会議室",
+          "numberOfPeople": 3,
+          "type": "社内",
+          "purpose": "旧会議",
+          "seriesId": "update-series",
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T09:00:00",
+          "endTime": "2026-06-22T10:00:00",
+          "participantIds": [
+            6
+          ],
+          "participants": "旧表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        }
+      ],
+      "appointments": [],
+      "status": 204,
+      "noticeCount": 6,
+      "forceNoticeFailure": false,
+      "fakeResponses": {},
+      "requests": [],
+      "logs": []
+    },
+    {
+      "name": "empty_targets",
+      "method": "POST",
+      "path": "/api/Reservations/78/series-update",
+      "request": {
+        "originalReservation": {
+          "id": 78,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "旧会議室",
+          "numberOfPeople": 3,
+          "type": "社内",
+          "purpose": "旧会議",
+          "seriesId": "missing ",
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T09:00:00",
+          "endTime": "2026-06-22T10:00:00",
+          "participantIds": [
+            2,
+            3,
+            4
+          ],
+          "participants": "旧表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        "updatedReservation": {
+          "id": 78,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新会議",
+          "seriesId": null,
+          "date": "2026-06-30T00:00:00",
+          "startTime": "2026-06-23T10:00:00",
+          "endTime": "2026-06-23T11:00:00",
+          "participantIds": [
+            2,
+            4,
+            5
+          ],
+          "participants": "新表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        "scope": "all",
+        "notifyParticipants": true
+      },
+      "dataset": "empty",
+      "rows": [
+        {
+          "id": 78,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "旧会議室",
+          "numberOfPeople": 3,
+          "type": "社内",
+          "purpose": "旧会議",
+          "seriesId": "missing ",
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T09:00:00",
+          "endTime": "2026-06-22T10:00:00",
+          "participantIds": [
+            2,
+            3,
+            4
+          ],
+          "participants": "旧表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        }
+      ],
+      "appointments": [],
+      "status": 204,
+      "noticeCount": 0,
+      "forceNoticeFailure": false,
+      "fakeResponses": {},
+      "requests": [],
+      "logs": []
+    },
+    {
+      "name": "provider_failure_and_timeout",
+      "method": "PUT",
+      "path": "/api/Reservations/51",
+      "request": {
+        "id": 51,
+        "userId": 2,
+        "name": "架空の予約者",
+        "room": "新会議室",
+        "numberOfPeople": 3,
+        "type": "来客",
+        "purpose": "新会議",
+        "seriesId": null,
+        "date": "2026-06-23T00:00:00",
+        "startTime": "2026-06-23T10:00:00",
+        "endTime": "2026-06-23T11:00:00",
+        "participantIds": [
+          2,
+          4,
+          5
+        ],
+        "participants": "新表示",
+        "repeatType": "しない",
+        "repeatUntil": null
+      },
+      "dataset": "single",
+      "rows": [
+        {
+          "id": 51,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新会議",
+          "seriesId": null,
+          "date": "2026-06-23T00:00:00",
+          "startTime": "2026-06-23T10:00:00",
+          "endTime": "2026-06-23T11:00:00",
+          "participantIds": [
+            2,
+            4,
+            5
+          ],
+          "participants": "新表示",
+          "repeatType": "しない",
+          "repeatUntil": null
+        }
+      ],
+      "appointments": [],
+      "status": 204,
+      "noticeCount": 3,
+      "forceNoticeFailure": false,
+      "fakeResponses": {
+        "900003": 503,
+        "900002": "timeout"
+      },
+      "requests": [
+        {
+          "roomId": "900003",
+          "body": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者、追加参加者\n対応: 変更内容を確認してください\n[hr]\n目的: 新会議\n利用日: 2026/06/23\n会議室: 新会議室\n時間: 10:00〜11:00\n予約者: 架空の予約者\n参加者: 継続参加者、追加参加者\n[hr]\n変更点:\n- 利用日が 2026/06/22 から 2026/06/23 に変更されました\n- 会議室が 旧会議室 から 新会議室 に変更されました\n- 区分が 社内 から 来客 に変更されました\n- 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました\n- 目的が「旧会議」から「新会議」に変更されました\n- 参加メンバーに 追加参加者 が追加されました\n- 参加メンバーから 外れた参加者 が削除されました\n[/info]"
+        },
+        {
+          "roomId": "900002",
+          "body": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者、追加参加者\n対応: 変更内容を確認してください\n[hr]\n目的: 新会議\n利用日: 2026/06/23\n会議室: 新会議室\n時間: 10:00〜11:00\n予約者: 架空の予約者\n参加者: 継続参加者、追加参加者\n[hr]\n変更点:\n- 利用日が 2026/06/22 から 2026/06/23 に変更されました\n- 会議室が 旧会議室 から 新会議室 に変更されました\n- 区分が 社内 から 来客 に変更されました\n- 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました\n- 目的が「旧会議」から「新会議」に変更されました\n- 参加メンバーに 追加参加者 が追加されました\n- 参加メンバーから 外れた参加者 が削除されました\n[/info]"
+        },
+        {
+          "roomId": "900005",
+          "body": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者、追加参加者\n対応: 変更内容を確認してください\n[hr]\n目的: 新会議\n利用日: 2026/06/23\n会議室: 新会議室\n時間: 10:00〜11:00\n予約者: 架空の予約者\n参加者: 継続参加者、追加参加者\n[hr]\n変更点:\n- 利用日が 2026/06/22 から 2026/06/23 に変更されました\n- 会議室が 旧会議室 から 新会議室 に変更されました\n- 区分が 社内 から 来客 に変更されました\n- 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました\n- 目的が「旧会議」から「新会議」に変更されました\n- 参加メンバーに 追加参加者 が追加されました\n- 参加メンバーから 外れた参加者 が削除されました\n[/info]"
+        }
+      ],
+      "logs": [
+        {
+          "reservationId": 51,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationUpdated",
+          "deliveryKey": "ReservationUpdated:reservation:51:user:3:change:6aaf88681fe643b3a028c5106e32670f",
+          "targetUserId": 3,
+          "scheduledStartTime": "2026-06-23T10:00:00",
+          "roomId": "900003",
+          "status": "Failed",
+          "errorMessage": "Failed to send Chatwork message. StatusCode: 503, Response: {\"synthetic\":true}",
+          "attemptedAt": "2026-11-24T02:17:10.5744555",
+          "sentAt": null,
+          "message": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者、追加参加者\n対応: 変更内容を確認してください\n[hr]\n目的: 新会議\n利用日: 2026/06/23\n会議室: 新会議室\n時間: 10:00〜11:00\n予約者: 架空の予約者\n参加者: 継続参加者、追加参加者\n[hr]\n変更点:\n- 利用日が 2026/06/22 から 2026/06/23 に変更されました\n- 会議室が 旧会議室 から 新会議室 に変更されました\n- 区分が 社内 から 来客 に変更されました\n- 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました\n- 目的が「旧会議」から「新会議」に変更されました\n- 参加メンバーに 追加参加者 が追加されました\n- 参加メンバーから 外れた参加者 が削除されました\n[/info]",
+          "createdAt": "2026-11-24T02:17:10.5744555"
+        },
+        {
+          "reservationId": 51,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationUpdated",
+          "deliveryKey": "ReservationUpdated:reservation:51:user:4:change:6aaf88681fe643b3a028c5106e32670f",
+          "targetUserId": 4,
+          "scheduledStartTime": "2026-06-23T10:00:00",
+          "roomId": null,
+          "status": "Skipped",
+          "errorMessage": "ChatworkDirectRoomId is not configured.",
+          "attemptedAt": "2026-11-24T02:17:10.5841984",
+          "sentAt": null,
+          "message": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者、追加参加者\n対応: 変更内容を確認してください\n[hr]\n目的: 新会議\n利用日: 2026/06/23\n会議室: 新会議室\n時間: 10:00〜11:00\n予約者: 架空の予約者\n参加者: 継続参加者、追加参加者\n[hr]\n変更点:\n- 利用日が 2026/06/22 から 2026/06/23 に変更されました\n- 会議室が 旧会議室 から 新会議室 に変更されました\n- 区分が 社内 から 来客 に変更されました\n- 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました\n- 目的が「旧会議」から「新会議」に変更されました\n- 参加メンバーに 追加参加者 が追加されました\n- 参加メンバーから 外れた参加者 が削除されました\n[/info]",
+          "createdAt": "2026-11-24T02:17:10.5841984"
+        },
+        {
+          "reservationId": 51,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationUpdated",
+          "deliveryKey": "ReservationUpdated:reservation:51:user:2:change:6aaf88681fe643b3a028c5106e32670f",
+          "targetUserId": 2,
+          "scheduledStartTime": "2026-06-23T10:00:00",
+          "roomId": "900002",
+          "status": "Failed",
+          "errorMessage": "The request was canceled due to the configured HttpClient.Timeout of 0.5 seconds elapsing.",
+          "attemptedAt": "2026-11-24T02:17:10.5892376",
+          "sentAt": null,
+          "message": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者、追加参加者\n対応: 変更内容を確認してください\n[hr]\n目的: 新会議\n利用日: 2026/06/23\n会議室: 新会議室\n時間: 10:00〜11:00\n予約者: 架空の予約者\n参加者: 継続参加者、追加参加者\n[hr]\n変更点:\n- 利用日が 2026/06/22 から 2026/06/23 に変更されました\n- 会議室が 旧会議室 から 新会議室 に変更されました\n- 区分が 社内 から 来客 に変更されました\n- 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました\n- 目的が「旧会議」から「新会議」に変更されました\n- 参加メンバーに 追加参加者 が追加されました\n- 参加メンバーから 外れた参加者 が削除されました\n[/info]",
+          "createdAt": "2026-11-24T02:17:10.5892376"
+        },
+        {
+          "reservationId": 51,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationUpdated",
+          "deliveryKey": "ReservationUpdated:reservation:51:user:5:change:6aaf88681fe643b3a028c5106e32670f",
+          "targetUserId": 5,
+          "scheduledStartTime": "2026-06-23T10:00:00",
+          "roomId": "900005",
+          "status": "Succeeded",
+          "errorMessage": null,
+          "attemptedAt": "2026-11-24T02:17:11.1090477",
+          "sentAt": "2026-11-24T02:17:11.1128016",
+          "message": "[info][title]会議予約が変更されました[/title]\n対象: 外れた参加者、継続参加者、架空の予約者、追加参加者\n対応: 変更内容を確認してください\n[hr]\n目的: 新会議\n利用日: 2026/06/23\n会議室: 新会議室\n時間: 10:00〜11:00\n予約者: 架空の予約者\n参加者: 継続参加者、追加参加者\n[hr]\n変更点:\n- 利用日が 2026/06/22 から 2026/06/23 に変更されました\n- 会議室が 旧会議室 から 新会議室 に変更されました\n- 区分が 社内 から 来客 に変更されました\n- 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました\n- 目的が「旧会議」から「新会議」に変更されました\n- 参加メンバーに 追加参加者 が追加されました\n- 参加メンバーから 外れた参加者 が削除されました\n[/info]",
+          "createdAt": "2026-11-24T02:17:11.1090477"
+        }
+      ]
+    },
+    {
+      "name": "notice_commit_failure",
+      "method": "POST",
+      "path": "/api/Reservations/73/series-update",
+      "request": {
+        "originalReservation": {
+          "id": 73,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "旧会議室",
+          "numberOfPeople": 3,
+          "type": "社内",
+          "purpose": "旧会議",
+          "seriesId": "update-series",
+          "date": "2026-06-29T00:00:00",
+          "startTime": "2026-06-29T09:00:00",
+          "endTime": "2026-06-29T10:00:00",
+          "participantIds": [
+            2,
+            6
+          ],
+          "participants": "旧表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        "updatedReservation": {
+          "id": 73,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新会議",
+          "seriesId": null,
+          "date": "2026-06-30T00:00:00",
+          "startTime": "2026-06-23T10:00:00",
+          "endTime": "2026-06-23T11:00:00",
+          "participantIds": [
+            2,
+            4,
+            5
+          ],
+          "participants": "新表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        "scope": "all",
+        "notifyParticipants": true
+      },
+      "dataset": "series",
+      "rows": [
+        {
+          "id": 71,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新会議",
+          "seriesId": "update-series",
+          "date": "2026-06-23T00:00:00",
+          "startTime": "2026-06-23T10:00:00",
+          "endTime": "2026-06-23T11:00:00",
+          "participantIds": [
+            2,
+            4,
+            5
+          ],
+          "participants": "新表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        {
+          "id": 72,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新会議",
+          "seriesId": "update-series",
+          "date": "2026-06-23T00:00:00",
+          "startTime": "2026-06-23T10:00:00",
+          "endTime": "2026-06-23T11:00:00",
+          "participantIds": [
+            2,
+            4,
+            5
+          ],
+          "participants": "新表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        {
+          "id": 73,
+          "userId": 2,
+          "name": "架空の予約者",
+          "room": "新会議室",
+          "numberOfPeople": 3,
+          "type": "来客",
+          "purpose": "新会議",
+          "seriesId": "update-series",
+          "date": "2026-06-30T00:00:00",
+          "startTime": "2026-06-30T10:00:00",
+          "endTime": "2026-06-30T11:00:00",
+          "participantIds": [
+            2,
+            4,
+            5
+          ],
+          "participants": "新表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        },
+        {
+          "id": 74,
+          "userId": 6,
+          "name": "架空の予約者",
+          "room": "旧会議室",
+          "numberOfPeople": 3,
+          "type": "社内",
+          "purpose": "旧会議",
+          "seriesId": "update-series",
+          "date": "2026-06-22T00:00:00",
+          "startTime": "2026-06-22T09:00:00",
+          "endTime": "2026-06-22T10:00:00",
+          "participantIds": [
+            6
+          ],
+          "participants": "旧表示",
+          "repeatType": "毎週",
+          "repeatUntil": "2026-07-31T00:00:00"
+        }
+      ],
+      "appointments": [],
+      "status": 500,
+      "noticeCount": 0,
+      "forceNoticeFailure": true,
+      "fakeResponses": {},
+      "requests": [],
+      "logs": []
+    }
+  ]
+}
