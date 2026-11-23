@@ -8,11 +8,13 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
 
 	"github.com/Haru8644/MeetingRoomBooker/backend/internal/auth"
+	"github.com/Haru8644/MeetingRoomBooker/backend/internal/chatwork"
 	"github.com/Haru8644/MeetingRoomBooker/backend/internal/httpapi"
 	"github.com/Haru8644/MeetingRoomBooker/backend/internal/notifications"
 	"github.com/Haru8644/MeetingRoomBooker/backend/internal/reservations"
@@ -63,6 +65,20 @@ func run(ctx context.Context) error {
 		ping = pool.Ping
 	}
 
+	var cancellation *chatwork.CancellationSender
+	if setting := os.Getenv("CHATWORK_ENABLED"); setting != "" {
+		enabled, err := strconv.ParseBool(setting)
+		if err != nil {
+			return errors.New("CHATWORK_ENABLED must be a boolean")
+		}
+		if enabled {
+			cancellation, err = chatwork.NewCancellationSender(pool, os.Getenv("CHATWORK_API_TOKEN"), os.Getenv("CHATWORK_API_BASE_URL"), development)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	reservationList := httpapi.NewReservationListHandler(func(ctx context.Context) ([]reservations.ListEntry, error) {
 		return reservations.List(ctx, pool)
 	})
@@ -79,10 +95,18 @@ func run(ctx context.Context) error {
 		return reservations.UpdateSeries(ctx, pool, id, entry, actorID, isAdmin, scope, notify)
 	}
 	deleteReservation := func(ctx context.Context, id, actorID int, isAdmin bool) error {
-		return reservations.Delete(ctx, pool, id, actorID, isAdmin)
+		deleted, err := reservations.Delete(ctx, pool, id, actorID, isAdmin)
+		if err == nil && cancellation != nil {
+			cancellation.Send(ctx, deleted)
+		}
+		return err
 	}
 	deleteReservationSeries := func(ctx context.Context, id, actorID int, isAdmin bool, scope string) error {
-		return reservations.DeleteSeries(ctx, pool, id, actorID, isAdmin, scope)
+		deleted, err := reservations.DeleteSeries(ctx, pool, id, actorID, isAdmin, scope)
+		if err == nil && cancellation != nil {
+			cancellation.Send(ctx, deleted)
+		}
+		return err
 	}
 	changeParticipation := func(ctx context.Context, id, actorID int, join bool) error {
 		return reservations.ChangeParticipation(ctx, pool, id, actorID, join)

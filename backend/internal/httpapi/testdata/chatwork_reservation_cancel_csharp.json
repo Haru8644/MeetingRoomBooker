@@ -1,0 +1,593 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "架空の管理者",
+      "roomId": "900001"
+    },
+    {
+      "id": 2,
+      "name": "架空の予約者",
+      "roomId": "900002"
+    },
+    {
+      "id": 3,
+      "name": "架空の参加者",
+      "roomId": " 900003 "
+    },
+    {
+      "id": 4,
+      "name": "宛先未設定の参加者",
+      "roomId": null
+    },
+    {
+      "id": 5,
+      "name": "架空の参加者",
+      "roomId": "900005"
+    },
+    {
+      "id": 6,
+      "name": "対象外の予約者",
+      "roomId": "900006"
+    }
+  ],
+  "datasets": {
+    "single": [
+      {
+        "id": 55,
+        "userId": 2,
+        "name": "予約表の架空名",
+        "room": "大会議室",
+        "numberOfPeople": 4,
+        "type": "社内",
+        "purpose": " ",
+        "seriesId": null,
+        "date": "2026-06-22T00:00:00",
+        "startTime": "2026-06-22T09:00:00",
+        "endTime": "2026-06-22T10:00:00",
+        "participantIds": [
+          2,
+          3,
+          3,
+          0,
+          -5,
+          77,
+          4
+        ],
+        "participants": "表示用の名前",
+        "repeatType": "しない",
+        "repeatUntil": null
+      }
+    ],
+    "series": [
+      {
+        "id": 73,
+        "userId": 2,
+        "name": "予約表の架空名",
+        "room": "大会議室",
+        "numberOfPeople": 4,
+        "type": "社内",
+        "purpose": "週次会議",
+        "seriesId": "cancel-series",
+        "date": "2026-06-29T00:00:00",
+        "startTime": "2026-06-29T09:00:00",
+        "endTime": "2026-06-29T10:00:00",
+        "participantIds": [
+          77,
+          5,
+          2
+        ],
+        "participants": "表示用の名前",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      },
+      {
+        "id": 72,
+        "userId": 2,
+        "name": "予約表の架空名",
+        "room": "大会議室",
+        "numberOfPeople": 4,
+        "type": "社内",
+        "purpose": "週次会議",
+        "seriesId": "cancel-series",
+        "date": "2026-06-22T00:00:00",
+        "startTime": "2026-06-22T08:00:00",
+        "endTime": "2026-06-22T09:00:00",
+        "participantIds": [
+          3,
+          2,
+          3
+        ],
+        "participants": "表示用の名前",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      },
+      {
+        "id": 71,
+        "userId": 2,
+        "name": "予約表の架空名",
+        "room": "大会議室",
+        "numberOfPeople": 4,
+        "type": "社内",
+        "purpose": "週次会議",
+        "seriesId": "cancel-series",
+        "date": "2026-06-22T00:00:00",
+        "startTime": "2026-06-22T09:00:00",
+        "endTime": "2026-06-22T10:00:00",
+        "participantIds": [
+          2,
+          4,
+          0
+        ],
+        "participants": "表示用の名前",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      },
+      {
+        "id": 74,
+        "userId": 6,
+        "name": "予約表の架空名",
+        "room": "大会議室",
+        "numberOfPeople": 4,
+        "type": "社内",
+        "purpose": "週次会議",
+        "seriesId": "cancel-series",
+        "date": "2026-06-22T00:00:00",
+        "startTime": "2026-06-22T09:00:00",
+        "endTime": "2026-06-22T10:00:00",
+        "participantIds": [
+          6
+        ],
+        "participants": "表示用の名前",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      }
+    ],
+    "empty": [
+      {
+        "id": 78,
+        "userId": 2,
+        "name": "予約表の架空名",
+        "room": "大会議室",
+        "numberOfPeople": 4,
+        "type": "社内",
+        "purpose": "週次会議",
+        "seriesId": "unmatched ",
+        "date": "2026-06-22T00:00:00",
+        "startTime": "2026-06-22T09:00:00",
+        "endTime": "2026-06-22T10:00:00",
+        "participantIds": [
+          2,
+          3,
+          3,
+          0,
+          -5,
+          77,
+          4
+        ],
+        "participants": "表示用の名前",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      }
+    ],
+    "only_owner": [
+      {
+        "id": 56,
+        "userId": 2,
+        "name": "予約表の架空名",
+        "room": "大会議室",
+        "numberOfPeople": 4,
+        "type": "社内",
+        "purpose": "単独予約",
+        "seriesId": "cancel-series",
+        "date": "2026-06-22T00:00:00",
+        "startTime": "2026-06-22T09:00:00",
+        "endTime": "2026-06-22T10:00:00",
+        "participantIds": [
+          2,
+          2,
+          0
+        ],
+        "participants": "表示用の名前",
+        "repeatType": "毎週",
+        "repeatUntil": "2026-07-31T00:00:00"
+      }
+    ]
+  },
+  "cases": [
+    {
+      "name": "single",
+      "dataset": "single",
+      "method": "DELETE",
+      "path": "/api/Reservations/55",
+      "request": null,
+      "status": 204,
+      "remaining": [],
+      "existingKey": false,
+      "forceDeleteFailure": false,
+      "fakeResponses": {},
+      "requests": [
+        {
+          "roomId": "900003",
+          "body": "[info][title]会議予約がキャンセルされました[/title]\n対象: 架空の参加者、宛先未設定の参加者、架空の予約者\n対応: この予約は無効です\n[hr]\n目的: 予約表の架空名\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:00〜10:00\n予約者: 架空の予約者\n参加者: 架空の参加者、ユーザー77、宛先未設定の参加者\n[/info]"
+        },
+        {
+          "roomId": "900002",
+          "body": "[info][title]会議予約がキャンセルされました[/title]\n対象: 架空の参加者、宛先未設定の参加者、架空の予約者\n対応: この予約は無効です\n[hr]\n目的: 予約表の架空名\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:00〜10:00\n予約者: 架空の予約者\n参加者: 架空の参加者、ユーザー77、宛先未設定の参加者\n[/info]"
+        }
+      ],
+      "logs": [
+        {
+          "reservationId": 55,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationCanceled",
+          "deliveryKey": "ReservationCanceled:reservation:55:user:3",
+          "targetUserId": 3,
+          "scheduledStartTime": "2026-06-22T09:00:00",
+          "roomId": "900003",
+          "status": "Succeeded",
+          "errorMessage": null,
+          "attemptedAt": "2026-11-24T00:53:41.3308061",
+          "sentAt": "2026-11-24T00:53:41.3721799",
+          "message": "[info][title]会議予約がキャンセルされました[/title]\n対象: 架空の参加者、宛先未設定の参加者、架空の予約者\n対応: この予約は無効です\n[hr]\n目的: 予約表の架空名\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:00〜10:00\n予約者: 架空の予約者\n参加者: 架空の参加者、ユーザー77、宛先未設定の参加者\n[/info]",
+          "createdAt": "2026-11-24T00:53:41.3308061"
+        },
+        {
+          "reservationId": 55,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationCanceled",
+          "deliveryKey": "ReservationCanceled:reservation:55:user:4",
+          "targetUserId": 4,
+          "scheduledStartTime": "2026-06-22T09:00:00",
+          "roomId": null,
+          "status": "Skipped",
+          "errorMessage": "ChatworkDirectRoomId is not configured.",
+          "attemptedAt": "2026-11-24T00:53:41.420196",
+          "sentAt": null,
+          "message": "[info][title]会議予約がキャンセルされました[/title]\n対象: 架空の参加者、宛先未設定の参加者、架空の予約者\n対応: この予約は無効です\n[hr]\n目的: 予約表の架空名\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:00〜10:00\n予約者: 架空の予約者\n参加者: 架空の参加者、ユーザー77、宛先未設定の参加者\n[/info]",
+          "createdAt": "2026-11-24T00:53:41.420196"
+        },
+        {
+          "reservationId": 55,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationCanceled",
+          "deliveryKey": "ReservationCanceled:reservation:55:user:2",
+          "targetUserId": 2,
+          "scheduledStartTime": "2026-06-22T09:00:00",
+          "roomId": "900002",
+          "status": "Succeeded",
+          "errorMessage": null,
+          "attemptedAt": "2026-11-24T00:53:41.4256897",
+          "sentAt": "2026-11-24T00:53:41.4342398",
+          "message": "[info][title]会議予約がキャンセルされました[/title]\n対象: 架空の参加者、宛先未設定の参加者、架空の予約者\n対応: この予約は無効です\n[hr]\n目的: 予約表の架空名\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:00〜10:00\n予約者: 架空の予約者\n参加者: 架空の参加者、ユーザー77、宛先未設定の参加者\n[/info]",
+          "createdAt": "2026-11-24T00:53:41.4256897"
+        }
+      ]
+    },
+    {
+      "name": "series",
+      "dataset": "series",
+      "method": "POST",
+      "path": "/api/Reservations/73/series-delete",
+      "request": {
+        "originalReservation": {
+          "id": 73,
+          "name": "入力の架空名",
+          "room": "別室"
+        },
+        "scope": "all"
+      },
+      "status": 204,
+      "remaining": [
+        74
+      ],
+      "existingKey": false,
+      "forceDeleteFailure": false,
+      "fakeResponses": {},
+      "requests": [
+        {
+          "roomId": "900003",
+          "body": "[info][title]会議予約がキャンセルされました[/title]\n対象: 宛先未設定の参加者、架空の参加者、架空の予約者\n対応: 繰り返し予約がまとめて削除されました\n[hr]\n目的: 週次会議\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:00〜10:00\n予約者: 架空の予約者\n参加者: 宛先未設定の参加者、架空の参加者、ユーザー77、架空の参加者\n[hr]\n削除件数: 3件\n[/info]"
+        },
+        {
+          "roomId": "900005",
+          "body": "[info][title]会議予約がキャンセルされました[/title]\n対象: 宛先未設定の参加者、架空の参加者、架空の予約者\n対応: 繰り返し予約がまとめて削除されました\n[hr]\n目的: 週次会議\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:00〜10:00\n予約者: 架空の予約者\n参加者: 宛先未設定の参加者、架空の参加者、ユーザー77、架空の参加者\n[hr]\n削除件数: 3件\n[/info]"
+        },
+        {
+          "roomId": "900002",
+          "body": "[info][title]会議予約がキャンセルされました[/title]\n対象: 宛先未設定の参加者、架空の参加者、架空の予約者\n対応: 繰り返し予約がまとめて削除されました\n[hr]\n目的: 週次会議\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:00〜10:00\n予約者: 架空の予約者\n参加者: 宛先未設定の参加者、架空の参加者、ユーザー77、架空の参加者\n[hr]\n削除件数: 3件\n[/info]"
+        }
+      ],
+      "logs": [
+        {
+          "reservationId": 71,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationCanceled",
+          "deliveryKey": "ReservationCanceled:reservation:71:user:4",
+          "targetUserId": 4,
+          "scheduledStartTime": "2026-06-22T09:00:00",
+          "roomId": null,
+          "status": "Skipped",
+          "errorMessage": "ChatworkDirectRoomId is not configured.",
+          "attemptedAt": "2026-11-24T00:53:41.5229559",
+          "sentAt": null,
+          "message": "[info][title]会議予約がキャンセルされました[/title]\n対象: 宛先未設定の参加者、架空の参加者、架空の予約者\n対応: 繰り返し予約がまとめて削除されました\n[hr]\n目的: 週次会議\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:00〜10:00\n予約者: 架空の予約者\n参加者: 宛先未設定の参加者、架空の参加者、ユーザー77、架空の参加者\n[hr]\n削除件数: 3件\n[/info]",
+          "createdAt": "2026-11-24T00:53:41.5229559"
+        },
+        {
+          "reservationId": 71,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationCanceled",
+          "deliveryKey": "ReservationCanceled:reservation:71:user:3",
+          "targetUserId": 3,
+          "scheduledStartTime": "2026-06-22T09:00:00",
+          "roomId": "900003",
+          "status": "Succeeded",
+          "errorMessage": null,
+          "attemptedAt": "2026-11-24T00:53:41.5266043",
+          "sentAt": "2026-11-24T00:53:41.5286501",
+          "message": "[info][title]会議予約がキャンセルされました[/title]\n対象: 宛先未設定の参加者、架空の参加者、架空の予約者\n対応: 繰り返し予約がまとめて削除されました\n[hr]\n目的: 週次会議\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:00〜10:00\n予約者: 架空の予約者\n参加者: 宛先未設定の参加者、架空の参加者、ユーザー77、架空の参加者\n[hr]\n削除件数: 3件\n[/info]",
+          "createdAt": "2026-11-24T00:53:41.5266043"
+        },
+        {
+          "reservationId": 71,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationCanceled",
+          "deliveryKey": "ReservationCanceled:reservation:71:user:5",
+          "targetUserId": 5,
+          "scheduledStartTime": "2026-06-22T09:00:00",
+          "roomId": "900005",
+          "status": "Succeeded",
+          "errorMessage": null,
+          "attemptedAt": "2026-11-24T00:53:41.5331389",
+          "sentAt": "2026-11-24T00:53:41.5361297",
+          "message": "[info][title]会議予約がキャンセルされました[/title]\n対象: 宛先未設定の参加者、架空の参加者、架空の予約者\n対応: 繰り返し予約がまとめて削除されました\n[hr]\n目的: 週次会議\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:00〜10:00\n予約者: 架空の予約者\n参加者: 宛先未設定の参加者、架空の参加者、ユーザー77、架空の参加者\n[hr]\n削除件数: 3件\n[/info]",
+          "createdAt": "2026-11-24T00:53:41.5331389"
+        },
+        {
+          "reservationId": 71,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationCanceled",
+          "deliveryKey": "ReservationCanceled:reservation:71:user:2",
+          "targetUserId": 2,
+          "scheduledStartTime": "2026-06-22T09:00:00",
+          "roomId": "900002",
+          "status": "Succeeded",
+          "errorMessage": null,
+          "attemptedAt": "2026-11-24T00:53:41.5418637",
+          "sentAt": "2026-11-24T00:53:41.544444",
+          "message": "[info][title]会議予約がキャンセルされました[/title]\n対象: 宛先未設定の参加者、架空の参加者、架空の予約者\n対応: 繰り返し予約がまとめて削除されました\n[hr]\n目的: 週次会議\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:00〜10:00\n予約者: 架空の予約者\n参加者: 宛先未設定の参加者、架空の参加者、ユーザー77、架空の参加者\n[hr]\n削除件数: 3件\n[/info]",
+          "createdAt": "2026-11-24T00:53:41.5418637"
+        }
+      ]
+    },
+    {
+      "name": "series_one_occurrence",
+      "dataset": "only_owner",
+      "method": "POST",
+      "path": "/api/Reservations/56/series-delete",
+      "request": {
+        "originalReservation": {
+          "id": 56,
+          "name": "入力の架空名",
+          "room": "別室"
+        },
+        "scope": "all"
+      },
+      "status": 204,
+      "remaining": [],
+      "existingKey": false,
+      "forceDeleteFailure": false,
+      "fakeResponses": {},
+      "requests": [
+        {
+          "roomId": "900002",
+          "body": "[info][title]会議予約がキャンセルされました[/title]\n対象: 架空の予約者\n対応: この予約は無効です\n[hr]\n目的: 単独予約\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:00〜10:00\n予約者: 架空の予約者\n参加者: なし\n[/info]"
+        }
+      ],
+      "logs": [
+        {
+          "reservationId": 56,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationCanceled",
+          "deliveryKey": "ReservationCanceled:reservation:56:user:2",
+          "targetUserId": 2,
+          "scheduledStartTime": "2026-06-22T09:00:00",
+          "roomId": "900002",
+          "status": "Succeeded",
+          "errorMessage": null,
+          "attemptedAt": "2026-11-24T00:53:41.5759084",
+          "sentAt": "2026-11-24T00:53:41.5774898",
+          "message": "[info][title]会議予約がキャンセルされました[/title]\n対象: 架空の予約者\n対応: この予約は無効です\n[hr]\n目的: 単独予約\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:00〜10:00\n予約者: 架空の予約者\n参加者: なし\n[/info]",
+          "createdAt": "2026-11-24T00:53:41.5759084"
+        }
+      ]
+    },
+    {
+      "name": "existing_key",
+      "dataset": "single",
+      "method": "DELETE",
+      "path": "/api/Reservations/55",
+      "request": null,
+      "status": 204,
+      "remaining": [],
+      "existingKey": true,
+      "forceDeleteFailure": false,
+      "fakeResponses": {},
+      "requests": [
+        {
+          "roomId": "900002",
+          "body": "[info][title]会議予約がキャンセルされました[/title]\n対象: 架空の参加者、宛先未設定の参加者、架空の予約者\n対応: この予約は無効です\n[hr]\n目的: 予約表の架空名\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:00〜10:00\n予約者: 架空の予約者\n参加者: 架空の参加者、ユーザー77、宛先未設定の参加者\n[/info]"
+        }
+      ],
+      "logs": [
+        {
+          "reservationId": 55,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationCanceled",
+          "deliveryKey": "ReservationCanceled:reservation:55:user:3",
+          "targetUserId": 3,
+          "scheduledStartTime": "2026-06-22T09:00:00",
+          "roomId": "900003",
+          "status": "Failed",
+          "errorMessage": "previous synthetic failure",
+          "attemptedAt": "2026-05-01T10:00:00",
+          "sentAt": null,
+          "message": "過去の配信ログ",
+          "createdAt": "2026-05-01T10:00:00"
+        },
+        {
+          "reservationId": 55,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationCanceled",
+          "deliveryKey": "ReservationCanceled:reservation:55:user:4",
+          "targetUserId": 4,
+          "scheduledStartTime": "2026-06-22T09:00:00",
+          "roomId": null,
+          "status": "Skipped",
+          "errorMessage": "ChatworkDirectRoomId is not configured.",
+          "attemptedAt": "2026-11-24T00:53:41.6021171",
+          "sentAt": null,
+          "message": "[info][title]会議予約がキャンセルされました[/title]\n対象: 架空の参加者、宛先未設定の参加者、架空の予約者\n対応: この予約は無効です\n[hr]\n目的: 予約表の架空名\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:00〜10:00\n予約者: 架空の予約者\n参加者: 架空の参加者、ユーザー77、宛先未設定の参加者\n[/info]",
+          "createdAt": "2026-11-24T00:53:41.6021171"
+        },
+        {
+          "reservationId": 55,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationCanceled",
+          "deliveryKey": "ReservationCanceled:reservation:55:user:2",
+          "targetUserId": 2,
+          "scheduledStartTime": "2026-06-22T09:00:00",
+          "roomId": "900002",
+          "status": "Succeeded",
+          "errorMessage": null,
+          "attemptedAt": "2026-11-24T00:53:41.6072207",
+          "sentAt": "2026-11-24T00:53:41.610278",
+          "message": "[info][title]会議予約がキャンセルされました[/title]\n対象: 架空の参加者、宛先未設定の参加者、架空の予約者\n対応: この予約は無効です\n[hr]\n目的: 予約表の架空名\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:00〜10:00\n予約者: 架空の予約者\n参加者: 架空の参加者、ユーザー77、宛先未設定の参加者\n[/info]",
+          "createdAt": "2026-11-24T00:53:41.6072207"
+        }
+      ]
+    },
+    {
+      "name": "provider_failure_and_timeout",
+      "dataset": "single",
+      "method": "DELETE",
+      "path": "/api/Reservations/55",
+      "request": null,
+      "status": 204,
+      "remaining": [],
+      "existingKey": false,
+      "forceDeleteFailure": false,
+      "fakeResponses": {
+        "900003": 503,
+        "900002": "timeout"
+      },
+      "requests": [
+        {
+          "roomId": "900003",
+          "body": "[info][title]会議予約がキャンセルされました[/title]\n対象: 架空の参加者、宛先未設定の参加者、架空の予約者\n対応: この予約は無効です\n[hr]\n目的: 予約表の架空名\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:00〜10:00\n予約者: 架空の予約者\n参加者: 架空の参加者、ユーザー77、宛先未設定の参加者\n[/info]"
+        },
+        {
+          "roomId": "900002",
+          "body": "[info][title]会議予約がキャンセルされました[/title]\n対象: 架空の参加者、宛先未設定の参加者、架空の予約者\n対応: この予約は無効です\n[hr]\n目的: 予約表の架空名\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:00〜10:00\n予約者: 架空の予約者\n参加者: 架空の参加者、ユーザー77、宛先未設定の参加者\n[/info]"
+        }
+      ],
+      "logs": [
+        {
+          "reservationId": 55,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationCanceled",
+          "deliveryKey": "ReservationCanceled:reservation:55:user:3",
+          "targetUserId": 3,
+          "scheduledStartTime": "2026-06-22T09:00:00",
+          "roomId": "900003",
+          "status": "Failed",
+          "errorMessage": "Failed to send Chatwork message. StatusCode: 503, Response: {\"synthetic\":true}",
+          "attemptedAt": "2026-11-24T00:53:41.6378082",
+          "sentAt": null,
+          "message": "[info][title]会議予約がキャンセルされました[/title]\n対象: 架空の参加者、宛先未設定の参加者、架空の予約者\n対応: この予約は無効です\n[hr]\n目的: 予約表の架空名\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:00〜10:00\n予約者: 架空の予約者\n参加者: 架空の参加者、ユーザー77、宛先未設定の参加者\n[/info]",
+          "createdAt": "2026-11-24T00:53:41.6378082"
+        },
+        {
+          "reservationId": 55,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationCanceled",
+          "deliveryKey": "ReservationCanceled:reservation:55:user:4",
+          "targetUserId": 4,
+          "scheduledStartTime": "2026-06-22T09:00:00",
+          "roomId": null,
+          "status": "Skipped",
+          "errorMessage": "ChatworkDirectRoomId is not configured.",
+          "attemptedAt": "2026-11-24T00:53:41.659956",
+          "sentAt": null,
+          "message": "[info][title]会議予約がキャンセルされました[/title]\n対象: 架空の参加者、宛先未設定の参加者、架空の予約者\n対応: この予約は無効です\n[hr]\n目的: 予約表の架空名\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:00〜10:00\n予約者: 架空の予約者\n参加者: 架空の参加者、ユーザー77、宛先未設定の参加者\n[/info]",
+          "createdAt": "2026-11-24T00:53:41.659956"
+        },
+        {
+          "reservationId": 55,
+          "workScheduleEntryId": null,
+          "deliveryType": "ReservationCanceled",
+          "deliveryKey": "ReservationCanceled:reservation:55:user:2",
+          "targetUserId": 2,
+          "scheduledStartTime": "2026-06-22T09:00:00",
+          "roomId": "900002",
+          "status": "Failed",
+          "errorMessage": "The request was canceled due to the configured HttpClient.Timeout of 0.5 seconds elapsing.",
+          "attemptedAt": "2026-11-24T00:53:41.6669427",
+          "sentAt": null,
+          "message": "[info][title]会議予約がキャンセルされました[/title]\n対象: 架空の参加者、宛先未設定の参加者、架空の予約者\n対応: この予約は無効です\n[hr]\n目的: 予約表の架空名\n利用日: 2026/06/22\n会議室: 大会議室\n時間: 09:00〜10:00\n予約者: 架空の予約者\n参加者: 架空の参加者、ユーザー77、宛先未設定の参加者\n[/info]",
+          "createdAt": "2026-11-24T00:53:41.6669427"
+        }
+      ]
+    },
+    {
+      "name": "empty",
+      "dataset": "empty",
+      "method": "POST",
+      "path": "/api/Reservations/78/series-delete",
+      "request": {
+        "originalReservation": {
+          "id": 78,
+          "name": "入力の架空名",
+          "room": "別室"
+        },
+        "scope": "all"
+      },
+      "status": 204,
+      "remaining": [
+        78
+      ],
+      "existingKey": false,
+      "forceDeleteFailure": false,
+      "fakeResponses": {},
+      "requests": [],
+      "logs": []
+    },
+    {
+      "name": "delete_failure",
+      "dataset": "series",
+      "method": "POST",
+      "path": "/api/Reservations/73/series-delete",
+      "request": {
+        "originalReservation": {
+          "id": 73,
+          "name": "入力の架空名",
+          "room": "別室"
+        },
+        "scope": "all"
+      },
+      "status": 500,
+      "remaining": [
+        71,
+        72,
+        73,
+        74
+      ],
+      "existingKey": false,
+      "forceDeleteFailure": true,
+      "fakeResponses": {},
+      "requests": [],
+      "logs": []
+    }
+  ]
+}

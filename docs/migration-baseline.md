@@ -261,7 +261,7 @@ The [C# `d8fe3b7` capture](../backend/internal/httpapi/testdata/reservation_upda
 
 ## Go single reservation cancellation
 
-Blazor sends `DELETE /api/Reservations/{id}`. The organizer and administrators can cancel the addressed booking. The [C# SQLite capture](../backend/internal/httpapi/testdata/reservation_cancel_csharp.json) records successful, forbidden, missing, and repeated cancellations. The single-row delete preserves sibling rows with the same series ID and existing in-app notices. C# sends Chatwork cancellation notices after deletion. Delivery parity is covered by the Chatwork migration.
+Blazor sends `DELETE /api/Reservations/{id}`. The organizer and administrators can cancel the addressed booking. The [C# SQLite capture](../backend/internal/httpapi/testdata/reservation_cancel_csharp.json) records successful, forbidden, missing, and repeated cancellations. The single-row delete preserves sibling rows with the same series ID and existing in-app notices. See [Chatwork cancellation DMs](#go-chatwork-cancellation-dms) for post-commit delivery.
 
 Go uses the same row lock as updates for the authorization check and the same room/date lock as creates. A create that waits behind a cancellation checks the freed slot after the delete commits. The integration test also checks anonymous and untrusted-origin requests, concurrent cancellations of one row, and reuse of the freed slot.
 
@@ -335,12 +335,30 @@ Go acquires the row locks in ascending ID order, resolves the selection again af
 
 The [C# HTTP and SQLite capture](../backend/internal/httpapi/testdata/reservation_series_delete_csharp.json) records 24 cases. Reuse the reservation datasets from the [series update capture](../backend/internal/httpapi/testdata/reservation_series_update_csharp.json) in the disposable `d8fe3b7` setup above. Assign the fake direct room IDs `900001`, `900002`, and `900003` to users 1, 2, and 3 with a fake `IChatworkClient`. Before each case, clear bookings, notices, and Chatwork delivery logs, then seed the case's reservations, one notice per reservation, and one notice without a reservation target. Submit the recorded request and use its role's cookie and `Accept: application/json`. Compare the HTTP result, remaining reservation IDs and values, and preexisting notice rows. To reproduce the SQLite failure, raise an error in a `BEFORE DELETE` trigger for ID 12 once ID 10 has been removed within the transaction.
 
-C# also attempted Chatwork delivery to the fake rooms on successful cancellations with recipients. The Go port leaves Chatwork delivery and its logs to a separate migration. Go uses its shared JSON diagnostics for conversion errors, omitting ASP.NET's trace ID and parser byte position.
+C# also attempted Chatwork delivery to the fake rooms on successful cancellations with recipients. See [Chatwork cancellation DMs](#go-chatwork-cancellation-dms) for Go delivery. Go uses its shared JSON diagnostics for conversion errors, omitting ASP.NET's trace ID and parser byte position.
 
 Set `RESERVATION_SERIES_DELETE_TEST_DATABASE_URL` to a disposable local PostgreSQL URL that permits creating schemas. From `backend` in WSL, run the command below. The test applies migrations `0001`–`0006`, starts the normal Go HTTP server, and runs the captured, failure, and concurrency cases. With the URL unset, the database integration test is skipped.
 
 ```bash
 TZ=Asia/Tokyo go test -v -count=1 ./cmd/api -run '^TestRecurringReservationDeletePostgres$'
+```
+
+## Go Chatwork cancellation DMs
+
+Both cancellation routes snapshot the deleted reservations while holding their existing PostgreSQL transaction locks. Delivery starts only after a successful commit with at least one deleted row. The representative is the first deleted row by date and ID. The Go sender reads the current names and `chatwork_direct_room_id` for the deduplicated organizer and participant IDs across the deleted rows. It uses the representative's room, date, time, label, and ID. Missing user records appear as participant ID labels where applicable and receive no delivery. For multiple rows the Japanese message includes the number deleted. The [C# HTTP and SQLite fixture](../backend/internal/httpapi/testdata/chatwork_reservation_cancel_csharp.json) records seven cases, including every fake room, form body, and delivery log. Its series case used reservation 71 as the representative even though the request addressed reservation 73 and another booking started earlier on the same date.
+
+[Migration `0007`](../backend/migrations/0007_create_chatwork_delivery_logs.sql) stores the cancellation message, target, original scheduled start and delivery timestamps. It keeps the C# key `ReservationCanceled:reservation:{id}:user:{userId}` under a PostgreSQL unique constraint. This history allows canceled reservation IDs and users to be retained after their rows are removed. Preserve existing keys and statuses when importing history. When explicitly importing log IDs, reconcile the identity sequence before enabling writes.
+
+Go inserts and commits the delivery claim before sending, using `ON CONFLICT DO NOTHING`. Every existing status suppresses another attempt. A missing room records `Skipped` without sending. A confirmed success records `Succeeded` and its sent time. An explicit HTTP rejection such as `503` records `Failed` and the status code. C# inserted results after HTTP and logged a timeout as `Failed`. Go leaves a claim `Unknown` during sending and whenever the response or result write cannot be confirmed. It stores neither provider response bodies nor tokens in delivery errors. A database claim failure suppresses HTTP. These delivery failures leave the committed cancellation response at `204`.
+
+Automatic retries are disabled for all statuses. Reconcile an `Unknown` result against the provider or the recipient's room before considering an operator-approved resend. Keep its key during reconciliation to avoid duplicate DMs. A process exit after deleting but before claiming can leave no log, and exhausting the 10-second overall delivery budget can leave later recipients unclaimed. A crash between HTTP and the result write leaves the claim `Unknown`. This synchronous post-commit sender uses a 3-second HTTP timeout. A durable outbox could close the pre-claim gap and would need an explicit recovery policy for uncertain receipts.
+
+Delivery defaults to disabled. Apply migration `0007` before setting `CHATWORK_ENABLED=true` and supply `CHATWORK_API_TOKEN` through the local environment. The default endpoint is `https://api.chatwork.com/v2/`. `APP_ENV=development` allows a loopback-only `CHATWORK_API_BASE_URL` override for synthetic testing. To reproduce the C# capture, run the disposable SQLite setup at `d8fe3b7`, point its typed `IChatworkClient` at a loopback fake instead of the configured Chatwork base address, and disable the reminder worker. Enable Chatwork with a synthetic token and seed the fixture's users and reservations. Have the fake return `503` for room `900003` and delay room `900002` beyond the C# client timeout for the failure case.
+
+Set `CHATWORK_CANCELLATION_TEST_DATABASE_URL` to a disposable local PostgreSQL URL with schema creation privileges. From `backend` in WSL, run the command below. It starts a loopback fake HTTP server, compares the C# fixture, checks committed database state inside the fake, and covers concurrent claims, failure at reservation commit, and replay after an uncertain result.
+
+```bash
+TZ=Asia/Tokyo go test -v -count=1 ./cmd/api -run '^TestChatworkReservationCancellationPostgres$'
 ```
 
 ## Recovery to C# and SQLite
