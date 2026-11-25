@@ -88,7 +88,8 @@ func RegisterSessionRoutes(mux *http.ServeMux, service sessionService, reservati
 	}
 	mux.Handle(workScheduleListPattern, h.requireSession(newWorkScheduleListHandler(listWorkSchedules)))
 	mux.Handle("GET "+workSchedulePath+"/{id}", h.idRoute("id", newWorkScheduleGetHandler(getWorkSchedule)))
-	mux.Handle("PUT "+workSchedulePath+"/{id}", csrf.Handler(h.idRoute("id", newWorkScheduleUpdateHandler(updateWorkSchedule))))
+	mux.Handle("PUT "+workSchedulePath+"/{id}", csrf.Handler(h.idRoute("id", newWorkScheduleUpdateHandler(updateWorkSchedule, false))))
+	mux.Handle("PUT "+workSchedulePath+"/{id}/series", csrf.Handler(h.idRoute("id", newWorkScheduleUpdateHandler(updateWorkSchedule, true))))
 	mux.Handle("POST "+workSchedulePath, csrf.Handler(h.requireSession(newWorkScheduleCreateHandler(createWorkSchedule, false))))
 	mux.Handle("POST "+workSchedulePath+"/series", csrf.Handler(h.requireSession(newWorkScheduleCreateHandler(createWorkSchedule, true))))
 	mux.Handle("GET /api/Users/participants", h.requireSession(func(w http.ResponseWriter, r *http.Request, _ auth.User) {

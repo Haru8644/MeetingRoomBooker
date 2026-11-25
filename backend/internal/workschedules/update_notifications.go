@@ -12,7 +12,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func notifyWorkScheduleUpdate(ctx context.Context, tx pgx.Tx, previous, current storedEntry, input EntryInput,
+func notifyWorkScheduleUpdate(ctx context.Context, tx pgx.Tx, previous, current storedEntry,
 	names map[int]string, now int64,
 ) ([]UpdateDelivery, error) {
 	retained, added, removed := updateParticipants(previous.ParticipantIDs, current.ParticipantIDs)
@@ -25,9 +25,9 @@ func notifyWorkScheduleUpdate(ctx context.Context, tx pgx.Tx, previous, current 
 	}
 	changes := scheduleChangeLines(previous, current, added, removed, names)
 	var conflicts []scheduleConflict
-	if input.Type == externalAppointment && len(input.ParticipantIDs) > 0 {
+	if current.Type == externalAppointment && len(current.ParticipantIDs) > 0 {
 		var err error
-		conflicts, err = findScheduleConflicts(ctx, tx, []Entry{current.Entry}, []time.Time{input.Date}, input, names)
+		conflicts, err = findScheduleConflicts(ctx, tx, []int{current.ID}, names)
 		if err != nil {
 			return nil, err
 		}

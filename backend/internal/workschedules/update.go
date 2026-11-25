@@ -24,6 +24,7 @@ type UpdateDelivery struct {
 
 type UpdateResult struct {
 	Entry      Entry
+	Scope      string
 	ChangeID   string
 	Deliveries []UpdateDelivery
 }
@@ -59,22 +60,12 @@ func Update(ctx context.Context, pool *pgxpool.Pool, id int, input EntryInput, a
 		}
 		clock := time.Now()
 		now := dotnettime.Ticks(dotnettime.OnDate(clock, clock))
-		var start, end *int64
-		if input.Start != nil {
-			start, end = new(dotnettime.Ticks(*input.Start)), new(dotnettime.Ticks(*input.End))
-		}
-		current, err := scanStoredEntry(tx.QueryRow(ctx, `
-			UPDATE work_schedule_entries
-			SET type=$2, title=$3, date_ticks=$4, start_time_ticks=$5, end_time_ticks=$6,
-			    leave_period=$7, participant_ids=$8, participants=$9, updated_at_ticks=$10
-			WHERE id=$1
-			RETURNING `+entryColumns, id, input.Type, input.Title, dotnettime.Ticks(input.Date), start, end,
-			input.LeavePeriod, input.ParticipantIDs, input.Participants, now))
+		current, err := writeWorkScheduleUpdate(ctx, tx, id, input, dotnettime.Ticks(input.Date), now)
 		if err != nil {
 			return err
 		}
 		result.Entry = current.Entry
-		result.Deliveries, err = notifyWorkScheduleUpdate(ctx, tx, previous, current, input, names, now)
+		result.Deliveries, err = notifyWorkScheduleUpdate(ctx, tx, previous, current, names, now)
 		return err
 	})
 	if err != nil {
@@ -84,4 +75,18 @@ func Update(ctx context.Context, pool *pgxpool.Pool, id int, input EntryInput, a
 		result.ChangeID = newWorkScheduleUUID()
 	}
 	return result, nil
+}
+
+func writeWorkScheduleUpdate(ctx context.Context, tx pgx.Tx, id int, input EntryInput, dateTicks, now int64) (storedEntry, error) {
+	var start, end *int64
+	if input.Start != nil {
+		start, end = new(dotnettime.Ticks(*input.Start)), new(dotnettime.Ticks(*input.End))
+	}
+	return scanStoredEntry(tx.QueryRow(ctx, `
+			UPDATE work_schedule_entries
+			SET type=$2, title=$3, date_ticks=$4, start_time_ticks=$5, end_time_ticks=$6,
+			    leave_period=$7, participant_ids=$8, participants=$9, updated_at_ticks=$10
+			WHERE id=$1
+			RETURNING `+entryColumns, id, input.Type, input.Title, dateTicks, start, end,
+		input.LeavePeriod, input.ParticipantIDs, input.Participants, now))
 }

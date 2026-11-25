@@ -21,7 +21,11 @@ func creationMessages(ctx context.Context, tx pgx.Tx, entries []Entry, dates []t
 	var hours string
 	if input.Type == externalAppointment {
 		hours = "時間: " + input.Start.Format("15:04") + "〜" + input.End.Format("15:04")
-		conflicts, err = findScheduleConflicts(ctx, tx, entries, dates, input, names)
+		ids := make([]int, len(entries))
+		for i, entry := range entries {
+			ids[i] = entry.ID
+		}
+		conflicts, err = findScheduleConflicts(ctx, tx, ids, names)
 		if err != nil {
 			return "", "", "", err
 		}
@@ -63,12 +67,25 @@ func conflictWarnings(conflicts []scheduleConflict, names map[int]string) (kind,
 	const maxDetails = 5
 	var lines []string
 	dm = []string{"[hr]", "注意: 参加者の予定重複があります"}
-	for _, conflict := range conflicts[:min(len(conflicts), maxDetails)] {
+	type conflictKey struct {
+		user, id int
+		source   string
+	}
+	seen := make(map[conflictKey]bool, maxDetails)
+	for _, conflict := range conflicts {
+		key := conflictKey{conflict.UserID, conflict.ID, conflict.Source}
+		if seen[key] {
+			continue
+		}
+		seen[key] = true
 		line := fmt.Sprintf("%s: %s「%s」 %s %s〜%s", names[conflict.UserID], conflict.Source, conflict.Title,
 			dotnettime.FromTicks(conflict.Date).Format("2006/01/02"), dotnettime.FromTicks(conflict.Start).Format("15:04"),
 			dotnettime.FromTicks(conflict.End).Format("15:04"))
 		lines = append(lines, line)
 		dm = append(dm, "- "+line)
+		if len(lines) == maxDetails {
+			break
+		}
 	}
 	notice = " 注意: 参加者の予定重複があります。" + strings.Join(lines, " ")
 	if len(conflicts) > maxDetails {
@@ -112,36 +129,34 @@ func participantText(display string) string {
 }
 
 type scheduleConflict struct {
-	UserID, ID       int
-	Source, Title    string
-	DisplayIfNoTitle *string
-	Date, Start, End int64
+	OccurrenceID, UserID, ID int
+	Source, Title            string
+	DisplayIfNoTitle         *string
+	Date, Start, End         int64
 }
 
-func findScheduleConflicts(ctx context.Context, tx pgx.Tx, entries []Entry, dates []time.Time, input EntryInput,
-	names map[int]string,
-) ([]scheduleConflict, error) {
-	dateTicks := make([]int64, len(dates))
-	entryIDs := make([]int, len(entries))
-	for i, date := range dates {
-		dateTicks[i], entryIDs[i] = dotnettime.Ticks(date), entries[i].ID
-	}
-	startOffset := dotnettime.Ticks(*input.Start) - dateTicks[0]
-	endOffset := dotnettime.Ticks(*input.End) - dateTicks[0]
+// findScheduleConflicts reads all updated occurrences and their participant sets
+// in one statement. Callers pass IDs in calendar order for warning formatting.
+func findScheduleConflicts(ctx context.Context, tx pgx.Tx, ids []int, names map[int]string) ([]scheduleConflict, error) {
 	rows, err := tx.Query(ctx, `
-		WITH occurrences AS (SELECT * FROM unnest($2::bigint[], $3::integer[]) AS o(day_ticks, entry_id))
-		SELECT p.id, r.id, '会議室予約', r.purpose, r.name, o.day_ticks, r.start_time_ticks, r.end_time_ticks
+		WITH occurrences AS (
+		    SELECT id, date_ticks - date_ticks % $2::bigint AS day_ticks,
+		           start_time_ticks, end_time_ticks, participant_ids
+		    FROM work_schedule_entries
+		    WHERE id = ANY($1::integer[]) AND type = 0 AND start_time_ticks < end_time_ticks
+		)
+		SELECT o.id, p.id, r.id, '会議室予約', r.purpose, r.name, o.day_ticks, r.start_time_ticks, r.end_time_ticks
 		FROM occurrences o
 		JOIN reservations r ON r.date_ticks = o.day_ticks
-		  AND r.start_time_ticks < o.day_ticks + $4 AND r.end_time_ticks > o.day_ticks + $5
-		JOIN unnest($1::integer[]) AS p(id) ON p.id = r.user_id OR p.id = ANY(r.participant_ids)
+		  AND r.start_time_ticks < o.end_time_ticks AND r.end_time_ticks > o.start_time_ticks
+		JOIN LATERAL unnest(o.participant_ids) AS p(id) ON p.id = r.user_id OR p.id = ANY(r.participant_ids)
 		UNION ALL
-		SELECT p.id, e.id, '社外予定', e.title, NULL::text, o.day_ticks, e.start_time_ticks, e.end_time_ticks
+		SELECT o.id, p.id, e.id, '社外予定', e.title, NULL::text, o.day_ticks, e.start_time_ticks, e.end_time_ticks
 		FROM occurrences o
-		JOIN work_schedule_entries e ON e.date_ticks = o.day_ticks AND e.type = 0 AND e.id <> o.entry_id
-		  AND e.start_time_ticks < o.day_ticks + $4 AND e.end_time_ticks > o.day_ticks + $5
-		JOIN unnest($1::integer[]) AS p(id) ON p.id = ANY(e.participant_ids)`,
-		input.ParticipantIDs, dateTicks, entryIDs, endOffset, startOffset)
+		JOIN work_schedule_entries e ON e.date_ticks = o.day_ticks AND e.type = 0 AND e.id <> o.id
+		  AND e.start_time_ticks < o.end_time_ticks AND e.end_time_ticks > o.start_time_ticks
+		JOIN LATERAL unnest(o.participant_ids) AS p(id) ON p.id = ANY(e.participant_ids)`,
+		ids, dotnettime.TicksPerDay)
 	if err != nil {
 		return nil, fmt.Errorf("query work schedule conflicts: %w", err)
 	}
@@ -155,9 +170,13 @@ func findScheduleConflicts(ctx context.Context, tx pgx.Tx, entries []Entry, date
 			c.Title = *c.DisplayIfNoTitle
 		}
 	}
+	position := make(map[int]int, len(ids))
+	for i, id := range ids {
+		position[id] = i
+	}
 	order := collate.New(language.Und)
 	slices.SortStableFunc(conflicts, func(a, b scheduleConflict) int {
-		return cmp.Or(cmp.Compare(a.Date, b.Date), cmp.Compare(a.Start, b.Start), order.CompareString(names[a.UserID], names[b.UserID]),
+		return cmp.Or(cmp.Compare(position[a.OccurrenceID], position[b.OccurrenceID]), cmp.Compare(a.Start, b.Start), order.CompareString(names[a.UserID], names[b.UserID]),
 			order.CompareString(a.Source, b.Source), cmp.Compare(a.ID, b.ID))
 	})
 	return conflicts, nil
