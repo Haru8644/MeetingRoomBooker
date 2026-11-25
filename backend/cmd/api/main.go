@@ -66,6 +66,7 @@ func run(ctx context.Context) error {
 	}
 
 	var chatworkSender *chatwork.Sender
+	var sendChatworkTest func(context.Context, string, string) error
 	if setting := os.Getenv("CHATWORK_ENABLED"); setting != "" {
 		enabled, err := strconv.ParseBool(setting)
 		if err != nil {
@@ -76,6 +77,7 @@ func run(ctx context.Context) error {
 			if err != nil {
 				return err
 			}
+			sendChatworkTest = chatworkSender.SendTestMessage
 		}
 	}
 
@@ -168,7 +170,12 @@ func run(ctx context.Context) error {
 		reservationList, createReservation, createReservationSeries, updateReservation, updateReservationSeries,
 		deleteReservation, deleteReservationSeries, changeParticipation,
 		listWorkSchedules, getWorkSchedule, createWorkSchedule, updateWorkSchedule, deleteWorkSchedule, listParticipants, notifications.NewInbox(pool),
-		httpapi.SessionOptions{Development: development, FrontendOrigins: strings.Split(os.Getenv("FRONTEND_ORIGINS"), ",")})
+		httpapi.SessionOptions{
+			Development:        development,
+			FrontendOrigins:    strings.Split(os.Getenv("FRONTEND_ORIGINS"), ","),
+			ChatworkTestRoomID: os.Getenv("CHATWORK_ROOM_ID"),
+			SendChatworkTest:   sendChatworkTest,
+		})
 	if err != nil {
 		return err
 	}

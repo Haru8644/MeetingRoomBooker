@@ -10,6 +10,15 @@ import (
 	"strings"
 )
 
+// SendTestMessage sends one explicit test without claiming a delivery log row.
+func (sender *Sender) SendTestMessage(ctx context.Context, room, message string) error {
+	status, reason := sender.postMessage(ctx, room, message)
+	if status == "Succeeded" {
+		return nil
+	}
+	return errors.New(reason)
+}
+
 func (sender *Sender) postMessage(ctx context.Context, room, message string) (status, reason string) {
 	form := url.Values{"body": {message}}
 	request, err := http.NewRequestWithContext(ctx, http.MethodPost,
@@ -17,7 +26,7 @@ func (sender *Sender) postMessage(ctx context.Context, room, message string) (st
 	if err != nil {
 		return "Failed", "Could not construct the Chatwork request."
 	}
-	request.GetBody = nil // The delivery log is a one-attempt claim.
+	request.GetBody = nil // Keep each send to one attempt, including manual test messages.
 	request.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	request.Header.Set("X-ChatWorkToken", sender.token)
 	response, err := sender.client.Do(request)
