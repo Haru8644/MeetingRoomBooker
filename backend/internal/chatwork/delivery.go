@@ -70,6 +70,7 @@ type deliverySubject struct {
 	reservationID        int
 	workScheduleEntryID  *int
 	workScheduleSeriesID string
+	workScheduleScope    string
 	scheduledStart       time.Time
 }
 
@@ -135,6 +136,9 @@ func (sender *Sender) sendToRecipients(ctx context.Context, deliveryType, keySuf
 	switch {
 	case subject.workScheduleSeriesID != "":
 		keyTarget = "work-schedule-series:" + subject.workScheduleSeriesID
+		if subject.workScheduleScope != "" {
+			keyTarget += ":scope:" + subject.workScheduleScope
+		}
 	case subject.workScheduleEntryID != nil:
 		keyTarget = fmt.Sprintf("work-schedule:%d", *subject.workScheduleEntryID)
 	default:

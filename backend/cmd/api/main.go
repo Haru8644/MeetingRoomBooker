@@ -147,8 +147,8 @@ func run(ctx context.Context) error {
 		}
 		return result.Entries, err
 	}
-	updateWorkSchedule := func(ctx context.Context, id int, input workschedules.EntryInput, user auth.User) (workschedules.Entry, error) {
-		result, err := workschedules.Update(ctx, pool, id, input, user.ID, user.IsAdmin)
+	updateWorkSchedule := func(ctx context.Context, id int, input workschedules.EntryInput, user auth.User, scope string) (workschedules.Entry, error) {
+		result, err := workschedules.UpdateSeries(ctx, pool, id, input, user.ID, user.IsAdmin, scope)
 		if err == nil && chatworkSender != nil {
 			chatworkSender.SendWorkScheduleUpdate(ctx, result)
 		}

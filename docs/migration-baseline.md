@@ -519,6 +519,34 @@ go vet ./...
 
 The integration test creates and drops an isolated schema, applies migrations through `0010`, and starts the Go API and fake Chatwork server on loopback. It compares the capture and checks origin protection, the concurrent row lock, replay, distinct change IDs, and disabled delivery. All 22 PostgreSQL integration suites passed on PostgreSQL 16.15. The database-free `go test ./...` passed with those suites skipped. `go vet ./...` and `git diff --check` passed.
 
+## Go recurring work schedule update
+
+`PUT /api/work-schedule-entries/{id}/series?scope=...` uses the existing session and write-origin checks. Scope trims whitespace and folds to lowercase. Omitted and blank values dispatch to `single`, which uses ordinary single-entry update and its notification and delivery keys. Each of `single`, `following`, and `all` returns an empty `204` on success. An unknown scope returns `400`.
+
+The batch scopes select external appointments with an exact stored series ID matching the trimmed key of the selected row. `following` starts at the selected calendar day and start time. It includes equal start times and later dates, and uses midnight when a start time is absent. A single or non-external selected entry, an empty target set, and a request to change recurrence conditions return `400`. For example, a selected legacy row with a padded key and no exact-key rows has an empty target set. If exact-key rows exist, the padded row itself stays outside that set. The caller must own every target or be an administrator.
+
+Go locks the selected row and candidates together in ID order. After the locks are acquired it resolves the range again using the locked selected row. If the scope gained an unlocked target, it restarts the transaction so all targets are locked in the same order. Permissions are checked against the locked rows. This handles edits to the selected date, time, or type while waiting without taking the selected row out of order. The integration test used a concurrent single PUT to move the selected start earlier and verified that the batch included the newly eligible row. A separate lock test verified a `403` when a target's creator changed during the wait.
+
+Each target keeps its date, ID, creator, creation time, series ID and recurrence values. The edit updates the title, times, participants and modification timestamp. Times are attached to each target's own calendar day, and participant normalization uses that target's creator. The requested date has no effect on batch scopes.
+
+In-app notices and DMs go once to the union of participant IDs from before and after all selected occurrences. The first updated row by date, start time, and ID is the reference. The summary includes scope, period, count, time and the representative's participant display. It compares the first row of each ordered snapshot for title, time and participant ID changes. C# still generates a summary when those values are unchanged. Go reads overlaps in one query over the updated occurrences using each row's participants, and both messages use the resulting warnings. The first five distinct participant/source pairs are displayed. The remaining-count suffix follows C# and counts raw conflicts before deduplication, which matters for multiple same-day occurrences.
+
+Go saves all changes and notices in one PostgreSQL transaction and sends DMs after it commits. The C# notification failure case returned `204`, kept the updates, and attempted DMs. Go returned `500`, rolled back every edited row and sent zero DMs. A failure on the last row update rolled back both implementations. Both return `204` after a post-commit delivery failure. The HTTP `503` and timeout produced C# `Failed` rows. Go sanitizes the HTTP error and retains the existing `Unknown` claim for the timeout. Chatwork defaults to disabled.
+
+The delivery key is `WorkScheduleSeriesUpdated:work-schedule-series:{seriesId}:scope:{scope}:user:{userId}:change:{changeId}`. All recipients share a lowercase UUIDv4 change ID for the event. The log keeps `reservation_id=0`, the representative's ID and its updated scheduled start. The existing unique claim suppresses replay. Single-scope updates use the ordinary single-entry event key.
+
+To reproduce the [26-case C# capture](../backend/internal/httpapi/testdata/work_schedule_series_update_csharp.json), use the disposable `d8fe3b7` SQLite and loopback Chatwork setup for [single work schedule creation](#go-single-work-schedule-creation). Register the synthetic users in fixture order, using the administrator to register the remaining users, and set their recorded direct rooms. Before each request clear work schedules, reservations, notifications and delivery logs. Load the named `dataset` and the case's `seeds`. PUT the recorded payload, ID and scope with the indicated session and `Accept: application/json`. For `notice_failure`, abort a SQLite `BEFORE INSERT` trigger for notices to user 3. For `last_update_failure`, abort a `BEFORE UPDATE` trigger for schedule 53. For the provider failure case, return `503` from room `900003` and delay room `900002` beyond the client timeout. Compare all stored rows and the requests, notices and logs in recipient order, allowing for generated timestamps and change IDs.
+
+In WSL, set `WORK_SCHEDULE_SERIES_UPDATE_TEST_DATABASE_URL` to a disposable local PostgreSQL URL with schema creation privileges. From `backend` run:
+
+```bash
+go test -v -count=1 ./cmd/api -run '^TestWorkScheduleSeriesUpdatePostgres$'
+go test ./...
+go vet ./...
+```
+
+The integration test uses a temporary schema and the normal Go API with a loopback Chatwork fake. It verifies the captured responses, rows, messages and logs, origin protection, concurrent edits, replay, and disabled delivery. All 23 PostgreSQL integration suites passed on PostgreSQL 16.15. The database-free `go test ./...` passed with those suites skipped. `go vet ./...` and `git diff --check` passed.
+
 ## Recovery to C# and SQLite
 
 Rehearse each stage in development with synthetic rows and a recording fake Chatwork sender. `scripts/deploy/deploy-prod.sh` uses SQLite's backup API and integrity check. `scripts/deploy/rollback-prod.sh` restores the earlier API, web assets and final SQLite snapshot. A rollback after Go accepts writes also needs the committed PostgreSQL state.
