@@ -669,6 +669,41 @@ go vet ./...
 
 The Go integration test applies the existing migrations in a temporary schema and starts the normal API and loopback fake. It compares the capture and exercises scope expansion behind a series edit, scope shrinkage behind a single delete, authorization after a lock wait, rollback, post-commit delivery and replay. All 25 PostgreSQL integration suites passed on PostgreSQL 16.15. The database-free `go test ./...` passed with those suites skipped. `go vet ./...`, formatting, and `git diff --check` passed.
 
+## Go room conflict records
+
+The five `/api/room-conflict-records` routes use the existing session authentication. Signed-in users can read the list, details, and summary. The reporter and administrators can edit a record. For automatic detections with a null reporter, only administrators can edit. The response uses the same rule for `canEdit`. The list sorts by occurrence time descending, then ID descending, and returns `[]` when empty. POST and PUT use the standard write-origin check.
+
+The [C# HTTP and SQLite capture](../backend/internal/httpapi/testdata/room_conflict_records_csharp.json) records 54 cases at `d8fe3b7`. The JSON names, numeric enums, nullable IDs and detection key, date strings, and permissions match the existing OperationsWeb types. A manual report sets type ActualRoomCollision, takes the reporter from the session, defaults to Confirmed, and rejects Detected after checking reservation references. The room name and free text are trimmed before the 100 and 1,000 UTF-16 code-unit limits, respectively. Null descriptions and resolutions become empty strings. Both optional reservation IDs must exist if supplied and must be different. An explicit zero or negative ID is valid if that imported reservation exists. A successful POST returns `201` and an absolute Location for the new record.
+
+PUT returns `200` with the stored result. JSON binding runs before lookup. The record's existence and edit permission are checked before domain validation. Updates replace only status, impact, cause, description, resolution, and the update timestamp. The Go binding response uses the shared validation message for syntax and type errors and omits ASP.NET trace IDs. Reservation existence is checked in the insert transaction with ordered key-share locks. Updates check the reporter on a locked row. These PostgreSQL locks coordinate concurrent writes without changing which references persist after a subsequent deletion.
+
+[Migration 0012](../backend/migrations/0012_create_room_conflict_records.sql) uses the existing .NET tick representation. PostgreSQL timestamps would lose the seventh fractional digit. Stored values serialize without a timezone suffix. In the capture, an offset input was converted to the server's local time before storage. A `Z` input kept its UTC clock fields and was read back without the suffix. The monthly counts use the API server's local calendar and include the first instant of the month through the last tick before the next month. The overlap count filters by type even for a resolved record. Confirmed collisions filter by type and status, high impact filters by impact, and open detections cover all dates. Go computes all four counts in one PostgreSQL statement and reads them from a single snapshot.
+
+The PostgreSQL table retains historical reservation and reporter IDs after those rows are deleted. A nullable unique detection key permits multiple manual records and rejects a duplicate non-null key. The identity column accepts explicit IDs for imports. After loading into a fresh table, advance the sequence before enabling writers. Preserve the source allocation high-water mark during a cutover if it exceeds the maximum surviving ID.
+
+```sql
+SELECT setval(pg_get_serial_sequence('room_conflict_records', 'id'),
+              GREATEST(COALESCE(max(id), 1), 1),
+              COALESCE(max(id) > 0, false))
+FROM room_conflict_records;
+```
+
+To repeat the C# capture in WSL, use a disposable `d8fe3b7` API with fresh SQLite, `TZ=Asia/Tokyo`, Chatwork and detection disabled, `Database__EnsureCreatedOnStartup=true`, and `Database__ApplyMigrationsOnStartup=false`. Register synthetic administrator, reporter, and third-party accounts in that order. Replay the fixture in order using its requests, sessions and Accept headers. Before `month_summary`, use the seven relative dates and enum combinations from `seedRoomConflictMonth` in the integration test. Then clear the conflict table and seed the fixture's two records and the reservations from `seedRoomConflictRows`. Follow the creation Location. Before `history_after_deletion`, delete user 2 as administrator so the user and owned reservation 10 are gone. Compare the conflict responses and SQLite rows, matching generated timestamps with their persisted values. [PostgreSQL integration test](../backend/cmd/api/room_conflict_records_postgres_test.go)
+
+In WSL, set `ROOM_CONFLICT_RECORDS_TEST_DATABASE_URL` to a disposable PostgreSQL URL with schema creation privileges. Run from `backend`:
+
+```bash
+TZ=Asia/Tokyo go test -v -count=1 ./cmd/api -run '^TestRoomConflictRecordsPostgres$'
+```
+
+The test compares HTTP responses and stored rows, checks origin rejection for both write routes, imports explicit IDs, rejects a duplicate detection key, and verifies the next generated ID. It tests a Tokyo month boundary while UTC is still in the previous month.
+
+For the OperationsWeb check, apply migrations 0001–0012 to a disposable database. Start Go in WSL with `APP_ENV=development`, `HTTP_ADDR=127.0.0.1:18081`, `FRONTEND_ORIGINS=http://127.0.0.1:15173`, `TZ=Asia/Tokyo`, and that database URL. In Windows PowerShell, run `npm ci` in a temporary copy of OperationsWeb, set `$env:VITE_API_BASE_URL = 'http://127.0.0.1:18081'`, and run `npm run dev -- --host 127.0.0.1 --port 15173`. Establish a synthetic Go session in the same Chrome context before opening the dashboard. The browser run used Playwright's `context.request` and the existing login API to set the session cookie.
+
+In Windows Chrome, a seeded detection with no reporter displayed as View only. List and summary returned `200`. A manual report returned `201` and appeared as Editable after automatic list and summary refreshes. Confirmed collisions increased from 0 to 1. Editing the record to Resolved returned `200`, refreshed the displayed row and summary, and brought confirmed collisions back to 0. A follow-up request to the POST Location returned the stored resolution. The unchanged OperationsWeb build also passed.
+
+All 30 PostgreSQL integration tests ran and passed on PostgreSQL 16.15. The database-free `go test ./...` passed with the integration tests skipped. Formatting, `go vet ./...`, and `git diff --check` passed.
+
 ## Recovery to C# and SQLite
 
 Rehearse each stage in development with synthetic rows and a recording fake Chatwork sender. `scripts/deploy/deploy-prod.sh` uses SQLite's backup API and integrity check. `scripts/deploy/rollback-prod.sh` restores the earlier API, web assets and final SQLite snapshot. A rollback after Go accepts writes also needs the committed PostgreSQL state.

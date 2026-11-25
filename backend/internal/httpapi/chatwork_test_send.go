@@ -18,7 +18,7 @@ func newChatworkTestHandler(defaultRoom string, send func(context.Context, strin
 			Message *string
 			RoomID  string
 		}{Message: new("")}
-		if !readAdminJSON(w, r, &request) {
+		if !readJSONRequest(w, r, &request) {
 			return
 		}
 		if request.Message == nil {

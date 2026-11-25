@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/Haru8644/MeetingRoomBooker/backend/internal/auth"
+	"github.com/Haru8644/MeetingRoomBooker/backend/internal/roomconflicts"
 	"github.com/Haru8644/MeetingRoomBooker/backend/internal/users"
 )
 
@@ -29,6 +30,7 @@ type SessionOptions struct {
 	FrontendOrigins    []string
 	ChatworkTestRoomID string
 	SendChatworkTest   func(context.Context, string, string) error
+	RoomConflicts      *roomconflicts.Store
 }
 
 type sessionHandler struct {
@@ -109,6 +111,9 @@ func RegisterSessionRoutes(mux *http.ServeMux, service sessionService, reservati
 	}))
 	h.registerAdminUserRoutes(mux, csrf)
 	h.registerNotificationRoutes(mux, csrf, inbox)
+	if options.RoomConflicts != nil {
+		h.registerRoomConflictRoutes(mux, csrf, options.RoomConflicts)
+	}
 	mux.Handle("POST /api/Chatwork/test", csrf.Handler(h.requireAdmin(
 		newChatworkTestHandler(options.ChatworkTestRoomID, options.SendChatworkTest))))
 

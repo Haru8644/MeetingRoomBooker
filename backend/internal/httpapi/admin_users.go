@@ -2,9 +2,7 @@ package httpapi
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
-	"io"
 	"net/http"
 
 	"github.com/Haru8644/MeetingRoomBooker/backend/internal/auth"
@@ -30,7 +28,7 @@ func (h sessionHandler) registerAdminUserRoutes(mux *http.ServeMux, origins *htt
 
 	mux.Handle("PUT /api/Users/{id}/name", origins.Handler(h.adminUserRoute(func(w http.ResponseWriter, r *http.Request, _ auth.User, id int) {
 		request := &struct{ Name *string }{Name: new("")}
-		if !readAdminJSON(w, r, &request) {
+		if !readJSONRequest(w, r, &request) {
 			return
 		}
 		if request.Name == nil {
@@ -41,13 +39,13 @@ func (h sessionHandler) registerAdminUserRoutes(mux *http.ServeMux, origins *htt
 	})))
 	mux.Handle("PUT /api/Users/{id}/chatwork-account", origins.Handler(h.adminUserRoute(func(w http.ResponseWriter, r *http.Request, _ auth.User, id int) {
 		var request *struct{ ChatworkAccountID *string }
-		if readAdminJSON(w, r, &request) {
+		if readJSONRequest(w, r, &request) {
 			writeAdminUserMutation(w, r, h.service.UpdateChatworkAccountID(r.Context(), id, request.ChatworkAccountID))
 		}
 	})))
 	mux.Handle("PUT /api/Users/{id}/chatwork-direct-room", origins.Handler(h.adminUserRoute(func(w http.ResponseWriter, r *http.Request, _ auth.User, id int) {
 		var request *struct{ ChatworkDirectRoomID *string }
-		if readAdminJSON(w, r, &request) {
+		if readJSONRequest(w, r, &request) {
 			writeAdminUserMutation(w, r, h.service.UpdateChatworkDirectRoomID(r.Context(), id, request.ChatworkDirectRoomID))
 		}
 	})))
@@ -74,37 +72,6 @@ func (h sessionHandler) requireAdmin(next http.Handler) http.Handler {
 		}
 		next.ServeHTTP(w, r)
 	})
-}
-
-func readAdminJSON[T any](w http.ResponseWriter, r *http.Request, request **T) bool {
-	if !hasJSONContentType(r) {
-		writeValidationProblem(w, http.StatusUnsupportedMediaType, nil)
-		return false
-	}
-	decoder := json.NewDecoder(http.MaxBytesReader(w, r.Body, 30_000_000))
-	err := decoder.Decode(request)
-	empty := err == io.EOF
-	if err == nil {
-		err = decoder.Decode(new(json.RawMessage))
-		empty = *request == nil && err == io.EOF
-		if err == nil {
-			err = errors.New("expected one JSON object")
-		}
-	}
-	var tooLarge *http.MaxBytesError
-	switch {
-	case errors.As(err, &tooLarge):
-		w.WriteHeader(http.StatusRequestEntityTooLarge)
-	case empty:
-		writeValidationProblem(w, http.StatusBadRequest, map[string][]string{
-			"": {"A non-empty request body is required."}, "request": {"The request field is required."},
-		})
-	case err != io.EOF:
-		writeValidationProblem(w, http.StatusBadRequest, map[string][]string{"request": {"A JSON request object is required."}})
-	default:
-		return true
-	}
-	return false
 }
 
 func writeAdminUserMutation(w http.ResponseWriter, r *http.Request, err error) {
