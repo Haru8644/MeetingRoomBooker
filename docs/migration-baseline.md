@@ -704,6 +704,36 @@ In Windows Chrome, a seeded detection with no reporter displayed as View only. L
 
 All 30 PostgreSQL integration tests ran and passed on PostgreSQL 16.15. The database-free `go test ./...` passed with the integration tests skipped. Formatting, `go vet ./...`, and `git diff --check` passed.
 
+## Go room conflict detection worker
+
+The API can record unresolved overlaps using the reservations and conflict tables through migration 0012. Configure the following environment variables before starting the API in WSL.
+
+| Variable | Default | Meaning |
+| --- | --- | --- |
+| `ROOM_CONFLICT_DETECTION_ENABLED` | `false` | Set to `true` to run a pass at startup. Enabling requires `DATABASE_URL`. |
+| `ROOM_CONFLICT_DETECTION_INTERVAL_MINUTES` | `1` | Whole minutes to wait after a pass completes, including after a logged failure. |
+| `ROOM_CONFLICT_DETECTION_LOOKBACK_MINUTES` | `15` | Whole minutes of overlap starts to examine on each pass. |
+
+Unset or empty values use the defaults. A zero or negative minute count uses the corresponding default, as in C#. A malformed boolean, a non-integer minute count, a value outside signed 32-bit range or a positive count exceeding Go's duration range fails startup. Go reads these settings once per process. Restart the API to apply a change. The C# worker consults its options monitor each cycle. A stopped worker can miss an overlap that began before the next pass's lookback window.
+
+Each pass reads candidates from one ordered query using local wall-clock .NET ticks. It reuses the reservation overlap checker to compare the original room strings, calendar dates and strict overlap conditions (`left.start < right.end && left.end > right.start`). The start of the intersection must fall within the closed lookback window. Only the key trims the room and drops fractional seconds. For example, reservations 3 and 5 produced `会議室 A|20260601|3|5|20260601101800|20260601103000`, with a stored occurrence of `2026-06-01T10:18:00.1234567`.
+
+Go inserts the pass's records in one PostgreSQL transaction. The existence check skips known keys before identity allocation. The unique constraint and `ON CONFLICT (detection_key) DO NOTHING` also cover two workers racing after the check. Existing reviews retain all fields. The C# service checks key existence and then calls `SaveChangesAsync` for its batch. On shutdown or a listener error, the Go process cancels and joins both background workers before closing their shared database pool.
+
+### Reproduce the comparison in WSL
+
+1. In a temporary .NET 8 console project, reference `MeetingRoomBooker.Api.csproj` from `d8fe3b7`. Open a fresh SQLite file using `AppDbContext` and `Database.EnsureCreated()`. Load the 21 `seeds` from the [C# capture](../backend/internal/httpapi/testdata/room_conflict_detection_csharp.json) into `Reservations` with explicit IDs, user ID 1 and synthetic name and purpose. Preserve date and time fields as zone-free `DateTime` values.
+2. Instantiate `RoomConflictDetectionService` with the context and a null logger. Call `DetectUnresolvedOverlapsAsync` with the fixture's `now`, a 15-minute window and no cancellation. Read back `RoomConflictRecords.AsNoTracking()`. Then clear the conflict table, reinsert the fixture's edited `existing` record, and run the same pass twice. The observed insert counts in SQLite were **7, 6, 0**.
+3. Set `ROOM_CONFLICT_DETECTION_TEST_DATABASE_URL` to a disposable PostgreSQL database with schema creation privileges. From `backend`, run the following command. The integration test applies migrations to its own schema and starts the API on loopback.
+
+```bash
+TZ=Asia/Tokyo go test -v -count=1 ./cmd/api -run 'TestRoomConflictDetectionPostgres|TestDetection'
+```
+
+Both engines included overlap starts at each window boundary and excluded starts one tick outside. The three overlapping reservations produced all three pairs. Touching intervals, a different room or reservation date, and a reservation ending at the lower bound produced no rows. All seven UTF-8 keys and stored fields matched, apart from independently generated record IDs. Both engines preserved the captured review, including its update timestamp.
+
+On PostgreSQL 16.15, an injected constraint failure rolled back the whole pass. Four simultaneous retries inserted seven records in total. Editing a detection and running the detector again preserved the edit. With detection disabled, API startup created zero records. With it enabled, the initial pair and then a new pair after restart appeared through the authenticated list and summary endpoints. Cancellation interrupted a pass blocked on a database lock, and the API returned its listen error when its port was occupied. A virtual-clock test measured a two-second failed pass followed by the next start at 62 seconds. The live restart fixture places its overlap seven minutes inside the window to tolerate host clock corrections. The detector tests passed ten consecutive runs. One intermediate full run failed an existing Chatwork delivery timestamp assertion. The final full run passed all 31 PostgreSQL integration tests with no skips. The database-free suite, formatting check, `go vet ./...` and `git diff --check` also passed.
+
 ## Recovery to C# and SQLite
 
 Rehearse each stage in development with synthetic rows and a recording fake Chatwork sender. `scripts/deploy/deploy-prod.sh` uses SQLite's backup API and integrity check. `scripts/deploy/rollback-prod.sh` restores the earlier API, web assets and final SQLite snapshot. A rollback after Go accepts writes also needs the committed PostgreSQL state.

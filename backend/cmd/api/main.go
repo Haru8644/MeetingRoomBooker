@@ -10,6 +10,7 @@ import (
 	"os/signal"
 	"strconv"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
 
@@ -66,6 +67,14 @@ func run(ctx context.Context) error {
 		ping = pool.Ping
 	}
 
+	detection, err := readDetectionOptions()
+	if err != nil {
+		return err
+	}
+	if detection.enabled && pool == nil {
+		return errors.New("room conflict detection requires DATABASE_URL")
+	}
+	conflicts := roomconflicts.NewStore(pool)
 	var chatworkSender *chatwork.Sender
 	var sendChatworkTest func(context.Context, string, string) error
 	if setting := os.Getenv("CHATWORK_ENABLED"); setting != "" {
@@ -176,24 +185,23 @@ func run(ctx context.Context) error {
 			FrontendOrigins:    strings.Split(os.Getenv("FRONTEND_ORIGINS"), ","),
 			ChatworkTestRoomID: os.Getenv("CHATWORK_ROOM_ID"),
 			SendChatworkTest:   sendChatworkTest,
-			RoomConflicts:      roomconflicts.NewStore(pool),
+			RoomConflicts:      conflicts,
 		})
 	if err != nil {
 		return err
 	}
 
+	workerCtx, stopWorkers := context.WithCancel(ctx)
+	var workers sync.WaitGroup
+	defer func() {
+		stopWorkers()
+		workers.Wait()
+	}()
 	if chatworkSender != nil {
-		workerCtx, stopWorker := context.WithCancel(ctx)
-		workerDone := make(chan struct{})
-		go func() {
-			defer close(workerDone)
-			chatworkSender.RunReminders(workerCtx)
-		}()
-		// Join the worker on shutdown and on listen errors before closing the pool.
-		defer func() {
-			stopWorker()
-			<-workerDone
-		}()
+		workers.Go(func() { chatworkSender.RunReminders(workerCtx) })
+	}
+	if detection.enabled {
+		workers.Go(func() { runDetectionWorker(workerCtx, detection, conflicts.Detect) })
 	}
 
 	server := &http.Server{

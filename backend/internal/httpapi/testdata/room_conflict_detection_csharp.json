@@ -1,0 +1,294 @@
+{
+  "now": "2026-06-01T10:30:00.1234567",
+  "lookbackMinutes": 15,
+  "seeds": [
+    {
+      "id": 101,
+      "room": "beforeLower",
+      "date": "2026-06-01T00:00:00",
+      "startTime": "2026-06-01T09:15:00.1234567",
+      "endTime": "2026-06-01T10:31:00.1234567"
+    },
+    {
+      "id": 100,
+      "room": "beforeLower",
+      "date": "2026-06-01T00:00:00",
+      "startTime": "2026-06-01T10:15:00.1234566",
+      "endTime": "2026-06-01T10:32:00.1234567"
+    },
+    {
+      "id": 103,
+      "room": "lower",
+      "date": "2026-06-01T00:00:00",
+      "startTime": "2026-06-01T09:15:00.1234567",
+      "endTime": "2026-06-01T10:31:00.1234567"
+    },
+    {
+      "id": 102,
+      "room": "lower",
+      "date": "2026-06-01T00:00:00",
+      "startTime": "2026-06-01T10:15:00.1234567",
+      "endTime": "2026-06-01T10:32:00.1234567"
+    },
+    {
+      "id": 105,
+      "room": "afterLower",
+      "date": "2026-06-01T00:00:00",
+      "startTime": "2026-06-01T09:15:00.1234567",
+      "endTime": "2026-06-01T10:31:00.1234567"
+    },
+    {
+      "id": 104,
+      "room": "afterLower",
+      "date": "2026-06-01T00:00:00",
+      "startTime": "2026-06-01T10:15:00.1234568",
+      "endTime": "2026-06-01T10:32:00.1234567"
+    },
+    {
+      "id": 107,
+      "room": "beforeNow",
+      "date": "2026-06-01T00:00:00",
+      "startTime": "2026-06-01T09:15:00.1234567",
+      "endTime": "2026-06-01T10:31:00.1234567"
+    },
+    {
+      "id": 106,
+      "room": "beforeNow",
+      "date": "2026-06-01T00:00:00",
+      "startTime": "2026-06-01T10:30:00.1234566",
+      "endTime": "2026-06-01T10:32:00.1234567"
+    },
+    {
+      "id": 109,
+      "room": "now",
+      "date": "2026-06-01T00:00:00",
+      "startTime": "2026-06-01T09:15:00.1234567",
+      "endTime": "2026-06-01T10:31:00.1234567"
+    },
+    {
+      "id": 108,
+      "room": "now",
+      "date": "2026-06-01T00:00:00",
+      "startTime": "2026-06-01T10:30:00.1234567",
+      "endTime": "2026-06-01T10:32:00.1234567"
+    },
+    {
+      "id": 111,
+      "room": "afterNow",
+      "date": "2026-06-01T00:00:00",
+      "startTime": "2026-06-01T09:15:00.1234567",
+      "endTime": "2026-06-01T10:31:00.1234567"
+    },
+    {
+      "id": 110,
+      "room": "afterNow",
+      "date": "2026-06-01T00:00:00",
+      "startTime": "2026-06-01T10:30:00.1234568",
+      "endTime": "2026-06-01T10:32:00.1234567"
+    },
+    {
+      "id": 9,
+      "room": "　会議室 A  ",
+      "date": "2026-06-01T00:00:00",
+      "startTime": "2026-06-01T10:16:00.1234567",
+      "endTime": "2026-06-01T10:30:00.1234574"
+    },
+    {
+      "id": 5,
+      "room": "　会議室 A  ",
+      "date": "2026-06-01T00:00:00",
+      "startTime": "2026-06-01T10:17:00.1234567",
+      "endTime": "2026-06-01T10:30:00.1234576"
+    },
+    {
+      "id": 3,
+      "room": "　会議室 A  ",
+      "date": "2026-06-01T00:00:00",
+      "startTime": "2026-06-01T10:18:00.1234567",
+      "endTime": "2026-06-01T10:30:00.1234575"
+    },
+    {
+      "id": 15,
+      "room": "会議室 A",
+      "date": "2026-06-01T00:00:00",
+      "startTime": "2026-06-01T10:17:00.1234567",
+      "endTime": "2026-06-01T10:34:00.1234567"
+    },
+    {
+      "id": 16,
+      "room": "　会議室 A  ",
+      "date": "2026-06-02T00:00:00",
+      "startTime": "2026-06-01T10:17:00.1234567",
+      "endTime": "2026-06-01T10:34:00.1234567"
+    },
+    {
+      "id": 30,
+      "room": "touch",
+      "date": "2026-06-01T00:00:00",
+      "startTime": "2026-06-01T10:15:00.1234567",
+      "endTime": "2026-06-01T10:30:00.1234567"
+    },
+    {
+      "id": 31,
+      "room": "touch",
+      "date": "2026-06-01T00:00:00",
+      "startTime": "2026-06-01T10:30:00.1234567",
+      "endTime": "2026-06-01T10:33:00.1234567"
+    },
+    {
+      "id": 32,
+      "room": "endBoundary",
+      "date": "2026-06-01T00:00:00",
+      "startTime": "2026-06-01T09:15:00.1234567",
+      "endTime": "2026-06-01T10:15:00.1234567"
+    },
+    {
+      "id": 33,
+      "room": "endBoundary",
+      "date": "2026-06-01T00:00:00",
+      "startTime": "2026-06-01T10:15:00.1234567",
+      "endTime": "2026-06-01T10:30:00.1234567"
+    }
+  ],
+  "rows": [
+    {
+      "id": 1,
+      "type": 0,
+      "status": 0,
+      "occurredAt": "2026-06-01T10:15:00.1234567",
+      "roomName": "lower",
+      "reservationIdA": 102,
+      "reservationIdB": 103,
+      "impact": 1,
+      "cause": 98,
+      "description": "同じ会議室の予約が未解消のまま重複時間帯を迎えました。",
+      "resolution": "",
+      "detectionKey": "lower|20260601|102|103|20260601101500|20260601103100",
+      "reportedByUserId": null,
+      "createdAt": "2026-06-01T10:30:00.1234567",
+      "updatedAt": null
+    },
+    {
+      "id": 2,
+      "type": 0,
+      "status": 0,
+      "occurredAt": "2026-06-01T10:15:00.1234568",
+      "roomName": "afterLower",
+      "reservationIdA": 104,
+      "reservationIdB": 105,
+      "impact": 1,
+      "cause": 98,
+      "description": "同じ会議室の予約が未解消のまま重複時間帯を迎えました。",
+      "resolution": "",
+      "detectionKey": "afterLower|20260601|104|105|20260601101500|20260601103100",
+      "reportedByUserId": null,
+      "createdAt": "2026-06-01T10:30:00.1234567",
+      "updatedAt": null
+    },
+    {
+      "id": 3,
+      "type": 0,
+      "status": 0,
+      "occurredAt": "2026-06-01T10:30:00.1234566",
+      "roomName": "beforeNow",
+      "reservationIdA": 106,
+      "reservationIdB": 107,
+      "impact": 1,
+      "cause": 98,
+      "description": "同じ会議室の予約が未解消のまま重複時間帯を迎えました。",
+      "resolution": "",
+      "detectionKey": "beforeNow|20260601|106|107|20260601103000|20260601103100",
+      "reportedByUserId": null,
+      "createdAt": "2026-06-01T10:30:00.1234567",
+      "updatedAt": null
+    },
+    {
+      "id": 4,
+      "type": 0,
+      "status": 0,
+      "occurredAt": "2026-06-01T10:30:00.1234567",
+      "roomName": "now",
+      "reservationIdA": 108,
+      "reservationIdB": 109,
+      "impact": 1,
+      "cause": 98,
+      "description": "同じ会議室の予約が未解消のまま重複時間帯を迎えました。",
+      "resolution": "",
+      "detectionKey": "now|20260601|108|109|20260601103000|20260601103100",
+      "reportedByUserId": null,
+      "createdAt": "2026-06-01T10:30:00.1234567",
+      "updatedAt": null
+    },
+    {
+      "id": 5,
+      "type": 0,
+      "status": 0,
+      "occurredAt": "2026-06-01T10:17:00.1234567",
+      "roomName": "　会議室 A  ",
+      "reservationIdA": 5,
+      "reservationIdB": 9,
+      "impact": 1,
+      "cause": 98,
+      "description": "同じ会議室の予約が未解消のまま重複時間帯を迎えました。",
+      "resolution": "",
+      "detectionKey": "会議室 A|20260601|5|9|20260601101700|20260601103000",
+      "reportedByUserId": null,
+      "createdAt": "2026-06-01T10:30:00.1234567",
+      "updatedAt": null
+    },
+    {
+      "id": 6,
+      "type": 0,
+      "status": 0,
+      "occurredAt": "2026-06-01T10:18:00.1234567",
+      "roomName": "　会議室 A  ",
+      "reservationIdA": 3,
+      "reservationIdB": 9,
+      "impact": 1,
+      "cause": 98,
+      "description": "同じ会議室の予約が未解消のまま重複時間帯を迎えました。",
+      "resolution": "",
+      "detectionKey": "会議室 A|20260601|3|9|20260601101800|20260601103000",
+      "reportedByUserId": null,
+      "createdAt": "2026-06-01T10:30:00.1234567",
+      "updatedAt": null
+    },
+    {
+      "id": 7,
+      "type": 0,
+      "status": 0,
+      "occurredAt": "2026-06-01T10:18:00.1234567",
+      "roomName": "　会議室 A  ",
+      "reservationIdA": 3,
+      "reservationIdB": 5,
+      "impact": 1,
+      "cause": 98,
+      "description": "同じ会議室の予約が未解消のまま重複時間帯を迎えました。",
+      "resolution": "",
+      "detectionKey": "会議室 A|20260601|3|5|20260601101800|20260601103000",
+      "reportedByUserId": null,
+      "createdAt": "2026-06-01T10:30:00.1234567",
+      "updatedAt": null
+    }
+  ],
+  "existing": {
+    "id": 7,
+    "type": 0,
+    "status": 3,
+    "occurredAt": "2026-06-01T10:18:00.1234567",
+    "roomName": "　会議室 A  ",
+    "reservationIdA": 3,
+    "reservationIdB": 5,
+    "impact": 1,
+    "cause": 98,
+    "description": "同じ会議室の予約が未解消のまま重複時間帯を迎えました。",
+    "resolution": "Reviewed",
+    "detectionKey": "会議室 A|20260601|3|5|20260601101800|20260601103000",
+    "reportedByUserId": null,
+    "createdAt": "2026-06-01T10:30:00.1234567",
+    "updatedAt": "2026-06-01T10:31:00.1234567"
+  },
+  "first": 7,
+  "withExisting": 6,
+  "replay": 0
+}
