@@ -19,22 +19,18 @@ type userAdministration interface {
 }
 
 func (h sessionHandler) registerAdminUserRoutes(mux *http.ServeMux, origins *http.CrossOriginProtection) {
-	mux.Handle("GET /api/Users", h.requireSession(func(w http.ResponseWriter, r *http.Request, user auth.User) {
-		if !user.IsAdmin {
-			w.WriteHeader(http.StatusForbidden)
-			return
-		}
+	mux.Handle("GET /api/Users", h.requireAdmin(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		users, err := h.service.ListUsers(r.Context())
 		if err != nil {
 			writeSessionError(w, err)
 			return
 		}
 		writeJSON(w, http.StatusOK, users)
-	}))
+	})))
 
 	mux.Handle("PUT /api/Users/{id}/name", origins.Handler(h.adminUserRoute(func(w http.ResponseWriter, r *http.Request, _ auth.User, id int) {
 		request := &struct{ Name *string }{Name: new("")}
-		if !readAdminUserUpdate(w, r, &request) {
+		if !readAdminJSON(w, r, &request) {
 			return
 		}
 		if request.Name == nil {
@@ -45,13 +41,13 @@ func (h sessionHandler) registerAdminUserRoutes(mux *http.ServeMux, origins *htt
 	})))
 	mux.Handle("PUT /api/Users/{id}/chatwork-account", origins.Handler(h.adminUserRoute(func(w http.ResponseWriter, r *http.Request, _ auth.User, id int) {
 		var request *struct{ ChatworkAccountID *string }
-		if readAdminUserUpdate(w, r, &request) {
+		if readAdminJSON(w, r, &request) {
 			writeAdminUserMutation(w, r, h.service.UpdateChatworkAccountID(r.Context(), id, request.ChatworkAccountID))
 		}
 	})))
 	mux.Handle("PUT /api/Users/{id}/chatwork-direct-room", origins.Handler(h.adminUserRoute(func(w http.ResponseWriter, r *http.Request, _ auth.User, id int) {
 		var request *struct{ ChatworkDirectRoomID *string }
-		if readAdminUserUpdate(w, r, &request) {
+		if readAdminJSON(w, r, &request) {
 			writeAdminUserMutation(w, r, h.service.UpdateChatworkDirectRoomID(r.Context(), id, request.ChatworkDirectRoomID))
 		}
 	})))
@@ -70,7 +66,17 @@ func (h sessionHandler) adminUserRoute(next func(http.ResponseWriter, *http.Requ
 	})
 }
 
-func readAdminUserUpdate[T any](w http.ResponseWriter, r *http.Request, request **T) bool {
+func (h sessionHandler) requireAdmin(next http.Handler) http.Handler {
+	return h.requireSession(func(w http.ResponseWriter, r *http.Request, user auth.User) {
+		if !user.IsAdmin {
+			w.WriteHeader(http.StatusForbidden)
+			return
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+func readAdminJSON[T any](w http.ResponseWriter, r *http.Request, request **T) bool {
 	if !hasJSONContentType(r) {
 		writeValidationProblem(w, http.StatusUnsupportedMediaType, nil)
 		return false

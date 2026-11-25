@@ -1,0 +1,543 @@
+{
+  "groups": [
+    {
+      "name": "configured",
+      "enabled": true,
+      "defaultRoom": "  91001  ",
+      "cases": [
+        {
+          "name": "anonymous",
+          "actor": "anonymous",
+          "model": {
+            "message": "  架空のテスト + & = %\n次の行\t終わり  "
+          },
+          "response": {
+            "status": 401,
+            "body": "",
+            "contentType": ""
+          },
+          "calls": []
+        },
+        {
+          "name": "member",
+          "actor": "member",
+          "model": {
+            "message": "  架空のテスト + & = %\n次の行\t終わり  "
+          },
+          "response": {
+            "status": 403,
+            "body": "",
+            "contentType": ""
+          },
+          "calls": []
+        },
+        {
+          "name": "omitted_message",
+          "actor": "admin",
+          "model": {},
+          "response": {
+            "status": 400,
+            "body": "Message は必須です。",
+            "contentType": "application/json"
+          },
+          "calls": []
+        },
+        {
+          "name": "blank_message",
+          "actor": "admin",
+          "model": {
+            "message": " \t　\n "
+          },
+          "response": {
+            "status": 400,
+            "body": "Message は必須です。",
+            "contentType": "application/json"
+          },
+          "calls": []
+        },
+        {
+          "name": "blank_text_negotiation",
+          "actor": "admin",
+          "model": {
+            "message": " "
+          },
+          "accept": "text/plain",
+          "response": {
+            "status": 400,
+            "body": "Message は必須です。",
+            "contentType": "text/plain"
+          },
+          "calls": []
+        },
+        {
+          "name": "null_message",
+          "actor": "admin",
+          "model": {
+            "message": null
+          },
+          "response": {
+            "status": 400,
+            "body": {
+              "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+              "title": "One or more validation errors occurred.",
+              "status": 400,
+              "errors": {
+                "Message": [
+                  "The Message field is required."
+                ]
+              }
+            },
+            "contentType": "application/problem+json"
+          },
+          "calls": []
+        },
+        {
+          "name": "null_model",
+          "actor": "admin",
+          "model": null,
+          "raw": "null",
+          "response": {
+            "status": 400,
+            "body": {
+              "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+              "title": "One or more validation errors occurred.",
+              "status": 400,
+              "errors": {
+                "": [
+                  "A non-empty request body is required."
+                ],
+                "request": [
+                  "The request field is required."
+                ]
+              }
+            },
+            "contentType": "application/problem+json"
+          },
+          "calls": []
+        },
+        {
+          "name": "empty_model",
+          "actor": "admin",
+          "model": null,
+          "response": {
+            "status": 400,
+            "body": {
+              "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+              "title": "One or more validation errors occurred.",
+              "status": 400,
+              "errors": {
+                "": [
+                  "A non-empty request body is required."
+                ],
+                "request": [
+                  "The request field is required."
+                ]
+              }
+            },
+            "contentType": "application/problem+json"
+          },
+          "calls": []
+        },
+        {
+          "name": "invalid_json",
+          "actor": "admin",
+          "model": null,
+          "raw": "{\"message\":",
+          "response": {
+            "status": 400,
+            "body": {
+              "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+              "title": "One or more validation errors occurred.",
+              "status": 400,
+              "errors": {
+                "request": [
+                  "The request field is required."
+                ],
+                "$.message": [
+                  "Expected depth to be zero at the end of the JSON payload. There is an open JSON object or array that should be closed. Path: $.message | LineNumber: 0 | BytePositionInLine: 11."
+                ]
+              }
+            },
+            "contentType": "application/problem+json"
+          },
+          "calls": []
+        },
+        {
+          "name": "non_string_room",
+          "actor": "admin",
+          "model": {
+            "message": "  架空のテスト + & = %\n次の行\t終わり  ",
+            "roomId": 42
+          },
+          "response": {
+            "status": 400,
+            "body": {
+              "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+              "title": "One or more validation errors occurred.",
+              "status": 400,
+              "errors": {
+                "request": [
+                  "The request field is required."
+                ],
+                "$.roomId": [
+                  "The JSON value could not be converted to System.String. Path: $.roomId | LineNumber: 0 | BytePositionInLine: 80."
+                ]
+              }
+            },
+            "contentType": "application/problem+json"
+          },
+          "calls": []
+        },
+        {
+          "name": "unsupported_media",
+          "actor": "admin",
+          "model": null,
+          "raw": "{}",
+          "content": "text/plain",
+          "response": {
+            "status": 415,
+            "body": {
+              "type": "https://tools.ietf.org/html/rfc9110#section-15.5.16",
+              "title": "Unsupported Media Type",
+              "status": 415
+            },
+            "contentType": "application/problem+json"
+          },
+          "calls": []
+        },
+        {
+          "name": "default_omitted",
+          "actor": "admin",
+          "model": {
+            "message": "  架空のテスト + & = %\n次の行\t終わり  "
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "message": "Chatworkへのテスト送信に成功しました。"
+            },
+            "contentType": "application/json"
+          },
+          "calls": [
+            {
+              "path": "/v2/rooms/91001/messages",
+              "message": "  架空のテスト + & = %\n次の行\t終わり  "
+            }
+          ]
+        },
+        {
+          "name": "default_null",
+          "actor": "admin",
+          "model": {
+            "message": "  架空のテスト + & = %\n次の行\t終わり  ",
+            "roomId": null
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "message": "Chatworkへのテスト送信に成功しました。"
+            },
+            "contentType": "application/json"
+          },
+          "calls": [
+            {
+              "path": "/v2/rooms/91001/messages",
+              "message": "  架空のテスト + & = %\n次の行\t終わり  "
+            }
+          ]
+        },
+        {
+          "name": "default_blank",
+          "actor": "admin",
+          "model": {
+            "message": "  架空のテスト + & = %\n次の行\t終わり  ",
+            "roomId": " \t "
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "message": "Chatworkへのテスト送信に成功しました。"
+            },
+            "contentType": "application/json"
+          },
+          "calls": [
+            {
+              "path": "/v2/rooms/91001/messages",
+              "message": "  架空のテスト + & = %\n次の行\t終わり  "
+            }
+          ]
+        },
+        {
+          "name": "room_trimmed",
+          "actor": "admin",
+          "model": {
+            "message": "  架空のテスト + & = %\n次の行\t終わり  ",
+            "roomId": "  92002  "
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "message": "Chatworkへのテスト送信に成功しました。"
+            },
+            "contentType": "application/json"
+          },
+          "calls": [
+            {
+              "path": "/v2/rooms/92002/messages",
+              "message": "  架空のテスト + & = %\n次の行\t終わり  "
+            }
+          ]
+        },
+        {
+          "name": "same_message_again",
+          "actor": "admin",
+          "model": {
+            "message": "  架空のテスト + & = %\n次の行\t終わり  ",
+            "roomId": "  92002  "
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "message": "Chatworkへのテスト送信に成功しました。"
+            },
+            "contentType": "application/json"
+          },
+          "calls": [
+            {
+              "path": "/v2/rooms/92002/messages",
+              "message": "  架空のテスト + & = %\n次の行\t終わり  "
+            }
+          ]
+        },
+        {
+          "name": "untrusted_origin",
+          "actor": "admin",
+          "model": {
+            "message": "  架空のテスト + & = %\n次の行\t終わり  ",
+            "roomId": "92002"
+          },
+          "origin": "https://untrusted.example.test",
+          "response": {
+            "status": 200,
+            "body": {
+              "message": "Chatworkへのテスト送信に成功しました。"
+            },
+            "contentType": "application/json"
+          },
+          "calls": [
+            {
+              "path": "/v2/rooms/92002/messages",
+              "message": "  架空のテスト + & = %\n次の行\t終わり  "
+            }
+          ]
+        },
+        {
+          "name": "provider_503",
+          "actor": "admin",
+          "model": {
+            "message": "  架空のテスト + & = %\n次の行\t終わり  ",
+            "roomId": "95003"
+          },
+          "response": {
+            "status": 500,
+            "body": {
+              "message": "Chatworkへのテスト送信に失敗しました。",
+              "detail": "Failed to send Chatwork message. StatusCode: 503, Response: synthetic upstream detail"
+            },
+            "contentType": "application/json"
+          },
+          "calls": [
+            {
+              "path": "/v2/rooms/95003/messages",
+              "message": "  架空のテスト + & = %\n次の行\t終わり  "
+            }
+          ]
+        },
+        {
+          "name": "provider_timeout",
+          "actor": "admin",
+          "model": {
+            "message": "  架空のテスト + & = %\n次の行\t終わり  ",
+            "roomId": "95004"
+          },
+          "response": {
+            "status": 500,
+            "body": {
+              "message": "Chatworkへのテスト送信に失敗しました。",
+              "detail": "The request was canceled due to the configured HttpClient.Timeout of 0.5 seconds elapsing."
+            },
+            "contentType": "application/json"
+          },
+          "calls": [
+            {
+              "path": "/v2/rooms/95004/messages",
+              "message": "  架空のテスト + & = %\n次の行\t終わり  "
+            }
+          ]
+        }
+      ],
+      "deliveryLogRows": 0
+    },
+    {
+      "name": "missing_room",
+      "enabled": true,
+      "defaultRoom": "  ",
+      "cases": [
+        {
+          "name": "default_missing",
+          "actor": "admin",
+          "model": {
+            "message": "  架空のテスト + & = %\n次の行\t終わり  "
+          },
+          "response": {
+            "status": 500,
+            "body": {
+              "message": "Chatworkへのテスト送信に失敗しました。",
+              "detail": "Chatwork default room ID is not configured."
+            },
+            "contentType": "application/json"
+          },
+          "calls": []
+        },
+        {
+          "name": "explicit_without_default",
+          "actor": "admin",
+          "model": {
+            "message": "  架空のテスト + & = %\n次の行\t終わり  ",
+            "roomId": "92002"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "message": "Chatworkへのテスト送信に成功しました。"
+            },
+            "contentType": "application/json"
+          },
+          "calls": [
+            {
+              "path": "/v2/rooms/92002/messages",
+              "message": "  架空のテスト + & = %\n次の行\t終わり  "
+            }
+          ]
+        }
+      ],
+      "deliveryLogRows": 0
+    },
+    {
+      "name": "disabled",
+      "enabled": false,
+      "defaultRoom": "91001",
+      "cases": [
+        {
+          "name": "disabled_default",
+          "actor": "admin",
+          "model": {
+            "message": "  架空のテスト + & = %\n次の行\t終わり  "
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "message": "Chatworkへのテスト送信に成功しました。"
+            },
+            "contentType": "application/json"
+          },
+          "calls": []
+        },
+        {
+          "name": "disabled_explicit",
+          "actor": "admin",
+          "model": {
+            "message": "  架空のテスト + & = %\n次の行\t終わり  ",
+            "roomId": "92002"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "message": "Chatworkへのテスト送信に成功しました。"
+            },
+            "contentType": "application/json"
+          },
+          "calls": []
+        },
+        {
+          "name": "disabled_invalid",
+          "actor": "admin",
+          "model": {
+            "message": " "
+          },
+          "response": {
+            "status": 400,
+            "body": "Message は必須です。",
+            "contentType": "application/json"
+          },
+          "calls": []
+        }
+      ],
+      "deliveryLogRows": 0
+    },
+    {
+      "name": "disabled_missing_room",
+      "enabled": false,
+      "defaultRoom": "",
+      "cases": [
+        {
+          "name": "disabled_default_missing",
+          "actor": "admin",
+          "model": {
+            "message": "  架空のテスト + & = %\n次の行\t終わり  "
+          },
+          "response": {
+            "status": 500,
+            "body": {
+              "message": "Chatworkへのテスト送信に失敗しました。",
+              "detail": "Chatwork default room ID is not configured."
+            },
+            "contentType": "application/json"
+          },
+          "calls": []
+        },
+        {
+          "name": "disabled_explicit_missing_default",
+          "actor": "admin",
+          "model": {
+            "message": "  架空のテスト + & = %\n次の行\t終わり  ",
+            "roomId": "92002"
+          },
+          "response": {
+            "status": 200,
+            "body": {
+              "message": "Chatworkへのテスト送信に成功しました。"
+            },
+            "contentType": "application/json"
+          },
+          "calls": []
+        }
+      ],
+      "deliveryLogRows": 0
+    },
+    {
+      "name": "missing_token",
+      "enabled": true,
+      "defaultRoom": "91001",
+      "cases": [
+        {
+          "name": "enabled_missing_token",
+          "actor": "admin",
+          "model": {
+            "message": "  架空のテスト + & = %\n次の行\t終わり  "
+          },
+          "response": {
+            "status": 500,
+            "body": {
+              "message": "Chatworkへのテスト送信に失敗しました。",
+              "detail": "Chatwork API token is not configured."
+            },
+            "contentType": "application/json"
+          },
+          "calls": []
+        }
+      ],
+      "deliveryLogRows": 0
+    }
+  ]
+}

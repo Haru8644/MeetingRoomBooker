@@ -25,8 +25,10 @@ type sessionService interface {
 }
 
 type SessionOptions struct {
-	Development     bool
-	FrontendOrigins []string
+	Development        bool
+	FrontendOrigins    []string
+	ChatworkTestRoomID string
+	SendChatworkTest   func(context.Context, string, string) error
 }
 
 type sessionHandler struct {
@@ -107,6 +109,8 @@ func RegisterSessionRoutes(mux *http.ServeMux, service sessionService, reservati
 	}))
 	h.registerAdminUserRoutes(mux, csrf)
 	h.registerNotificationRoutes(mux, csrf, inbox)
+	mux.Handle("POST /api/Chatwork/test", csrf.Handler(h.requireAdmin(
+		newChatworkTestHandler(options.ChatworkTestRoomID, options.SendChatworkTest))))
 
 	if len(origins) == 0 {
 		return mux, nil

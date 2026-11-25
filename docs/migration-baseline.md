@@ -395,6 +395,28 @@ Set `RESERVATION_SERIES_DELETE_TEST_DATABASE_URL` to a disposable local PostgreS
 TZ=Asia/Tokyo go test -v -count=1 ./cmd/api -run '^TestRecurringReservationDeletePostgres$'
 ```
 
+## Go administrator Chatwork test send
+
+`POST /api/Chatwork/test` uses the administrator session policy and the existing write-origin check. Anonymous requests receive `401`, general users receive `403`, and untrusted origins receive `403` before sending. A missing or whitespace-only `message` returns `400` with `Message は必須です。`. An explicit null message fails model validation. The sender preserves valid message text, including leading and trailing whitespace, line breaks, and form metacharacters. An omitted, null, or blank `roomId` uses the configured default room. An explicit room is trimmed and can be used without a default.
+
+Chatwork delivery is disabled by default. Enable the shared sender with `CHATWORK_ENABLED=true` and configure its existing `CHATWORK_API_TOKEN` through the environment. Set `CHATWORK_ROOM_ID` only if test requests should have a default destination. Its value is trimmed and applies only to this route. The HTTP client uses the existing `X-ChatWorkToken` header, a form-encoded `body` field, a three-second timeout, and no redirects. The production URL remains the existing Chatwork endpoint. `APP_ENV=development` permits a loopback-only `CHATWORK_API_BASE_URL` override. Each test request attempts one send using the request context. Repeating it sends again and leaves reservation and work schedule delivery logs untouched.
+
+The [C# capture](../backend/internal/httpapi/testdata/chatwork_test_send_csharp.json) records 27 cases from `d8fe3b7`. Confirmed sends return `200` with `{"message":"Chatworkへのテスト送信に成功しました。"}`. Both implementations return `500` with a failure message and detail when the enabled sender has no default room for a request without an explicit room. Both return `500` for provider errors and timeouts. Go uses safe status and timeout details from the shared client. C# included the provider response body on an upstream HTTP failure. Go excludes that body and the token from both the API response and logs.
+
+With delivery disabled, C# returned a success message without sending for an explicit room or a configured default. A missing default produced `500` before the disabled check. Go returns `503` with `Chatwork delivery is disabled.` for valid requests whenever sending is disabled. With delivery enabled and a missing token, C# returned `500` at request time and Go retained the shared sender's startup validation. A direct C# HTTP request with an authenticated administrator cookie and an untrusted Origin still sent to the fake. Go's write-origin check blocked it. Go omits ASP.NET trace IDs and uses its shared JSON validation detail for syntax and type errors.
+
+To repeat the C# capture in WSL, use a temporary `d8fe3b7` checkout and fresh SQLite file. In the temporary `Program.cs`, point the typed Chatwork client at a recording loopback fake, set its timeout to 500 ms, and remove the reminder worker registration. Use `Database__EnsureCreatedOnStartup=true`, `Database__ApplyMigrationsOnStartup=false`, and `RoomConflictDetection__Enabled=false`. Register and log in with a synthetic administrator and general user, then replay the fixture requests in order for each configuration. Restart between groups using the recorded `Chatwork__Enabled` and `Chatwork__RoomId`, and set a synthetic `Chatwork__ApiToken` in the enabled groups except `missing_token`. Have the fake return `503` for room `95003` and delay room `95004` beyond the client timeout. Confirm the token header without recording its value. Compare the form, HTTP response, and delivery log count.
+
+For Go, set `CHATWORK_TEST_SEND_DATABASE_URL` to a disposable local PostgreSQL URL with schema creation privileges. From `backend` in WSL, run:
+
+```bash
+go test -v -count=1 ./cmd/api -run '^TestChatworkTestSendPostgres$'
+```
+
+The integration test starts the normal Go API with isolated schemas and a loopback fake. It compares responses and decoded form bodies, tests the timeout, redirect and URL restrictions, checks that a synthetic upstream body and token stay out of responses and logs, and verifies that two identical test requests send twice with zero delivery history rows.
+
+All 29 PostgreSQL integration tests ran and passed on PostgreSQL 16.15. The database-free `go test ./...` passed with those tests skipped. Formatting, `go vet ./...`, and `git diff --check` passed.
+
 ## Go Chatwork cancellation DMs
 
 Both cancellation routes snapshot the deleted reservations while holding their existing PostgreSQL transaction locks. Delivery starts only after a successful commit with at least one deleted row. The representative is the first deleted row by date and ID. The Go sender reads the current names and `chatwork_direct_room_id` for the deduplicated organizer and participant IDs across the deleted rows. It uses the representative's room, date, time, label, and ID. Missing user records appear as participant ID labels where applicable and receive no delivery. For multiple rows the Japanese message includes the number deleted. The [C# HTTP and SQLite fixture](../backend/internal/httpapi/testdata/chatwork_reservation_cancel_csharp.json) records seven cases, including every fake room, form body, and delivery log. Its series case used reservation 71 as the representative even though the request addressed reservation 73 and another booking started earlier on the same date.
