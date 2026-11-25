@@ -734,6 +734,31 @@ Both engines included overlap starts at each window boundary and excluded starts
 
 On PostgreSQL 16.15, an injected constraint failure rolled back the whole pass. Four simultaneous retries inserted seven records in total. Editing a detection and running the detector again preserved the edit. With detection disabled, API startup created zero records. With it enabled, the initial pair and then a new pair after restart appeared through the authenticated list and summary endpoints. Cancellation interrupted a pass blocked on a database lock, and the API returned its listen error when its port was occupied. A virtual-clock test measured a two-second failed pass followed by the next start at 62 seconds. The live restart fixture places its overlap seven minutes inside the window to tolerate host clock corrections. The detector tests passed ten consecutive runs. One intermediate full run failed an existing Chatwork delivery timestamp assertion. The final full run passed all 31 PostgreSQL integration tests with no skips. The database-free suite, formatting check, `go vet ./...` and `git diff --check` also passed.
 
+## Go CI with PostgreSQL
+
+The Go workflow runs two independent jobs on matching backend or workflow changes. `Test Go backend` runs `go test -v ./...` without a database. `Test Go backend with PostgreSQL` starts a job-local PostgreSQL 16 service, waits for its TCP health check, and supplies its assigned host port to the test runner. Both jobs use the Go version in `backend/go.mod`.
+
+Each integration suite first reads its existing connection variable, then falls back to `POSTGRES_TEST_DATABASE_URL`. This covers both the API suites and the reservation list suite in `internal/httpapi`, including the existing `CHATWORK_TEST_SEND_DATABASE_URL` override. With both connection settings empty, ordinary tests skip the suite. With `REQUIRE_POSTGRES_TESTS=1`, a missing connection fails it. A configured but unusable connection fails in either mode. The suites retain their generated schema names and drop their schemas during cleanup.
+
+### Reproduce in WSL
+
+Run the database-free suite from `backend` in a shell with the test connection variables and required flag unset.
+
+```bash
+go test ./...
+```
+
+For the integration run, use a disposable PostgreSQL 16 database and a role that can create schemas. The following command runs from `backend` and uses a local database named `meetingroombooker_test` owned by the synthetic role `ci_test` on port 5432.
+
+```bash
+TZ=Asia/Tokyo POSTGRES_TEST_DATABASE_URL='postgres://ci_test:ci_test@127.0.0.1:5432/meetingroombooker_test?sslmode=disable' \
+  bash scripts/test-postgres.sh
+```
+
+The runner sets `REQUIRE_POSTGRES_TESTS=1` and runs every top-level test ending in `Postgres` across all backend packages with `-count=1`. Use that suffix and the shared connection helper for new suites. A Go test failure, a skipped suite or subtest, or zero passing suites makes the command fail. The pass count is reported dynamically.
+
+At the #115 baseline the WSL database-free run passed 17 top-level tests and skipped all 31 PostgreSQL suites. The same runner used by CI passed all 31 suites on PostgreSQL 16.15 on the first run, with zero skips and zero remaining test schemas. The Chatwork update delivery timestamp check passed. Running the script with all test URLs unset, then with the shared URL pointing at a refused loopback port, failed all 31 suites each time with exit status 1. Valid suite overrides also passed with an unreachable shared URL in both test packages. The hosted runner's service startup, dynamic port and both job results can be verified after opening the PR.
+
 ## Recovery to C# and SQLite
 
 Rehearse each stage in development with synthetic rows and a recording fake Chatwork sender. `scripts/deploy/deploy-prod.sh` uses SQLite's backup API and integrity check. `scripts/deploy/rollback-prod.sh` restores the earlier API, web assets and final SQLite snapshot. A rollback after Go accepts writes also needs the committed PostgreSQL state.
