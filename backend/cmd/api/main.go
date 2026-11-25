@@ -18,6 +18,7 @@ import (
 	"github.com/Haru8644/MeetingRoomBooker/backend/internal/httpapi"
 	"github.com/Haru8644/MeetingRoomBooker/backend/internal/notifications"
 	"github.com/Haru8644/MeetingRoomBooker/backend/internal/reservations"
+	"github.com/Haru8644/MeetingRoomBooker/backend/internal/roomconflicts"
 	"github.com/Haru8644/MeetingRoomBooker/backend/internal/users"
 	"github.com/Haru8644/MeetingRoomBooker/backend/internal/workschedules"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -175,6 +176,7 @@ func run(ctx context.Context) error {
 			FrontendOrigins:    strings.Split(os.Getenv("FRONTEND_ORIGINS"), ","),
 			ChatworkTestRoomID: os.Getenv("CHATWORK_ROOM_ID"),
 			SendChatworkTest:   sendChatworkTest,
+			RoomConflicts:      roomconflicts.NewStore(pool),
 		})
 	if err != nil {
 		return err

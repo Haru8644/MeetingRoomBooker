@@ -1,0 +1,1544 @@
+{
+  "seed": [
+    {
+      "id": 20,
+      "type": 1,
+      "status": 1,
+      "occurredAt": "2026-07-14T11:22:33.1234567",
+      "roomName": "Manual room",
+      "reservationIdA": 10,
+      "reservationIdB": 20,
+      "impact": 2,
+      "cause": 98,
+      "description": "Synthetic conflict",
+      "resolution": "",
+      "detectionKey": null,
+      "reportedByUserId": 2,
+      "createdAt": "2026-06-04T10:30:00.1234567",
+      "updatedAt": null
+    },
+    {
+      "id": 21,
+      "type": 0,
+      "status": 0,
+      "occurredAt": "2026-07-14T11:22:33.1234567",
+      "roomName": "Detected room",
+      "reservationIdA": 10,
+      "reservationIdB": 20,
+      "impact": 1,
+      "cause": 98,
+      "description": "Synthetic conflict",
+      "resolution": "",
+      "detectionKey": "synthetic:10:20",
+      "reportedByUserId": null,
+      "createdAt": "2026-06-04T10:30:00.1234567",
+      "updatedAt": null
+    }
+  ],
+  "cases": [
+    {
+      "name": "anonymous_GET",
+      "actor": "anonymous",
+      "method": "GET",
+      "path": "",
+      "accept": "application/json",
+      "response": {
+        "status": 401,
+        "body": "",
+        "contentType": "",
+        "location": ""
+      }
+    },
+    {
+      "name": "anonymous_GET_20",
+      "actor": "anonymous",
+      "method": "GET",
+      "path": "/20",
+      "accept": "application/json",
+      "response": {
+        "status": 401,
+        "body": "",
+        "contentType": "",
+        "location": ""
+      }
+    },
+    {
+      "name": "anonymous_GET_summary",
+      "actor": "anonymous",
+      "method": "GET",
+      "path": "/summary",
+      "accept": "application/json",
+      "response": {
+        "status": 401,
+        "body": "",
+        "contentType": "",
+        "location": ""
+      }
+    },
+    {
+      "name": "anonymous_POST",
+      "actor": "anonymous",
+      "method": "POST",
+      "path": "",
+      "accept": "application/json",
+      "response": {
+        "status": 401,
+        "body": "",
+        "contentType": "",
+        "location": ""
+      },
+      "model": {}
+    },
+    {
+      "name": "anonymous_PUT_20",
+      "actor": "anonymous",
+      "method": "PUT",
+      "path": "/20",
+      "accept": "application/json",
+      "response": {
+        "status": 401,
+        "body": "",
+        "contentType": "",
+        "location": ""
+      },
+      "model": {}
+    },
+    {
+      "name": "empty_list",
+      "actor": "reporter",
+      "method": "GET",
+      "path": "",
+      "accept": "application/json",
+      "response": {
+        "status": 200,
+        "body": [],
+        "contentType": "application/json",
+        "location": ""
+      }
+    },
+    {
+      "name": "empty_summary",
+      "actor": "third_party",
+      "method": "GET",
+      "path": "/summary",
+      "accept": "application/json",
+      "response": {
+        "status": 200,
+        "body": {
+          "unresolvedOverlapsThisMonth": 0,
+          "confirmedCollisionsThisMonth": 0,
+          "highImpactConflictsThisMonth": 0,
+          "openDetectedRecords": 0
+        },
+        "contentType": "application/json",
+        "location": ""
+      }
+    },
+    {
+      "name": "month_summary",
+      "actor": "reporter",
+      "method": "GET",
+      "path": "/summary",
+      "accept": "application/json",
+      "response": {
+        "status": 200,
+        "body": {
+          "unresolvedOverlapsThisMonth": 2,
+          "confirmedCollisionsThisMonth": 1,
+          "highImpactConflictsThisMonth": 2,
+          "openDetectedRecords": 3
+        },
+        "contentType": "application/json",
+        "location": ""
+      }
+    },
+    {
+      "name": "list_reporter",
+      "actor": "reporter",
+      "method": "GET",
+      "path": "",
+      "accept": "application/json",
+      "response": {
+        "status": 200,
+        "body": [
+          {
+            "id": 21,
+            "type": 0,
+            "status": 0,
+            "occurredAt": "2026-07-14T11:22:33.1234567",
+            "roomName": "Detected room",
+            "reservationIdA": 10,
+            "reservationIdB": 20,
+            "impact": 1,
+            "cause": 98,
+            "description": "Synthetic conflict",
+            "resolution": "",
+            "detectionKey": "synthetic:10:20",
+            "reportedByUserId": null,
+            "createdAt": "2026-06-04T10:30:00.1234567",
+            "updatedAt": null,
+            "canEdit": false
+          },
+          {
+            "id": 20,
+            "type": 1,
+            "status": 1,
+            "occurredAt": "2026-07-14T11:22:33.1234567",
+            "roomName": "Manual room",
+            "reservationIdA": 10,
+            "reservationIdB": 20,
+            "impact": 2,
+            "cause": 98,
+            "description": "Synthetic conflict",
+            "resolution": "",
+            "detectionKey": null,
+            "reportedByUserId": 2,
+            "createdAt": "2026-06-04T10:30:00.1234567",
+            "updatedAt": null,
+            "canEdit": true
+          }
+        ],
+        "contentType": "application/json",
+        "location": ""
+      }
+    },
+    {
+      "name": "detail_reporter_20",
+      "actor": "reporter",
+      "method": "GET",
+      "path": "/20",
+      "accept": "application/json",
+      "response": {
+        "status": 200,
+        "body": {
+          "id": 20,
+          "type": 1,
+          "status": 1,
+          "occurredAt": "2026-07-14T11:22:33.1234567",
+          "roomName": "Manual room",
+          "reservationIdA": 10,
+          "reservationIdB": 20,
+          "impact": 2,
+          "cause": 98,
+          "description": "Synthetic conflict",
+          "resolution": "",
+          "detectionKey": null,
+          "reportedByUserId": 2,
+          "createdAt": "2026-06-04T10:30:00.1234567",
+          "updatedAt": null,
+          "canEdit": true
+        },
+        "contentType": "application/json",
+        "location": ""
+      }
+    },
+    {
+      "name": "detail_reporter_21",
+      "actor": "reporter",
+      "method": "GET",
+      "path": "/21",
+      "accept": "application/json",
+      "response": {
+        "status": 200,
+        "body": {
+          "id": 21,
+          "type": 0,
+          "status": 0,
+          "occurredAt": "2026-07-14T11:22:33.1234567",
+          "roomName": "Detected room",
+          "reservationIdA": 10,
+          "reservationIdB": 20,
+          "impact": 1,
+          "cause": 98,
+          "description": "Synthetic conflict",
+          "resolution": "",
+          "detectionKey": "synthetic:10:20",
+          "reportedByUserId": null,
+          "createdAt": "2026-06-04T10:30:00.1234567",
+          "updatedAt": null,
+          "canEdit": false
+        },
+        "contentType": "application/json",
+        "location": ""
+      }
+    },
+    {
+      "name": "list_third_party",
+      "actor": "third_party",
+      "method": "GET",
+      "path": "",
+      "accept": "application/json",
+      "response": {
+        "status": 200,
+        "body": [
+          {
+            "id": 21,
+            "type": 0,
+            "status": 0,
+            "occurredAt": "2026-07-14T11:22:33.1234567",
+            "roomName": "Detected room",
+            "reservationIdA": 10,
+            "reservationIdB": 20,
+            "impact": 1,
+            "cause": 98,
+            "description": "Synthetic conflict",
+            "resolution": "",
+            "detectionKey": "synthetic:10:20",
+            "reportedByUserId": null,
+            "createdAt": "2026-06-04T10:30:00.1234567",
+            "updatedAt": null,
+            "canEdit": false
+          },
+          {
+            "id": 20,
+            "type": 1,
+            "status": 1,
+            "occurredAt": "2026-07-14T11:22:33.1234567",
+            "roomName": "Manual room",
+            "reservationIdA": 10,
+            "reservationIdB": 20,
+            "impact": 2,
+            "cause": 98,
+            "description": "Synthetic conflict",
+            "resolution": "",
+            "detectionKey": null,
+            "reportedByUserId": 2,
+            "createdAt": "2026-06-04T10:30:00.1234567",
+            "updatedAt": null,
+            "canEdit": false
+          }
+        ],
+        "contentType": "application/json",
+        "location": ""
+      }
+    },
+    {
+      "name": "detail_third_party_20",
+      "actor": "third_party",
+      "method": "GET",
+      "path": "/20",
+      "accept": "application/json",
+      "response": {
+        "status": 200,
+        "body": {
+          "id": 20,
+          "type": 1,
+          "status": 1,
+          "occurredAt": "2026-07-14T11:22:33.1234567",
+          "roomName": "Manual room",
+          "reservationIdA": 10,
+          "reservationIdB": 20,
+          "impact": 2,
+          "cause": 98,
+          "description": "Synthetic conflict",
+          "resolution": "",
+          "detectionKey": null,
+          "reportedByUserId": 2,
+          "createdAt": "2026-06-04T10:30:00.1234567",
+          "updatedAt": null,
+          "canEdit": false
+        },
+        "contentType": "application/json",
+        "location": ""
+      }
+    },
+    {
+      "name": "detail_third_party_21",
+      "actor": "third_party",
+      "method": "GET",
+      "path": "/21",
+      "accept": "application/json",
+      "response": {
+        "status": 200,
+        "body": {
+          "id": 21,
+          "type": 0,
+          "status": 0,
+          "occurredAt": "2026-07-14T11:22:33.1234567",
+          "roomName": "Detected room",
+          "reservationIdA": 10,
+          "reservationIdB": 20,
+          "impact": 1,
+          "cause": 98,
+          "description": "Synthetic conflict",
+          "resolution": "",
+          "detectionKey": "synthetic:10:20",
+          "reportedByUserId": null,
+          "createdAt": "2026-06-04T10:30:00.1234567",
+          "updatedAt": null,
+          "canEdit": false
+        },
+        "contentType": "application/json",
+        "location": ""
+      }
+    },
+    {
+      "name": "list_admin",
+      "actor": "admin",
+      "method": "GET",
+      "path": "",
+      "accept": "application/json",
+      "response": {
+        "status": 200,
+        "body": [
+          {
+            "id": 21,
+            "type": 0,
+            "status": 0,
+            "occurredAt": "2026-07-14T11:22:33.1234567",
+            "roomName": "Detected room",
+            "reservationIdA": 10,
+            "reservationIdB": 20,
+            "impact": 1,
+            "cause": 98,
+            "description": "Synthetic conflict",
+            "resolution": "",
+            "detectionKey": "synthetic:10:20",
+            "reportedByUserId": null,
+            "createdAt": "2026-06-04T10:30:00.1234567",
+            "updatedAt": null,
+            "canEdit": true
+          },
+          {
+            "id": 20,
+            "type": 1,
+            "status": 1,
+            "occurredAt": "2026-07-14T11:22:33.1234567",
+            "roomName": "Manual room",
+            "reservationIdA": 10,
+            "reservationIdB": 20,
+            "impact": 2,
+            "cause": 98,
+            "description": "Synthetic conflict",
+            "resolution": "",
+            "detectionKey": null,
+            "reportedByUserId": 2,
+            "createdAt": "2026-06-04T10:30:00.1234567",
+            "updatedAt": null,
+            "canEdit": true
+          }
+        ],
+        "contentType": "application/json",
+        "location": ""
+      }
+    },
+    {
+      "name": "detail_admin_20",
+      "actor": "admin",
+      "method": "GET",
+      "path": "/20",
+      "accept": "application/json",
+      "response": {
+        "status": 200,
+        "body": {
+          "id": 20,
+          "type": 1,
+          "status": 1,
+          "occurredAt": "2026-07-14T11:22:33.1234567",
+          "roomName": "Manual room",
+          "reservationIdA": 10,
+          "reservationIdB": 20,
+          "impact": 2,
+          "cause": 98,
+          "description": "Synthetic conflict",
+          "resolution": "",
+          "detectionKey": null,
+          "reportedByUserId": 2,
+          "createdAt": "2026-06-04T10:30:00.1234567",
+          "updatedAt": null,
+          "canEdit": true
+        },
+        "contentType": "application/json",
+        "location": ""
+      }
+    },
+    {
+      "name": "detail_admin_21",
+      "actor": "admin",
+      "method": "GET",
+      "path": "/21",
+      "accept": "application/json",
+      "response": {
+        "status": 200,
+        "body": {
+          "id": 21,
+          "type": 0,
+          "status": 0,
+          "occurredAt": "2026-07-14T11:22:33.1234567",
+          "roomName": "Detected room",
+          "reservationIdA": 10,
+          "reservationIdB": 20,
+          "impact": 1,
+          "cause": 98,
+          "description": "Synthetic conflict",
+          "resolution": "",
+          "detectionKey": "synthetic:10:20",
+          "reportedByUserId": null,
+          "createdAt": "2026-06-04T10:30:00.1234567",
+          "updatedAt": null,
+          "canEdit": true
+        },
+        "contentType": "application/json",
+        "location": ""
+      }
+    },
+    {
+      "name": "absent_get",
+      "actor": "reporter",
+      "method": "GET",
+      "path": "/999",
+      "accept": "application/json",
+      "response": {
+        "status": 404,
+        "body": {
+          "type": "https://tools.ietf.org/html/rfc9110#section-15.5.5",
+          "title": "Not Found",
+          "status": 404
+        },
+        "contentType": "application/problem+json",
+        "location": ""
+      }
+    },
+    {
+      "name": "bad_id",
+      "actor": "anonymous",
+      "method": "GET",
+      "path": "/2147483648",
+      "accept": "application/json",
+      "response": {
+        "status": 404,
+        "body": "",
+        "contentType": "",
+        "location": ""
+      }
+    },
+    {
+      "name": "missing_date",
+      "actor": "reporter",
+      "method": "POST",
+      "path": "",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": "OccurredAt is required.",
+        "contentType": "application/json",
+        "location": ""
+      },
+      "model": {
+        "roomName": "Room"
+      }
+    },
+    {
+      "name": "min_date",
+      "actor": "reporter",
+      "method": "POST",
+      "path": "",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": "OccurredAt is required.",
+        "contentType": "application/json",
+        "location": ""
+      },
+      "model": {
+        "occurredAt": "0001-01-01T00:00:00",
+        "roomName": "  架空会議室  "
+      }
+    },
+    {
+      "name": "null_date",
+      "actor": "reporter",
+      "method": "POST",
+      "path": "",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": {
+          "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+          "title": "One or more validation errors occurred.",
+          "status": 400,
+          "errors": {
+            "request": [
+              "The request field is required."
+            ],
+            "$.occurredAt": [
+              "The JSON value could not be converted to System.DateTime. Path: $.occurredAt | LineNumber: 0 | BytePositionInLine: 19."
+            ]
+          }
+        },
+        "contentType": "application/problem+json",
+        "location": ""
+      },
+      "model": {
+        "occurredAt": null,
+        "roomName": "  架空会議室  "
+      }
+    },
+    {
+      "name": "blank_room",
+      "actor": "reporter",
+      "method": "POST",
+      "path": "",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": "RoomName is required.",
+        "contentType": "application/json",
+        "location": ""
+      },
+      "model": {
+        "occurredAt": "2026-07-14T11:22:33.1234567",
+        "roomName": " \t　"
+      }
+    },
+    {
+      "name": "null_room",
+      "actor": "reporter",
+      "method": "POST",
+      "path": "",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": {
+          "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+          "title": "One or more validation errors occurred.",
+          "status": 400,
+          "errors": {
+            "RoomName": [
+              "The RoomName field is required."
+            ]
+          }
+        },
+        "contentType": "application/problem+json",
+        "location": ""
+      },
+      "model": {
+        "occurredAt": "2026-07-14T11:22:33.1234567",
+        "roomName": null
+      }
+    },
+    {
+      "name": "room_over",
+      "actor": "reporter",
+      "method": "POST",
+      "path": "",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": "RoomName must be 100 characters or less.",
+        "contentType": "application/json",
+        "location": ""
+      },
+      "model": {
+        "occurredAt": "2026-07-14T11:22:33.1234567",
+        "roomName": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀x"
+      }
+    },
+    {
+      "name": "description_over",
+      "actor": "reporter",
+      "method": "POST",
+      "path": "",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": "Description must be 1000 characters or less.",
+        "contentType": "application/json",
+        "location": ""
+      },
+      "model": {
+        "occurredAt": "2026-07-14T11:22:33.1234567",
+        "roomName": "  架空会議室  ",
+        "description": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀x"
+      }
+    },
+    {
+      "name": "resolution_over",
+      "actor": "reporter",
+      "method": "POST",
+      "path": "",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": "Resolution must be 1000 characters or less.",
+        "contentType": "application/json",
+        "location": ""
+      },
+      "model": {
+        "occurredAt": "2026-07-14T11:22:33.1234567",
+        "roomName": "  架空会議室  ",
+        "resolution": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀x"
+      }
+    },
+    {
+      "name": "invalid_impact",
+      "actor": "reporter",
+      "method": "POST",
+      "path": "",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": "Impact is invalid.",
+        "contentType": "application/json",
+        "location": ""
+      },
+      "model": {
+        "occurredAt": "2026-07-14T11:22:33.1234567",
+        "roomName": "  架空会議室  ",
+        "impact": 101
+      }
+    },
+    {
+      "name": "invalid_cause",
+      "actor": "reporter",
+      "method": "POST",
+      "path": "",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": "Cause is invalid.",
+        "contentType": "application/json",
+        "location": ""
+      },
+      "model": {
+        "occurredAt": "2026-07-14T11:22:33.1234567",
+        "roomName": "  架空会議室  ",
+        "cause": 101
+      }
+    },
+    {
+      "name": "invalid_status",
+      "actor": "reporter",
+      "method": "POST",
+      "path": "",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": "Status is invalid.",
+        "contentType": "application/json",
+        "location": ""
+      },
+      "model": {
+        "occurredAt": "2026-07-14T11:22:33.1234567",
+        "roomName": "  架空会議室  ",
+        "status": 101
+      }
+    },
+    {
+      "name": "same_reservation",
+      "actor": "reporter",
+      "method": "POST",
+      "path": "",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": "ReservationIdA and ReservationIdB must be different.",
+        "contentType": "application/json",
+        "location": ""
+      },
+      "model": {
+        "occurredAt": "2026-07-14T11:22:33.1234567",
+        "roomName": "  架空会議室  ",
+        "reservationIdA": 10,
+        "reservationIdB": 10
+      }
+    },
+    {
+      "name": "same_missing_before_detected",
+      "actor": "reporter",
+      "method": "POST",
+      "path": "",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": "ReservationIdA and ReservationIdB must be different.",
+        "contentType": "application/json",
+        "location": ""
+      },
+      "model": {
+        "occurredAt": "2026-07-14T11:22:33.1234567",
+        "roomName": "  架空会議室  ",
+        "status": 0,
+        "reservationIdA": 999,
+        "reservationIdB": 999
+      }
+    },
+    {
+      "name": "missing_a_and_b",
+      "actor": "reporter",
+      "method": "POST",
+      "path": "",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": "Reservation was not found: 999, -9.",
+        "contentType": "application/json",
+        "location": ""
+      },
+      "model": {
+        "occurredAt": "2026-07-14T11:22:33.1234567",
+        "roomName": "  架空会議室  ",
+        "reservationIdA": 999,
+        "reservationIdB": -9
+      }
+    },
+    {
+      "name": "overflow_reservation",
+      "actor": "reporter",
+      "method": "POST",
+      "path": "",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": {
+          "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+          "title": "One or more validation errors occurred.",
+          "status": 400,
+          "errors": {
+            "request": [
+              "The request field is required."
+            ],
+            "$.reservationIdA": [
+              "The JSON value could not be converted to System.Nullable`1[System.Int32]. Path: $.reservationIdA | LineNumber: 0 | BytePositionInLine: 109."
+            ]
+          }
+        },
+        "contentType": "application/problem+json",
+        "location": ""
+      },
+      "model": {
+        "occurredAt": "2026-07-14T11:22:33.1234567",
+        "roomName": "  架空会議室  ",
+        "reservationIdA": 2147483648
+      }
+    },
+    {
+      "name": "manual_detected",
+      "actor": "reporter",
+      "method": "POST",
+      "path": "",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": "Manual conflict reports cannot be created with Detected status.",
+        "contentType": "application/json",
+        "location": ""
+      },
+      "model": {
+        "occurredAt": "2026-07-14T11:22:33.1234567",
+        "roomName": "  架空会議室  ",
+        "status": 0
+      }
+    },
+    {
+      "name": "null_impact",
+      "actor": "reporter",
+      "method": "POST",
+      "path": "",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": {
+          "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+          "title": "One or more validation errors occurred.",
+          "status": 400,
+          "errors": {
+            "request": [
+              "The request field is required."
+            ],
+            "$.impact": [
+              "The JSON value could not be converted to MeetingRoomBooker.Api.Models.ConflictImpact. Path: $.impact | LineNumber: 0 | BytePositionInLine: 95."
+            ]
+          }
+        },
+        "contentType": "application/problem+json",
+        "location": ""
+      },
+      "model": {
+        "occurredAt": "2026-07-14T11:22:33.1234567",
+        "roomName": "  架空会議室  ",
+        "impact": null
+      }
+    },
+    {
+      "name": "quoted_enum",
+      "actor": "reporter",
+      "method": "POST",
+      "path": "",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": {
+          "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+          "title": "One or more validation errors occurred.",
+          "status": 400,
+          "errors": {
+            "request": [
+              "The request field is required."
+            ],
+            "$.impact": [
+              "The JSON value could not be converted to MeetingRoomBooker.Api.Models.ConflictImpact. Path: $.impact | LineNumber: 0 | BytePositionInLine: 94."
+            ]
+          }
+        },
+        "contentType": "application/problem+json",
+        "location": ""
+      },
+      "model": {
+        "occurredAt": "2026-07-14T11:22:33.1234567",
+        "roomName": "  架空会議室  ",
+        "impact": "2"
+      }
+    },
+    {
+      "name": "creation_defaults",
+      "actor": "reporter",
+      "method": "POST",
+      "path": "",
+      "accept": "application/json",
+      "response": {
+        "status": 201,
+        "body": {
+          "id": 22,
+          "type": 1,
+          "status": 1,
+          "occurredAt": "2026-07-14T11:22:33.1234567",
+          "roomName": "架空会議室",
+          "reservationIdA": 10,
+          "reservationIdB": 20,
+          "impact": 1,
+          "cause": 98,
+          "description": "",
+          "resolution": "",
+          "detectionKey": null,
+          "reportedByUserId": 2,
+          "createdAt": "2026-11-25T14:09:25.9465504",
+          "updatedAt": null,
+          "canEdit": true
+        },
+        "contentType": "application/json",
+        "location": "/api/room-conflict-records/22"
+      },
+      "model": {
+        "occurredAt": "2026-07-14T11:22:33.1234567",
+        "roomName": "  架空会議室  ",
+        "reservationIdA": "10",
+        "reservationIdB": 20,
+        "reportedByUserId": 1,
+        "type": 0,
+        "detectionKey": "ignore"
+      },
+      "generated": "createdAt",
+      "saved": {
+        "id": 22,
+        "type": 1,
+        "status": 1,
+        "occurredAt": "2026-07-14T11:22:33.1234567",
+        "roomName": "架空会議室",
+        "reservationIdA": 10,
+        "reservationIdB": 20,
+        "impact": 1,
+        "cause": 98,
+        "description": "",
+        "resolution": "",
+        "detectionKey": null,
+        "reportedByUserId": 2,
+        "createdAt": "2026-11-25T14:09:25.9465504",
+        "updatedAt": null
+      }
+    },
+    {
+      "name": "location_get",
+      "actor": "reporter",
+      "method": "GET",
+      "path": "/22",
+      "accept": "application/json",
+      "response": {
+        "status": 200,
+        "body": {
+          "id": 22,
+          "type": 1,
+          "status": 1,
+          "occurredAt": "2026-07-14T11:22:33.1234567",
+          "roomName": "架空会議室",
+          "reservationIdA": 10,
+          "reservationIdB": 20,
+          "impact": 1,
+          "cause": 98,
+          "description": "",
+          "resolution": "",
+          "detectionKey": null,
+          "reportedByUserId": 2,
+          "createdAt": "2026-11-25T14:09:25.9465504",
+          "updatedAt": null,
+          "canEdit": true
+        },
+        "contentType": "application/json",
+        "location": ""
+      },
+      "generated": "createdAt"
+    },
+    {
+      "name": "create_utf16_limits",
+      "actor": "reporter",
+      "method": "POST",
+      "path": "",
+      "accept": "application/json",
+      "response": {
+        "status": 201,
+        "body": {
+          "id": 23,
+          "type": 1,
+          "status": 2,
+          "occurredAt": "2026-07-14T09:00:00",
+          "roomName": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+          "reservationIdA": -2147483648,
+          "reservationIdB": 2147483647,
+          "impact": 1,
+          "cause": 98,
+          "description": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+          "resolution": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+          "detectionKey": null,
+          "reportedByUserId": 2,
+          "createdAt": "2026-11-25T14:09:26.0104265",
+          "updatedAt": null,
+          "canEdit": true
+        },
+        "contentType": "application/json",
+        "location": "/api/room-conflict-records/23"
+      },
+      "model": {
+        "occurredAt": "2026-07-14T09:00",
+        "roomName": " 😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀 ",
+        "description": " 😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀 ",
+        "resolution": " 😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀 ",
+        "status": 2,
+        "reservationIdA": -2147483648,
+        "reservationIdB": 2147483647
+      },
+      "generated": "createdAt",
+      "saved": {
+        "id": 23,
+        "type": 1,
+        "status": 2,
+        "occurredAt": "2026-07-14T09:00:00",
+        "roomName": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+        "reservationIdA": -2147483648,
+        "reservationIdB": 2147483647,
+        "impact": 1,
+        "cause": 98,
+        "description": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+        "resolution": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+        "detectionKey": null,
+        "reportedByUserId": 2,
+        "createdAt": "2026-11-25T14:09:26.0104265",
+        "updatedAt": null
+      }
+    },
+    {
+      "name": "create_offset",
+      "actor": "reporter",
+      "method": "POST",
+      "path": "",
+      "accept": "application/json",
+      "response": {
+        "status": 201,
+        "body": {
+          "id": 24,
+          "type": 1,
+          "status": 1,
+          "occurredAt": "2026-07-14T09:22:33.1234567",
+          "roomName": "架空会議室",
+          "reservationIdA": null,
+          "reservationIdB": 0,
+          "impact": 1,
+          "cause": 98,
+          "description": "description",
+          "resolution": "resolution",
+          "detectionKey": null,
+          "reportedByUserId": 2,
+          "createdAt": "2026-11-25T14:09:26.0186822",
+          "updatedAt": null,
+          "canEdit": true
+        },
+        "contentType": "application/json",
+        "location": "/api/room-conflict-records/24"
+      },
+      "model": {
+        "occurredAt": "2026-07-14T02:22:33.1234567+02:00",
+        "roomName": "  架空会議室  ",
+        "description": "  description  ",
+        "resolution": "  resolution  ",
+        "reservationIdB": 0,
+        "status": null
+      },
+      "generated": "createdAt",
+      "saved": {
+        "id": 24,
+        "type": 1,
+        "status": 1,
+        "occurredAt": "2026-07-14T09:22:33.1234567",
+        "roomName": "架空会議室",
+        "reservationIdA": null,
+        "reservationIdB": 0,
+        "impact": 1,
+        "cause": 98,
+        "description": "description",
+        "resolution": "resolution",
+        "detectionKey": null,
+        "reportedByUserId": 2,
+        "createdAt": "2026-11-25T14:09:26.0186822",
+        "updatedAt": null
+      }
+    },
+    {
+      "name": "create_zulu",
+      "actor": "reporter",
+      "method": "POST",
+      "path": "",
+      "accept": "application/json",
+      "response": {
+        "status": 201,
+        "body": {
+          "id": 25,
+          "type": 1,
+          "status": 3,
+          "occurredAt": "2026-07-14T02:22:33.1234567",
+          "roomName": "架空会議室",
+          "reservationIdA": null,
+          "reservationIdB": null,
+          "impact": 2,
+          "cause": 99,
+          "description": "",
+          "resolution": "",
+          "detectionKey": null,
+          "reportedByUserId": 2,
+          "createdAt": "2026-11-25T14:09:26.0242462",
+          "updatedAt": null,
+          "canEdit": true
+        },
+        "contentType": "application/json",
+        "location": "/api/room-conflict-records/25"
+      },
+      "model": {
+        "occurredAt": "2026-07-14T02:22:33.123456789Z",
+        "roomName": "  架空会議室  ",
+        "impact": 2,
+        "cause": 99,
+        "status": 3
+      },
+      "generated": "createdAt",
+      "saved": {
+        "id": 25,
+        "type": 1,
+        "status": 3,
+        "occurredAt": "2026-07-14T02:22:33.1234567",
+        "roomName": "架空会議室",
+        "reservationIdA": null,
+        "reservationIdB": null,
+        "impact": 2,
+        "cause": 99,
+        "description": "",
+        "resolution": "",
+        "detectionKey": null,
+        "reportedByUserId": 2,
+        "createdAt": "2026-11-25T14:09:26.0242462",
+        "updatedAt": null
+      }
+    },
+    {
+      "name": "put_missing_invalid",
+      "actor": "reporter",
+      "method": "PUT",
+      "path": "/999",
+      "accept": "application/json",
+      "response": {
+        "status": 404,
+        "body": {
+          "type": "https://tools.ietf.org/html/rfc9110#section-15.5.5",
+          "title": "Not Found",
+          "status": 404
+        },
+        "contentType": "application/problem+json",
+        "location": ""
+      },
+      "model": {
+        "status": 99
+      }
+    },
+    {
+      "name": "put_third_party_invalid",
+      "actor": "third_party",
+      "method": "PUT",
+      "path": "/20",
+      "accept": "application/json",
+      "response": {
+        "status": 403,
+        "body": "",
+        "contentType": "",
+        "location": ""
+      },
+      "model": {
+        "status": 99
+      }
+    },
+    {
+      "name": "put_model_before_missing",
+      "actor": "reporter",
+      "method": "PUT",
+      "path": "/999",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": {
+          "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+          "title": "One or more validation errors occurred.",
+          "status": 400,
+          "errors": {
+            "request": [
+              "The request field is required."
+            ],
+            "$.status": [
+              "The JSON value could not be converted to MeetingRoomBooker.Api.Models.ConflictStatus. Path: $.status | LineNumber: 0 | BytePositionInLine: 15."
+            ]
+          }
+        },
+        "contentType": "application/problem+json",
+        "location": ""
+      },
+      "model": {
+        "status": null
+      }
+    },
+    {
+      "name": "put_model_before_forbidden",
+      "actor": "third_party",
+      "method": "PUT",
+      "path": "/20",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": {
+          "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+          "title": "One or more validation errors occurred.",
+          "status": 400,
+          "errors": {
+            "request": [
+              "The request field is required."
+            ],
+            "$.status": [
+              "Expected depth to be zero at the end of the JSON payload. There is an open JSON object or array that should be closed. Path: $.status | LineNumber: 0 | BytePositionInLine: 10."
+            ]
+          }
+        },
+        "contentType": "application/problem+json",
+        "location": ""
+      },
+      "raw": "{\"status\":"
+    },
+    {
+      "name": "put_reporter_invalid",
+      "actor": "reporter",
+      "method": "PUT",
+      "path": "/20",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": "Status is invalid.",
+        "contentType": "application/json",
+        "location": ""
+      },
+      "model": {
+        "status": 8
+      }
+    },
+    {
+      "name": "put_reporter_long",
+      "actor": "reporter",
+      "method": "PUT",
+      "path": "/20",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": "Description must be 1000 characters or less.",
+        "contentType": "application/json",
+        "location": ""
+      },
+      "model": {
+        "description": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀x"
+      }
+    },
+    {
+      "name": "put_reporter_detected",
+      "actor": "reporter",
+      "method": "PUT",
+      "path": "/21",
+      "accept": "application/json",
+      "response": {
+        "status": 403,
+        "body": "",
+        "contentType": "",
+        "location": ""
+      },
+      "model": {}
+    },
+    {
+      "name": "put_reporter_ok",
+      "actor": "reporter",
+      "method": "PUT",
+      "path": "/20",
+      "accept": "application/json",
+      "response": {
+        "status": 200,
+        "body": {
+          "id": 20,
+          "type": 1,
+          "status": 3,
+          "occurredAt": "2026-07-14T11:22:33.1234567",
+          "roomName": "Manual room",
+          "reservationIdA": 10,
+          "reservationIdB": 20,
+          "impact": 0,
+          "cause": 2,
+          "description": "更新",
+          "resolution": "",
+          "detectionKey": null,
+          "reportedByUserId": 2,
+          "createdAt": "2026-06-04T10:30:00.1234567",
+          "updatedAt": "2026-11-25T14:09:26.0652969",
+          "canEdit": true
+        },
+        "contentType": "application/json",
+        "location": ""
+      },
+      "model": {
+        "status": 3,
+        "impact": 0,
+        "cause": 2,
+        "description": "  更新  ",
+        "resolution": null,
+        "roomName": "ignored",
+        "reservationIdA": 999,
+        "reportedByUserId": 3
+      },
+      "generated": "updatedAt",
+      "saved": {
+        "id": 20,
+        "type": 1,
+        "status": 3,
+        "occurredAt": "2026-07-14T11:22:33.1234567",
+        "roomName": "Manual room",
+        "reservationIdA": 10,
+        "reservationIdB": 20,
+        "impact": 0,
+        "cause": 2,
+        "description": "更新",
+        "resolution": "",
+        "detectionKey": null,
+        "reportedByUserId": 2,
+        "createdAt": "2026-06-04T10:30:00.1234567",
+        "updatedAt": "2026-11-25T14:09:26.0652969"
+      }
+    },
+    {
+      "name": "put_admin_detected",
+      "actor": "admin",
+      "method": "PUT",
+      "path": "/21",
+      "accept": "application/json",
+      "response": {
+        "status": 200,
+        "body": {
+          "id": 21,
+          "type": 0,
+          "status": 2,
+          "occurredAt": "2026-07-14T11:22:33.1234567",
+          "roomName": "Detected room",
+          "reservationIdA": 10,
+          "reservationIdB": 20,
+          "impact": 2,
+          "cause": 99,
+          "description": "",
+          "resolution": "Reviewed",
+          "detectionKey": "synthetic:10:20",
+          "reportedByUserId": null,
+          "createdAt": "2026-06-04T10:30:00.1234567",
+          "updatedAt": "2026-11-25T14:09:26.0755676",
+          "canEdit": true
+        },
+        "contentType": "application/json",
+        "location": ""
+      },
+      "model": {
+        "status": 2,
+        "impact": 2,
+        "cause": 99,
+        "description": null,
+        "resolution": "  Reviewed  "
+      },
+      "generated": "updatedAt",
+      "saved": {
+        "id": 21,
+        "type": 0,
+        "status": 2,
+        "occurredAt": "2026-07-14T11:22:33.1234567",
+        "roomName": "Detected room",
+        "reservationIdA": 10,
+        "reservationIdB": 20,
+        "impact": 2,
+        "cause": 99,
+        "description": "",
+        "resolution": "Reviewed",
+        "detectionKey": "synthetic:10:20",
+        "reportedByUserId": null,
+        "createdAt": "2026-06-04T10:30:00.1234567",
+        "updatedAt": "2026-11-25T14:09:26.0755676"
+      }
+    },
+    {
+      "name": "put_defaults",
+      "actor": "admin",
+      "method": "PUT",
+      "path": "/21",
+      "accept": "application/json",
+      "response": {
+        "status": 200,
+        "body": {
+          "id": 21,
+          "type": 0,
+          "status": 0,
+          "occurredAt": "2026-07-14T11:22:33.1234567",
+          "roomName": "Detected room",
+          "reservationIdA": 10,
+          "reservationIdB": 20,
+          "impact": 0,
+          "cause": 0,
+          "description": "",
+          "resolution": "",
+          "detectionKey": "synthetic:10:20",
+          "reportedByUserId": null,
+          "createdAt": "2026-06-04T10:30:00.1234567",
+          "updatedAt": "2026-11-25T14:09:26.0826973",
+          "canEdit": true
+        },
+        "contentType": "application/json",
+        "location": ""
+      },
+      "model": {},
+      "generated": "updatedAt",
+      "saved": {
+        "id": 21,
+        "type": 0,
+        "status": 0,
+        "occurredAt": "2026-07-14T11:22:33.1234567",
+        "roomName": "Detected room",
+        "reservationIdA": 10,
+        "reservationIdB": 20,
+        "impact": 0,
+        "cause": 0,
+        "description": "",
+        "resolution": "",
+        "detectionKey": "synthetic:10:20",
+        "reportedByUserId": null,
+        "createdAt": "2026-06-04T10:30:00.1234567",
+        "updatedAt": "2026-11-25T14:09:26.0826973"
+      }
+    },
+    {
+      "name": "history_after_deletion",
+      "actor": "admin",
+      "method": "GET",
+      "path": "/20",
+      "accept": "application/json",
+      "response": {
+        "status": 200,
+        "body": {
+          "id": 20,
+          "type": 1,
+          "status": 3,
+          "occurredAt": "2026-07-14T11:22:33.1234567",
+          "roomName": "Manual room",
+          "reservationIdA": 10,
+          "reservationIdB": 20,
+          "impact": 0,
+          "cause": 2,
+          "description": "更新",
+          "resolution": "",
+          "detectionKey": null,
+          "reportedByUserId": 2,
+          "createdAt": "2026-06-04T10:30:00.1234567",
+          "updatedAt": "2026-11-25T14:09:26.0652969",
+          "canEdit": true
+        },
+        "contentType": "application/json",
+        "location": ""
+      },
+      "generated": "updatedAt",
+      "saved": {
+        "id": 20,
+        "type": 1,
+        "status": 3,
+        "occurredAt": "2026-07-14T11:22:33.1234567",
+        "roomName": "Manual room",
+        "reservationIdA": 10,
+        "reservationIdB": 20,
+        "impact": 0,
+        "cause": 2,
+        "description": "更新",
+        "resolution": "",
+        "detectionKey": null,
+        "reportedByUserId": 2,
+        "createdAt": "2026-06-04T10:30:00.1234567",
+        "updatedAt": "2026-11-25T14:09:26.0652969"
+      }
+    },
+    {
+      "name": "detected_after_deletion",
+      "actor": "third_party",
+      "method": "GET",
+      "path": "/21",
+      "accept": "application/json",
+      "response": {
+        "status": 200,
+        "body": {
+          "id": 21,
+          "type": 0,
+          "status": 0,
+          "occurredAt": "2026-07-14T11:22:33.1234567",
+          "roomName": "Detected room",
+          "reservationIdA": 10,
+          "reservationIdB": 20,
+          "impact": 0,
+          "cause": 0,
+          "description": "",
+          "resolution": "",
+          "detectionKey": "synthetic:10:20",
+          "reportedByUserId": null,
+          "createdAt": "2026-06-04T10:30:00.1234567",
+          "updatedAt": "2026-11-25T14:09:26.0826973",
+          "canEdit": false
+        },
+        "contentType": "application/json",
+        "location": ""
+      },
+      "generated": "updatedAt",
+      "saved": {
+        "id": 21,
+        "type": 0,
+        "status": 0,
+        "occurredAt": "2026-07-14T11:22:33.1234567",
+        "roomName": "Detected room",
+        "reservationIdA": 10,
+        "reservationIdB": 20,
+        "impact": 0,
+        "cause": 0,
+        "description": "",
+        "resolution": "",
+        "detectionKey": "synthetic:10:20",
+        "reportedByUserId": null,
+        "createdAt": "2026-06-04T10:30:00.1234567",
+        "updatedAt": "2026-11-25T14:09:26.0826973"
+      }
+    }
+  ]
+}
