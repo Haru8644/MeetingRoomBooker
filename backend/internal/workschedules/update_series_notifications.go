@@ -1,7 +1,6 @@
 package workschedules
 
 import (
-	"cmp"
 	"context"
 	"fmt"
 	"slices"
@@ -17,7 +16,7 @@ func notifyWorkScheduleSeriesUpdate(ctx context.Context, tx pgx.Tx, before, afte
 	slices.SortFunc(after, compareScheduleOccurrences)
 	first := after[0]
 	result := UpdateResult{Entry: first.Entry, Scope: scope}
-	recipients := seriesUpdateParticipants(before, after)
+	recipients := workScheduleParticipants(before, after)
 	if len(recipients) == 0 {
 		return result, nil
 	}
@@ -30,12 +29,8 @@ func notifyWorkScheduleSeriesUpdate(ctx context.Context, tx pgx.Tx, before, afte
 		return UpdateResult{}, err
 	}
 	kind, noticeWarning, dmWarning := conflictWarnings(conflicts, names)
-	scopeLabel := "全て"
-	if scope == "following" {
-		scopeLabel = "今回以降"
-	}
 	summary := []string{
-		"反映範囲: " + scopeLabel,
+		"反映範囲: " + workScheduleSeriesScopeLabel(scope),
 		"期間: " + first.calendarDate() + "〜" + after[len(after)-1].calendarDate(),
 		fmt.Sprintf("件数: %d件", len(after)),
 		"時間: " + first.timeRange(),
@@ -61,32 +56,6 @@ func notifyWorkScheduleSeriesUpdate(ctx context.Context, tx pgx.Tx, before, afte
 		Message: strings.Join(append(body, "[/info]"), "\n"),
 	}}
 	return result, nil
-}
-
-func compareScheduleOccurrences(a, b storedEntry) int {
-	start := func(entry storedEntry) int64 {
-		if entry.startTicks == nil {
-			return entry.dateTicks
-		}
-		return *entry.startTicks
-	}
-	return cmp.Or(cmp.Compare(a.dateTicks, b.dateTicks), cmp.Compare(start(a), start(b)), cmp.Compare(a.ID, b.ID))
-}
-
-func seriesUpdateParticipants(before, after []storedEntry) []int {
-	var recipients []int
-	seen := make(map[int]bool)
-	for _, entries := range [][]storedEntry{before, after} {
-		for _, entry := range entries {
-			for _, id := range entry.ParticipantIDs {
-				if id > 0 && !seen[id] {
-					recipients = append(recipients, id)
-					seen[id] = true
-				}
-			}
-		}
-	}
-	return recipients
 }
 
 func seriesUpdateChangeLines(before, after storedEntry) []string {

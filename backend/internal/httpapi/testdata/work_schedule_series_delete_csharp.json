@@ -1,0 +1,718 @@
+{
+  "users": [
+    {"id": 1, "name": "架空の管理者", "roomId": "900001"},
+    {"id": 2, "name": "架空の作成者", "roomId": "900002"},
+    {"id": 3, "name": "架空の同席者", "roomId": " 900003 "},
+    {"id": 4, "name": "宛先未設定の参加者", "roomId": null},
+    {"id": 5, "name": "架空の追加参加者", "roomId": "900005"},
+    {"id": 6, "name": "架空の別ユーザー", "roomId": "900006"}
+  ],
+  "datasets": {
+      "standard": [
+        {"id": 60, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-18T00:00:00", "startTime": "2026-06-18T09:00:00.1234567", "endTime": "2026-06-18T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3], "participants": "架空の作成者、架空の同席者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"},
+        {"id": 65, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T08:00:00", "endTime": "2026-06-19T08:30:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"},
+        {"id": 61, "createdByUserId": 2, "type": 0, "title": "代表の架空訪問", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 4, 4, 0, -1], "participants": "保存済みの対象者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"},
+        {"id": 62, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"},
+        {"id": 64, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T10:00:00", "endTime": "2026-06-19T11:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"},
+        {"id": 66, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-22T00:00:00", "startTime": "2026-06-22T09:00:00.1234567", "endTime": "2026-06-22T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 6], "participants": "架空の作成者、架空の別ユーザー", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"},
+        {"id": 67, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "other-series", "date": "2026-06-22T00:00:00", "startTime": "2026-06-22T09:00:00.1234567", "endTime": "2026-06-22T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3], "participants": "架空の作成者、架空の同席者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"},
+        {"id": 68, "createdByUserId": 2, "type": 1, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-22T00:00:00", "startTime": null, "endTime": null, "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の作成者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"},
+        {"id": 69, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": null, "date": "2026-06-23T00:00:00", "startTime": "2026-06-23T09:00:00.1234567", "endTime": "2026-06-23T10:00:00", "repeatType": null, "repeatUntil": null, "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"},
+        {"id": 63, "createdByUserId": 2, "type": 0, "title": "時刻未設定の架空訪問", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": null, "endTime": null, "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [3, 3, 4], "participants": "   ", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"}
+      ],
+      "mixed": [
+        {"id": 60, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-18T00:00:00", "startTime": "2026-06-18T09:00:00.1234567", "endTime": "2026-06-18T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3], "participants": "架空の作成者、架空の同席者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"},
+        {"id": 65, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T08:00:00", "endTime": "2026-06-19T08:30:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"},
+        {"id": 61, "createdByUserId": 2, "type": 0, "title": "代表の架空訪問", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 4, 4, 0, -1], "participants": "保存済みの対象者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"},
+        {"id": 62, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"},
+        {"id": 64, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T10:00:00", "endTime": "2026-06-19T11:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"},
+        {"id": 66, "createdByUserId": 5, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-22T00:00:00", "startTime": "2026-06-22T09:00:00.1234567", "endTime": "2026-06-22T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [5, 6], "participants": "架空の追加参加者、架空の別ユーザー", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"},
+        {"id": 67, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "other-series", "date": "2026-06-22T00:00:00", "startTime": "2026-06-22T09:00:00.1234567", "endTime": "2026-06-22T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3], "participants": "架空の作成者、架空の同席者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"},
+        {"id": 68, "createdByUserId": 2, "type": 1, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-22T00:00:00", "startTime": null, "endTime": null, "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2], "participants": "架空の作成者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"},
+        {"id": 69, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": null, "date": "2026-06-23T00:00:00", "startTime": "2026-06-23T09:00:00.1234567", "endTime": "2026-06-23T10:00:00", "repeatType": null, "repeatUntil": null, "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"},
+        {"id": 63, "createdByUserId": 2, "type": 0, "title": "時刻未設定の架空訪問", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": null, "endTime": null, "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [3, 3, 4], "participants": "   ", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"}
+      ],
+      "simple": [
+        {"id": 52, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"},
+        {"id": 53, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-22T00:00:00", "startTime": "2026-06-22T09:00:00.1234567", "endTime": "2026-06-22T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"}
+      ],
+      "empty_ids": [
+        {"id": 52, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [0, -7], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"},
+        {"id": 53, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-22T00:00:00", "startTime": "2026-06-22T09:00:00.1234567", "endTime": "2026-06-22T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [0, -7], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"}
+      ],
+      "padded": [
+        {"id": 70, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "  11111111111141118111111111111111  ", "date": "2026-06-23T00:00:00", "startTime": "2026-06-23T09:00:00.1234567", "endTime": "2026-06-23T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"}
+      ],
+      "padded_match": [
+        {"id": 52, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"},
+        {"id": 53, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-22T00:00:00", "startTime": "2026-06-22T09:00:00.1234567", "endTime": "2026-06-22T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"},
+        {"id": 70, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "  11111111111141118111111111111111  ", "date": "2026-06-23T00:00:00", "startTime": "2026-06-23T09:00:00.1234567", "endTime": "2026-06-23T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"}
+      ]
+  },
+  "cases": [
+    {
+      "name": "following_boundary",
+      "actor": "owner",
+      "dataset": "standard",
+      "id": "62",
+      "scope": " FoLLowing ",
+      "response": {"status": 204, "body": "", "contentType": null, "location": null},
+      "again": {"status": 404, "body": {"type": "https://tools.ietf.org/html/rfc9110#section-15.5.5", "title": "Not Found", "status": 404}, "contentType": "application/problem+json; charset=utf-8", "location": null},
+      "remaining": [
+        60,
+        63,
+        65,
+        67,
+        68,
+        69
+      ],
+      "initial": [
+        {"id": 701, "userId": 2, "type": "Info", "message": "既存の架空通知", "createdAt": "2026-06-01T12:20:30.1234567", "targetDate": "2026-06-19T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 61, "isRead": true},
+        {"id": 702, "userId": 3, "type": "Warning", "message": "対象外の架空通知", "createdAt": "2026-06-01T12:20:30.1234567", "targetDate": "2026-06-19T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 65, "isRead": true}
+      ],
+      "existingLogs": [],
+      "notices": [
+        {"id": 701, "userId": 2, "message": "既存の架空通知", "createdAt": "2026-06-01T12:20:30.1234567", "targetDate": "2026-06-19T00:00:00", "isRead": true, "type": "Info", "targetReservationId": null, "targetWorkScheduleEntryId": 61},
+        {"id": 702, "userId": 3, "message": "対象外の架空通知", "createdAt": "2026-06-01T12:20:30.1234567", "targetDate": "2026-06-19T00:00:00", "isRead": true, "type": "Warning", "targetReservationId": null, "targetWorkScheduleEntryId": 65},
+        {"id": 703, "userId": 2, "message": "社外予定「代表の架空訪問」をまとめて削除しました。削除範囲: 今回以降 / 期間: 2026/06/19〜2026/06/22 / 件数: 4件 / 対象者: 保存済みの対象者", "createdAt": "2026-11-25T11:44:20.8884371", "targetDate": "2026-06-19T00:00:00", "isRead": false, "type": "Info", "targetReservationId": null, "targetWorkScheduleEntryId": 61},
+        {"id": 704, "userId": 4, "message": "社外予定「代表の架空訪問」をまとめて削除しました。削除範囲: 今回以降 / 期間: 2026/06/19〜2026/06/22 / 件数: 4件 / 対象者: 保存済みの対象者", "createdAt": "2026-11-25T11:44:20.8898732", "targetDate": "2026-06-19T00:00:00", "isRead": false, "type": "Info", "targetReservationId": null, "targetWorkScheduleEntryId": 61},
+        {"id": 705, "userId": 3, "message": "社外予定「代表の架空訪問」をまとめて削除しました。削除範囲: 今回以降 / 期間: 2026/06/19〜2026/06/22 / 件数: 4件 / 対象者: 保存済みの対象者", "createdAt": "2026-11-25T11:44:20.8903076", "targetDate": "2026-06-19T00:00:00", "isRead": false, "type": "Info", "targetReservationId": null, "targetWorkScheduleEntryId": 61},
+        {"id": 706, "userId": 6, "message": "社外予定「代表の架空訪問」をまとめて削除しました。削除範囲: 今回以降 / 期間: 2026/06/19〜2026/06/22 / 件数: 4件 / 対象者: 保存済みの対象者", "createdAt": "2026-11-25T11:44:20.8907611", "targetDate": "2026-06-19T00:00:00", "isRead": false, "type": "Info", "targetReservationId": null, "targetWorkScheduleEntryId": 61}
+      ],
+      "logs": [
+        {"reservationId": 0, "workScheduleEntryId": 61, "deliveryType": "WorkScheduleSeriesDeleted", "deliveryKey": "WorkScheduleSeriesDeleted:work-schedule-series:11111111111141118111111111111111:scope:following:user:2", "targetUserId": 2, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": "900002", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-25T11:44:20.958588", "sentAt": "2026-11-25T11:44:20.9998261", "message": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 代表の架空訪問\n削除範囲: 今回以降\n期間: 2026/06/19〜2026/06/22\n件数: 4件\n時間: 09:00〜10:00\n対象者: 保存済みの対象者\n[/info]", "createdAt": "2026-11-25T11:44:20.958588"},
+        {"reservationId": 0, "workScheduleEntryId": 61, "deliveryType": "WorkScheduleSeriesDeleted", "deliveryKey": "WorkScheduleSeriesDeleted:work-schedule-series:11111111111141118111111111111111:scope:following:user:4", "targetUserId": 4, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": null, "status": "Skipped", "errorMessage": "ChatworkDirectRoomId is not configured.", "attemptedAt": "2026-11-25T11:44:21.0319337", "sentAt": null, "message": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 代表の架空訪問\n削除範囲: 今回以降\n期間: 2026/06/19〜2026/06/22\n件数: 4件\n時間: 09:00〜10:00\n対象者: 保存済みの対象者\n[/info]", "createdAt": "2026-11-25T11:44:21.0319337"},
+        {"reservationId": 0, "workScheduleEntryId": 61, "deliveryType": "WorkScheduleSeriesDeleted", "deliveryKey": "WorkScheduleSeriesDeleted:work-schedule-series:11111111111141118111111111111111:scope:following:user:3", "targetUserId": 3, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": "900003", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-25T11:44:21.0351008", "sentAt": "2026-11-25T11:44:21.0375317", "message": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 代表の架空訪問\n削除範囲: 今回以降\n期間: 2026/06/19〜2026/06/22\n件数: 4件\n時間: 09:00〜10:00\n対象者: 保存済みの対象者\n[/info]", "createdAt": "2026-11-25T11:44:21.0351008"},
+        {"reservationId": 0, "workScheduleEntryId": 61, "deliveryType": "WorkScheduleSeriesDeleted", "deliveryKey": "WorkScheduleSeriesDeleted:work-schedule-series:11111111111141118111111111111111:scope:following:user:6", "targetUserId": 6, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": "900006", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-25T11:44:21.041863", "sentAt": "2026-11-25T11:44:21.0430695", "message": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 代表の架空訪問\n削除範囲: 今回以降\n期間: 2026/06/19〜2026/06/22\n件数: 4件\n時間: 09:00〜10:00\n対象者: 保存済みの対象者\n[/info]", "createdAt": "2026-11-25T11:44:21.041863"}
+      ],
+      "requests": [
+        {"roomId": "900002", "body": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 代表の架空訪問\n削除範囲: 今回以降\n期間: 2026/06/19〜2026/06/22\n件数: 4件\n時間: 09:00〜10:00\n対象者: 保存済みの対象者\n[/info]"},
+        {"roomId": "900003", "body": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 代表の架空訪問\n削除範囲: 今回以降\n期間: 2026/06/19〜2026/06/22\n件数: 4件\n時間: 09:00〜10:00\n対象者: 保存済みの対象者\n[/info]"},
+        {"roomId": "900006", "body": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 代表の架空訪問\n削除範囲: 今回以降\n期間: 2026/06/19〜2026/06/22\n件数: 4件\n時間: 09:00〜10:00\n対象者: 保存済みの対象者\n[/info]"}
+      ],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "following_missing_start",
+      "actor": "owner",
+      "dataset": "standard",
+      "id": "63",
+      "scope": "following",
+      "response": {"status": 204, "body": "", "contentType": null, "location": null},
+      "again": null,
+      "remaining": [
+        60,
+        67,
+        68,
+        69
+      ],
+      "initial": [],
+      "existingLogs": [],
+      "notices": [
+        {"id": 707, "userId": 3, "message": "社外予定「時刻未設定の架空訪問」をまとめて削除しました。削除範囲: 今回以降 / 期間: 2026/06/19〜2026/06/22 / 件数: 6件 / 対象者: 未設定", "createdAt": "2026-11-25T11:44:21.1012426", "targetDate": "2026-06-19T00:00:00", "isRead": false, "type": "Info", "targetReservationId": null, "targetWorkScheduleEntryId": 63},
+        {"id": 708, "userId": 4, "message": "社外予定「時刻未設定の架空訪問」をまとめて削除しました。削除範囲: 今回以降 / 期間: 2026/06/19〜2026/06/22 / 件数: 6件 / 対象者: 未設定", "createdAt": "2026-11-25T11:44:21.1015999", "targetDate": "2026-06-19T00:00:00", "isRead": false, "type": "Info", "targetReservationId": null, "targetWorkScheduleEntryId": 63},
+        {"id": 709, "userId": 2, "message": "社外予定「時刻未設定の架空訪問」をまとめて削除しました。削除範囲: 今回以降 / 期間: 2026/06/19〜2026/06/22 / 件数: 6件 / 対象者: 未設定", "createdAt": "2026-11-25T11:44:21.1019355", "targetDate": "2026-06-19T00:00:00", "isRead": false, "type": "Info", "targetReservationId": null, "targetWorkScheduleEntryId": 63},
+        {"id": 710, "userId": 6, "message": "社外予定「時刻未設定の架空訪問」をまとめて削除しました。削除範囲: 今回以降 / 期間: 2026/06/19〜2026/06/22 / 件数: 6件 / 対象者: 未設定", "createdAt": "2026-11-25T11:44:21.1022674", "targetDate": "2026-06-19T00:00:00", "isRead": false, "type": "Info", "targetReservationId": null, "targetWorkScheduleEntryId": 63}
+      ],
+      "logs": [
+        {"reservationId": 0, "workScheduleEntryId": 63, "deliveryType": "WorkScheduleSeriesDeleted", "deliveryKey": "WorkScheduleSeriesDeleted:work-schedule-series:11111111111141118111111111111111:scope:following:user:3", "targetUserId": 3, "scheduledStartTime": "2026-06-19T00:00:00", "roomId": "900003", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-25T11:44:21.1073359", "sentAt": "2026-11-25T11:44:21.1088041", "message": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 時刻未設定の架空訪問\n削除範囲: 今回以降\n期間: 2026/06/19〜2026/06/22\n件数: 6件\n時間: 終日\n対象者: 未設定\n[/info]", "createdAt": "2026-11-25T11:44:21.1073359"},
+        {"reservationId": 0, "workScheduleEntryId": 63, "deliveryType": "WorkScheduleSeriesDeleted", "deliveryKey": "WorkScheduleSeriesDeleted:work-schedule-series:11111111111141118111111111111111:scope:following:user:4", "targetUserId": 4, "scheduledStartTime": "2026-06-19T00:00:00", "roomId": null, "status": "Skipped", "errorMessage": "ChatworkDirectRoomId is not configured.", "attemptedAt": "2026-11-25T11:44:21.11288", "sentAt": null, "message": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 時刻未設定の架空訪問\n削除範囲: 今回以降\n期間: 2026/06/19〜2026/06/22\n件数: 6件\n時間: 終日\n対象者: 未設定\n[/info]", "createdAt": "2026-11-25T11:44:21.11288"},
+        {"reservationId": 0, "workScheduleEntryId": 63, "deliveryType": "WorkScheduleSeriesDeleted", "deliveryKey": "WorkScheduleSeriesDeleted:work-schedule-series:11111111111141118111111111111111:scope:following:user:2", "targetUserId": 2, "scheduledStartTime": "2026-06-19T00:00:00", "roomId": "900002", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-25T11:44:21.115862", "sentAt": "2026-11-25T11:44:21.117139", "message": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 時刻未設定の架空訪問\n削除範囲: 今回以降\n期間: 2026/06/19〜2026/06/22\n件数: 6件\n時間: 終日\n対象者: 未設定\n[/info]", "createdAt": "2026-11-25T11:44:21.115862"},
+        {"reservationId": 0, "workScheduleEntryId": 63, "deliveryType": "WorkScheduleSeriesDeleted", "deliveryKey": "WorkScheduleSeriesDeleted:work-schedule-series:11111111111141118111111111111111:scope:following:user:6", "targetUserId": 6, "scheduledStartTime": "2026-06-19T00:00:00", "roomId": "900006", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-25T11:44:21.120724", "sentAt": "2026-11-25T11:44:21.1217982", "message": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 時刻未設定の架空訪問\n削除範囲: 今回以降\n期間: 2026/06/19〜2026/06/22\n件数: 6件\n時間: 終日\n対象者: 未設定\n[/info]", "createdAt": "2026-11-25T11:44:21.120724"}
+      ],
+      "requests": [
+        {"roomId": "900003", "body": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 時刻未設定の架空訪問\n削除範囲: 今回以降\n期間: 2026/06/19〜2026/06/22\n件数: 6件\n時間: 終日\n対象者: 未設定\n[/info]"},
+        {"roomId": "900002", "body": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 時刻未設定の架空訪問\n削除範囲: 今回以降\n期間: 2026/06/19〜2026/06/22\n件数: 6件\n時間: 終日\n対象者: 未設定\n[/info]"},
+        {"roomId": "900006", "body": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 時刻未設定の架空訪問\n削除範囲: 今回以降\n期間: 2026/06/19〜2026/06/22\n件数: 6件\n時間: 終日\n対象者: 未設定\n[/info]"}
+      ],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "all_owner",
+      "actor": "owner",
+      "dataset": "standard",
+      "id": "62",
+      "scope": "ALL",
+      "response": {"status": 204, "body": "", "contentType": null, "location": null},
+      "again": null,
+      "remaining": [
+        67,
+        68,
+        69
+      ],
+      "initial": [],
+      "existingLogs": [],
+      "notices": [
+        {"id": 711, "userId": 2, "message": "社外予定「変更前の架空予定」をまとめて削除しました。削除範囲: 全て / 期間: 2026/06/18〜2026/06/22 / 件数: 7件 / 対象者: 架空の作成者、架空の同席者", "createdAt": "2026-11-25T11:44:21.1522131", "targetDate": "2026-06-18T00:00:00", "isRead": false, "type": "Info", "targetReservationId": null, "targetWorkScheduleEntryId": 60},
+        {"id": 712, "userId": 3, "message": "社外予定「変更前の架空予定」をまとめて削除しました。削除範囲: 全て / 期間: 2026/06/18〜2026/06/22 / 件数: 7件 / 対象者: 架空の作成者、架空の同席者", "createdAt": "2026-11-25T11:44:21.1525637", "targetDate": "2026-06-18T00:00:00", "isRead": false, "type": "Info", "targetReservationId": null, "targetWorkScheduleEntryId": 60},
+        {"id": 713, "userId": 4, "message": "社外予定「変更前の架空予定」をまとめて削除しました。削除範囲: 全て / 期間: 2026/06/18〜2026/06/22 / 件数: 7件 / 対象者: 架空の作成者、架空の同席者", "createdAt": "2026-11-25T11:44:21.1529098", "targetDate": "2026-06-18T00:00:00", "isRead": false, "type": "Info", "targetReservationId": null, "targetWorkScheduleEntryId": 60},
+        {"id": 714, "userId": 6, "message": "社外予定「変更前の架空予定」をまとめて削除しました。削除範囲: 全て / 期間: 2026/06/18〜2026/06/22 / 件数: 7件 / 対象者: 架空の作成者、架空の同席者", "createdAt": "2026-11-25T11:44:21.1532322", "targetDate": "2026-06-18T00:00:00", "isRead": false, "type": "Info", "targetReservationId": null, "targetWorkScheduleEntryId": 60}
+      ],
+      "logs": [
+        {"reservationId": 0, "workScheduleEntryId": 60, "deliveryType": "WorkScheduleSeriesDeleted", "deliveryKey": "WorkScheduleSeriesDeleted:work-schedule-series:11111111111141118111111111111111:scope:all:user:2", "targetUserId": 2, "scheduledStartTime": "2026-06-18T09:00:00.1234567", "roomId": "900002", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-25T11:44:21.1583039", "sentAt": "2026-11-25T11:44:21.1596344", "message": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 変更前の架空予定\n削除範囲: 全て\n期間: 2026/06/18〜2026/06/22\n件数: 7件\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者\n[/info]", "createdAt": "2026-11-25T11:44:21.1583039"},
+        {"reservationId": 0, "workScheduleEntryId": 60, "deliveryType": "WorkScheduleSeriesDeleted", "deliveryKey": "WorkScheduleSeriesDeleted:work-schedule-series:11111111111141118111111111111111:scope:all:user:3", "targetUserId": 3, "scheduledStartTime": "2026-06-18T09:00:00.1234567", "roomId": "900003", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-25T11:44:21.1642372", "sentAt": "2026-11-25T11:44:21.1654273", "message": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 変更前の架空予定\n削除範囲: 全て\n期間: 2026/06/18〜2026/06/22\n件数: 7件\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者\n[/info]", "createdAt": "2026-11-25T11:44:21.1642372"},
+        {"reservationId": 0, "workScheduleEntryId": 60, "deliveryType": "WorkScheduleSeriesDeleted", "deliveryKey": "WorkScheduleSeriesDeleted:work-schedule-series:11111111111141118111111111111111:scope:all:user:4", "targetUserId": 4, "scheduledStartTime": "2026-06-18T09:00:00.1234567", "roomId": null, "status": "Skipped", "errorMessage": "ChatworkDirectRoomId is not configured.", "attemptedAt": "2026-11-25T11:44:21.1693847", "sentAt": null, "message": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 変更前の架空予定\n削除範囲: 全て\n期間: 2026/06/18〜2026/06/22\n件数: 7件\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者\n[/info]", "createdAt": "2026-11-25T11:44:21.1693847"},
+        {"reservationId": 0, "workScheduleEntryId": 60, "deliveryType": "WorkScheduleSeriesDeleted", "deliveryKey": "WorkScheduleSeriesDeleted:work-schedule-series:11111111111141118111111111111111:scope:all:user:6", "targetUserId": 6, "scheduledStartTime": "2026-06-18T09:00:00.1234567", "roomId": "900006", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-25T11:44:21.1723972", "sentAt": "2026-11-25T11:44:21.1734442", "message": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 変更前の架空予定\n削除範囲: 全て\n期間: 2026/06/18〜2026/06/22\n件数: 7件\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者\n[/info]", "createdAt": "2026-11-25T11:44:21.1723972"}
+      ],
+      "requests": [
+        {"roomId": "900002", "body": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 変更前の架空予定\n削除範囲: 全て\n期間: 2026/06/18〜2026/06/22\n件数: 7件\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者\n[/info]"},
+        {"roomId": "900003", "body": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 変更前の架空予定\n削除範囲: 全て\n期間: 2026/06/18〜2026/06/22\n件数: 7件\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者\n[/info]"},
+        {"roomId": "900006", "body": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 変更前の架空予定\n削除範囲: 全て\n期間: 2026/06/18〜2026/06/22\n件数: 7件\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者\n[/info]"}
+      ],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "admin_mixed_creators",
+      "actor": "admin",
+      "dataset": "mixed",
+      "id": "62",
+      "scope": "all",
+      "response": {"status": 204, "body": "", "contentType": null, "location": null},
+      "again": null,
+      "remaining": [
+        67,
+        68,
+        69
+      ],
+      "initial": [],
+      "existingLogs": [],
+      "notices": [
+        {"id": 715, "userId": 2, "message": "社外予定「変更前の架空予定」をまとめて削除しました。削除範囲: 全て / 期間: 2026/06/18〜2026/06/22 / 件数: 7件 / 対象者: 架空の作成者、架空の同席者", "createdAt": "2026-11-25T11:44:21.1985101", "targetDate": "2026-06-18T00:00:00", "isRead": false, "type": "Info", "targetReservationId": null, "targetWorkScheduleEntryId": 60},
+        {"id": 716, "userId": 3, "message": "社外予定「変更前の架空予定」をまとめて削除しました。削除範囲: 全て / 期間: 2026/06/18〜2026/06/22 / 件数: 7件 / 対象者: 架空の作成者、架空の同席者", "createdAt": "2026-11-25T11:44:21.1989335", "targetDate": "2026-06-18T00:00:00", "isRead": false, "type": "Info", "targetReservationId": null, "targetWorkScheduleEntryId": 60},
+        {"id": 717, "userId": 4, "message": "社外予定「変更前の架空予定」をまとめて削除しました。削除範囲: 全て / 期間: 2026/06/18〜2026/06/22 / 件数: 7件 / 対象者: 架空の作成者、架空の同席者", "createdAt": "2026-11-25T11:44:21.199275", "targetDate": "2026-06-18T00:00:00", "isRead": false, "type": "Info", "targetReservationId": null, "targetWorkScheduleEntryId": 60},
+        {"id": 718, "userId": 5, "message": "社外予定「変更前の架空予定」をまとめて削除しました。削除範囲: 全て / 期間: 2026/06/18〜2026/06/22 / 件数: 7件 / 対象者: 架空の作成者、架空の同席者", "createdAt": "2026-11-25T11:44:21.1996069", "targetDate": "2026-06-18T00:00:00", "isRead": false, "type": "Info", "targetReservationId": null, "targetWorkScheduleEntryId": 60},
+        {"id": 719, "userId": 6, "message": "社外予定「変更前の架空予定」をまとめて削除しました。削除範囲: 全て / 期間: 2026/06/18〜2026/06/22 / 件数: 7件 / 対象者: 架空の作成者、架空の同席者", "createdAt": "2026-11-25T11:44:21.1999228", "targetDate": "2026-06-18T00:00:00", "isRead": false, "type": "Info", "targetReservationId": null, "targetWorkScheduleEntryId": 60}
+      ],
+      "logs": [
+        {"reservationId": 0, "workScheduleEntryId": 60, "deliveryType": "WorkScheduleSeriesDeleted", "deliveryKey": "WorkScheduleSeriesDeleted:work-schedule-series:11111111111141118111111111111111:scope:all:user:2", "targetUserId": 2, "scheduledStartTime": "2026-06-18T09:00:00.1234567", "roomId": "900002", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-25T11:44:21.2053226", "sentAt": "2026-11-25T11:44:21.2065538", "message": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 変更前の架空予定\n削除範囲: 全て\n期間: 2026/06/18〜2026/06/22\n件数: 7件\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者\n[/info]", "createdAt": "2026-11-25T11:44:21.2053226"},
+        {"reservationId": 0, "workScheduleEntryId": 60, "deliveryType": "WorkScheduleSeriesDeleted", "deliveryKey": "WorkScheduleSeriesDeleted:work-schedule-series:11111111111141118111111111111111:scope:all:user:3", "targetUserId": 3, "scheduledStartTime": "2026-06-18T09:00:00.1234567", "roomId": "900003", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-25T11:44:21.2103612", "sentAt": "2026-11-25T11:44:21.2114363", "message": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 変更前の架空予定\n削除範囲: 全て\n期間: 2026/06/18〜2026/06/22\n件数: 7件\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者\n[/info]", "createdAt": "2026-11-25T11:44:21.2103612"},
+        {"reservationId": 0, "workScheduleEntryId": 60, "deliveryType": "WorkScheduleSeriesDeleted", "deliveryKey": "WorkScheduleSeriesDeleted:work-schedule-series:11111111111141118111111111111111:scope:all:user:4", "targetUserId": 4, "scheduledStartTime": "2026-06-18T09:00:00.1234567", "roomId": null, "status": "Skipped", "errorMessage": "ChatworkDirectRoomId is not configured.", "attemptedAt": "2026-11-25T11:44:21.2154481", "sentAt": null, "message": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 変更前の架空予定\n削除範囲: 全て\n期間: 2026/06/18〜2026/06/22\n件数: 7件\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者\n[/info]", "createdAt": "2026-11-25T11:44:21.2154481"},
+        {"reservationId": 0, "workScheduleEntryId": 60, "deliveryType": "WorkScheduleSeriesDeleted", "deliveryKey": "WorkScheduleSeriesDeleted:work-schedule-series:11111111111141118111111111111111:scope:all:user:5", "targetUserId": 5, "scheduledStartTime": "2026-06-18T09:00:00.1234567", "roomId": "900005", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-25T11:44:21.2191198", "sentAt": "2026-11-25T11:44:21.220255", "message": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 変更前の架空予定\n削除範囲: 全て\n期間: 2026/06/18〜2026/06/22\n件数: 7件\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者\n[/info]", "createdAt": "2026-11-25T11:44:21.2191198"},
+        {"reservationId": 0, "workScheduleEntryId": 60, "deliveryType": "WorkScheduleSeriesDeleted", "deliveryKey": "WorkScheduleSeriesDeleted:work-schedule-series:11111111111141118111111111111111:scope:all:user:6", "targetUserId": 6, "scheduledStartTime": "2026-06-18T09:00:00.1234567", "roomId": "900006", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-25T11:44:21.2237905", "sentAt": "2026-11-25T11:44:21.2247103", "message": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 変更前の架空予定\n削除範囲: 全て\n期間: 2026/06/18〜2026/06/22\n件数: 7件\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者\n[/info]", "createdAt": "2026-11-25T11:44:21.2237905"}
+      ],
+      "requests": [
+        {"roomId": "900002", "body": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 変更前の架空予定\n削除範囲: 全て\n期間: 2026/06/18〜2026/06/22\n件数: 7件\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者\n[/info]"},
+        {"roomId": "900003", "body": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 変更前の架空予定\n削除範囲: 全て\n期間: 2026/06/18〜2026/06/22\n件数: 7件\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者\n[/info]"},
+        {"roomId": "900005", "body": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 変更前の架空予定\n削除範囲: 全て\n期間: 2026/06/18〜2026/06/22\n件数: 7件\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者\n[/info]"},
+        {"roomId": "900006", "body": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 変更前の架空予定\n削除範囲: 全て\n期間: 2026/06/18〜2026/06/22\n件数: 7件\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者\n[/info]"}
+      ],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "mixed_creators_forbidden",
+      "actor": "owner",
+      "dataset": "mixed",
+      "id": "62",
+      "scope": "all",
+      "response": {"status": 403, "body": "", "contentType": null, "location": null},
+      "again": null,
+      "remaining": [
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69
+      ],
+      "initial": [],
+      "existingLogs": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "member_forbidden",
+      "actor": "member",
+      "dataset": "standard",
+      "id": "62",
+      "scope": "following",
+      "response": {"status": 403, "body": "", "contentType": null, "location": null},
+      "again": null,
+      "remaining": [
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69
+      ],
+      "initial": [],
+      "existingLogs": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "not_authenticated",
+      "actor": "anonymous",
+      "dataset": "standard",
+      "id": "62",
+      "scope": "all",
+      "response": {"status": 401, "body": "", "contentType": null, "location": null},
+      "again": null,
+      "remaining": [
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69
+      ],
+      "initial": [],
+      "existingLogs": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "missing_id",
+      "actor": "owner",
+      "dataset": "standard",
+      "id": "505",
+      "scope": "all",
+      "response": {"status": 404, "body": {"type": "https://tools.ietf.org/html/rfc9110#section-15.5.5", "title": "Not Found", "status": 404}, "contentType": "application/problem+json; charset=utf-8", "location": null},
+      "again": null,
+      "remaining": [
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69
+      ],
+      "initial": [],
+      "existingLogs": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "invalid_id",
+      "actor": "owner",
+      "dataset": "standard",
+      "id": "NaN",
+      "scope": "all",
+      "response": {"status": 404, "body": "", "contentType": null, "location": null},
+      "again": null,
+      "remaining": [
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69
+      ],
+      "initial": [],
+      "existingLogs": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "unknown_scope",
+      "actor": "owner",
+      "dataset": "standard",
+      "id": "62",
+      "scope": "later",
+      "response": {"status": 400, "body": "削除範囲が不正です。", "contentType": "application/json; charset=utf-8", "location": null},
+      "again": null,
+      "remaining": [
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69
+      ],
+      "initial": [],
+      "existingLogs": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "no_series",
+      "actor": "owner",
+      "dataset": "standard",
+      "id": "69",
+      "scope": "all",
+      "response": {"status": 400, "body": "繰り返し社外予定のみまとめて削除できます。", "contentType": "application/json; charset=utf-8", "location": null},
+      "again": null,
+      "remaining": [
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69
+      ],
+      "initial": [],
+      "existingLogs": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "wrong_schedule_type",
+      "actor": "owner",
+      "dataset": "standard",
+      "id": "68",
+      "scope": "all",
+      "response": {"status": 400, "body": "繰り返し社外予定のみまとめて削除できます。", "contentType": "application/json; charset=utf-8", "location": null},
+      "again": null,
+      "remaining": [
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69
+      ],
+      "initial": [],
+      "existingLogs": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "empty_targets",
+      "actor": "owner",
+      "dataset": "padded",
+      "id": "70",
+      "scope": "following",
+      "response": {"status": 400, "body": "削除対象の社外予定がありません。", "contentType": "application/json; charset=utf-8", "location": null},
+      "again": null,
+      "remaining": [
+        70
+      ],
+      "initial": [],
+      "existingLogs": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "trimmed_key_targets",
+      "actor": "owner",
+      "dataset": "padded_match",
+      "id": "70",
+      "scope": "all",
+      "response": {"status": 204, "body": "", "contentType": null, "location": null},
+      "again": null,
+      "remaining": [
+        70
+      ],
+      "initial": [],
+      "existingLogs": [],
+      "notices": [
+        {"id": 720, "userId": 2, "message": "社外予定「変更前の架空予定」をまとめて削除しました。削除範囲: 全て / 期間: 2026/06/19〜2026/06/22 / 件数: 2件 / 対象者: 架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-11-25T11:44:21.3925365", "targetDate": "2026-06-19T00:00:00", "isRead": false, "type": "Info", "targetReservationId": null, "targetWorkScheduleEntryId": 52},
+        {"id": 721, "userId": 3, "message": "社外予定「変更前の架空予定」をまとめて削除しました。削除範囲: 全て / 期間: 2026/06/19〜2026/06/22 / 件数: 2件 / 対象者: 架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-11-25T11:44:21.3928461", "targetDate": "2026-06-19T00:00:00", "isRead": false, "type": "Info", "targetReservationId": null, "targetWorkScheduleEntryId": 52},
+        {"id": 722, "userId": 4, "message": "社外予定「変更前の架空予定」をまとめて削除しました。削除範囲: 全て / 期間: 2026/06/19〜2026/06/22 / 件数: 2件 / 対象者: 架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-11-25T11:44:21.3931314", "targetDate": "2026-06-19T00:00:00", "isRead": false, "type": "Info", "targetReservationId": null, "targetWorkScheduleEntryId": 52}
+      ],
+      "logs": [
+        {"reservationId": 0, "workScheduleEntryId": 52, "deliveryType": "WorkScheduleSeriesDeleted", "deliveryKey": "WorkScheduleSeriesDeleted:work-schedule-series:11111111111141118111111111111111:scope:all:user:2", "targetUserId": 2, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": "900002", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-25T11:44:21.3978218", "sentAt": "2026-11-25T11:44:21.3990412", "message": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 変更前の架空予定\n削除範囲: 全て\n期間: 2026/06/19〜2026/06/22\n件数: 2件\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[/info]", "createdAt": "2026-11-25T11:44:21.3978218"},
+        {"reservationId": 0, "workScheduleEntryId": 52, "deliveryType": "WorkScheduleSeriesDeleted", "deliveryKey": "WorkScheduleSeriesDeleted:work-schedule-series:11111111111141118111111111111111:scope:all:user:3", "targetUserId": 3, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": "900003", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-25T11:44:21.4029011", "sentAt": "2026-11-25T11:44:21.4038973", "message": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 変更前の架空予定\n削除範囲: 全て\n期間: 2026/06/19〜2026/06/22\n件数: 2件\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[/info]", "createdAt": "2026-11-25T11:44:21.4029011"},
+        {"reservationId": 0, "workScheduleEntryId": 52, "deliveryType": "WorkScheduleSeriesDeleted", "deliveryKey": "WorkScheduleSeriesDeleted:work-schedule-series:11111111111141118111111111111111:scope:all:user:4", "targetUserId": 4, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": null, "status": "Skipped", "errorMessage": "ChatworkDirectRoomId is not configured.", "attemptedAt": "2026-11-25T11:44:21.4080027", "sentAt": null, "message": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 変更前の架空予定\n削除範囲: 全て\n期間: 2026/06/19〜2026/06/22\n件数: 2件\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[/info]", "createdAt": "2026-11-25T11:44:21.4080027"}
+      ],
+      "requests": [
+        {"roomId": "900002", "body": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 変更前の架空予定\n削除範囲: 全て\n期間: 2026/06/19〜2026/06/22\n件数: 2件\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[/info]"},
+        {"roomId": "900003", "body": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 変更前の架空予定\n削除範囲: 全て\n期間: 2026/06/19〜2026/06/22\n件数: 2件\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[/info]"}
+      ],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "single_default",
+      "actor": "owner",
+      "dataset": "standard",
+      "id": "69",
+      "scope": null,
+      "response": {"status": 204, "body": "", "contentType": null, "location": null},
+      "again": null,
+      "remaining": [
+        60,
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68
+      ],
+      "initial": [],
+      "existingLogs": [],
+      "notices": [
+        {"id": 723, "userId": 2, "message": "社外予定「変更前の架空予定」が削除されました。日付: 2026/06/23", "createdAt": "2026-11-25T11:44:21.4347684", "targetDate": "2026-06-23T00:00:00", "isRead": false, "type": "Info", "targetReservationId": null, "targetWorkScheduleEntryId": 69},
+        {"id": 724, "userId": 3, "message": "社外予定「変更前の架空予定」が削除されました。日付: 2026/06/23", "createdAt": "2026-11-25T11:44:21.435097", "targetDate": "2026-06-23T00:00:00", "isRead": false, "type": "Info", "targetReservationId": null, "targetWorkScheduleEntryId": 69},
+        {"id": 725, "userId": 4, "message": "社外予定「変更前の架空予定」が削除されました。日付: 2026/06/23", "createdAt": "2026-11-25T11:44:21.4354029", "targetDate": "2026-06-23T00:00:00", "isRead": false, "type": "Info", "targetReservationId": null, "targetWorkScheduleEntryId": 69}
+      ],
+      "logs": [
+        {"reservationId": 0, "workScheduleEntryId": 69, "deliveryType": "WorkScheduleDeleted", "deliveryKey": "WorkScheduleDeleted:work-schedule:69:user:2", "targetUserId": 2, "scheduledStartTime": "2026-06-23T09:00:00.1234567", "roomId": "900002", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-25T11:44:21.441016", "sentAt": "2026-11-25T11:44:21.4422127", "message": "[info][title]社外予定が削除されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/23\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[/info]", "createdAt": "2026-11-25T11:44:21.441016"},
+        {"reservationId": 0, "workScheduleEntryId": 69, "deliveryType": "WorkScheduleDeleted", "deliveryKey": "WorkScheduleDeleted:work-schedule:69:user:3", "targetUserId": 3, "scheduledStartTime": "2026-06-23T09:00:00.1234567", "roomId": "900003", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-25T11:44:21.4455894", "sentAt": "2026-11-25T11:44:21.4464937", "message": "[info][title]社外予定が削除されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/23\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[/info]", "createdAt": "2026-11-25T11:44:21.4455894"},
+        {"reservationId": 0, "workScheduleEntryId": 69, "deliveryType": "WorkScheduleDeleted", "deliveryKey": "WorkScheduleDeleted:work-schedule:69:user:4", "targetUserId": 4, "scheduledStartTime": "2026-06-23T09:00:00.1234567", "roomId": null, "status": "Skipped", "errorMessage": "ChatworkDirectRoomId is not configured.", "attemptedAt": "2026-11-25T11:44:21.4502089", "sentAt": null, "message": "[info][title]社外予定が削除されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/23\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[/info]", "createdAt": "2026-11-25T11:44:21.4502089"}
+      ],
+      "requests": [
+        {"roomId": "900002", "body": "[info][title]社外予定が削除されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/23\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[/info]"},
+        {"roomId": "900003", "body": "[info][title]社外予定が削除されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/23\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[/info]"}
+      ],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "single_blank",
+      "actor": "owner",
+      "dataset": "standard",
+      "id": "62",
+      "scope": "  ",
+      "response": {"status": 204, "body": "", "contentType": null, "location": null},
+      "again": null,
+      "remaining": [
+        60,
+        61,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69
+      ],
+      "initial": [],
+      "existingLogs": [],
+      "notices": [
+        {"id": 726, "userId": 2, "message": "社外予定「変更前の架空予定」が削除されました。日付: 2026/06/19", "createdAt": "2026-11-25T11:44:21.5220626", "targetDate": "2026-06-19T00:00:00", "isRead": false, "type": "Info", "targetReservationId": null, "targetWorkScheduleEntryId": 62},
+        {"id": 727, "userId": 3, "message": "社外予定「変更前の架空予定」が削除されました。日付: 2026/06/19", "createdAt": "2026-11-25T11:44:21.5223809", "targetDate": "2026-06-19T00:00:00", "isRead": false, "type": "Info", "targetReservationId": null, "targetWorkScheduleEntryId": 62},
+        {"id": 728, "userId": 4, "message": "社外予定「変更前の架空予定」が削除されました。日付: 2026/06/19", "createdAt": "2026-11-25T11:44:21.5226556", "targetDate": "2026-06-19T00:00:00", "isRead": false, "type": "Info", "targetReservationId": null, "targetWorkScheduleEntryId": 62}
+      ],
+      "logs": [
+        {"reservationId": 0, "workScheduleEntryId": 62, "deliveryType": "WorkScheduleDeleted", "deliveryKey": "WorkScheduleDeleted:work-schedule:62:user:2", "targetUserId": 2, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": "900002", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-25T11:44:21.5280257", "sentAt": "2026-11-25T11:44:21.5292927", "message": "[info][title]社外予定が削除されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[/info]", "createdAt": "2026-11-25T11:44:21.5280257"},
+        {"reservationId": 0, "workScheduleEntryId": 62, "deliveryType": "WorkScheduleDeleted", "deliveryKey": "WorkScheduleDeleted:work-schedule:62:user:3", "targetUserId": 3, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": "900003", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-25T11:44:21.5327879", "sentAt": "2026-11-25T11:44:21.5337101", "message": "[info][title]社外予定が削除されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[/info]", "createdAt": "2026-11-25T11:44:21.5327879"},
+        {"reservationId": 0, "workScheduleEntryId": 62, "deliveryType": "WorkScheduleDeleted", "deliveryKey": "WorkScheduleDeleted:work-schedule:62:user:4", "targetUserId": 4, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": null, "status": "Skipped", "errorMessage": "ChatworkDirectRoomId is not configured.", "attemptedAt": "2026-11-25T11:44:21.536919", "sentAt": null, "message": "[info][title]社外予定が削除されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[/info]", "createdAt": "2026-11-25T11:44:21.536919"}
+      ],
+      "requests": [
+        {"roomId": "900002", "body": "[info][title]社外予定が削除されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[/info]"},
+        {"roomId": "900003", "body": "[info][title]社外予定が削除されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[/info]"}
+      ],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "single_explicit",
+      "actor": "owner",
+      "dataset": "standard",
+      "id": "62",
+      "scope": " SiNgLe ",
+      "response": {"status": 204, "body": "", "contentType": null, "location": null},
+      "again": null,
+      "remaining": [
+        60,
+        61,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68,
+        69
+      ],
+      "initial": [],
+      "existingLogs": [],
+      "notices": [
+        {"id": 729, "userId": 2, "message": "社外予定「変更前の架空予定」が削除されました。日付: 2026/06/19", "createdAt": "2026-11-25T11:44:21.5565812", "targetDate": "2026-06-19T00:00:00", "isRead": false, "type": "Info", "targetReservationId": null, "targetWorkScheduleEntryId": 62},
+        {"id": 730, "userId": 3, "message": "社外予定「変更前の架空予定」が削除されました。日付: 2026/06/19", "createdAt": "2026-11-25T11:44:21.5568717", "targetDate": "2026-06-19T00:00:00", "isRead": false, "type": "Info", "targetReservationId": null, "targetWorkScheduleEntryId": 62},
+        {"id": 731, "userId": 4, "message": "社外予定「変更前の架空予定」が削除されました。日付: 2026/06/19", "createdAt": "2026-11-25T11:44:21.5571344", "targetDate": "2026-06-19T00:00:00", "isRead": false, "type": "Info", "targetReservationId": null, "targetWorkScheduleEntryId": 62}
+      ],
+      "logs": [
+        {"reservationId": 0, "workScheduleEntryId": 62, "deliveryType": "WorkScheduleDeleted", "deliveryKey": "WorkScheduleDeleted:work-schedule:62:user:2", "targetUserId": 2, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": "900002", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-25T11:44:21.5612945", "sentAt": "2026-11-25T11:44:21.5625386", "message": "[info][title]社外予定が削除されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[/info]", "createdAt": "2026-11-25T11:44:21.5612945"},
+        {"reservationId": 0, "workScheduleEntryId": 62, "deliveryType": "WorkScheduleDeleted", "deliveryKey": "WorkScheduleDeleted:work-schedule:62:user:3", "targetUserId": 3, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": "900003", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-25T11:44:21.5660878", "sentAt": "2026-11-25T11:44:21.5670251", "message": "[info][title]社外予定が削除されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[/info]", "createdAt": "2026-11-25T11:44:21.5660878"},
+        {"reservationId": 0, "workScheduleEntryId": 62, "deliveryType": "WorkScheduleDeleted", "deliveryKey": "WorkScheduleDeleted:work-schedule:62:user:4", "targetUserId": 4, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": null, "status": "Skipped", "errorMessage": "ChatworkDirectRoomId is not configured.", "attemptedAt": "2026-11-25T11:44:21.5703537", "sentAt": null, "message": "[info][title]社外予定が削除されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[/info]", "createdAt": "2026-11-25T11:44:21.5703537"}
+      ],
+      "requests": [
+        {"roomId": "900002", "body": "[info][title]社外予定が削除されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[/info]"},
+        {"roomId": "900003", "body": "[info][title]社外予定が削除されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[/info]"}
+      ],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "only_nonpositive_participants",
+      "actor": "owner",
+      "dataset": "empty_ids",
+      "id": "52",
+      "scope": "all",
+      "response": {"status": 204, "body": "", "contentType": null, "location": null},
+      "again": null,
+      "remaining": [],
+      "initial": [],
+      "existingLogs": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "delivery_already_claimed",
+      "actor": "owner",
+      "dataset": "standard",
+      "id": "62",
+      "scope": "all",
+      "response": {"status": 204, "body": "", "contentType": null, "location": null},
+      "again": null,
+      "remaining": [
+        67,
+        68,
+        69
+      ],
+      "initial": [],
+      "existingLogs": [
+        {"reservationId": 0, "workScheduleEntryId": 60, "deliveryType": "WorkScheduleSeriesDeleted", "deliveryKey": "WorkScheduleSeriesDeleted:work-schedule-series:11111111111141118111111111111111:scope:all:user:3", "targetUserId": 3, "scheduledStartTime": "2026-06-18T09:00:00.1234567", "roomId": "900003", "status": "Unknown", "errorMessage": "架空の既存試行", "attemptedAt": "2026-06-01T12:20:30.1234567", "sentAt": null, "message": "架空の送信済み本文", "createdAt": "2026-06-01T12:20:30.1234567"}
+      ],
+      "notices": [
+        {"id": 732, "userId": 2, "message": "社外予定「変更前の架空予定」をまとめて削除しました。削除範囲: 全て / 期間: 2026/06/18〜2026/06/22 / 件数: 7件 / 対象者: 架空の作成者、架空の同席者", "createdAt": "2026-11-25T11:44:21.614686", "targetDate": "2026-06-18T00:00:00", "isRead": false, "type": "Info", "targetReservationId": null, "targetWorkScheduleEntryId": 60},
+        {"id": 733, "userId": 3, "message": "社外予定「変更前の架空予定」をまとめて削除しました。削除範囲: 全て / 期間: 2026/06/18〜2026/06/22 / 件数: 7件 / 対象者: 架空の作成者、架空の同席者", "createdAt": "2026-11-25T11:44:21.6150581", "targetDate": "2026-06-18T00:00:00", "isRead": false, "type": "Info", "targetReservationId": null, "targetWorkScheduleEntryId": 60},
+        {"id": 734, "userId": 4, "message": "社外予定「変更前の架空予定」をまとめて削除しました。削除範囲: 全て / 期間: 2026/06/18〜2026/06/22 / 件数: 7件 / 対象者: 架空の作成者、架空の同席者", "createdAt": "2026-11-25T11:44:21.6153554", "targetDate": "2026-06-18T00:00:00", "isRead": false, "type": "Info", "targetReservationId": null, "targetWorkScheduleEntryId": 60},
+        {"id": 735, "userId": 6, "message": "社外予定「変更前の架空予定」をまとめて削除しました。削除範囲: 全て / 期間: 2026/06/18〜2026/06/22 / 件数: 7件 / 対象者: 架空の作成者、架空の同席者", "createdAt": "2026-11-25T11:44:21.6156263", "targetDate": "2026-06-18T00:00:00", "isRead": false, "type": "Info", "targetReservationId": null, "targetWorkScheduleEntryId": 60}
+      ],
+      "logs": [
+        {"reservationId": 0, "workScheduleEntryId": 60, "deliveryType": "WorkScheduleSeriesDeleted", "deliveryKey": "WorkScheduleSeriesDeleted:work-schedule-series:11111111111141118111111111111111:scope:all:user:3", "targetUserId": 3, "scheduledStartTime": "2026-06-18T09:00:00.1234567", "roomId": "900003", "status": "Unknown", "errorMessage": "架空の既存試行", "attemptedAt": "2026-06-01T12:20:30.1234567", "sentAt": null, "message": "架空の送信済み本文", "createdAt": "2026-06-01T12:20:30.1234567"},
+        {"reservationId": 0, "workScheduleEntryId": 60, "deliveryType": "WorkScheduleSeriesDeleted", "deliveryKey": "WorkScheduleSeriesDeleted:work-schedule-series:11111111111141118111111111111111:scope:all:user:2", "targetUserId": 2, "scheduledStartTime": "2026-06-18T09:00:00.1234567", "roomId": "900002", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-25T11:44:21.6204596", "sentAt": "2026-11-25T11:44:21.6218434", "message": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 変更前の架空予定\n削除範囲: 全て\n期間: 2026/06/18〜2026/06/22\n件数: 7件\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者\n[/info]", "createdAt": "2026-11-25T11:44:21.6204596"},
+        {"reservationId": 0, "workScheduleEntryId": 60, "deliveryType": "WorkScheduleSeriesDeleted", "deliveryKey": "WorkScheduleSeriesDeleted:work-schedule-series:11111111111141118111111111111111:scope:all:user:4", "targetUserId": 4, "scheduledStartTime": "2026-06-18T09:00:00.1234567", "roomId": null, "status": "Skipped", "errorMessage": "ChatworkDirectRoomId is not configured.", "attemptedAt": "2026-11-25T11:44:21.6252423", "sentAt": null, "message": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 変更前の架空予定\n削除範囲: 全て\n期間: 2026/06/18〜2026/06/22\n件数: 7件\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者\n[/info]", "createdAt": "2026-11-25T11:44:21.6252423"},
+        {"reservationId": 0, "workScheduleEntryId": 60, "deliveryType": "WorkScheduleSeriesDeleted", "deliveryKey": "WorkScheduleSeriesDeleted:work-schedule-series:11111111111141118111111111111111:scope:all:user:6", "targetUserId": 6, "scheduledStartTime": "2026-06-18T09:00:00.1234567", "roomId": "900006", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-25T11:44:21.6284689", "sentAt": "2026-11-25T11:44:21.6299079", "message": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 変更前の架空予定\n削除範囲: 全て\n期間: 2026/06/18〜2026/06/22\n件数: 7件\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者\n[/info]", "createdAt": "2026-11-25T11:44:21.6284689"}
+      ],
+      "requests": [
+        {"roomId": "900002", "body": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 変更前の架空予定\n削除範囲: 全て\n期間: 2026/06/18〜2026/06/22\n件数: 7件\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者\n[/info]"},
+        {"roomId": "900006", "body": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 変更前の架空予定\n削除範囲: 全て\n期間: 2026/06/18〜2026/06/22\n件数: 7件\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者\n[/info]"}
+      ],
+      "failure": null,
+      "fakeResponses": {}
+    },
+    {
+      "name": "provider_failure_and_timeout",
+      "actor": "owner",
+      "dataset": "simple",
+      "id": "52",
+      "scope": "all",
+      "response": {"status": 204, "body": "", "contentType": null, "location": null},
+      "again": null,
+      "remaining": [],
+      "initial": [],
+      "existingLogs": [],
+      "notices": [
+        {"id": 736, "userId": 2, "message": "社外予定「変更前の架空予定」をまとめて削除しました。削除範囲: 全て / 期間: 2026/06/19〜2026/06/22 / 件数: 2件 / 対象者: 架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-11-25T11:44:21.6554835", "targetDate": "2026-06-19T00:00:00", "isRead": false, "type": "Info", "targetReservationId": null, "targetWorkScheduleEntryId": 52},
+        {"id": 737, "userId": 3, "message": "社外予定「変更前の架空予定」をまとめて削除しました。削除範囲: 全て / 期間: 2026/06/19〜2026/06/22 / 件数: 2件 / 対象者: 架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-11-25T11:44:21.6558061", "targetDate": "2026-06-19T00:00:00", "isRead": false, "type": "Info", "targetReservationId": null, "targetWorkScheduleEntryId": 52},
+        {"id": 738, "userId": 4, "message": "社外予定「変更前の架空予定」をまとめて削除しました。削除範囲: 全て / 期間: 2026/06/19〜2026/06/22 / 件数: 2件 / 対象者: 架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-11-25T11:44:21.6560768", "targetDate": "2026-06-19T00:00:00", "isRead": false, "type": "Info", "targetReservationId": null, "targetWorkScheduleEntryId": 52}
+      ],
+      "logs": [
+        {"reservationId": 0, "workScheduleEntryId": 52, "deliveryType": "WorkScheduleSeriesDeleted", "deliveryKey": "WorkScheduleSeriesDeleted:work-schedule-series:11111111111141118111111111111111:scope:all:user:2", "targetUserId": 2, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": "900002", "status": "Failed", "errorMessage": "The request was canceled due to the configured HttpClient.Timeout of 0.5 seconds elapsing.", "attemptedAt": "2026-11-25T11:44:21.6617782", "sentAt": null, "message": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 変更前の架空予定\n削除範囲: 全て\n期間: 2026/06/19〜2026/06/22\n件数: 2件\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[/info]", "createdAt": "2026-11-25T11:44:21.6617782"},
+        {"reservationId": 0, "workScheduleEntryId": 52, "deliveryType": "WorkScheduleSeriesDeleted", "deliveryKey": "WorkScheduleSeriesDeleted:work-schedule-series:11111111111141118111111111111111:scope:all:user:3", "targetUserId": 3, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": "900003", "status": "Failed", "errorMessage": "Failed to send Chatwork message. StatusCode: 503, Response: {\"synthetic\":true}", "attemptedAt": "2026-11-25T11:44:22.1951014", "sentAt": null, "message": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 変更前の架空予定\n削除範囲: 全て\n期間: 2026/06/19〜2026/06/22\n件数: 2件\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[/info]", "createdAt": "2026-11-25T11:44:22.1951014"},
+        {"reservationId": 0, "workScheduleEntryId": 52, "deliveryType": "WorkScheduleSeriesDeleted", "deliveryKey": "WorkScheduleSeriesDeleted:work-schedule-series:11111111111141118111111111111111:scope:all:user:4", "targetUserId": 4, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": null, "status": "Skipped", "errorMessage": "ChatworkDirectRoomId is not configured.", "attemptedAt": "2026-11-25T11:44:22.2002838", "sentAt": null, "message": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 変更前の架空予定\n削除範囲: 全て\n期間: 2026/06/19〜2026/06/22\n件数: 2件\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[/info]", "createdAt": "2026-11-25T11:44:22.2002838"}
+      ],
+      "requests": [
+        {"roomId": "900002", "body": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 変更前の架空予定\n削除範囲: 全て\n期間: 2026/06/19〜2026/06/22\n件数: 2件\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[/info]"},
+        {"roomId": "900003", "body": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 変更前の架空予定\n削除範囲: 全て\n期間: 2026/06/19〜2026/06/22\n件数: 2件\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[/info]"}
+      ],
+      "failure": null,
+      "fakeResponses": {"900002": "timeout", "900003": 503}
+    },
+    {
+      "name": "notice_failure",
+      "actor": "owner",
+      "dataset": "simple",
+      "id": "52",
+      "scope": "all",
+      "response": {"status": 204, "body": "", "contentType": null, "location": null},
+      "again": null,
+      "remaining": [],
+      "initial": [],
+      "existingLogs": [],
+      "notices": [],
+      "logs": [
+        {"reservationId": 0, "workScheduleEntryId": 52, "deliveryType": "WorkScheduleSeriesDeleted", "deliveryKey": "WorkScheduleSeriesDeleted:work-schedule-series:11111111111141118111111111111111:scope:all:user:2", "targetUserId": 2, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": "900002", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-25T11:44:22.2381454", "sentAt": "2026-11-25T11:44:22.2396508", "message": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 変更前の架空予定\n削除範囲: 全て\n期間: 2026/06/19〜2026/06/22\n件数: 2件\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[/info]", "createdAt": "2026-11-25T11:44:22.2381454"},
+        {"reservationId": 0, "workScheduleEntryId": 52, "deliveryType": "WorkScheduleSeriesDeleted", "deliveryKey": "WorkScheduleSeriesDeleted:work-schedule-series:11111111111141118111111111111111:scope:all:user:3", "targetUserId": 3, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": "900003", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-25T11:44:22.243338", "sentAt": "2026-11-25T11:44:22.2444089", "message": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 変更前の架空予定\n削除範囲: 全て\n期間: 2026/06/19〜2026/06/22\n件数: 2件\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[/info]", "createdAt": "2026-11-25T11:44:22.243338"},
+        {"reservationId": 0, "workScheduleEntryId": 52, "deliveryType": "WorkScheduleSeriesDeleted", "deliveryKey": "WorkScheduleSeriesDeleted:work-schedule-series:11111111111141118111111111111111:scope:all:user:4", "targetUserId": 4, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": null, "status": "Skipped", "errorMessage": "ChatworkDirectRoomId is not configured.", "attemptedAt": "2026-11-25T11:44:22.2480562", "sentAt": null, "message": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 変更前の架空予定\n削除範囲: 全て\n期間: 2026/06/19〜2026/06/22\n件数: 2件\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[/info]", "createdAt": "2026-11-25T11:44:22.2480562"}
+      ],
+      "requests": [
+        {"roomId": "900002", "body": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 変更前の架空予定\n削除範囲: 全て\n期間: 2026/06/19〜2026/06/22\n件数: 2件\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[/info]"},
+        {"roomId": "900003", "body": "[info][title]社外予定をまとめて削除しました[/title]\n内容: 変更前の架空予定\n削除範囲: 全て\n期間: 2026/06/19〜2026/06/22\n件数: 2件\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[/info]"}
+      ],
+      "failure": "notice",
+      "fakeResponses": {}
+    },
+    {
+      "name": "second_delete_failure",
+      "actor": "owner",
+      "dataset": "simple",
+      "id": "52",
+      "scope": "all",
+      "response": {"status": 500, "body": "[development exception with synthetic second delete failure]", "contentType": "text/plain; charset=utf-8", "location": null},
+      "again": null,
+      "remaining": [
+        52,
+        53
+      ],
+      "initial": [],
+      "existingLogs": [],
+      "notices": [],
+      "logs": [],
+      "requests": [],
+      "failure": "delete",
+      "fakeResponses": {}
+    }
+  ]
+}

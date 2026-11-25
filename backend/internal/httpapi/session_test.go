@@ -50,6 +50,7 @@ func TestSessionRoutesWithoutDatabase(t *testing.T) {
 		{http.MethodPost, "/api/Reservations/7/series-delete"},
 		{http.MethodGet, "/api/work-schedule-entries"}, {http.MethodPut, "/api/work-schedule-entries/7"},
 		{http.MethodPut, "/api/work-schedule-entries/7/series"}, {http.MethodDelete, "/api/work-schedule-entries/7"},
+		{http.MethodDelete, "/api/work-schedule-entries/7/series"},
 		{http.MethodGet, "/api/Users/participants"},
 		{http.MethodGet, "/api/Notifications/user/2"}, {http.MethodPut, "/api/Notifications/101/read"}, {http.MethodDelete, "/api/Notifications/101"},
 	} {
