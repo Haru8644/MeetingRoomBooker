@@ -20,7 +20,7 @@ const (
 
 // CreateSeries commits the expanded entries and their summary notifications together.
 // Requests without recurrence go through ordinary single-entry creation.
-func CreateSeries(ctx context.Context, pool *pgxpool.Pool, input CreateInput, creatorID int) (Creation, error) {
+func CreateSeries(ctx context.Context, pool *pgxpool.Pool, input EntryInput, creatorID int) (Creation, error) {
 	repeat := strings.TrimSpace(input.RepeatType)
 	if repeat == "" || repeat == noRepeatType {
 		return Create(ctx, pool, input, creatorID)
@@ -30,16 +30,20 @@ func CreateSeries(ctx context.Context, pool *pgxpool.Pool, input CreateInput, cr
 		return Creation{}, err
 	}
 
-	var uuid [16]byte
-	rand.Read(uuid[:])
-	uuid[6] = uuid[6]&0x0f | 0x40
-	uuid[8] = uuid[8]&0x3f | 0x80
-	seriesID := hex.EncodeToString(uuid[:])
+	seriesID := newWorkScheduleUUID()
 	input.RepeatType, input.Date = repeat, dates[0]
 	return createEntries(ctx, pool, input, creatorID, dates, &seriesID)
 }
 
-func occurrenceDates(input CreateInput, repeat string) ([]time.Time, error) {
+func newWorkScheduleUUID() string {
+	var uuid [16]byte
+	rand.Read(uuid[:])
+	uuid[6] = uuid[6]&0x0f | 0x40
+	uuid[8] = uuid[8]&0x3f | 0x80
+	return hex.EncodeToString(uuid[:])
+}
+
+func occurrenceDates(input EntryInput, repeat string) ([]time.Time, error) {
 	switch {
 	case input.Type != externalAppointment:
 		return nil, ValidationError("繰り返し作成は社外予定のみ指定できます。")

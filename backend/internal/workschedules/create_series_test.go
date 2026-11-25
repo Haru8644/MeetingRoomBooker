@@ -37,7 +37,7 @@ func TestOccurrenceDates(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			dates, err := occurrenceDates(CreateInput{Date: from, RepeatUntil: &until}, test.repeat)
+			dates, err := occurrenceDates(EntryInput{Date: from, RepeatUntil: &until}, test.repeat)
 			if test.message != "" {
 				if err == nil || err.Error() != test.message || len(dates) != 0 {
 					t.Fatalf("occurrenceDates = %v, %v, want %q with no dates", dates, err, test.message)

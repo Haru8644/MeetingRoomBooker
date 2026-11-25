@@ -18,7 +18,7 @@ import (
 
 const workSchedulePath = "/api/work-schedule-entries"
 
-type workScheduleCreator func(context.Context, workschedules.CreateInput, int, bool) ([]workschedules.Entry, error)
+type workScheduleCreator func(context.Context, workschedules.EntryInput, int, bool) ([]workschedules.Entry, error)
 type workScheduleGetter func(context.Context, int) (*workschedules.Entry, error)
 
 func newWorkScheduleGetHandler(get workScheduleGetter) func(http.ResponseWriter, *http.Request, auth.User, int) {
@@ -28,9 +28,7 @@ func newWorkScheduleGetHandler(get workScheduleGetter) func(http.ResponseWriter,
 		case err != nil:
 			w.WriteHeader(http.StatusInternalServerError)
 		case entry == nil:
-			writeProblemDetails(w, problemDetails{
-				Type: "https://tools.ietf.org/html/rfc9110#section-15.5.5", Title: "Not Found", Status: http.StatusNotFound,
-			})
+			writeWorkScheduleNotFound(w)
 		default:
 			writeJSON(w, http.StatusOK, entry)
 		}
@@ -39,22 +37,8 @@ func newWorkScheduleGetHandler(get workScheduleGetter) func(http.ResponseWriter,
 
 func newWorkScheduleCreateHandler(create workScheduleCreator, series bool) func(http.ResponseWriter, *http.Request, auth.User) {
 	return func(w http.ResponseWriter, r *http.Request, user auth.User) {
-		if !hasJSONContentType(r) {
-			writeValidationProblem(w, http.StatusUnsupportedMediaType, nil)
-			return
-		}
-		decoder := json.NewDecoder(http.MaxBytesReader(w, r.Body, 30_000_000))
-		input, problems, err := readWorkScheduleCreate(decoder, time.Now())
-		var tooLarge *http.MaxBytesError
-		switch {
-		case errors.As(err, &tooLarge):
-			w.WriteHeader(http.StatusRequestEntityTooLarge)
-			return
-		case err != nil:
-			writeValidationProblem(w, http.StatusBadRequest, workScheduleBindingProblem(err))
-			return
-		case len(problems) > 0:
-			writeValidationProblem(w, http.StatusBadRequest, problems)
+		input, ok := decodeWorkScheduleInput(w, r)
+		if !ok {
 			return
 		}
 
@@ -80,7 +64,29 @@ func newWorkScheduleCreateHandler(create workScheduleCreator, series bool) func(
 	}
 }
 
-func readWorkScheduleCreate(decoder *json.Decoder, now time.Time) (workschedules.CreateInput, map[string][]string, error) {
+func decodeWorkScheduleInput(w http.ResponseWriter, r *http.Request) (workschedules.EntryInput, bool) {
+	if !hasJSONContentType(r) {
+		writeValidationProblem(w, http.StatusUnsupportedMediaType, nil)
+		return workschedules.EntryInput{}, false
+	}
+	decoder := json.NewDecoder(http.MaxBytesReader(w, r.Body, 30_000_000))
+	input, problems, err := readWorkScheduleInput(decoder, time.Now())
+	var tooLarge *http.MaxBytesError
+	switch {
+	case errors.As(err, &tooLarge):
+		w.WriteHeader(http.StatusRequestEntityTooLarge)
+		return workschedules.EntryInput{}, false
+	case err != nil:
+		writeValidationProblem(w, http.StatusBadRequest, workScheduleBindingProblem(err))
+		return workschedules.EntryInput{}, false
+	case len(problems) > 0:
+		writeValidationProblem(w, http.StatusBadRequest, problems)
+		return workschedules.EntryInput{}, false
+	}
+	return input, true
+}
+
+func readWorkScheduleInput(decoder *json.Decoder, now time.Time) (workschedules.EntryInput, map[string][]string, error) {
 	request := &struct {
 		Type           *int32          `json:"type"`
 		Title          *string         `json:"title"`
@@ -93,7 +99,7 @@ func readWorkScheduleCreate(decoder *json.Decoder, now time.Time) (workschedules
 		ParticipantIDs []jsonInt32     `json:"participantIds"`
 		Participants   *string         `json:"participants"`
 	}{Type: new(int32), Title: new(""), LeavePeriod: new(int32), ParticipantIDs: []jsonInt32{}, Participants: new("")}
-	var input workschedules.CreateInput
+	var input workschedules.EntryInput
 	if err := decoder.Decode(&request); err != nil {
 		return input, nil, err
 	}
