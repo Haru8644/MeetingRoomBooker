@@ -154,8 +154,8 @@ func run(ctx context.Context) error {
 		}
 		return result.Entry, err
 	}
-	deleteWorkSchedule := func(ctx context.Context, id int, user auth.User) error {
-		result, err := workschedules.Delete(ctx, pool, id, user.ID, user.IsAdmin)
+	deleteWorkSchedule := func(ctx context.Context, id int, user auth.User, scope string) error {
+		result, err := workschedules.DeleteSeries(ctx, pool, id, user.ID, user.IsAdmin, scope)
 		if err == nil && chatworkSender != nil {
 			chatworkSender.SendWorkScheduleDeletion(ctx, result)
 		}

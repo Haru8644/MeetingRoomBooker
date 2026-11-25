@@ -12,10 +12,11 @@ import (
 )
 
 type Deletion struct {
-	ID             int
-	ParticipantIDs []int
-	ScheduledStart time.Time
-	ChatworkBody   string
+	ID              int
+	SeriesID, Scope string
+	ParticipantIDs  []int
+	ScheduledStart  time.Time
+	ChatworkBody    string
 }
 
 // Delete removes one locked entry and saves its in-app notices in the same transaction.
@@ -26,22 +27,11 @@ func Delete(ctx context.Context, pool *pgxpool.Pool, id, actorID int, isAdmin bo
 		if err != nil {
 			return err
 		}
-		deleted, err := tx.Exec(ctx, `DELETE FROM work_schedule_entries WHERE id = $1`, entry.ID)
-		if err != nil {
-			return fmt.Errorf("delete work schedule: %w", err)
-		}
-		if deleted.RowsAffected() != 1 {
-			return fmt.Errorf("work schedule %d was not deleted", entry.ID)
+		if err := deleteLockedWorkSchedules(ctx, tx, []int{entry.ID}); err != nil {
+			return err
 		}
 
-		var recipients []int
-		seen := make(map[int]bool, len(entry.ParticipantIDs))
-		for _, userID := range entry.ParticipantIDs {
-			if userID > 0 && !seen[userID] {
-				recipients = append(recipients, userID)
-				seen[userID] = true
-			}
-		}
+		recipients := workScheduleParticipants([]storedEntry{entry})
 		result = Deletion{ID: entry.ID, ParticipantIDs: recipients, ScheduledStart: entry.scheduledStart()}
 		if len(recipients) == 0 {
 			return nil
@@ -64,4 +54,15 @@ func Delete(ctx context.Context, pool *pgxpool.Pool, id, actorID int, isAdmin bo
 		return Deletion{}, err
 	}
 	return result, nil
+}
+
+func deleteLockedWorkSchedules(ctx context.Context, tx pgx.Tx, ids []int) error {
+	deleted, err := tx.Exec(ctx, `DELETE FROM work_schedule_entries WHERE id = ANY($1::integer[])`, ids)
+	if err != nil {
+		return fmt.Errorf("delete work schedules: %w", err)
+	}
+	if deleted.RowsAffected() != int64(len(ids)) {
+		return fmt.Errorf("deleted %d work schedules, expected %d", deleted.RowsAffected(), len(ids))
+	}
+	return nil
 }
