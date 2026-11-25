@@ -38,7 +38,7 @@ func RegisterSessionRoutes(mux *http.ServeMux, service sessionService, reservati
 	deleteReservation func(context.Context, int, int, bool) error,
 	deleteReservationSeries reservationSeriesDeleter,
 	changeParticipation func(context.Context, int, int, bool) error, listWorkSchedules workScheduleLister,
-	getWorkSchedule workScheduleGetter, createWorkSchedule workScheduleCreator, updateWorkSchedule workScheduleUpdater,
+	getWorkSchedule workScheduleGetter, createWorkSchedule workScheduleCreator, updateWorkSchedule workScheduleUpdater, deleteWorkSchedule workScheduleDeleter,
 	listParticipants func(context.Context) ([]users.Participant, error), inbox notificationInbox, options SessionOptions,
 ) (http.Handler, error) {
 	csrf := http.NewCrossOriginProtection()
@@ -88,6 +88,7 @@ func RegisterSessionRoutes(mux *http.ServeMux, service sessionService, reservati
 	}
 	mux.Handle(workScheduleListPattern, h.requireSession(newWorkScheduleListHandler(listWorkSchedules)))
 	mux.Handle("GET "+workSchedulePath+"/{id}", h.idRoute("id", newWorkScheduleGetHandler(getWorkSchedule)))
+	mux.Handle("DELETE "+workSchedulePath+"/{id}", csrf.Handler(h.idRoute("id", newWorkScheduleDeleteHandler(deleteWorkSchedule))))
 	mux.Handle("PUT "+workSchedulePath+"/{id}", csrf.Handler(h.idRoute("id", newWorkScheduleUpdateHandler(updateWorkSchedule, false))))
 	mux.Handle("PUT "+workSchedulePath+"/{id}/series", csrf.Handler(h.idRoute("id", newWorkScheduleUpdateHandler(updateWorkSchedule, true))))
 	mux.Handle("POST "+workSchedulePath, csrf.Handler(h.requireSession(newWorkScheduleCreateHandler(createWorkSchedule, false))))

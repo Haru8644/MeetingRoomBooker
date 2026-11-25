@@ -41,7 +41,7 @@ func notifyWorkScheduleUpdate(ctx context.Context, tx pgx.Tx, previous, current 
 		if len(users) == 0 {
 			return nil
 		}
-		if err := saveWorkScheduleUpdateNotices(ctx, tx, entry, users, kind, notice, now); err != nil {
+		if err := saveWorkScheduleNotices(ctx, tx, entry, users, kind, notice, now); err != nil {
 			return err
 		}
 		message := "[info][title]" + dmTitle + "[/title]\n" + strings.Join(dmLines, "\n") + "\n[/info]"
@@ -112,7 +112,7 @@ func updateParticipants(previous, current []int) (retained, added, removed []int
 	return retained, added, removed
 }
 
-func saveWorkScheduleUpdateNotices(ctx context.Context, tx pgx.Tx, entry storedEntry, users []int, kind, message string, now int64) error {
+func saveWorkScheduleNotices(ctx context.Context, tx pgx.Tx, entry storedEntry, users []int, kind, message string, now int64) error {
 	// C# inserts when no message matches among notices of the same kind,
 	// user and entry. If any message matches, it keeps the newest candidate
 	// and refreshes it only if that candidate is the match.
@@ -141,7 +141,7 @@ func saveWorkScheduleUpdateNotices(ctx context.Context, tx pgx.Tx, entry storedE
 		WHERE NOT EXISTS (SELECT 1 FROM matches m WHERE m.user_id = u.id)`,
 		users, entry.ID, kind, message, now, entry.dateTicks)
 	if err != nil {
-		return fmt.Errorf("save work schedule update notifications: %w", err)
+		return fmt.Errorf("save work schedule notifications: %w", err)
 	}
 	return nil
 }

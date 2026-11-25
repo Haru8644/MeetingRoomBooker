@@ -154,13 +154,20 @@ func run(ctx context.Context) error {
 		}
 		return result.Entry, err
 	}
+	deleteWorkSchedule := func(ctx context.Context, id int, user auth.User) error {
+		result, err := workschedules.Delete(ctx, pool, id, user.ID, user.IsAdmin)
+		if err == nil && chatworkSender != nil {
+			chatworkSender.SendWorkScheduleDeletion(ctx, result)
+		}
+		return err
+	}
 	listParticipants := func(ctx context.Context) ([]users.Participant, error) {
 		return users.ListParticipants(ctx, pool)
 	}
 	handler, err := httpapi.RegisterSessionRoutes(httpapi.NewHandler(ping, readinessTimeout), auth.NewService(pool),
 		reservationList, createReservation, createReservationSeries, updateReservation, updateReservationSeries,
 		deleteReservation, deleteReservationSeries, changeParticipation,
-		listWorkSchedules, getWorkSchedule, createWorkSchedule, updateWorkSchedule, listParticipants, notifications.NewInbox(pool),
+		listWorkSchedules, getWorkSchedule, createWorkSchedule, updateWorkSchedule, deleteWorkSchedule, listParticipants, notifications.NewInbox(pool),
 		httpapi.SessionOptions{Development: development, FrontendOrigins: strings.Split(os.Getenv("FRONTEND_ORIGINS"), ",")})
 	if err != nil {
 		return err
