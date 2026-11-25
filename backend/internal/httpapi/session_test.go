@@ -98,7 +98,7 @@ func TestSessionRoutesWithoutDatabase(t *testing.T) {
 			}
 		})
 	}
-	for _, path := range []string{login, logout, "/api/Reservations"} {
+	for _, path := range []string{login, logout, "/api/Reservations", "/api/Users/register"} {
 		for _, origin := range []string{"https://untrusted.example.test", "null"} {
 			request := httptest.NewRequest(http.MethodPost, path, strings.NewReader(validLogin))
 			request.Header.Set("Content-Type", "application/json")

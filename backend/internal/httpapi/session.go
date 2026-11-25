@@ -17,6 +17,7 @@ import (
 const sessionCookieName = "MeetingRoomBooker.GoSession"
 
 type sessionService interface {
+	Register(context.Context, auth.Registration, *int) (auth.User, error)
 	Login(context.Context, string, string, bool, string) (auth.User, auth.Session, error)
 	Authenticate(context.Context, string) (auth.User, *auth.Session, error)
 	Logout(context.Context, string) error
@@ -65,6 +66,7 @@ func RegisterSessionRoutes(mux *http.ServeMux, service sessionService, reservati
 
 	h := sessionHandler{service: service, development: options.Development}
 	mux.Handle("POST /api/Auth/login", csrf.Handler(http.HandlerFunc(h.login)))
+	mux.Handle("POST /api/Users/register", csrf.Handler(http.HandlerFunc(h.registerUser)))
 	mux.Handle("GET /api/Auth/me", h.requireSession(func(w http.ResponseWriter, _ *http.Request, user auth.User) {
 		writeJSON(w, http.StatusOK, user)
 	}))
