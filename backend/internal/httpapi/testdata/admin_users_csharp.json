@@ -1,0 +1,1108 @@
+{
+  "cases": [
+    {
+      "name": "list_anonymous",
+      "actor": "anonymous",
+      "method": "GET",
+      "path": "/api/Users",
+      "raw": null,
+      "accept": "application/json",
+      "response": {
+        "status": 401,
+        "body": "",
+        "contentType": "",
+        "location": ""
+      }
+    },
+    {
+      "name": "list_member",
+      "actor": "member",
+      "method": "GET",
+      "path": "/api/Users",
+      "raw": null,
+      "accept": "application/json",
+      "response": {
+        "status": 403,
+        "body": "",
+        "contentType": "",
+        "location": ""
+      }
+    },
+    {
+      "name": "list_admin",
+      "actor": "admin",
+      "method": "GET",
+      "path": "/api/Users",
+      "raw": null,
+      "accept": "application/json",
+      "response": {
+        "status": 200,
+        "body": [
+          {"id": 1, "name": "Synthetic admin", "email": "admin@example.test", "avatarColor": "#58a6ff", "isAdmin": true, "chatworkAccountId": "11", "chatworkDirectRoomId": "21"},
+          {"id": 2, "name": "Synthetic target", "email": "target@example.test", "avatarColor": "#58a6ff", "isAdmin": false, "chatworkAccountId": "12", "chatworkDirectRoomId": "22"},
+          {"id": 3, "name": "Synthetic member", "email": "member@example.test", "avatarColor": "#58a6ff", "isAdmin": false, "chatworkAccountId": "13", "chatworkDirectRoomId": "23"},
+          {"id": 4, "name": "Synthetic other-admin", "email": "other-admin@example.test", "avatarColor": "#58a6ff", "isAdmin": true, "chatworkAccountId": "14", "chatworkDirectRoomId": "24"}
+        ],
+        "contentType": "application/json",
+        "location": ""
+      }
+    },
+    {
+      "name": "registration_location",
+      "actor": "admin",
+      "method": "GET",
+      "path": "/api/Users?id=2",
+      "raw": null,
+      "accept": "application/json",
+      "response": {
+        "status": 200,
+        "body": [
+          {"id": 1, "name": "Synthetic admin", "email": "admin@example.test", "avatarColor": "#58a6ff", "isAdmin": true, "chatworkAccountId": "11", "chatworkDirectRoomId": "21"},
+          {"id": 2, "name": "Synthetic target", "email": "target@example.test", "avatarColor": "#58a6ff", "isAdmin": false, "chatworkAccountId": "12", "chatworkDirectRoomId": "22"},
+          {"id": 3, "name": "Synthetic member", "email": "member@example.test", "avatarColor": "#58a6ff", "isAdmin": false, "chatworkAccountId": "13", "chatworkDirectRoomId": "23"},
+          {"id": 4, "name": "Synthetic other-admin", "email": "other-admin@example.test", "avatarColor": "#58a6ff", "isAdmin": true, "chatworkAccountId": "14", "chatworkDirectRoomId": "24"}
+        ],
+        "contentType": "application/json",
+        "location": ""
+      }
+    },
+    {
+      "name": "name_anonymous",
+      "actor": "anonymous",
+      "method": "PUT",
+      "path": "/api/Users/2/name",
+      "raw": "{\"bad\":",
+      "accept": "application/json",
+      "response": {
+        "status": 401,
+        "body": "",
+        "contentType": "",
+        "location": ""
+      }
+    },
+    {
+      "name": "name_member",
+      "actor": "member",
+      "method": "PUT",
+      "path": "/api/Users/2/name",
+      "raw": "{\"bad\":",
+      "accept": "application/json",
+      "response": {
+        "status": 403,
+        "body": "",
+        "contentType": "",
+        "location": ""
+      }
+    },
+    {
+      "name": "name_invalid_id",
+      "actor": "anonymous",
+      "method": "PUT",
+      "path": "/api/Users/not-id/name",
+      "raw": "{}",
+      "accept": "application/json",
+      "response": {
+        "status": 404,
+        "body": "",
+        "contentType": "",
+        "location": ""
+      }
+    },
+    {
+      "name": "name_missing_user",
+      "actor": "admin",
+      "method": "PUT",
+      "path": "/api/Users/999/name",
+      "raw": "{\"name\": \"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"}",
+      "accept": "application/json",
+      "response": {
+        "status": 404,
+        "body": {"type": "https://tools.ietf.org/html/rfc9110#section-15.5.5", "title": "Not Found", "status": 404},
+        "contentType": "application/problem+json",
+        "location": ""
+      }
+    },
+    {
+      "name": "name_malformed_before_lookup",
+      "actor": "admin",
+      "method": "PUT",
+      "path": "/api/Users/999/name",
+      "raw": "{\"bad\":",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": {"type": "https://tools.ietf.org/html/rfc9110#section-15.5.1", "title": "One or more validation errors occurred.", "status": 400, "errors": {"request": ["The request field is required."], "$.bad": ["Expected depth to be zero at the end of the JSON payload. There is an open JSON object or array that should be closed. Path: $.bad | LineNumber: 0 | BytePositionInLine: 7."]}},
+        "contentType": "application/problem+json",
+        "location": ""
+      }
+    },
+    {
+      "name": "name_wrong_type_before_lookup",
+      "actor": "admin",
+      "method": "PUT",
+      "path": "/api/Users/999/name",
+      "raw": "{\"name\": 4}",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": {"type": "https://tools.ietf.org/html/rfc9110#section-15.5.1", "title": "One or more validation errors occurred.", "status": 400, "errors": {"request": ["The request field is required."], "$.name": ["The JSON value could not be converted to System.String. Path: $.name | LineNumber: 0 | BytePositionInLine: 10."]}},
+        "contentType": "application/problem+json",
+        "location": ""
+      }
+    },
+    {
+      "name": "name_null_body",
+      "actor": "admin",
+      "method": "PUT",
+      "path": "/api/Users/2/name",
+      "raw": "null",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": {"type": "https://tools.ietf.org/html/rfc9110#section-15.5.1", "title": "One or more validation errors occurred.", "status": 400, "errors": {"": ["A non-empty request body is required."], "request": ["The request field is required."]}},
+        "contentType": "application/problem+json",
+        "location": ""
+      }
+    },
+    {
+      "name": "name_over_utf16",
+      "actor": "admin",
+      "method": "PUT",
+      "path": "/api/Users/2/name",
+      "raw": "{\"name\": \"\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00x\"}",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": "Name must be 100 characters or less.",
+        "contentType": "application/json",
+        "location": ""
+      }
+    },
+    {
+      "name": "name_equal_utf16",
+      "actor": "admin",
+      "method": "PUT",
+      "path": "/api/Users/2/name",
+      "raw": "{\"name\": \"  😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀  \"}",
+      "accept": "application/json",
+      "response": {
+        "status": 204,
+        "body": "",
+        "contentType": "",
+        "location": ""
+      },
+      "saved": {
+        "reservations": [
+          {"id": 10, "name": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀", "ids": [2, 3], "count": 2, "display": "Stored display 10"},
+          {"id": 11, "name": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀", "ids": [2], "count": 1, "display": "Stored display 11"},
+          {"id": 20, "name": "Synthetic member", "ids": [2, 3, 2, 4, 3, 0, -1, 4], "count": 8, "display": "Stored display 20"},
+          {"id": 21, "name": "Synthetic member", "ids": [2, 2], "count": 2, "display": "Stored display 21"},
+          {"id": 22, "name": "Synthetic member", "ids": [3, 3], "count": 2, "display": "Stored display 22"}
+        ],
+        "notices": [
+          [100, 3, 10, null],
+          [101, 2, 11, null],
+          [102, 2, null, 30],
+          [103, 3, 20, null],
+          [104, 3, null, 30],
+          [105, 4, null, null]
+        ],
+        "schedules": [
+          [30, 2, "2,3"]
+        ],
+        "deliveries": [
+          [40, 10, 2, "synthetic-key", "Sent"]
+        ],
+        "conflicts": [
+          [50, 10, 20, 2]
+        ]
+      }
+    },
+    {
+      "name": "name_utf16_readback",
+      "actor": "admin",
+      "method": "GET",
+      "path": "/api/Users",
+      "raw": null,
+      "accept": "application/json",
+      "response": {
+        "status": 200,
+        "body": [
+          {"id": 1, "name": "Synthetic admin", "email": "admin@example.test", "avatarColor": "#58a6ff", "isAdmin": true, "chatworkAccountId": "11", "chatworkDirectRoomId": "21"},
+          {"id": 2, "name": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀", "email": "target@example.test", "avatarColor": "#58a6ff", "isAdmin": false, "chatworkAccountId": "12", "chatworkDirectRoomId": "22"},
+          {"id": 3, "name": "Synthetic member", "email": "member@example.test", "avatarColor": "#58a6ff", "isAdmin": false, "chatworkAccountId": "13", "chatworkDirectRoomId": "23"},
+          {"id": 4, "name": "Synthetic other-admin", "email": "other-admin@example.test", "avatarColor": "#58a6ff", "isAdmin": true, "chatworkAccountId": "14", "chatworkDirectRoomId": "24"}
+        ],
+        "contentType": "application/json",
+        "location": ""
+      }
+    },
+    {
+      "name": "name_omitted",
+      "actor": "admin",
+      "method": "PUT",
+      "path": "/api/Users/2/name",
+      "raw": "{}",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": "Name is required.",
+        "contentType": "application/json",
+        "location": ""
+      }
+    },
+    {
+      "name": "name_omitted_missing_user",
+      "actor": "admin",
+      "method": "PUT",
+      "path": "/api/Users/999/name",
+      "raw": "{}",
+      "accept": "application/json",
+      "response": {
+        "status": 404,
+        "body": {"type": "https://tools.ietf.org/html/rfc9110#section-15.5.5", "title": "Not Found", "status": 404},
+        "contentType": "application/problem+json",
+        "location": ""
+      }
+    },
+    {
+      "name": "name_null_before_lookup",
+      "actor": "admin",
+      "method": "PUT",
+      "path": "/api/Users/999/name",
+      "raw": "{\"name\":null}",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": {"type": "https://tools.ietf.org/html/rfc9110#section-15.5.1", "title": "One or more validation errors occurred.", "status": 400, "errors": {"Name": ["The Name field is required."]}},
+        "contentType": "application/problem+json",
+        "location": ""
+      }
+    },
+    {
+      "name": "name_blank",
+      "actor": "admin",
+      "method": "PUT",
+      "path": "/api/Users/2/name",
+      "raw": "{\"name\":\"  \"}",
+      "accept": "text/plain",
+      "response": {
+        "status": 400,
+        "body": "Name is required.",
+        "contentType": "text/plain",
+        "location": ""
+      }
+    },
+    {
+      "name": "name_update",
+      "actor": "admin",
+      "method": "PUT",
+      "path": "/api/Users/2/name",
+      "raw": "{\"name\":\"  Renamed synthetic target  \"}",
+      "accept": "application/json",
+      "response": {
+        "status": 204,
+        "body": "",
+        "contentType": "",
+        "location": ""
+      },
+      "saved": {
+        "reservations": [
+          {"id": 10, "name": "Renamed synthetic target", "ids": [2, 3], "count": 2, "display": "Stored display 10"},
+          {"id": 11, "name": "Renamed synthetic target", "ids": [2], "count": 1, "display": "Stored display 11"},
+          {"id": 20, "name": "Synthetic member", "ids": [2, 3, 2, 4, 3, 0, -1, 4], "count": 8, "display": "Stored display 20"},
+          {"id": 21, "name": "Synthetic member", "ids": [2, 2], "count": 2, "display": "Stored display 21"},
+          {"id": 22, "name": "Synthetic member", "ids": [3, 3], "count": 2, "display": "Stored display 22"}
+        ],
+        "notices": [
+          [100, 3, 10, null],
+          [101, 2, 11, null],
+          [102, 2, null, 30],
+          [103, 3, 20, null],
+          [104, 3, null, 30],
+          [105, 4, null, null]
+        ],
+        "schedules": [
+          [30, 2, "2,3"]
+        ],
+        "deliveries": [
+          [40, 10, 2, "synthetic-key", "Sent"]
+        ],
+        "conflicts": [
+          [50, 10, 20, 2]
+        ]
+      }
+    },
+    {
+      "name": "name_readback",
+      "actor": "admin",
+      "method": "GET",
+      "path": "/api/Users",
+      "raw": null,
+      "accept": "application/json",
+      "response": {
+        "status": 200,
+        "body": [
+          {"id": 1, "name": "Synthetic admin", "email": "admin@example.test", "avatarColor": "#58a6ff", "isAdmin": true, "chatworkAccountId": "11", "chatworkDirectRoomId": "21"},
+          {"id": 2, "name": "Renamed synthetic target", "email": "target@example.test", "avatarColor": "#58a6ff", "isAdmin": false, "chatworkAccountId": "12", "chatworkDirectRoomId": "22"},
+          {"id": 3, "name": "Synthetic member", "email": "member@example.test", "avatarColor": "#58a6ff", "isAdmin": false, "chatworkAccountId": "13", "chatworkDirectRoomId": "23"},
+          {"id": 4, "name": "Synthetic other-admin", "email": "other-admin@example.test", "avatarColor": "#58a6ff", "isAdmin": true, "chatworkAccountId": "14", "chatworkDirectRoomId": "24"}
+        ],
+        "contentType": "application/json",
+        "location": ""
+      }
+    },
+    {
+      "name": "chatwork-account_anonymous",
+      "actor": "anonymous",
+      "method": "PUT",
+      "path": "/api/Users/2/chatwork-account",
+      "raw": "{\"bad\":",
+      "accept": "application/json",
+      "response": {
+        "status": 401,
+        "body": "",
+        "contentType": "",
+        "location": ""
+      }
+    },
+    {
+      "name": "chatwork-account_member",
+      "actor": "member",
+      "method": "PUT",
+      "path": "/api/Users/2/chatwork-account",
+      "raw": "{\"bad\":",
+      "accept": "application/json",
+      "response": {
+        "status": 403,
+        "body": "",
+        "contentType": "",
+        "location": ""
+      }
+    },
+    {
+      "name": "chatwork-account_invalid_id",
+      "actor": "anonymous",
+      "method": "PUT",
+      "path": "/api/Users/not-id/chatwork-account",
+      "raw": "{}",
+      "accept": "application/json",
+      "response": {
+        "status": 404,
+        "body": "",
+        "contentType": "",
+        "location": ""
+      }
+    },
+    {
+      "name": "chatwork-account_missing_user",
+      "actor": "admin",
+      "method": "PUT",
+      "path": "/api/Users/999/chatwork-account",
+      "raw": "{\"chatworkAccountId\": \"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"}",
+      "accept": "application/json",
+      "response": {
+        "status": 404,
+        "body": {"type": "https://tools.ietf.org/html/rfc9110#section-15.5.5", "title": "Not Found", "status": 404},
+        "contentType": "application/problem+json",
+        "location": ""
+      }
+    },
+    {
+      "name": "chatwork-account_malformed_before_lookup",
+      "actor": "admin",
+      "method": "PUT",
+      "path": "/api/Users/999/chatwork-account",
+      "raw": "{\"bad\":",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": {"type": "https://tools.ietf.org/html/rfc9110#section-15.5.1", "title": "One or more validation errors occurred.", "status": 400, "errors": {"request": ["The request field is required."], "$.bad": ["Expected depth to be zero at the end of the JSON payload. There is an open JSON object or array that should be closed. Path: $.bad | LineNumber: 0 | BytePositionInLine: 7."]}},
+        "contentType": "application/problem+json",
+        "location": ""
+      }
+    },
+    {
+      "name": "chatwork-account_wrong_type_before_lookup",
+      "actor": "admin",
+      "method": "PUT",
+      "path": "/api/Users/999/chatwork-account",
+      "raw": "{\"chatworkAccountId\": 4}",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": {"type": "https://tools.ietf.org/html/rfc9110#section-15.5.1", "title": "One or more validation errors occurred.", "status": 400, "errors": {"request": ["The request field is required."], "$.chatworkAccountId": ["The JSON value could not be converted to System.String. Path: $.chatworkAccountId | LineNumber: 0 | BytePositionInLine: 23."]}},
+        "contentType": "application/problem+json",
+        "location": ""
+      }
+    },
+    {
+      "name": "chatwork-account_null_body",
+      "actor": "admin",
+      "method": "PUT",
+      "path": "/api/Users/2/chatwork-account",
+      "raw": "null",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": {"type": "https://tools.ietf.org/html/rfc9110#section-15.5.1", "title": "One or more validation errors occurred.", "status": 400, "errors": {"": ["A non-empty request body is required."], "request": ["The request field is required."]}},
+        "contentType": "application/problem+json",
+        "location": ""
+      }
+    },
+    {
+      "name": "chatwork-account_over_utf16",
+      "actor": "admin",
+      "method": "PUT",
+      "path": "/api/Users/2/chatwork-account",
+      "raw": "{\"chatworkAccountId\": \"\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00x\"}",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": "Chatwork account ID must be 100 characters or less.",
+        "contentType": "application/json",
+        "location": ""
+      }
+    },
+    {
+      "name": "chatwork-account_equal_utf16",
+      "actor": "admin",
+      "method": "PUT",
+      "path": "/api/Users/2/chatwork-account",
+      "raw": "{\"chatworkAccountId\": \"  😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀  \"}",
+      "accept": "application/json",
+      "response": {
+        "status": 204,
+        "body": "",
+        "contentType": "",
+        "location": ""
+      }
+    },
+    {
+      "name": "chatwork-account_utf16_readback",
+      "actor": "admin",
+      "method": "GET",
+      "path": "/api/Users",
+      "raw": null,
+      "accept": "application/json",
+      "response": {
+        "status": 200,
+        "body": [
+          {"id": 1, "name": "Synthetic admin", "email": "admin@example.test", "avatarColor": "#58a6ff", "isAdmin": true, "chatworkAccountId": "11", "chatworkDirectRoomId": "21"},
+          {"id": 2, "name": "Renamed synthetic target", "email": "target@example.test", "avatarColor": "#58a6ff", "isAdmin": false, "chatworkAccountId": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀", "chatworkDirectRoomId": "22"},
+          {"id": 3, "name": "Synthetic member", "email": "member@example.test", "avatarColor": "#58a6ff", "isAdmin": false, "chatworkAccountId": "13", "chatworkDirectRoomId": "23"},
+          {"id": 4, "name": "Synthetic other-admin", "email": "other-admin@example.test", "avatarColor": "#58a6ff", "isAdmin": true, "chatworkAccountId": "14", "chatworkDirectRoomId": "24"}
+        ],
+        "contentType": "application/json",
+        "location": ""
+      }
+    },
+    {
+      "name": "chatwork-account_blank_clears",
+      "actor": "admin",
+      "method": "PUT",
+      "path": "/api/Users/2/chatwork-account",
+      "raw": "{\"chatworkAccountId\": \"  \\t \"}",
+      "accept": "application/json",
+      "response": {
+        "status": 204,
+        "body": "",
+        "contentType": "",
+        "location": ""
+      }
+    },
+    {
+      "name": "chatwork-account_blank_readback",
+      "actor": "admin",
+      "method": "GET",
+      "path": "/api/Users",
+      "raw": null,
+      "accept": "application/json",
+      "response": {
+        "status": 200,
+        "body": [
+          {"id": 1, "name": "Synthetic admin", "email": "admin@example.test", "avatarColor": "#58a6ff", "isAdmin": true, "chatworkAccountId": "11", "chatworkDirectRoomId": "21"},
+          {"id": 2, "name": "Renamed synthetic target", "email": "target@example.test", "avatarColor": "#58a6ff", "isAdmin": false, "chatworkAccountId": null, "chatworkDirectRoomId": "22"},
+          {"id": 3, "name": "Synthetic member", "email": "member@example.test", "avatarColor": "#58a6ff", "isAdmin": false, "chatworkAccountId": "13", "chatworkDirectRoomId": "23"},
+          {"id": 4, "name": "Synthetic other-admin", "email": "other-admin@example.test", "avatarColor": "#58a6ff", "isAdmin": true, "chatworkAccountId": "14", "chatworkDirectRoomId": "24"}
+        ],
+        "contentType": "application/json",
+        "location": ""
+      }
+    },
+    {
+      "name": "chatwork-account_independent",
+      "actor": "admin",
+      "method": "PUT",
+      "path": "/api/Users/2/chatwork-account",
+      "raw": "{\"chatworkAccountId\": \"  synthetic-ID  \", \"chatworkDirectRoomId\": 123}",
+      "accept": "application/json",
+      "response": {
+        "status": 204,
+        "body": "",
+        "contentType": "",
+        "location": ""
+      }
+    },
+    {
+      "name": "chatwork-account_independent_readback",
+      "actor": "admin",
+      "method": "GET",
+      "path": "/api/Users",
+      "raw": null,
+      "accept": "application/json",
+      "response": {
+        "status": 200,
+        "body": [
+          {"id": 1, "name": "Synthetic admin", "email": "admin@example.test", "avatarColor": "#58a6ff", "isAdmin": true, "chatworkAccountId": "11", "chatworkDirectRoomId": "21"},
+          {"id": 2, "name": "Renamed synthetic target", "email": "target@example.test", "avatarColor": "#58a6ff", "isAdmin": false, "chatworkAccountId": "synthetic-ID", "chatworkDirectRoomId": "22"},
+          {"id": 3, "name": "Synthetic member", "email": "member@example.test", "avatarColor": "#58a6ff", "isAdmin": false, "chatworkAccountId": "13", "chatworkDirectRoomId": "23"},
+          {"id": 4, "name": "Synthetic other-admin", "email": "other-admin@example.test", "avatarColor": "#58a6ff", "isAdmin": true, "chatworkAccountId": "14", "chatworkDirectRoomId": "24"}
+        ],
+        "contentType": "application/json",
+        "location": ""
+      }
+    },
+    {
+      "name": "chatwork-account_null_clears",
+      "actor": "admin",
+      "method": "PUT",
+      "path": "/api/Users/2/chatwork-account",
+      "raw": "{\"chatworkAccountId\": null}",
+      "accept": "application/json",
+      "response": {
+        "status": 204,
+        "body": "",
+        "contentType": "",
+        "location": ""
+      }
+    },
+    {
+      "name": "chatwork-account_null_readback",
+      "actor": "admin",
+      "method": "GET",
+      "path": "/api/Users",
+      "raw": null,
+      "accept": "application/json",
+      "response": {
+        "status": 200,
+        "body": [
+          {"id": 1, "name": "Synthetic admin", "email": "admin@example.test", "avatarColor": "#58a6ff", "isAdmin": true, "chatworkAccountId": "11", "chatworkDirectRoomId": "21"},
+          {"id": 2, "name": "Renamed synthetic target", "email": "target@example.test", "avatarColor": "#58a6ff", "isAdmin": false, "chatworkAccountId": null, "chatworkDirectRoomId": "22"},
+          {"id": 3, "name": "Synthetic member", "email": "member@example.test", "avatarColor": "#58a6ff", "isAdmin": false, "chatworkAccountId": "13", "chatworkDirectRoomId": "23"},
+          {"id": 4, "name": "Synthetic other-admin", "email": "other-admin@example.test", "avatarColor": "#58a6ff", "isAdmin": true, "chatworkAccountId": "14", "chatworkDirectRoomId": "24"}
+        ],
+        "contentType": "application/json",
+        "location": ""
+      }
+    },
+    {
+      "name": "chatwork-account_omitted_clears",
+      "actor": "admin",
+      "method": "PUT",
+      "path": "/api/Users/2/chatwork-account",
+      "raw": "{}",
+      "accept": "application/json",
+      "response": {
+        "status": 204,
+        "body": "",
+        "contentType": "",
+        "location": ""
+      }
+    },
+    {
+      "name": "chatwork-account_omitted_readback",
+      "actor": "admin",
+      "method": "GET",
+      "path": "/api/Users",
+      "raw": null,
+      "accept": "application/json",
+      "response": {
+        "status": 200,
+        "body": [
+          {"id": 1, "name": "Synthetic admin", "email": "admin@example.test", "avatarColor": "#58a6ff", "isAdmin": true, "chatworkAccountId": "11", "chatworkDirectRoomId": "21"},
+          {"id": 2, "name": "Renamed synthetic target", "email": "target@example.test", "avatarColor": "#58a6ff", "isAdmin": false, "chatworkAccountId": null, "chatworkDirectRoomId": "22"},
+          {"id": 3, "name": "Synthetic member", "email": "member@example.test", "avatarColor": "#58a6ff", "isAdmin": false, "chatworkAccountId": "13", "chatworkDirectRoomId": "23"},
+          {"id": 4, "name": "Synthetic other-admin", "email": "other-admin@example.test", "avatarColor": "#58a6ff", "isAdmin": true, "chatworkAccountId": "14", "chatworkDirectRoomId": "24"}
+        ],
+        "contentType": "application/json",
+        "location": ""
+      }
+    },
+    {
+      "name": "chatwork-direct-room_anonymous",
+      "actor": "anonymous",
+      "method": "PUT",
+      "path": "/api/Users/2/chatwork-direct-room",
+      "raw": "{\"bad\":",
+      "accept": "application/json",
+      "response": {
+        "status": 401,
+        "body": "",
+        "contentType": "",
+        "location": ""
+      }
+    },
+    {
+      "name": "chatwork-direct-room_member",
+      "actor": "member",
+      "method": "PUT",
+      "path": "/api/Users/2/chatwork-direct-room",
+      "raw": "{\"bad\":",
+      "accept": "application/json",
+      "response": {
+        "status": 403,
+        "body": "",
+        "contentType": "",
+        "location": ""
+      }
+    },
+    {
+      "name": "chatwork-direct-room_invalid_id",
+      "actor": "anonymous",
+      "method": "PUT",
+      "path": "/api/Users/not-id/chatwork-direct-room",
+      "raw": "{}",
+      "accept": "application/json",
+      "response": {
+        "status": 404,
+        "body": "",
+        "contentType": "",
+        "location": ""
+      }
+    },
+    {
+      "name": "chatwork-direct-room_missing_user",
+      "actor": "admin",
+      "method": "PUT",
+      "path": "/api/Users/999/chatwork-direct-room",
+      "raw": "{\"chatworkDirectRoomId\": \"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\"}",
+      "accept": "application/json",
+      "response": {
+        "status": 404,
+        "body": {"type": "https://tools.ietf.org/html/rfc9110#section-15.5.5", "title": "Not Found", "status": 404},
+        "contentType": "application/problem+json",
+        "location": ""
+      }
+    },
+    {
+      "name": "chatwork-direct-room_malformed_before_lookup",
+      "actor": "admin",
+      "method": "PUT",
+      "path": "/api/Users/999/chatwork-direct-room",
+      "raw": "{\"bad\":",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": {"type": "https://tools.ietf.org/html/rfc9110#section-15.5.1", "title": "One or more validation errors occurred.", "status": 400, "errors": {"request": ["The request field is required."], "$.bad": ["Expected depth to be zero at the end of the JSON payload. There is an open JSON object or array that should be closed. Path: $.bad | LineNumber: 0 | BytePositionInLine: 7."]}},
+        "contentType": "application/problem+json",
+        "location": ""
+      }
+    },
+    {
+      "name": "chatwork-direct-room_wrong_type_before_lookup",
+      "actor": "admin",
+      "method": "PUT",
+      "path": "/api/Users/999/chatwork-direct-room",
+      "raw": "{\"chatworkDirectRoomId\": 4}",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": {"type": "https://tools.ietf.org/html/rfc9110#section-15.5.1", "title": "One or more validation errors occurred.", "status": 400, "errors": {"request": ["The request field is required."], "$.chatworkDirectRoomId": ["The JSON value could not be converted to System.String. Path: $.chatworkDirectRoomId | LineNumber: 0 | BytePositionInLine: 26."]}},
+        "contentType": "application/problem+json",
+        "location": ""
+      }
+    },
+    {
+      "name": "chatwork-direct-room_null_body",
+      "actor": "admin",
+      "method": "PUT",
+      "path": "/api/Users/2/chatwork-direct-room",
+      "raw": "null",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": {"type": "https://tools.ietf.org/html/rfc9110#section-15.5.1", "title": "One or more validation errors occurred.", "status": 400, "errors": {"": ["A non-empty request body is required."], "request": ["The request field is required."]}},
+        "contentType": "application/problem+json",
+        "location": ""
+      }
+    },
+    {
+      "name": "chatwork-direct-room_over_utf16",
+      "actor": "admin",
+      "method": "PUT",
+      "path": "/api/Users/2/chatwork-direct-room",
+      "raw": "{\"chatworkDirectRoomId\": \"\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00\\ud83d\\ude00x\"}",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": "Chatwork direct room ID must be 100 characters or less.",
+        "contentType": "application/json",
+        "location": ""
+      }
+    },
+    {
+      "name": "chatwork-direct-room_equal_utf16",
+      "actor": "admin",
+      "method": "PUT",
+      "path": "/api/Users/2/chatwork-direct-room",
+      "raw": "{\"chatworkDirectRoomId\": \"  😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀  \"}",
+      "accept": "application/json",
+      "response": {
+        "status": 204,
+        "body": "",
+        "contentType": "",
+        "location": ""
+      }
+    },
+    {
+      "name": "chatwork-direct-room_utf16_readback",
+      "actor": "admin",
+      "method": "GET",
+      "path": "/api/Users",
+      "raw": null,
+      "accept": "application/json",
+      "response": {
+        "status": 200,
+        "body": [
+          {"id": 1, "name": "Synthetic admin", "email": "admin@example.test", "avatarColor": "#58a6ff", "isAdmin": true, "chatworkAccountId": "11", "chatworkDirectRoomId": "21"},
+          {"id": 2, "name": "Renamed synthetic target", "email": "target@example.test", "avatarColor": "#58a6ff", "isAdmin": false, "chatworkAccountId": null, "chatworkDirectRoomId": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀"},
+          {"id": 3, "name": "Synthetic member", "email": "member@example.test", "avatarColor": "#58a6ff", "isAdmin": false, "chatworkAccountId": "13", "chatworkDirectRoomId": "23"},
+          {"id": 4, "name": "Synthetic other-admin", "email": "other-admin@example.test", "avatarColor": "#58a6ff", "isAdmin": true, "chatworkAccountId": "14", "chatworkDirectRoomId": "24"}
+        ],
+        "contentType": "application/json",
+        "location": ""
+      }
+    },
+    {
+      "name": "chatwork-direct-room_blank_clears",
+      "actor": "admin",
+      "method": "PUT",
+      "path": "/api/Users/2/chatwork-direct-room",
+      "raw": "{\"chatworkDirectRoomId\": \"  \\t \"}",
+      "accept": "application/json",
+      "response": {
+        "status": 204,
+        "body": "",
+        "contentType": "",
+        "location": ""
+      }
+    },
+    {
+      "name": "chatwork-direct-room_blank_readback",
+      "actor": "admin",
+      "method": "GET",
+      "path": "/api/Users",
+      "raw": null,
+      "accept": "application/json",
+      "response": {
+        "status": 200,
+        "body": [
+          {"id": 1, "name": "Synthetic admin", "email": "admin@example.test", "avatarColor": "#58a6ff", "isAdmin": true, "chatworkAccountId": "11", "chatworkDirectRoomId": "21"},
+          {"id": 2, "name": "Renamed synthetic target", "email": "target@example.test", "avatarColor": "#58a6ff", "isAdmin": false, "chatworkAccountId": null, "chatworkDirectRoomId": null},
+          {"id": 3, "name": "Synthetic member", "email": "member@example.test", "avatarColor": "#58a6ff", "isAdmin": false, "chatworkAccountId": "13", "chatworkDirectRoomId": "23"},
+          {"id": 4, "name": "Synthetic other-admin", "email": "other-admin@example.test", "avatarColor": "#58a6ff", "isAdmin": true, "chatworkAccountId": "14", "chatworkDirectRoomId": "24"}
+        ],
+        "contentType": "application/json",
+        "location": ""
+      }
+    },
+    {
+      "name": "chatwork-direct-room_independent",
+      "actor": "admin",
+      "method": "PUT",
+      "path": "/api/Users/2/chatwork-direct-room",
+      "raw": "{\"chatworkDirectRoomId\": \"  synthetic-ID  \", \"chatworkAccountId\": 123}",
+      "accept": "application/json",
+      "response": {
+        "status": 204,
+        "body": "",
+        "contentType": "",
+        "location": ""
+      }
+    },
+    {
+      "name": "chatwork-direct-room_independent_readback",
+      "actor": "admin",
+      "method": "GET",
+      "path": "/api/Users",
+      "raw": null,
+      "accept": "application/json",
+      "response": {
+        "status": 200,
+        "body": [
+          {"id": 1, "name": "Synthetic admin", "email": "admin@example.test", "avatarColor": "#58a6ff", "isAdmin": true, "chatworkAccountId": "11", "chatworkDirectRoomId": "21"},
+          {"id": 2, "name": "Renamed synthetic target", "email": "target@example.test", "avatarColor": "#58a6ff", "isAdmin": false, "chatworkAccountId": null, "chatworkDirectRoomId": "synthetic-ID"},
+          {"id": 3, "name": "Synthetic member", "email": "member@example.test", "avatarColor": "#58a6ff", "isAdmin": false, "chatworkAccountId": "13", "chatworkDirectRoomId": "23"},
+          {"id": 4, "name": "Synthetic other-admin", "email": "other-admin@example.test", "avatarColor": "#58a6ff", "isAdmin": true, "chatworkAccountId": "14", "chatworkDirectRoomId": "24"}
+        ],
+        "contentType": "application/json",
+        "location": ""
+      }
+    },
+    {
+      "name": "chatwork-direct-room_null_clears",
+      "actor": "admin",
+      "method": "PUT",
+      "path": "/api/Users/2/chatwork-direct-room",
+      "raw": "{\"chatworkDirectRoomId\": null}",
+      "accept": "application/json",
+      "response": {
+        "status": 204,
+        "body": "",
+        "contentType": "",
+        "location": ""
+      }
+    },
+    {
+      "name": "chatwork-direct-room_null_readback",
+      "actor": "admin",
+      "method": "GET",
+      "path": "/api/Users",
+      "raw": null,
+      "accept": "application/json",
+      "response": {
+        "status": 200,
+        "body": [
+          {"id": 1, "name": "Synthetic admin", "email": "admin@example.test", "avatarColor": "#58a6ff", "isAdmin": true, "chatworkAccountId": "11", "chatworkDirectRoomId": "21"},
+          {"id": 2, "name": "Renamed synthetic target", "email": "target@example.test", "avatarColor": "#58a6ff", "isAdmin": false, "chatworkAccountId": null, "chatworkDirectRoomId": null},
+          {"id": 3, "name": "Synthetic member", "email": "member@example.test", "avatarColor": "#58a6ff", "isAdmin": false, "chatworkAccountId": "13", "chatworkDirectRoomId": "23"},
+          {"id": 4, "name": "Synthetic other-admin", "email": "other-admin@example.test", "avatarColor": "#58a6ff", "isAdmin": true, "chatworkAccountId": "14", "chatworkDirectRoomId": "24"}
+        ],
+        "contentType": "application/json",
+        "location": ""
+      }
+    },
+    {
+      "name": "chatwork-direct-room_omitted_clears",
+      "actor": "admin",
+      "method": "PUT",
+      "path": "/api/Users/2/chatwork-direct-room",
+      "raw": "{}",
+      "accept": "application/json",
+      "response": {
+        "status": 204,
+        "body": "",
+        "contentType": "",
+        "location": ""
+      }
+    },
+    {
+      "name": "chatwork-direct-room_omitted_readback",
+      "actor": "admin",
+      "method": "GET",
+      "path": "/api/Users",
+      "raw": null,
+      "accept": "application/json",
+      "response": {
+        "status": 200,
+        "body": [
+          {"id": 1, "name": "Synthetic admin", "email": "admin@example.test", "avatarColor": "#58a6ff", "isAdmin": true, "chatworkAccountId": "11", "chatworkDirectRoomId": "21"},
+          {"id": 2, "name": "Renamed synthetic target", "email": "target@example.test", "avatarColor": "#58a6ff", "isAdmin": false, "chatworkAccountId": null, "chatworkDirectRoomId": null},
+          {"id": 3, "name": "Synthetic member", "email": "member@example.test", "avatarColor": "#58a6ff", "isAdmin": false, "chatworkAccountId": "13", "chatworkDirectRoomId": "23"},
+          {"id": 4, "name": "Synthetic other-admin", "email": "other-admin@example.test", "avatarColor": "#58a6ff", "isAdmin": true, "chatworkAccountId": "14", "chatworkDirectRoomId": "24"}
+        ],
+        "contentType": "application/json",
+        "location": ""
+      }
+    },
+    {
+      "name": "delete_anonymous",
+      "actor": "anonymous",
+      "method": "DELETE",
+      "path": "/api/Users/2",
+      "raw": null,
+      "accept": "application/json",
+      "response": {
+        "status": 401,
+        "body": "",
+        "contentType": "",
+        "location": ""
+      }
+    },
+    {
+      "name": "delete_member",
+      "actor": "member",
+      "method": "DELETE",
+      "path": "/api/Users/2",
+      "raw": null,
+      "accept": "application/json",
+      "response": {
+        "status": 403,
+        "body": "",
+        "contentType": "",
+        "location": ""
+      }
+    },
+    {
+      "name": "delete_non_numeric",
+      "actor": "anonymous",
+      "method": "DELETE",
+      "path": "/api/Users/not-id",
+      "raw": null,
+      "accept": "application/json",
+      "response": {
+        "status": 404,
+        "body": "",
+        "contentType": "",
+        "location": ""
+      }
+    },
+    {
+      "name": "delete_missing_user",
+      "actor": "admin",
+      "method": "DELETE",
+      "path": "/api/Users/999",
+      "raw": null,
+      "accept": "application/json",
+      "response": {
+        "status": 404,
+        "body": {"type": "https://tools.ietf.org/html/rfc9110#section-15.5.5", "title": "Not Found", "status": 404},
+        "contentType": "application/problem+json",
+        "location": ""
+      }
+    },
+    {
+      "name": "delete_other_admin",
+      "actor": "admin",
+      "method": "DELETE",
+      "path": "/api/Users/4",
+      "raw": null,
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": "管理者ユーザーは削除できません。",
+        "contentType": "application/json",
+        "location": ""
+      }
+    },
+    {
+      "name": "delete_admin_self",
+      "actor": "admin",
+      "method": "DELETE",
+      "path": "/api/Users/1",
+      "raw": null,
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": "管理者ユーザーは削除できません。",
+        "contentType": "application/json",
+        "location": ""
+      }
+    },
+    {
+      "name": "delete_demoted_self",
+      "actor": "other-admin",
+      "method": "DELETE",
+      "path": "/api/Users/4",
+      "raw": null,
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": "自分自身は削除できません。",
+        "contentType": "application/json",
+        "location": ""
+      }
+    },
+    {
+      "name": "delete_target",
+      "actor": "admin",
+      "method": "DELETE",
+      "path": "/api/Users/2",
+      "raw": null,
+      "accept": "application/json",
+      "response": {
+        "status": 204,
+        "body": "",
+        "contentType": "",
+        "location": ""
+      },
+      "saved": {
+        "reservations": [
+          {"id": 20, "name": "Synthetic member", "ids": [3, 4, 0, -1], "count": 4, "display": "Stored display 20"},
+          {"id": 21, "name": "Synthetic member", "ids": [], "count": 0, "display": "Stored display 21"},
+          {"id": 22, "name": "Synthetic member", "ids": [3, 3], "count": 2, "display": "Stored display 22"}
+        ],
+        "notices": [
+          [103, 3, 20, null],
+          [104, 3, null, 30],
+          [105, 4, null, null]
+        ],
+        "schedules": [
+          [30, 2, "2,3"]
+        ],
+        "deliveries": [
+          [40, 10, 2, "synthetic-key", "Sent"]
+        ],
+        "conflicts": [
+          [50, 10, 20, 2]
+        ]
+      }
+    },
+    {
+      "name": "delete_repeat",
+      "actor": "admin",
+      "method": "DELETE",
+      "path": "/api/Users/2",
+      "raw": null,
+      "accept": "application/json",
+      "response": {
+        "status": 404,
+        "body": {"type": "https://tools.ietf.org/html/rfc9110#section-15.5.5", "title": "Not Found", "status": 404},
+        "contentType": "application/problem+json",
+        "location": ""
+      }
+    },
+    {
+      "name": "deleted_list",
+      "actor": "admin",
+      "method": "GET",
+      "path": "/api/Users",
+      "raw": null,
+      "accept": "application/json",
+      "response": {
+        "status": 200,
+        "body": [
+          {"id": 1, "name": "Synthetic admin", "email": "admin@example.test", "avatarColor": "#58a6ff", "isAdmin": true, "chatworkAccountId": "11", "chatworkDirectRoomId": "21"},
+          {"id": 3, "name": "Synthetic member", "email": "member@example.test", "avatarColor": "#58a6ff", "isAdmin": false, "chatworkAccountId": "13", "chatworkDirectRoomId": "23"},
+          {"id": 4, "name": "Synthetic other-admin", "email": "other-admin@example.test", "avatarColor": "#58a6ff", "isAdmin": true, "chatworkAccountId": "14", "chatworkDirectRoomId": "24"}
+        ],
+        "contentType": "application/json",
+        "location": ""
+      }
+    },
+    {
+      "name": "deleted_participants",
+      "actor": "target",
+      "method": "GET",
+      "path": "/api/Users/participants",
+      "raw": null,
+      "accept": "application/json",
+      "response": {
+        "status": 200,
+        "body": [
+          {"id": 1, "name": "Synthetic admin", "avatarColor": "#58a6ff"},
+          {"id": 3, "name": "Synthetic member", "avatarColor": "#58a6ff"},
+          {"id": 4, "name": "Synthetic other-admin", "avatarColor": "#58a6ff"}
+        ],
+        "contentType": "application/json",
+        "location": ""
+      }
+    },
+    {
+      "name": "deleted_me",
+      "actor": "target",
+      "method": "GET",
+      "path": "/api/Auth/me",
+      "raw": null,
+      "accept": "application/json",
+      "response": {
+        "status": 401,
+        "body": {"type": "https://tools.ietf.org/html/rfc9110#section-15.5.2", "title": "Unauthorized", "status": 401},
+        "contentType": "application/problem+json",
+        "location": ""
+      }
+    }
+  ],
+  "chatworkCalls": 0
+}
