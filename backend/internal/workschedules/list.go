@@ -53,19 +53,30 @@ func Get(ctx context.Context, pool *pgxpool.Pool, id int) (*Entry, error) {
 	return &entry, err
 }
 
+type storedEntry struct {
+	Entry
+	dateTicks            int64
+	startTicks, endTicks *int64
+}
+
 func scanEntry(row pgx.Row) (Entry, error) {
-	var entry Entry
-	var date, createdAt, updatedAt int64
-	var start, end, repeatUntil *int64
+	entry, err := scanStoredEntry(row)
+	return entry.Entry, err
+}
+
+func scanStoredEntry(row pgx.Row) (storedEntry, error) {
+	var entry storedEntry
+	var createdAt, updatedAt int64
+	var repeatUntil *int64
 	err := row.Scan(&entry.ID, &entry.CreatedByUserID, &entry.Type, &entry.Title, &entry.SeriesID,
-		&date, &start, &end, &entry.RepeatType, &repeatUntil, &entry.LeavePeriod, &entry.ParticipantIDs,
+		&entry.dateTicks, &entry.startTicks, &entry.endTicks, &entry.RepeatType, &repeatUntil, &entry.LeavePeriod, &entry.ParticipantIDs,
 		&entry.Participants, &createdAt, &updatedAt)
 	if err != nil {
-		return Entry{}, fmt.Errorf("scan work schedule entry: %w", err)
+		return storedEntry{}, fmt.Errorf("scan work schedule entry: %w", err)
 	}
-	entry.Date = dotnettime.FromTicks(date).Format(dotnettime.Layout)
-	entry.StartTime = nullableDateTime(start)
-	entry.EndTime = nullableDateTime(end)
+	entry.Date = dotnettime.FromTicks(entry.dateTicks).Format(dotnettime.Layout)
+	entry.StartTime = nullableDateTime(entry.startTicks)
+	entry.EndTime = nullableDateTime(entry.endTicks)
 	entry.RepeatUntil = nullableDateTime(repeatUntil)
 	entry.CreatedAt = dotnettime.FromTicks(createdAt).Format(dotnettime.Layout)
 	entry.UpdatedAt = dotnettime.FromTicks(updatedAt).Format(dotnettime.Layout)

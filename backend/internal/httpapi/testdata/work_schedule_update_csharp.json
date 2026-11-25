@@ -1,0 +1,540 @@
+{
+  "users": [
+    {"id": 1, "name": "架空の管理者", "roomId": "900001"},
+    {"id": 2, "name": "架空の作成者", "roomId": "900002"},
+    {"id": 3, "name": "架空の同席者", "roomId": " 900003 "},
+    {"id": 4, "name": "宛先未設定の参加者", "roomId": null},
+    {"id": 5, "name": "架空の追加参加者", "roomId": "900005"},
+    {"id": 6, "name": "架空の別ユーザー", "roomId": "900006"}
+  ],
+  "initialEntries": [
+    {"id": 52, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"},
+    {"id": 53, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-25T00:00:00", "startTime": "2026-06-25T09:00:00.1234567", "endTime": "2026-06-25T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"}
+  ],
+  "cases": [
+    {
+      "name": "owner_move_series",
+      "actor": "owner",
+      "id": "52",
+      "request": {"type": 0, "title": "  移動後の架空予定  ", "date": "2026-06-22T17:15:00", "startTime": "2000-01-01T10:00:00", "endTime": "2000-01-01T11:00:00", "participantIds": [5, 4, 5, -8, 0], "participants": " ", "leavePeriod": 0, "createdByUserId": 1, "seriesId": "ignored"},
+      "response": {"status": 200, "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": {"id": 52, "createdByUserId": 2, "type": 0, "title": "移動後の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-22T00:00:00", "startTime": "2026-06-22T10:00:00", "endTime": "2026-06-22T11:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 5, 4], "participants": "架空の作成者、架空の追加参加者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-11-24T06:38:40.0862718"},
+      "notices": [
+        {"id": 1, "userId": 5, "type": "Warning", "message": "社外予定「移動後の架空予定」の対象者にあなたが追加されました。日付: 2026/06/22 / 時間: 10:00〜11:00 / 対象者: 架空の作成者、架空の追加参加者、宛先未設定の参加者 注意: 参加者の予定重複があります。架空の作成者: 会議室予約「移動先の架空会議」 2026/06/22 10:05〜10:30 架空の追加参加者: 社外予定「移動先の架空訪問」 2026/06/22 10:40〜11:20", "targetDate": "2026-06-22T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 52, "isRead": false, "createdAt": "2026-11-24T06:38:40.1855854"},
+        {"id": 2, "userId": 3, "type": "Info", "message": "社外予定「変更前の架空予定」の対象者からあなたが削除されました。日付: 2026/06/19", "targetDate": "2026-06-19T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 52, "isRead": false, "createdAt": "2026-11-24T06:38:40.200921"},
+        {"id": 3, "userId": 2, "type": "Warning", "message": "社外予定「移動後の架空予定」が更新されました。日付: 2026/06/22 / 時間: 10:00〜11:00 / 対象者: 架空の作成者、架空の追加参加者、宛先未設定の参加者 変更点: 内容が「変更前の架空予定」から「移動後の架空予定」に変更されました。 日付が 2026/06/19 から 2026/06/22 に変更されました。 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました。 対象者に 架空の追加参加者 が追加されました。 対象者から 架空の同席者 が削除されました。 注意: 参加者の予定重複があります。架空の作成者: 会議室予約「移動先の架空会議」 2026/06/22 10:05〜10:30 架空の追加参加者: 社外予定「移動先の架空訪問」 2026/06/22 10:40〜11:20", "targetDate": "2026-06-22T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 52, "isRead": false, "createdAt": "2026-11-24T06:38:40.202323"},
+        {"id": 4, "userId": 4, "type": "Warning", "message": "社外予定「移動後の架空予定」が更新されました。日付: 2026/06/22 / 時間: 10:00〜11:00 / 対象者: 架空の作成者、架空の追加参加者、宛先未設定の参加者 変更点: 内容が「変更前の架空予定」から「移動後の架空予定」に変更されました。 日付が 2026/06/19 から 2026/06/22 に変更されました。 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました。 対象者に 架空の追加参加者 が追加されました。 対象者から 架空の同席者 が削除されました。 注意: 参加者の予定重複があります。架空の作成者: 会議室予約「移動先の架空会議」 2026/06/22 10:05〜10:30 架空の追加参加者: 社外予定「移動先の架空訪問」 2026/06/22 10:40〜11:20", "targetDate": "2026-06-22T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 52, "isRead": false, "createdAt": "2026-11-24T06:38:40.2029484"}
+      ],
+      "initial": [],
+      "logs": [
+        {"reservationId": 0, "workScheduleEntryId": 52, "deliveryType": "WorkScheduleUpdated", "deliveryKey": "WorkScheduleUpdated:work-schedule:52:user:2:change:90fdd1f3f10c4a1187774a3cf720c791", "targetUserId": 2, "scheduledStartTime": "2026-06-22T10:00:00", "roomId": "900002", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T06:38:40.2557701", "sentAt": "2026-11-24T06:38:40.2981308", "message": "[info][title]社外予定が変更されました[/title]\n内容: 移動後の架空予定\n日付: 2026/06/22\n時間: 10:00〜11:00\n対象者: 架空の作成者、架空の追加参加者、宛先未設定の参加者\n[hr]\n変更点:\n- 内容が「変更前の架空予定」から「移動後の架空予定」に変更されました\n- 日付が 2026/06/19 から 2026/06/22 に変更されました\n- 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました\n- 対象者に 架空の追加参加者 が追加されました\n- 対象者から 架空の同席者 が削除されました\n[hr]\n注意: 参加者の予定重複があります\n- 架空の作成者: 会議室予約「移動先の架空会議」 2026/06/22 10:05〜10:30\n- 架空の追加参加者: 社外予定「移動先の架空訪問」 2026/06/22 10:40〜11:20\n[/info]", "createdAt": "2026-11-24T06:38:40.2557701"},
+        {"reservationId": 0, "workScheduleEntryId": 52, "deliveryType": "WorkScheduleUpdated", "deliveryKey": "WorkScheduleUpdated:work-schedule:52:user:4:change:90fdd1f3f10c4a1187774a3cf720c791", "targetUserId": 4, "scheduledStartTime": "2026-06-22T10:00:00", "roomId": null, "status": "Skipped", "errorMessage": "ChatworkDirectRoomId is not configured.", "attemptedAt": "2026-11-24T06:38:40.3315462", "sentAt": null, "message": "[info][title]社外予定が変更されました[/title]\n内容: 移動後の架空予定\n日付: 2026/06/22\n時間: 10:00〜11:00\n対象者: 架空の作成者、架空の追加参加者、宛先未設定の参加者\n[hr]\n変更点:\n- 内容が「変更前の架空予定」から「移動後の架空予定」に変更されました\n- 日付が 2026/06/19 から 2026/06/22 に変更されました\n- 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました\n- 対象者に 架空の追加参加者 が追加されました\n- 対象者から 架空の同席者 が削除されました\n[hr]\n注意: 参加者の予定重複があります\n- 架空の作成者: 会議室予約「移動先の架空会議」 2026/06/22 10:05〜10:30\n- 架空の追加参加者: 社外予定「移動先の架空訪問」 2026/06/22 10:40〜11:20\n[/info]", "createdAt": "2026-11-24T06:38:40.3315462"},
+        {"reservationId": 0, "workScheduleEntryId": 52, "deliveryType": "WorkScheduleUpdated", "deliveryKey": "WorkScheduleUpdated:work-schedule:52:user:5:change:90fdd1f3f10c4a1187774a3cf720c791", "targetUserId": 5, "scheduledStartTime": "2026-06-22T10:00:00", "roomId": "900005", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T06:38:40.3365392", "sentAt": "2026-11-24T06:38:40.3463189", "message": "[info][title]社外予定の対象者に追加されました[/title]\n内容: 移動後の架空予定\n日付: 2026/06/22\n時間: 10:00〜11:00\n対象者: 架空の作成者、架空の追加参加者、宛先未設定の参加者\n[hr]\n注意: 参加者の予定重複があります\n- 架空の作成者: 会議室予約「移動先の架空会議」 2026/06/22 10:05〜10:30\n- 架空の追加参加者: 社外予定「移動先の架空訪問」 2026/06/22 10:40〜11:20\n[/info]", "createdAt": "2026-11-24T06:38:40.3365392"},
+        {"reservationId": 0, "workScheduleEntryId": 52, "deliveryType": "WorkScheduleUpdated", "deliveryKey": "WorkScheduleUpdated:work-schedule:52:user:3:change:90fdd1f3f10c4a1187774a3cf720c791", "targetUserId": 3, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": "900003", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T06:38:40.3510374", "sentAt": "2026-11-24T06:38:40.352975", "message": "[info][title]社外予定の対象者から削除されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/19\n[/info]", "createdAt": "2026-11-24T06:38:40.3510374"}
+      ],
+      "requests": [
+        {"roomId": "900002", "body": "[info][title]社外予定が変更されました[/title]\n内容: 移動後の架空予定\n日付: 2026/06/22\n時間: 10:00〜11:00\n対象者: 架空の作成者、架空の追加参加者、宛先未設定の参加者\n[hr]\n変更点:\n- 内容が「変更前の架空予定」から「移動後の架空予定」に変更されました\n- 日付が 2026/06/19 から 2026/06/22 に変更されました\n- 時間が 09:00〜10:00 から 10:00〜11:00 に変更されました\n- 対象者に 架空の追加参加者 が追加されました\n- 対象者から 架空の同席者 が削除されました\n[hr]\n注意: 参加者の予定重複があります\n- 架空の作成者: 会議室予約「移動先の架空会議」 2026/06/22 10:05〜10:30\n- 架空の追加参加者: 社外予定「移動先の架空訪問」 2026/06/22 10:40〜11:20\n[/info]"},
+        {"roomId": "900005", "body": "[info][title]社外予定の対象者に追加されました[/title]\n内容: 移動後の架空予定\n日付: 2026/06/22\n時間: 10:00〜11:00\n対象者: 架空の作成者、架空の追加参加者、宛先未設定の参加者\n[hr]\n注意: 参加者の予定重複があります\n- 架空の作成者: 会議室予約「移動先の架空会議」 2026/06/22 10:05〜10:30\n- 架空の追加参加者: 社外予定「移動先の架空訪問」 2026/06/22 10:40〜11:20\n[/info]"},
+        {"roomId": "900003", "body": "[info][title]社外予定の対象者から削除されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/19\n[/info]"}
+      ],
+      "seeds": [
+        {"id": 203, "date": "2026-06-22", "kind": "reservation", "title": "移動先の架空会議", "start": "10:05:00", "end": "10:30:00", "userId": 2, "participantIds": []},
+        {"id": 301, "date": "2026-06-22", "kind": "work", "title": "移動先の架空訪問", "start": "10:40:00", "end": "11:20:00", "userId": 6, "participantIds": [5]}
+      ],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "admin_to_leave",
+      "actor": "admin",
+      "id": "52",
+      "request": {"type": 2, "title": "", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "participantIds": [], "participants": "", "leavePeriod": 2},
+      "response": {"status": 200, "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": {"id": 52, "createdByUserId": 2, "type": 2, "title": "休暇", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": null, "endTime": null, "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 2, "participantIds": [2], "participants": "架空の作成者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-11-24T06:38:40.4086815"},
+      "notices": [
+        {"id": 5, "userId": 3, "type": "Info", "message": "社外予定「変更前の架空予定」の対象者からあなたが削除されました。日付: 2026/06/19", "targetDate": "2026-06-19T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 52, "isRead": false, "createdAt": "2026-11-24T06:38:40.4166078"},
+        {"id": 6, "userId": 4, "type": "Info", "message": "社外予定「変更前の架空予定」の対象者からあなたが削除されました。日付: 2026/06/19", "targetDate": "2026-06-19T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 52, "isRead": false, "createdAt": "2026-11-24T06:38:40.4170569"},
+        {"id": 7, "userId": 2, "type": "Info", "message": "休暇予定「休暇」が更新されました。日付: 2026/06/19 / 休暇区分: 午後休 / 対象者: 架空の作成者 変更点: 種別が 社外予定 から 休暇予定 に変更されました。 内容が「変更前の架空予定」から「休暇」に変更されました。 時間が 09:00〜10:00 から 終日 に変更されました。 休暇区分が なし から 午後休 に変更されました。 対象者から 架空の同席者、宛先未設定の参加者 が削除されました。", "targetDate": "2026-06-19T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 52, "isRead": false, "createdAt": "2026-11-24T06:38:40.4174169"}
+      ],
+      "initial": [],
+      "logs": [
+        {"reservationId": 0, "workScheduleEntryId": 52, "deliveryType": "WorkScheduleUpdated", "deliveryKey": "WorkScheduleUpdated:work-schedule:52:user:2:change:69916ce5351d47d69a9915e719b9f0f2", "targetUserId": 2, "scheduledStartTime": "2026-06-19T00:00:00", "roomId": "900002", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T06:38:40.422344", "sentAt": "2026-11-24T06:38:40.4239494", "message": "[info][title]休暇予定が変更されました[/title]\n内容: 休暇\n日付: 2026/06/19\n休暇区分: 午後休\n対象者: 架空の作成者\n[hr]\n変更点:\n- 種別が 社外予定 から 休暇予定 に変更されました\n- 内容が「変更前の架空予定」から「休暇」に変更されました\n- 時間が 09:00〜10:00 から 終日 に変更されました\n- 休暇区分が なし から 午後休 に変更されました\n- 対象者から 架空の同席者、宛先未設定の参加者 が削除されました\n[/info]", "createdAt": "2026-11-24T06:38:40.422344"},
+        {"reservationId": 0, "workScheduleEntryId": 52, "deliveryType": "WorkScheduleUpdated", "deliveryKey": "WorkScheduleUpdated:work-schedule:52:user:3:change:69916ce5351d47d69a9915e719b9f0f2", "targetUserId": 3, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": "900003", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T06:38:40.4267607", "sentAt": "2026-11-24T06:38:40.4292646", "message": "[info][title]社外予定の対象者から削除されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/19\n[/info]", "createdAt": "2026-11-24T06:38:40.4267607"},
+        {"reservationId": 0, "workScheduleEntryId": 52, "deliveryType": "WorkScheduleUpdated", "deliveryKey": "WorkScheduleUpdated:work-schedule:52:user:4:change:69916ce5351d47d69a9915e719b9f0f2", "targetUserId": 4, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": null, "status": "Skipped", "errorMessage": "ChatworkDirectRoomId is not configured.", "attemptedAt": "2026-11-24T06:38:40.4331334", "sentAt": null, "message": "[info][title]社外予定の対象者から削除されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/19\n[/info]", "createdAt": "2026-11-24T06:38:40.4331334"}
+      ],
+      "requests": [
+        {"roomId": "900002", "body": "[info][title]休暇予定が変更されました[/title]\n内容: 休暇\n日付: 2026/06/19\n休暇区分: 午後休\n対象者: 架空の作成者\n[hr]\n変更点:\n- 種別が 社外予定 から 休暇予定 に変更されました\n- 内容が「変更前の架空予定」から「休暇」に変更されました\n- 時間が 09:00〜10:00 から 終日 に変更されました\n- 休暇区分が なし から 午後休 に変更されました\n- 対象者から 架空の同席者、宛先未設定の参加者 が削除されました\n[/info]"},
+        {"roomId": "900003", "body": "[info][title]社外予定の対象者から削除されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/19\n[/info]"}
+      ],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "owner_to_remote",
+      "actor": "owner",
+      "id": "52",
+      "request": {"type": 1, "title": "", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "leavePeriod": 3},
+      "response": {"status": 200, "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": {"id": 52, "createdByUserId": 2, "type": 1, "title": "在宅", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": null, "endTime": null, "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-11-24T06:38:40.4644309"},
+      "notices": [
+        {"id": 8, "userId": 2, "type": "Info", "message": "在宅予定「在宅」が更新されました。日付: 2026/06/19 / 対象者: 架空の作成者、架空の同席者、宛先未設定の参加者 変更点: 種別が 社外予定 から 在宅予定 に変更されました。 内容が「変更前の架空予定」から「在宅」に変更されました。 時間が 09:00〜10:00 から 終日 に変更されました。", "targetDate": "2026-06-19T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 52, "isRead": false, "createdAt": "2026-11-24T06:38:40.4674427"},
+        {"id": 9, "userId": 3, "type": "Info", "message": "在宅予定「在宅」が更新されました。日付: 2026/06/19 / 対象者: 架空の作成者、架空の同席者、宛先未設定の参加者 変更点: 種別が 社外予定 から 在宅予定 に変更されました。 内容が「変更前の架空予定」から「在宅」に変更されました。 時間が 09:00〜10:00 から 終日 に変更されました。", "targetDate": "2026-06-19T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 52, "isRead": false, "createdAt": "2026-11-24T06:38:40.4677817"},
+        {"id": 10, "userId": 4, "type": "Info", "message": "在宅予定「在宅」が更新されました。日付: 2026/06/19 / 対象者: 架空の作成者、架空の同席者、宛先未設定の参加者 変更点: 種別が 社外予定 から 在宅予定 に変更されました。 内容が「変更前の架空予定」から「在宅」に変更されました。 時間が 09:00〜10:00 から 終日 に変更されました。", "targetDate": "2026-06-19T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 52, "isRead": false, "createdAt": "2026-11-24T06:38:40.4680599"}
+      ],
+      "initial": [],
+      "logs": [
+        {"reservationId": 0, "workScheduleEntryId": 52, "deliveryType": "WorkScheduleUpdated", "deliveryKey": "WorkScheduleUpdated:work-schedule:52:user:2:change:9474c4e215ed41218e4ad60c4d2e4f83", "targetUserId": 2, "scheduledStartTime": "2026-06-19T00:00:00", "roomId": "900002", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T06:38:40.4733024", "sentAt": "2026-11-24T06:38:40.4755201", "message": "[info][title]在宅予定が変更されました[/title]\n内容: 在宅\n日付: 2026/06/19\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[hr]\n変更点:\n- 種別が 社外予定 から 在宅予定 に変更されました\n- 内容が「変更前の架空予定」から「在宅」に変更されました\n- 時間が 09:00〜10:00 から 終日 に変更されました\n[/info]", "createdAt": "2026-11-24T06:38:40.4733024"},
+        {"reservationId": 0, "workScheduleEntryId": 52, "deliveryType": "WorkScheduleUpdated", "deliveryKey": "WorkScheduleUpdated:work-schedule:52:user:3:change:9474c4e215ed41218e4ad60c4d2e4f83", "targetUserId": 3, "scheduledStartTime": "2026-06-19T00:00:00", "roomId": "900003", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T06:38:40.4803695", "sentAt": "2026-11-24T06:38:40.483192", "message": "[info][title]在宅予定が変更されました[/title]\n内容: 在宅\n日付: 2026/06/19\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[hr]\n変更点:\n- 種別が 社外予定 から 在宅予定 に変更されました\n- 内容が「変更前の架空予定」から「在宅」に変更されました\n- 時間が 09:00〜10:00 から 終日 に変更されました\n[/info]", "createdAt": "2026-11-24T06:38:40.4803695"},
+        {"reservationId": 0, "workScheduleEntryId": 52, "deliveryType": "WorkScheduleUpdated", "deliveryKey": "WorkScheduleUpdated:work-schedule:52:user:4:change:9474c4e215ed41218e4ad60c4d2e4f83", "targetUserId": 4, "scheduledStartTime": "2026-06-19T00:00:00", "roomId": null, "status": "Skipped", "errorMessage": "ChatworkDirectRoomId is not configured.", "attemptedAt": "2026-11-24T06:38:40.4891453", "sentAt": null, "message": "[info][title]在宅予定が変更されました[/title]\n内容: 在宅\n日付: 2026/06/19\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[hr]\n変更点:\n- 種別が 社外予定 から 在宅予定 に変更されました\n- 内容が「変更前の架空予定」から「在宅」に変更されました\n- 時間が 09:00〜10:00 から 終日 に変更されました\n[/info]", "createdAt": "2026-11-24T06:38:40.4891453"}
+      ],
+      "requests": [
+        {"roomId": "900002", "body": "[info][title]在宅予定が変更されました[/title]\n内容: 在宅\n日付: 2026/06/19\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[hr]\n変更点:\n- 種別が 社外予定 から 在宅予定 に変更されました\n- 内容が「変更前の架空予定」から「在宅」に変更されました\n- 時間が 09:00〜10:00 から 終日 に変更されました\n[/info]"},
+        {"roomId": "900003", "body": "[info][title]在宅予定が変更されました[/title]\n内容: 在宅\n日付: 2026/06/19\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[hr]\n変更点:\n- 種別が 社外予定 から 在宅予定 に変更されました\n- 内容が「変更前の架空予定」から「在宅」に変更されました\n- 時間が 09:00〜10:00 から 終日 に変更されました\n[/info]"}
+      ],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "participant_forbidden",
+      "actor": "member",
+      "id": "52",
+      "request": {"type": 0, "title": "拒否", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "leavePeriod": 0},
+      "response": {"status": 403, "body": "", "location": null, "contentType": null},
+      "saved": {"id": 52, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"},
+      "notices": [],
+      "initial": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "unrelated_forbidden",
+      "actor": "unrelated",
+      "id": "52",
+      "request": {"type": 0, "title": "拒否", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "leavePeriod": 0},
+      "response": {"status": 403, "body": "", "location": null, "contentType": null},
+      "saved": {"id": 52, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"},
+      "notices": [],
+      "initial": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "unauthenticated",
+      "actor": "anonymous",
+      "id": "52",
+      "request": {"type": 0, "title": "拒否", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "leavePeriod": 0},
+      "response": {"status": 401, "body": "", "location": null, "contentType": null},
+      "saved": {"id": 52, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"},
+      "notices": [],
+      "initial": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "missing_entry",
+      "actor": "owner",
+      "id": "12345",
+      "request": {"type": 0, "title": "変更前の架空予定", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "leavePeriod": 0},
+      "response": {"status": 404, "body": {"type": "https://tools.ietf.org/html/rfc9110#section-15.5.5", "title": "Not Found", "status": 404}, "location": null, "contentType": "application/problem+json; charset=utf-8"},
+      "saved": {"id": 52, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"},
+      "notices": [],
+      "initial": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "invalid_id",
+      "actor": "owner",
+      "id": "NaN",
+      "request": {"type": 0, "title": "変更前の架空予定", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "leavePeriod": 0},
+      "response": {"status": 404, "body": "", "location": null, "contentType": null},
+      "saved": {"id": 52, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"},
+      "notices": [],
+      "initial": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "unknown_type",
+      "actor": "owner",
+      "id": "52",
+      "request": {"type": 7, "title": "変更前の架空予定", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "leavePeriod": 0},
+      "response": {"status": 400, "body": "予定種別が不正です。", "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": {"id": 52, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"},
+      "notices": [],
+      "initial": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "invalid_leave",
+      "actor": "owner",
+      "id": "52",
+      "request": {"type": 2, "title": "変更前の架空予定", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "leavePeriod": 0},
+      "response": {"status": 400, "body": "休暇区分を選択してください。", "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": {"id": 52, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"},
+      "notices": [],
+      "initial": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "null_title",
+      "actor": "owner",
+      "id": "52",
+      "request": {"type": 0, "title": null, "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "leavePeriod": 0},
+      "response": {"status": 400, "body": {"type": "https://tools.ietf.org/html/rfc9110#section-15.5.1", "title": "One or more validation errors occurred.", "status": 400, "errors": {"Title": ["The Title field is required."]}}, "location": null, "contentType": "application/problem+json; charset=utf-8"},
+      "saved": {"id": 52, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"},
+      "notices": [],
+      "initial": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "missing_participants",
+      "actor": "owner",
+      "id": "52",
+      "request": {"type": 0, "title": "変更前の架空予定", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "participantIds": [99, 0, 98, 99], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "leavePeriod": 0},
+      "response": {"status": 400, "body": "存在しない参加者が含まれています: 99, 98", "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": {"id": 52, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"},
+      "notices": [],
+      "initial": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "inverted_time",
+      "actor": "owner",
+      "id": "52",
+      "request": {"type": 0, "title": "変更前の架空予定", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2000-01-01T08:00:00", "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "leavePeriod": 0},
+      "response": {"status": 400, "body": "終了時刻は開始時刻より後にしてください。", "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": {"id": 52, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"},
+      "notices": [],
+      "initial": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "recurrence_external",
+      "actor": "owner",
+      "id": "52",
+      "request": {"type": 0, "title": "変更前の架空予定", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "leavePeriod": 0, "repeatType": "毎週"},
+      "response": {"status": 400, "body": "繰り返し予定の一括更新は未対応です。", "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": {"id": 52, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"},
+      "notices": [],
+      "initial": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "recurrence_non_external",
+      "actor": "owner",
+      "id": "52",
+      "request": {"type": 1, "title": "変更前の架空予定", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "leavePeriod": 0, "repeatUntil": "2026-06-30"},
+      "response": {"status": 400, "body": "繰り返し作成は社外予定のみ指定できます。", "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": {"id": 52, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"},
+      "notices": [],
+      "initial": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "until_only_external",
+      "actor": "owner",
+      "id": "52",
+      "request": {"type": 0, "title": "変更前の架空予定", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "leavePeriod": 0, "repeatUntil": "2026-12-30"},
+      "response": {"status": 200, "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": {"id": 52, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-11-24T06:38:40.8311191"},
+      "notices": [],
+      "initial": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "validation_before_forbidden",
+      "actor": "member",
+      "id": "52",
+      "request": {"type": 0, "title": "変更前の架空予定", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "leavePeriod": 0, "repeatType": "毎日"},
+      "response": {"status": 400, "body": "繰り返し予定の一括更新は未対応です。", "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": {"id": 52, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"},
+      "notices": [],
+      "initial": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "business_validation_after_forbidden",
+      "actor": "member",
+      "id": "52",
+      "request": {"type": 7, "title": "変更前の架空予定", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "leavePeriod": 0},
+      "response": {"status": 403, "body": "", "location": null, "contentType": null},
+      "saved": {"id": 52, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-06-01T12:20:30.1234567"},
+      "notices": [],
+      "initial": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "no_change",
+      "actor": "owner",
+      "id": "52",
+      "request": {"type": 0, "title": "変更前の架空予定", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "leavePeriod": 0},
+      "response": {"status": 200, "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": {"id": 52, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-11-24T06:38:40.90351"},
+      "notices": [],
+      "initial": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "display_only",
+      "actor": "owner",
+      "id": "52",
+      "request": {"type": 0, "title": "変更前の架空予定", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "participantIds": [3, 2, 4], "participants": "表示名だけ変更", "leavePeriod": 0},
+      "response": {"status": 200, "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": {"id": 52, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [3, 2, 4], "participants": "表示名だけ変更", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-11-24T06:38:40.931866"},
+      "notices": [],
+      "initial": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "touching_only",
+      "actor": "owner",
+      "id": "52",
+      "request": {"type": 0, "title": "変更前の架空予定", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "leavePeriod": 0},
+      "response": {"status": 200, "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": {"id": 52, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-11-24T06:38:40.9613233"},
+      "notices": [],
+      "initial": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [
+        {"id": 202, "date": "2026-06-19", "kind": "reservation", "title": "端点のみ", "start": "10:00:00", "end": "11:00:00", "userId": 3, "participantIds": []}
+      ],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "warning_only",
+      "actor": "owner",
+      "id": "52",
+      "request": {"type": 0, "title": "変更前の架空予定", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "leavePeriod": 0},
+      "response": {"status": 200, "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": {"id": 52, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-11-24T06:38:40.9934293"},
+      "notices": [
+        {"id": 11, "userId": 2, "type": "Warning", "message": "社外予定「変更前の架空予定」が更新されました。日付: 2026/06/19 / 時間: 09:00〜10:00 / 対象者: 架空の作成者、架空の同席者、宛先未設定の参加者 注意: 参加者の予定重複があります。架空の作成者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30 架空の同席者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30", "targetDate": "2026-06-19T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 52, "isRead": false, "createdAt": "2026-11-24T06:38:40.999702"},
+        {"id": 12, "userId": 3, "type": "Warning", "message": "社外予定「変更前の架空予定」が更新されました。日付: 2026/06/19 / 時間: 09:00〜10:00 / 対象者: 架空の作成者、架空の同席者、宛先未設定の参加者 注意: 参加者の予定重複があります。架空の作成者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30 架空の同席者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30", "targetDate": "2026-06-19T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 52, "isRead": false, "createdAt": "2026-11-24T06:38:41.000024"},
+        {"id": 13, "userId": 4, "type": "Warning", "message": "社外予定「変更前の架空予定」が更新されました。日付: 2026/06/19 / 時間: 09:00〜10:00 / 対象者: 架空の作成者、架空の同席者、宛先未設定の参加者 注意: 参加者の予定重複があります。架空の作成者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30 架空の同席者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30", "targetDate": "2026-06-19T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 52, "isRead": false, "createdAt": "2026-11-24T06:38:41.0003374"}
+      ],
+      "initial": [],
+      "logs": [
+        {"reservationId": 0, "workScheduleEntryId": 52, "deliveryType": "WorkScheduleUpdated", "deliveryKey": "WorkScheduleUpdated:work-schedule:52:user:2:change:5092128fd6d64d7c9f1b294b7e571d4e", "targetUserId": 2, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": "900002", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T06:38:41.0059412", "sentAt": "2026-11-24T06:38:41.008531", "message": "[info][title]社外予定が変更されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[hr]\n注意: 参加者の予定重複があります\n- 架空の作成者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n- 架空の同席者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n[/info]", "createdAt": "2026-11-24T06:38:41.0059412"},
+        {"reservationId": 0, "workScheduleEntryId": 52, "deliveryType": "WorkScheduleUpdated", "deliveryKey": "WorkScheduleUpdated:work-schedule:52:user:3:change:5092128fd6d64d7c9f1b294b7e571d4e", "targetUserId": 3, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": "900003", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T06:38:41.0136653", "sentAt": "2026-11-24T06:38:41.0162762", "message": "[info][title]社外予定が変更されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[hr]\n注意: 参加者の予定重複があります\n- 架空の作成者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n- 架空の同席者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n[/info]", "createdAt": "2026-11-24T06:38:41.0136653"},
+        {"reservationId": 0, "workScheduleEntryId": 52, "deliveryType": "WorkScheduleUpdated", "deliveryKey": "WorkScheduleUpdated:work-schedule:52:user:4:change:5092128fd6d64d7c9f1b294b7e571d4e", "targetUserId": 4, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": null, "status": "Skipped", "errorMessage": "ChatworkDirectRoomId is not configured.", "attemptedAt": "2026-11-24T06:38:41.0208263", "sentAt": null, "message": "[info][title]社外予定が変更されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[hr]\n注意: 参加者の予定重複があります\n- 架空の作成者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n- 架空の同席者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n[/info]", "createdAt": "2026-11-24T06:38:41.0208263"}
+      ],
+      "requests": [
+        {"roomId": "900002", "body": "[info][title]社外予定が変更されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[hr]\n注意: 参加者の予定重複があります\n- 架空の作成者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n- 架空の同席者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n[/info]"},
+        {"roomId": "900003", "body": "[info][title]社外予定が変更されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[hr]\n注意: 参加者の予定重複があります\n- 架空の作成者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n- 架空の同席者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n[/info]"}
+      ],
+      "seeds": [
+        {"id": 201, "date": "2026-06-19", "kind": "reservation", "title": "連続しない架空会議", "start": "09:05:00", "end": "09:30:00", "userId": 3, "participantIds": [2, 3]}
+      ],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "reuse_newest_match",
+      "actor": "owner",
+      "id": "52",
+      "request": {"type": 0, "title": "変更前の架空予定", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "leavePeriod": 0},
+      "response": {"status": 200, "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": {"id": 52, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-11-24T06:38:41.0470774"},
+      "notices": [
+        {"id": 702, "userId": 2, "type": "Warning", "message": "社外予定「変更前の架空予定」が更新されました。日付: 2026/06/19 / 時間: 09:00〜10:00 / 対象者: 架空の作成者、架空の同席者、宛先未設定の参加者 注意: 参加者の予定重複があります。架空の作成者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30 架空の同席者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30", "targetDate": "2026-06-19T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 52, "isRead": false, "createdAt": "2026-11-24T06:38:41.0519696"},
+        {"id": 703, "userId": 2, "type": "Info", "message": "社外予定「変更前の架空予定」が更新されました。日付: 2026/06/19 / 時間: 09:00〜10:00 / 対象者: 架空の作成者、架空の同席者、宛先未設定の参加者 注意: 参加者の予定重複があります。架空の作成者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30 架空の同席者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30", "targetDate": "2026-06-01T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 52, "isRead": true, "createdAt": "2026-06-03T12:00:00"},
+        {"id": 704, "userId": 3, "type": "Warning", "message": "社外予定「変更前の架空予定」が更新されました。日付: 2026/06/19 / 時間: 09:00〜10:00 / 対象者: 架空の作成者、架空の同席者、宛先未設定の参加者 注意: 参加者の予定重複があります。架空の作成者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30 架空の同席者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30", "targetDate": "2026-06-19T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 52, "isRead": false, "createdAt": "2026-11-24T06:38:41.0548012"},
+        {"id": 705, "userId": 4, "type": "Warning", "message": "社外予定「変更前の架空予定」が更新されました。日付: 2026/06/19 / 時間: 09:00〜10:00 / 対象者: 架空の作成者、架空の同席者、宛先未設定の参加者 注意: 参加者の予定重複があります。架空の作成者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30 架空の同席者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30", "targetDate": "2026-06-19T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 52, "isRead": false, "createdAt": "2026-11-24T06:38:41.0551463"}
+      ],
+      "initial": [
+        {"id": 701, "userId": 2, "type": "Warning", "message": "別の既存メッセージ", "targetDate": "2026-06-01T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 52, "isRead": true, "createdAt": "2026-06-01T12:00:00"},
+        {"id": 702, "userId": 2, "type": "Warning", "message": "社外予定「変更前の架空予定」が更新されました。日付: 2026/06/19 / 時間: 09:00〜10:00 / 対象者: 架空の作成者、架空の同席者、宛先未設定の参加者 注意: 参加者の予定重複があります。架空の作成者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30 架空の同席者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30", "targetDate": "2026-06-01T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 52, "isRead": true, "createdAt": "2026-06-02T12:00:00"},
+        {"id": 703, "userId": 2, "type": "Info", "message": "社外予定「変更前の架空予定」が更新されました。日付: 2026/06/19 / 時間: 09:00〜10:00 / 対象者: 架空の作成者、架空の同席者、宛先未設定の参加者 注意: 参加者の予定重複があります。架空の作成者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30 架空の同席者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30", "targetDate": "2026-06-01T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 52, "isRead": true, "createdAt": "2026-06-03T12:00:00"}
+      ],
+      "logs": [
+        {"reservationId": 0, "workScheduleEntryId": 52, "deliveryType": "WorkScheduleUpdated", "deliveryKey": "WorkScheduleUpdated:work-schedule:52:user:2:change:d8b9143908bf48bfb16e729300886fd2", "targetUserId": 2, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": "900002", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T06:38:41.0707609", "sentAt": "2026-11-24T06:38:41.0723188", "message": "[info][title]社外予定が変更されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[hr]\n注意: 参加者の予定重複があります\n- 架空の作成者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n- 架空の同席者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n[/info]", "createdAt": "2026-11-24T06:38:41.0707609"},
+        {"reservationId": 0, "workScheduleEntryId": 52, "deliveryType": "WorkScheduleUpdated", "deliveryKey": "WorkScheduleUpdated:work-schedule:52:user:3:change:d8b9143908bf48bfb16e729300886fd2", "targetUserId": 3, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": "900003", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T06:38:41.0756717", "sentAt": "2026-11-24T06:38:41.0786205", "message": "[info][title]社外予定が変更されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[hr]\n注意: 参加者の予定重複があります\n- 架空の作成者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n- 架空の同席者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n[/info]", "createdAt": "2026-11-24T06:38:41.0756717"},
+        {"reservationId": 0, "workScheduleEntryId": 52, "deliveryType": "WorkScheduleUpdated", "deliveryKey": "WorkScheduleUpdated:work-schedule:52:user:4:change:d8b9143908bf48bfb16e729300886fd2", "targetUserId": 4, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": null, "status": "Skipped", "errorMessage": "ChatworkDirectRoomId is not configured.", "attemptedAt": "2026-11-24T06:38:41.0839095", "sentAt": null, "message": "[info][title]社外予定が変更されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[hr]\n注意: 参加者の予定重複があります\n- 架空の作成者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n- 架空の同席者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n[/info]", "createdAt": "2026-11-24T06:38:41.0839095"}
+      ],
+      "requests": [
+        {"roomId": "900002", "body": "[info][title]社外予定が変更されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[hr]\n注意: 参加者の予定重複があります\n- 架空の作成者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n- 架空の同席者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n[/info]"},
+        {"roomId": "900003", "body": "[info][title]社外予定が変更されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[hr]\n注意: 参加者の予定重複があります\n- 架空の作成者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n- 架空の同席者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n[/info]"}
+      ],
+      "seeds": [
+        {"id": 201, "date": "2026-06-19", "kind": "reservation", "title": "連続しない架空会議", "start": "09:05:00", "end": "09:30:00", "userId": 3, "participantIds": [2, 3]}
+      ],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "reuse_older_match",
+      "actor": "owner",
+      "id": "52",
+      "request": {"type": 0, "title": "変更前の架空予定", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "leavePeriod": 0},
+      "response": {"status": 200, "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": {"id": 52, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-11-24T06:38:41.1095071"},
+      "notices": [
+        {"id": 702, "userId": 2, "type": "Warning", "message": "別の既存メッセージ", "targetDate": "2026-06-01T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 52, "isRead": true, "createdAt": "2026-06-02T12:00:00"},
+        {"id": 703, "userId": 2, "type": "Info", "message": "社外予定「変更前の架空予定」が更新されました。日付: 2026/06/19 / 時間: 09:00〜10:00 / 対象者: 架空の作成者、架空の同席者、宛先未設定の参加者 注意: 参加者の予定重複があります。架空の作成者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30 架空の同席者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30", "targetDate": "2026-06-01T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 52, "isRead": true, "createdAt": "2026-06-03T12:00:00"},
+        {"id": 706, "userId": 3, "type": "Warning", "message": "社外予定「変更前の架空予定」が更新されました。日付: 2026/06/19 / 時間: 09:00〜10:00 / 対象者: 架空の作成者、架空の同席者、宛先未設定の参加者 注意: 参加者の予定重複があります。架空の作成者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30 架空の同席者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30", "targetDate": "2026-06-19T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 52, "isRead": false, "createdAt": "2026-11-24T06:38:41.1150886"},
+        {"id": 707, "userId": 4, "type": "Warning", "message": "社外予定「変更前の架空予定」が更新されました。日付: 2026/06/19 / 時間: 09:00〜10:00 / 対象者: 架空の作成者、架空の同席者、宛先未設定の参加者 注意: 参加者の予定重複があります。架空の作成者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30 架空の同席者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30", "targetDate": "2026-06-19T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 52, "isRead": false, "createdAt": "2026-11-24T06:38:41.1153898"}
+      ],
+      "initial": [
+        {"id": 701, "userId": 2, "type": "Warning", "message": "社外予定「変更前の架空予定」が更新されました。日付: 2026/06/19 / 時間: 09:00〜10:00 / 対象者: 架空の作成者、架空の同席者、宛先未設定の参加者 注意: 参加者の予定重複があります。架空の作成者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30 架空の同席者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30", "targetDate": "2026-06-01T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 52, "isRead": true, "createdAt": "2026-06-01T12:00:00"},
+        {"id": 702, "userId": 2, "type": "Warning", "message": "別の既存メッセージ", "targetDate": "2026-06-01T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 52, "isRead": true, "createdAt": "2026-06-02T12:00:00"},
+        {"id": 703, "userId": 2, "type": "Info", "message": "社外予定「変更前の架空予定」が更新されました。日付: 2026/06/19 / 時間: 09:00〜10:00 / 対象者: 架空の作成者、架空の同席者、宛先未設定の参加者 注意: 参加者の予定重複があります。架空の作成者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30 架空の同席者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30", "targetDate": "2026-06-01T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 52, "isRead": true, "createdAt": "2026-06-03T12:00:00"}
+      ],
+      "logs": [
+        {"reservationId": 0, "workScheduleEntryId": 52, "deliveryType": "WorkScheduleUpdated", "deliveryKey": "WorkScheduleUpdated:work-schedule:52:user:2:change:7a9ce891b8fa4d05b96706a8be60b159", "targetUserId": 2, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": "900002", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T06:38:41.1214859", "sentAt": "2026-11-24T06:38:41.1238693", "message": "[info][title]社外予定が変更されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[hr]\n注意: 参加者の予定重複があります\n- 架空の作成者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n- 架空の同席者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n[/info]", "createdAt": "2026-11-24T06:38:41.1214859"},
+        {"reservationId": 0, "workScheduleEntryId": 52, "deliveryType": "WorkScheduleUpdated", "deliveryKey": "WorkScheduleUpdated:work-schedule:52:user:3:change:7a9ce891b8fa4d05b96706a8be60b159", "targetUserId": 3, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": "900003", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T06:38:41.1286591", "sentAt": "2026-11-24T06:38:41.1313176", "message": "[info][title]社外予定が変更されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[hr]\n注意: 参加者の予定重複があります\n- 架空の作成者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n- 架空の同席者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n[/info]", "createdAt": "2026-11-24T06:38:41.1286591"},
+        {"reservationId": 0, "workScheduleEntryId": 52, "deliveryType": "WorkScheduleUpdated", "deliveryKey": "WorkScheduleUpdated:work-schedule:52:user:4:change:7a9ce891b8fa4d05b96706a8be60b159", "targetUserId": 4, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": null, "status": "Skipped", "errorMessage": "ChatworkDirectRoomId is not configured.", "attemptedAt": "2026-11-24T06:38:41.1364319", "sentAt": null, "message": "[info][title]社外予定が変更されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[hr]\n注意: 参加者の予定重複があります\n- 架空の作成者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n- 架空の同席者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n[/info]", "createdAt": "2026-11-24T06:38:41.1364319"}
+      ],
+      "requests": [
+        {"roomId": "900002", "body": "[info][title]社外予定が変更されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[hr]\n注意: 参加者の予定重複があります\n- 架空の作成者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n- 架空の同席者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n[/info]"},
+        {"roomId": "900003", "body": "[info][title]社外予定が変更されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[hr]\n注意: 参加者の予定重複があります\n- 架空の作成者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n- 架空の同席者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n[/info]"}
+      ],
+      "seeds": [
+        {"id": 201, "date": "2026-06-19", "kind": "reservation", "title": "連続しない架空会議", "start": "09:05:00", "end": "09:30:00", "userId": 3, "participantIds": [2, 3]}
+      ],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "different_message_keeps_history",
+      "actor": "owner",
+      "id": "52",
+      "request": {"type": 0, "title": "変更前の架空予定", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "leavePeriod": 0},
+      "response": {"status": 200, "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": {"id": 52, "createdByUserId": 2, "type": 0, "title": "変更前の架空予定", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-11-24T06:38:41.1650775"},
+      "notices": [
+        {"id": 702, "userId": 2, "type": "Warning", "message": "別の既存メッセージ", "targetDate": "2026-06-01T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 52, "isRead": true, "createdAt": "2026-06-02T12:00:00"},
+        {"id": 703, "userId": 2, "type": "Info", "message": "社外予定「変更前の架空予定」が更新されました。日付: 2026/06/19 / 時間: 09:00〜10:00 / 対象者: 架空の作成者、架空の同席者、宛先未設定の参加者 注意: 参加者の予定重複があります。架空の作成者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30 架空の同席者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30", "targetDate": "2026-06-01T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 52, "isRead": true, "createdAt": "2026-06-03T12:00:00"},
+        {"id": 708, "userId": 2, "type": "Warning", "message": "社外予定「変更前の架空予定」が更新されました。日付: 2026/06/19 / 時間: 09:00〜10:00 / 対象者: 架空の作成者、架空の同席者、宛先未設定の参加者 注意: 参加者の予定重複があります。架空の作成者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30 架空の同席者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30", "targetDate": "2026-06-19T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 52, "isRead": false, "createdAt": "2026-11-24T06:38:41.1717424"},
+        {"id": 709, "userId": 3, "type": "Warning", "message": "社外予定「変更前の架空予定」が更新されました。日付: 2026/06/19 / 時間: 09:00〜10:00 / 対象者: 架空の作成者、架空の同席者、宛先未設定の参加者 注意: 参加者の予定重複があります。架空の作成者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30 架空の同席者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30", "targetDate": "2026-06-19T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 52, "isRead": false, "createdAt": "2026-11-24T06:38:41.172154"},
+        {"id": 710, "userId": 4, "type": "Warning", "message": "社外予定「変更前の架空予定」が更新されました。日付: 2026/06/19 / 時間: 09:00〜10:00 / 対象者: 架空の作成者、架空の同席者、宛先未設定の参加者 注意: 参加者の予定重複があります。架空の作成者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30 架空の同席者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30", "targetDate": "2026-06-19T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 52, "isRead": false, "createdAt": "2026-11-24T06:38:41.1725691"}
+      ],
+      "initial": [
+        {"id": 702, "userId": 2, "type": "Warning", "message": "別の既存メッセージ", "targetDate": "2026-06-01T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 52, "isRead": true, "createdAt": "2026-06-02T12:00:00"},
+        {"id": 703, "userId": 2, "type": "Info", "message": "社外予定「変更前の架空予定」が更新されました。日付: 2026/06/19 / 時間: 09:00〜10:00 / 対象者: 架空の作成者、架空の同席者、宛先未設定の参加者 注意: 参加者の予定重複があります。架空の作成者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30 架空の同席者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30", "targetDate": "2026-06-01T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 52, "isRead": true, "createdAt": "2026-06-03T12:00:00"}
+      ],
+      "logs": [
+        {"reservationId": 0, "workScheduleEntryId": 52, "deliveryType": "WorkScheduleUpdated", "deliveryKey": "WorkScheduleUpdated:work-schedule:52:user:2:change:5b5077e9a5f84989ad4e92a6202b4301", "targetUserId": 2, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": "900002", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T06:38:41.1805315", "sentAt": "2026-11-24T06:38:41.1822348", "message": "[info][title]社外予定が変更されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[hr]\n注意: 参加者の予定重複があります\n- 架空の作成者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n- 架空の同席者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n[/info]", "createdAt": "2026-11-24T06:38:41.1805315"},
+        {"reservationId": 0, "workScheduleEntryId": 52, "deliveryType": "WorkScheduleUpdated", "deliveryKey": "WorkScheduleUpdated:work-schedule:52:user:3:change:5b5077e9a5f84989ad4e92a6202b4301", "targetUserId": 3, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": "900003", "status": "Succeeded", "errorMessage": null, "attemptedAt": "2026-11-24T06:38:41.1847329", "sentAt": "2026-11-24T06:38:41.1863381", "message": "[info][title]社外予定が変更されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[hr]\n注意: 参加者の予定重複があります\n- 架空の作成者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n- 架空の同席者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n[/info]", "createdAt": "2026-11-24T06:38:41.1847329"},
+        {"reservationId": 0, "workScheduleEntryId": 52, "deliveryType": "WorkScheduleUpdated", "deliveryKey": "WorkScheduleUpdated:work-schedule:52:user:4:change:5b5077e9a5f84989ad4e92a6202b4301", "targetUserId": 4, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": null, "status": "Skipped", "errorMessage": "ChatworkDirectRoomId is not configured.", "attemptedAt": "2026-11-24T06:38:41.1892473", "sentAt": null, "message": "[info][title]社外予定が変更されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[hr]\n注意: 参加者の予定重複があります\n- 架空の作成者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n- 架空の同席者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n[/info]", "createdAt": "2026-11-24T06:38:41.1892473"}
+      ],
+      "requests": [
+        {"roomId": "900002", "body": "[info][title]社外予定が変更されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[hr]\n注意: 参加者の予定重複があります\n- 架空の作成者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n- 架空の同席者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n[/info]"},
+        {"roomId": "900003", "body": "[info][title]社外予定が変更されました[/title]\n内容: 変更前の架空予定\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[hr]\n注意: 参加者の予定重複があります\n- 架空の作成者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n- 架空の同席者: 会議室予約「連続しない架空会議」 2026/06/19 09:05〜09:30\n[/info]"}
+      ],
+      "seeds": [
+        {"id": 201, "date": "2026-06-19", "kind": "reservation", "title": "連続しない架空会議", "start": "09:05:00", "end": "09:30:00", "userId": 3, "participantIds": [2, 3]}
+      ],
+      "forceNoticeFailure": false,
+      "fakeResponses": {}
+    },
+    {
+      "name": "provider_failure_and_timeout",
+      "actor": "owner",
+      "id": "52",
+      "request": {"type": 0, "title": "配信障害の架空更新", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "leavePeriod": 0},
+      "response": {"status": 200, "location": null, "contentType": "application/json; charset=utf-8"},
+      "saved": {"id": 52, "createdByUserId": 2, "type": 0, "title": "配信障害の架空更新", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-11-24T06:38:41.213225"},
+      "notices": [
+        {"id": 711, "userId": 2, "type": "Info", "message": "社外予定「配信障害の架空更新」が更新されました。日付: 2026/06/19 / 時間: 09:00〜10:00 / 対象者: 架空の作成者、架空の同席者、宛先未設定の参加者 変更点: 内容が「変更前の架空予定」から「配信障害の架空更新」に変更されました。", "targetDate": "2026-06-19T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 52, "isRead": false, "createdAt": "2026-11-24T06:38:41.2195402"},
+        {"id": 712, "userId": 3, "type": "Info", "message": "社外予定「配信障害の架空更新」が更新されました。日付: 2026/06/19 / 時間: 09:00〜10:00 / 対象者: 架空の作成者、架空の同席者、宛先未設定の参加者 変更点: 内容が「変更前の架空予定」から「配信障害の架空更新」に変更されました。", "targetDate": "2026-06-19T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 52, "isRead": false, "createdAt": "2026-11-24T06:38:41.2199956"},
+        {"id": 713, "userId": 4, "type": "Info", "message": "社外予定「配信障害の架空更新」が更新されました。日付: 2026/06/19 / 時間: 09:00〜10:00 / 対象者: 架空の作成者、架空の同席者、宛先未設定の参加者 変更点: 内容が「変更前の架空予定」から「配信障害の架空更新」に変更されました。", "targetDate": "2026-06-19T00:00:00", "targetReservationId": null, "targetWorkScheduleEntryId": 52, "isRead": false, "createdAt": "2026-11-24T06:38:41.2203099"}
+      ],
+      "initial": [],
+      "logs": [
+        {"reservationId": 0, "workScheduleEntryId": 52, "deliveryType": "WorkScheduleUpdated", "deliveryKey": "WorkScheduleUpdated:work-schedule:52:user:2:change:3c708d55d55c43ab91d96df99e43b74a", "targetUserId": 2, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": "900002", "status": "Failed", "errorMessage": "The request was canceled due to the configured HttpClient.Timeout of 0.5 seconds elapsing.", "attemptedAt": "2026-11-24T06:38:41.226977", "sentAt": null, "message": "[info][title]社外予定が変更されました[/title]\n内容: 配信障害の架空更新\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[hr]\n変更点:\n- 内容が「変更前の架空予定」から「配信障害の架空更新」に変更されました\n[/info]", "createdAt": "2026-11-24T06:38:41.226977"},
+        {"reservationId": 0, "workScheduleEntryId": 52, "deliveryType": "WorkScheduleUpdated", "deliveryKey": "WorkScheduleUpdated:work-schedule:52:user:3:change:3c708d55d55c43ab91d96df99e43b74a", "targetUserId": 3, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": "900003", "status": "Failed", "errorMessage": "Failed to send Chatwork message. StatusCode: 503, Response: {\"synthetic\":true}", "attemptedAt": "2026-11-24T06:38:41.7654981", "sentAt": null, "message": "[info][title]社外予定が変更されました[/title]\n内容: 配信障害の架空更新\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[hr]\n変更点:\n- 内容が「変更前の架空予定」から「配信障害の架空更新」に変更されました\n[/info]", "createdAt": "2026-11-24T06:38:41.7654981"},
+        {"reservationId": 0, "workScheduleEntryId": 52, "deliveryType": "WorkScheduleUpdated", "deliveryKey": "WorkScheduleUpdated:work-schedule:52:user:4:change:3c708d55d55c43ab91d96df99e43b74a", "targetUserId": 4, "scheduledStartTime": "2026-06-19T09:00:00.1234567", "roomId": null, "status": "Skipped", "errorMessage": "ChatworkDirectRoomId is not configured.", "attemptedAt": "2026-11-24T06:38:41.7721629", "sentAt": null, "message": "[info][title]社外予定が変更されました[/title]\n内容: 配信障害の架空更新\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[hr]\n変更点:\n- 内容が「変更前の架空予定」から「配信障害の架空更新」に変更されました\n[/info]", "createdAt": "2026-11-24T06:38:41.7721629"}
+      ],
+      "requests": [
+        {"roomId": "900002", "body": "[info][title]社外予定が変更されました[/title]\n内容: 配信障害の架空更新\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[hr]\n変更点:\n- 内容が「変更前の架空予定」から「配信障害の架空更新」に変更されました\n[/info]"},
+        {"roomId": "900003", "body": "[info][title]社外予定が変更されました[/title]\n内容: 配信障害の架空更新\n日付: 2026/06/19\n時間: 09:00〜10:00\n対象者: 架空の作成者、架空の同席者、宛先未設定の参加者\n[hr]\n変更点:\n- 内容が「変更前の架空予定」から「配信障害の架空更新」に変更されました\n[/info]"}
+      ],
+      "seeds": [],
+      "forceNoticeFailure": false,
+      "fakeResponses": {"900003": 503, "900002": "timeout"}
+    },
+    {
+      "name": "notice_failure",
+      "actor": "owner",
+      "id": "52",
+      "request": {"type": 0, "title": "ロールバック検証", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "leavePeriod": 0},
+      "response": {"status": 500, "body": "[development exception with synthetic notice failure]", "location": null, "contentType": "text/plain; charset=utf-8"},
+      "saved": {"id": 52, "createdByUserId": 2, "type": 0, "title": "ロールバック検証", "seriesId": "11111111111141118111111111111111", "date": "2026-06-19T00:00:00", "startTime": "2026-06-19T09:00:00.1234567", "endTime": "2026-06-19T10:00:00", "repeatType": "毎日", "repeatUntil": "2026-06-30T00:00:00", "leavePeriod": 0, "participantIds": [2, 3, 4], "participants": "架空の作成者、架空の同席者、宛先未設定の参加者", "createdAt": "2026-06-01T12:20:30.1234567", "updatedAt": "2026-11-24T06:38:41.8035863"},
+      "notices": [],
+      "initial": [],
+      "logs": [],
+      "requests": [],
+      "seeds": [],
+      "forceNoticeFailure": true,
+      "fakeResponses": {}
+    }
+  ]
+}

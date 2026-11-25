@@ -493,6 +493,32 @@ go vet ./...
 
 The integration test creates and drops an isolated schema, applies migrations through `0010`, and starts a loopback Go API and a fake Chatwork server. It checks all saved entries through the list and detail routes and verifies committed rows, notices, and delivery claims from inside the fake HTTP handler. The date expansion unit tests run without a database. All 21 PostgreSQL integration suites passed on PostgreSQL 16.15, including single-entry creation. The database-free `go test ./...` passed with those suites skipped. `go vet ./...` and `git diff --check` passed.
 
+## Go single work schedule update
+
+`PUT /api/work-schedule-entries/{id}` returns `200` and the saved entry in the same shape as the detail route. The existing session and write-origin checks apply. Only the stored creator and an administrator can edit. Other signed-in users get `403`, missing numeric IDs get `404`, and unauthenticated requests get `401`. Shared request binding runs before the service. As in C#, the recurrence checks run before looking up the row, and schedule and participant validation run after checking ownership. The stored creator is used when normalizing participants, including edits by an administrator.
+
+Go uses a PostgreSQL row lock to read the previous values and derives all changes from that snapshot. This serializes edits to the same entry and uses the committed values of a preceding edit. It retains the ID, creator, creation time, series ID, recurrence type and recurrence end date, and updates the modification time. Only the selected row is edited, including when it belongs to a series. The integration test held the row lock, changed the title, and verified that the waiting request quoted that changed title as its previous value.
+
+In-app notifications are written for added, removed and retained participants in that order. Chatwork attempts retained, added and removed recipients in that order. Added participants use the new date and details and receive any new overlap warning. Removed participants receive the prior title and date, without a warning, and their delivery log uses the previous scheduled start. Retained participants receive a notice and DM for recognized changes or a current warning. A no-op or a change confined to the participant display text or order creates no delivery unless there is a warning. The shared conflict query excludes the edited row and excludes overlaps that only touch at a time boundary. It supplies the same current conflict snapshot to both notification channels.
+
+The [reference capture](../backend/internal/httpapi/testdata/work_schedule_update_csharp.json) covers 27 PUT cases. An in-app notice is reused when the exact message already exists for the same user, work schedule ID and notice type. A matching newest notice keeps its ID, gets the current target date and timestamp, and becomes unread. An exact match triggers deletion of older notices in that scope. C# also does this when only an older notice matches, which leaves a newer, different notice intact with its original read state and timestamp. Go reproduces both cases. Without an exact match, a new row is inserted and existing messages remain.
+
+Go saves the schedule and notices in one transaction. In the forced-notice failure case, C# returned `500` with its edit still saved. Go returned `500` and rolled back the edit. Neither sent a DM. The Go test also checks the edit and notices from the fake Chatwork handler before letting a send proceed. That verifies the HTTP send happens after commit and that the notice failure cannot emit a DM.
+
+Each delivery uses `WorkScheduleUpdated:work-schedule:{id}:user:{userId}:change:{changeId}` with a single lowercase UUIDv4 change ID for the whole event. The existing unique delivery claim suppresses a replay of that event. A separate committed update gets a fresh change ID even when the warning text is identical. Delivery defaults to disabled. For the mock HTTP `503` and timeout, both backends returned `200`. Go stores a sanitized HTTP error and keeps an uncertain timeout `Unknown`. C# stored both as `Failed`.
+
+To reproduce the C# capture in WSL, use the disposable `d8fe3b7` SQLite and loopback Chatwork setup for [single work schedule creation](#go-single-work-schedule-creation). Register the six synthetic users in fixture order, using the first account to register the rest, and set their direct rooms. Before each case, reset the four fixture tables and seed `initialEntries`, the case's dated `seeds` and existing notices from `initial`. Send the case's `request` to the indicated PUT ID and use the recorded actor's session and `Accept: application/json`. Successful PUT bodies matched the saved row and detail response. The fixture records that row once and replaces the development exception stack with a marker. For `notice_failure`, make a SQLite `BEFORE INSERT` trigger on `Notifications` abort for user 3. For `provider_failure_and_timeout`, return `503` for room `900003` and delay room `900002` past the client timeout.
+
+In WSL, set `WORK_SCHEDULE_UPDATE_TEST_DATABASE_URL` to a disposable local PostgreSQL URL with schema creation privileges. From `backend` run:
+
+```bash
+go test -v -count=1 ./cmd/api -run '^TestWorkScheduleUpdatePostgres$'
+go test ./...
+go vet ./...
+```
+
+The integration test creates and drops an isolated schema, applies migrations through `0010`, and starts the Go API and fake Chatwork server on loopback. It compares the capture and checks origin protection, the concurrent row lock, replay, distinct change IDs, and disabled delivery. All 22 PostgreSQL integration suites passed on PostgreSQL 16.15. The database-free `go test ./...` passed with those suites skipped. `go vet ./...` and `git diff --check` passed.
+
 ## Recovery to C# and SQLite
 
 Rehearse each stage in development with synthetic rows and a recording fake Chatwork sender. `scripts/deploy/deploy-prod.sh` uses SQLite's backup API and integrity check. `scripts/deploy/rollback-prod.sh` restores the earlier API, web assets and final SQLite snapshot. A rollback after Go accepts writes also needs the committed PostgreSQL state.

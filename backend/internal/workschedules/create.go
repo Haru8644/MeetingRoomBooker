@@ -20,7 +20,7 @@ const (
 	leave
 )
 
-type CreateInput struct {
+type EntryInput struct {
 	Type, LeavePeriod int
 	Title             string
 	Date              time.Time
@@ -42,7 +42,7 @@ type Creation struct {
 }
 
 // Create commits the entry and its in-app notifications together.
-func Create(ctx context.Context, pool *pgxpool.Pool, input CreateInput, creatorID int) (Creation, error) {
+func Create(ctx context.Context, pool *pgxpool.Pool, input EntryInput, creatorID int) (Creation, error) {
 	noRepeat := strings.TrimSpace(input.RepeatType) == "" || input.RepeatType == noRepeatType
 	switch {
 	case input.Type != externalAppointment && (!noRepeat || input.RepeatUntil != nil):
@@ -54,7 +54,7 @@ func Create(ctx context.Context, pool *pgxpool.Pool, input CreateInput, creatorI
 	return createEntries(ctx, pool, input, creatorID, dates, nil)
 }
 
-func createEntries(ctx context.Context, pool *pgxpool.Pool, input CreateInput, creatorID int, dates []time.Time, seriesID *string) (Creation, error) {
+func createEntries(ctx context.Context, pool *pgxpool.Pool, input EntryInput, creatorID int, dates []time.Time, seriesID *string) (Creation, error) {
 	if err := input.validateFields(); err != nil {
 		return Creation{}, err
 	}
@@ -123,7 +123,7 @@ func createEntries(ctx context.Context, pool *pgxpool.Pool, input CreateInput, c
 	return created, nil
 }
 
-func (input CreateInput) validateFields() error {
+func (input EntryInput) validateFields() error {
 	switch {
 	case input.Type < externalAppointment || input.Type > leave:
 		return ValidationError("予定種別が不正です。")
@@ -136,7 +136,7 @@ func (input CreateInput) validateFields() error {
 	}
 }
 
-func (input *CreateInput) normalize(ctx context.Context, tx pgx.Tx, creatorID int) (map[int]string, error) {
+func (input *EntryInput) normalize(ctx context.Context, tx pgx.Tx, creatorID int) (map[int]string, error) {
 	ids := make([]int, 0, len(input.ParticipantIDs)+1)
 	seen := make(map[int]bool)
 	for _, id := range input.ParticipantIDs {
@@ -148,20 +148,9 @@ func (input *CreateInput) normalize(ctx context.Context, tx pgx.Tx, creatorID in
 	if creatorID > 0 && !seen[creatorID] {
 		ids = slices.Insert(ids, 0, creatorID)
 	}
-	rows, err := tx.Query(ctx, `SELECT id, name FROM users WHERE id = ANY($1::integer[])`, ids)
+	byID, err := loadParticipantNames(ctx, tx, ids)
 	if err != nil {
-		return nil, fmt.Errorf("read work schedule participants: %w", err)
-	}
-	names, err := pgx.CollectRows(rows, pgx.RowToStructByPos[struct {
-		ID   int
-		Name string
-	}])
-	if err != nil {
-		return nil, fmt.Errorf("read work schedule participant names: %w", err)
-	}
-	byID := make(map[int]string, len(names))
-	for _, user := range names {
-		byID[user.ID] = user.Name
+		return nil, err
 	}
 	var display, missing []string
 	for _, id := range ids {
@@ -212,6 +201,25 @@ func (input *CreateInput) normalize(ctx context.Context, tx pgx.Tx, creatorID in
 			input.Title = "休暇"
 		}
 		input.Start, input.End = nil, nil
+	}
+	return byID, nil
+}
+
+func loadParticipantNames(ctx context.Context, tx pgx.Tx, ids []int) (map[int]string, error) {
+	rows, err := tx.Query(ctx, `SELECT id, name FROM users WHERE id = ANY($1::integer[])`, ids)
+	if err != nil {
+		return nil, fmt.Errorf("read work schedule participants: %w", err)
+	}
+	names, err := pgx.CollectRows(rows, pgx.RowToStructByPos[struct {
+		ID   int
+		Name string
+	}])
+	if err != nil {
+		return nil, fmt.Errorf("read work schedule participant names: %w", err)
+	}
+	byID := make(map[int]string, len(names))
+	for _, user := range names {
+		byID[user.ID] = user.Name
 	}
 	return byID, nil
 }

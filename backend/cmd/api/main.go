@@ -136,7 +136,7 @@ func run(ctx context.Context) error {
 	getWorkSchedule := func(ctx context.Context, id int) (*workschedules.Entry, error) {
 		return workschedules.Get(ctx, pool, id)
 	}
-	createWorkSchedule := func(ctx context.Context, input workschedules.CreateInput, creatorID int, series bool) ([]workschedules.Entry, error) {
+	createWorkSchedule := func(ctx context.Context, input workschedules.EntryInput, creatorID int, series bool) ([]workschedules.Entry, error) {
 		create := workschedules.Create
 		if series {
 			create = workschedules.CreateSeries
@@ -147,13 +147,20 @@ func run(ctx context.Context) error {
 		}
 		return result.Entries, err
 	}
+	updateWorkSchedule := func(ctx context.Context, id int, input workschedules.EntryInput, user auth.User) (workschedules.Entry, error) {
+		result, err := workschedules.Update(ctx, pool, id, input, user.ID, user.IsAdmin)
+		if err == nil && chatworkSender != nil {
+			chatworkSender.SendWorkScheduleUpdate(ctx, result)
+		}
+		return result.Entry, err
+	}
 	listParticipants := func(ctx context.Context) ([]users.Participant, error) {
 		return users.ListParticipants(ctx, pool)
 	}
 	handler, err := httpapi.RegisterSessionRoutes(httpapi.NewHandler(ping, readinessTimeout), auth.NewService(pool),
 		reservationList, createReservation, createReservationSeries, updateReservation, updateReservationSeries,
 		deleteReservation, deleteReservationSeries, changeParticipation,
-		listWorkSchedules, getWorkSchedule, createWorkSchedule, listParticipants, notifications.NewInbox(pool),
+		listWorkSchedules, getWorkSchedule, createWorkSchedule, updateWorkSchedule, listParticipants, notifications.NewInbox(pool),
 		httpapi.SessionOptions{Development: development, FrontendOrigins: strings.Split(os.Getenv("FRONTEND_ORIGINS"), ",")})
 	if err != nil {
 		return err
