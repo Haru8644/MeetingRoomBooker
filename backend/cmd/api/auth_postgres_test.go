@@ -17,6 +17,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Haru8644/MeetingRoomBooker/backend/internal/testdb"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -120,13 +121,10 @@ func TestDevelopmentAPIRequiresLoopback(t *testing.T) {
 
 func newAPITestDatabase(t *testing.T, ctx context.Context, envName string) (*pgxpool.Pool, string) {
 	t.Helper()
-	databaseURL := os.Getenv(envName)
-	if databaseURL == "" {
-		t.Skipf("set %s to run the PostgreSQL test", envName)
-	}
+	databaseURL := testdb.URL(t, envName)
 	dsn, err := url.Parse(databaseURL)
 	if err != nil || (dsn.Scheme != "postgres" && dsn.Scheme != "postgresql") {
-		t.Fatalf("%s must be a PostgreSQL URL", envName)
+		t.Fatal("test database connection must be a PostgreSQL URL")
 	}
 	schema := "api_test_" + strings.ToLower(rand.Text())
 	params := dsn.Query()

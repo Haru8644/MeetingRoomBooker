@@ -12,20 +12,18 @@ import (
 	"time"
 
 	"github.com/Haru8644/MeetingRoomBooker/backend/internal/reservations"
+	"github.com/Haru8644/MeetingRoomBooker/backend/internal/testdb"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func TestReservationListPostgres(t *testing.T) {
-	databaseURL := os.Getenv("RESERVATION_TEST_DATABASE_URL")
-	if databaseURL == "" {
-		t.Skip("set RESERVATION_TEST_DATABASE_URL to run the PostgreSQL test")
-	}
+	databaseURL := testdb.URL(t, "RESERVATION_TEST_DATABASE_URL")
 	ctx, cancel := context.WithTimeout(t.Context(), 30*time.Second)
 	defer cancel()
 	config, err := pgxpool.ParseConfig(databaseURL)
 	if err != nil {
-		t.Fatal("invalid RESERVATION_TEST_DATABASE_URL")
+		t.Fatal("invalid PostgreSQL test database connection")
 	}
 	schema := pgx.Identifier{"reservation_list_test_" + strings.ToLower(rand.Text())}.Sanitize()
 	config.ConnConfig.RuntimeParams["search_path"] = schema
