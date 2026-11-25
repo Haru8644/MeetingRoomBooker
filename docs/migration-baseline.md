@@ -547,6 +547,30 @@ go vet ./...
 
 The integration test uses a temporary schema and the normal Go API with a loopback Chatwork fake. It verifies the captured responses, rows, messages and logs, origin protection, concurrent edits, replay, and disabled delivery. All 23 PostgreSQL integration suites passed on PostgreSQL 16.15. The database-free `go test ./...` passed with those suites skipped. `go vet ./...` and `git diff --check` passed.
 
+## Go single work schedule deletion
+
+`DELETE /api/work-schedule-entries/{id}` reuses the session, origin and numeric ID handling. The stored creator and administrators can delete the addressed entry. A successful deletion returns an empty `204`. Missing or previously deleted numeric IDs return `404` Problem Details. Invalid ID paths return an empty `404`, unauthenticated requests return `401`, and other signed-in users return `403`. Other occurrences in the same series remain available.
+
+Go takes the same PostgreSQL row lock as single-entry update. Authorization, participant IDs and all notification fields come from the locked row. In PostgreSQL, a delete waiting behind an update used the committed new title, date and participants. An update waiting behind a delete received `404`. Two concurrent deletes produced one `204`, one `404`, and one set of notices and delivery claims. The owner check also used the owner committed while the delete waited.
+
+The `Info` notice goes to the positive participant IDs in stored order after deduplication. The creator receives it when included in that list. The notice body contains the deleted schedule's type, title and calendar date, and the row stores the full original date value and the deleted ID. The copied ID remains available as a notification reference after the entry is removed. An existing exact message for the same user, work schedule ID and type triggers the shared notice reuse rules. When the newest row matches, it retains its ID, gets a fresh timestamp and becomes unread. If only an older row matches, C# keeps the newest different message intact and removes the older rows in that scope. Without a match it adds a row and keeps the history. Other recipients, notice types and targets keep their existing records.
+
+Go saves the delete and in-app notices in one transaction. In the forced notice failure case, C# returned `500` after committing the delete. Go returned `500` with the schedule still present. Both produced zero DMs. A single transaction makes a failed notice write retryable while retaining the schedule. Delivery begins after commit and the fake verifies that the schedule is already absent and the notices are visible before receiving HTTP.
+
+The shared Chatwork sender uses `WorkScheduleDeleted:work-schedule:{id}:user:{userId}`, `reservation_id=0` and the copied work schedule ID. Its scheduled start is the stored start or calendar midnight for untimed entries. The message uses the stored participant text, includes the time range for external appointments or the leave period for leave, and shows `未設定` for blank participant text. Positive IDs without a user row still receive an in-app notice and are omitted from DM delivery. A user with no direct room is logged as `Skipped`. Delivery defaults to disabled. Existing keys suppress replay. The mock rejection and timeout left both backends at `204). Go logs a sanitized `503` failure and retains `Unknown` for an uncertain timeout. C# records both as `Failed`.
+
+To reproduce the [C# capture](../backend/internal/httpapi/testdata/work_schedule_delete_csharp.json), use the temporary `d8fe3b7` SQLite and loopback setup for [single work schedule creation](#go-single-work-schedule-creation). Register the synthetic users in fixture order and assign the recorded DM rooms. For each case clear schedules, notices and delivery logs, then seed the named dataset, `initial` notices and `existingLogs`. Issue the DELETE with the recorded session and `Accept: application/json`. Repeat the creator case to check the second `404`. To force the notice failure, abort a SQLite `BEFORE INSERT` trigger on `Notifications` for user 2. Return `503` for fake room `900003` and delay `900002` past the fake client's timeout in the provider failure case. The fixture replaces the development exception stack with a marker.
+
+In WSL, set `WORK_SCHEDULE_DELETE_TEST_DATABASE_URL` to a disposable local PostgreSQL URL with schema creation privileges. Run from `backend`:
+
+```bash
+go test -v -count=1 ./cmd/api -run '^TestWorkScheduleDeletionPostgres$'
+go test ./...
+go vet ./...
+```
+
+The Go integration test uses the existing migrations and an isolated schema. It compares 18 C# cases plus the repeat DELETE and checks origin protection, row-lock contention, replay, and the disabled default. All 24 PostgreSQL integration suites passed on PostgreSQL 16.15. The database-free `go test ./...` passed with those suites skipped. `go vet ./...`, formatting, and `git diff --check` passed.
+
 ## Recovery to C# and SQLite
 
 Rehearse each stage in development with synthetic rows and a recording fake Chatwork sender. `scripts/deploy/deploy-prod.sh` uses SQLite's backup API and integrity check. `scripts/deploy/rollback-prod.sh` restores the earlier API, web assets and final SQLite snapshot. A rollback after Go accepts writes also needs the committed PostgreSQL state.

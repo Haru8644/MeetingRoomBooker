@@ -52,7 +52,7 @@ func notifyWorkScheduleSeriesUpdate(ctx context.Context, tx pgx.Tx, before, afte
 			body = append(body, "- "+line)
 		}
 	}
-	if err := saveWorkScheduleUpdateNotices(ctx, tx, first, recipients, kind, notice+noticeWarning, now); err != nil {
+	if err := saveWorkScheduleNotices(ctx, tx, first, recipients, kind, notice+noticeWarning, now); err != nil {
 		return UpdateResult{}, err
 	}
 	body = append(body, dmWarning...)

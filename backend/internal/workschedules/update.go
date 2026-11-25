@@ -41,15 +41,9 @@ func Update(ctx context.Context, pool *pgxpool.Pool, id int, input EntryInput, a
 
 	var result UpdateResult
 	err := pgx.BeginFunc(ctx, pool, func(tx pgx.Tx) error {
-		previous, err := scanStoredEntry(tx.QueryRow(ctx, `SELECT `+entryColumns+` FROM work_schedule_entries WHERE id = $1 FOR UPDATE`, id))
-		if errors.Is(err, pgx.ErrNoRows) {
-			return ErrNotFound
-		}
+		previous, err := lockManagedWorkSchedule(ctx, tx, id, actorID, isAdmin)
 		if err != nil {
 			return err
-		}
-		if previous.CreatedByUserID != actorID && !isAdmin {
-			return ErrForbidden
 		}
 		if err := input.validateFields(); err != nil {
 			return err
@@ -75,6 +69,20 @@ func Update(ctx context.Context, pool *pgxpool.Pool, id int, input EntryInput, a
 		result.ChangeID = newWorkScheduleUUID()
 	}
 	return result, nil
+}
+
+func lockManagedWorkSchedule(ctx context.Context, tx pgx.Tx, id, actorID int, isAdmin bool) (storedEntry, error) {
+	entry, err := scanStoredEntry(tx.QueryRow(ctx, `SELECT `+entryColumns+` FROM work_schedule_entries WHERE id = $1 FOR UPDATE`, id))
+	if errors.Is(err, pgx.ErrNoRows) {
+		return storedEntry{}, ErrNotFound
+	}
+	if err != nil {
+		return storedEntry{}, err
+	}
+	if entry.CreatedByUserID != actorID && !isAdmin {
+		return storedEntry{}, ErrForbidden
+	}
+	return entry, nil
 }
 
 func writeWorkScheduleUpdate(ctx context.Context, tx pgx.Tx, id int, input EntryInput, dateTicks, now int64) (storedEntry, error) {
