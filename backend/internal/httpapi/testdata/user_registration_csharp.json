@@ -1,0 +1,911 @@
+{
+  "cases": [
+    {
+      "name": "unsupported_media",
+      "actor": "anonymous",
+      "fields": null,
+      "passwordMode": null,
+      "raw": "{}",
+      "contentType": "text/plain",
+      "accept": "application/json",
+      "response": {
+        "status": 415,
+        "body": {
+          "type": "https://tools.ietf.org/html/rfc9110#section-15.5.16",
+          "title": "Unsupported Media Type",
+          "status": 415
+        },
+        "contentType": "application/problem+json; charset=utf-8",
+        "location": null
+      },
+      "saved": null,
+      "loginAs": null,
+      "loginStatus": null,
+      "trimmedLoginStatus": null
+    },
+    {
+      "name": "empty_body",
+      "actor": "anonymous",
+      "fields": null,
+      "passwordMode": null,
+      "raw": "",
+      "contentType": "application/json",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": {
+          "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+          "title": "One or more validation errors occurred.",
+          "status": 400,
+          "errors": {
+            "": [
+              "A non-empty request body is required."
+            ],
+            "request": [
+              "The request field is required."
+            ]
+          }
+        },
+        "contentType": "application/problem+json; charset=utf-8",
+        "location": null
+      },
+      "saved": null,
+      "loginAs": null,
+      "loginStatus": null,
+      "trimmedLoginStatus": null
+    },
+    {
+      "name": "json_null",
+      "actor": "anonymous",
+      "fields": null,
+      "passwordMode": null,
+      "raw": "null",
+      "contentType": "application/json",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": {
+          "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+          "title": "One or more validation errors occurred.",
+          "status": 400,
+          "errors": {
+            "": [
+              "A non-empty request body is required."
+            ],
+            "request": [
+              "The request field is required."
+            ]
+          }
+        },
+        "contentType": "application/problem+json; charset=utf-8",
+        "location": null
+      },
+      "saved": null,
+      "loginAs": null,
+      "loginStatus": null,
+      "trimmedLoginStatus": null
+    },
+    {
+      "name": "malformed_empty_database",
+      "actor": "anonymous",
+      "fields": null,
+      "passwordMode": null,
+      "raw": "{\"name\":",
+      "contentType": "application/json",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": {
+          "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+          "title": "One or more validation errors occurred.",
+          "status": 400,
+          "errors": {
+            "request": [
+              "The request field is required."
+            ],
+            "$.name": [
+              "Expected depth to be zero at the end of the JSON payload. There is an open JSON object or array that should be closed. Path: $.name | LineNumber: 0 | BytePositionInLine: 8."
+            ]
+          }
+        },
+        "contentType": "application/problem+json; charset=utf-8",
+        "location": null
+      },
+      "saved": null,
+      "loginAs": null,
+      "loginStatus": null,
+      "trimmedLoginStatus": null
+    },
+    {
+      "name": "missing_fields",
+      "actor": "anonymous",
+      "fields": {},
+      "passwordMode": "omit",
+      "raw": null,
+      "contentType": "application/json",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": {
+          "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+          "title": "One or more validation errors occurred.",
+          "status": 400,
+          "errors": {
+            "Name": [
+              "The Name field is required."
+            ],
+            "Email": [
+              "The Email field is required.",
+              "The Email field is not a valid e-mail address."
+            ],
+            "Password": [
+              "The Password field is required."
+            ]
+          }
+        },
+        "contentType": "application/problem+json; charset=utf-8",
+        "location": null
+      },
+      "saved": null,
+      "loginAs": null,
+      "loginStatus": null,
+      "trimmedLoginStatus": null
+    },
+    {
+      "name": "null_required_fields",
+      "actor": "anonymous",
+      "fields": {
+        "name": null,
+        "email": null
+      },
+      "passwordMode": "null",
+      "raw": null,
+      "contentType": "application/json",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": {
+          "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+          "title": "One or more validation errors occurred.",
+          "status": 400,
+          "errors": {
+            "Name": [
+              "The Name field is required."
+            ],
+            "Email": [
+              "The Email field is required."
+            ],
+            "Password": [
+              "The Password field is required."
+            ]
+          }
+        },
+        "contentType": "application/problem+json; charset=utf-8",
+        "location": null
+      },
+      "saved": null,
+      "loginAs": null,
+      "loginStatus": null,
+      "trimmedLoginStatus": null
+    },
+    {
+      "name": "blank_fields",
+      "actor": "anonymous",
+      "fields": {
+        "name": "  ",
+        "email": " "
+      },
+      "passwordMode": "blank",
+      "raw": null,
+      "contentType": "application/json",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": {
+          "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+          "title": "One or more validation errors occurred.",
+          "status": 400,
+          "errors": {
+            "Name": [
+              "The Name field is required."
+            ],
+            "Email": [
+              "The Email field is required.",
+              "The Email field is not a valid e-mail address."
+            ],
+            "Password": [
+              "The Password field is required."
+            ]
+          }
+        },
+        "contentType": "application/problem+json; charset=utf-8",
+        "location": null
+      },
+      "saved": null,
+      "loginAs": null,
+      "loginStatus": null,
+      "trimmedLoginStatus": null
+    },
+    {
+      "name": "bootstrap",
+      "actor": "anonymous",
+      "fields": {
+        "name": "  架空の初回管理者  ",
+        "email": "  ADMIN@Example.Test  ",
+        "avatarColor": "  ",
+        "chatworkAccountId": "  12001  ",
+        "chatworkDirectRoomId": " ",
+        "id": 999,
+        "isAdmin": false
+      },
+      "passwordMode": "padded",
+      "raw": null,
+      "contentType": "application/json",
+      "accept": "application/json",
+      "response": {
+        "status": 201,
+        "body": {
+          "id": 1,
+          "name": "架空の初回管理者",
+          "email": "admin@example.test",
+          "avatarColor": "#58a6ff",
+          "isAdmin": true,
+          "chatworkAccountId": "12001",
+          "chatworkDirectRoomId": null
+        },
+        "contentType": "application/json; charset=utf-8",
+        "location": "/api/Users?id=1"
+      },
+      "saved": {
+        "id": 1,
+        "name": "架空の初回管理者",
+        "email": "admin@example.test",
+        "avatarColor": "#58a6ff",
+        "isAdmin": true,
+        "chatworkAccountId": "12001",
+        "chatworkDirectRoomId": null
+      },
+      "loginAs": "admin",
+      "loginStatus": 200,
+      "trimmedLoginStatus": 401
+    },
+    {
+      "name": "anonymous_denied",
+      "actor": "anonymous",
+      "fields": {
+        "name": "架空の追加ユーザー",
+        "email": "new@example.test"
+      },
+      "passwordMode": "normal",
+      "raw": null,
+      "contentType": "application/json",
+      "accept": "application/json",
+      "response": {
+        "status": 403,
+        "body": "",
+        "contentType": null,
+        "location": null
+      },
+      "saved": null,
+      "loginAs": null,
+      "loginStatus": null,
+      "trimmedLoginStatus": null
+    },
+    {
+      "name": "anonymous_invalid_model",
+      "actor": "anonymous",
+      "fields": {
+        "name": "架空の追加ユーザー",
+        "email": "invalid"
+      },
+      "passwordMode": "omit",
+      "raw": null,
+      "contentType": "application/json",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": {
+          "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+          "title": "One or more validation errors occurred.",
+          "status": 400,
+          "errors": {
+            "Email": [
+              "The Email field is not a valid e-mail address."
+            ],
+            "Password": [
+              "The Password field is required."
+            ]
+          }
+        },
+        "contentType": "application/problem+json; charset=utf-8",
+        "location": null
+      },
+      "saved": null,
+      "loginAs": null,
+      "loginStatus": null,
+      "trimmedLoginStatus": null
+    },
+    {
+      "name": "anonymous_malformed",
+      "actor": "anonymous",
+      "fields": null,
+      "passwordMode": null,
+      "raw": "{\"email\":",
+      "contentType": "application/json",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": {
+          "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+          "title": "One or more validation errors occurred.",
+          "status": 400,
+          "errors": {
+            "request": [
+              "The request field is required."
+            ],
+            "$.email": [
+              "Expected depth to be zero at the end of the JSON payload. There is an open JSON object or array that should be closed. Path: $.email | LineNumber: 0 | BytePositionInLine: 9."
+            ]
+          }
+        },
+        "contentType": "application/problem+json; charset=utf-8",
+        "location": null
+      },
+      "saved": null,
+      "loginAs": null,
+      "loginStatus": null,
+      "trimmedLoginStatus": null
+    },
+    {
+      "name": "anonymous_null_avatar",
+      "actor": "anonymous",
+      "fields": {
+        "name": "架空の追加ユーザー",
+        "email": "new@example.test",
+        "avatarColor": null
+      },
+      "passwordMode": "normal",
+      "raw": null,
+      "contentType": "application/json",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": {
+          "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+          "title": "One or more validation errors occurred.",
+          "status": 400,
+          "errors": {
+            "AvatarColor": [
+              "The AvatarColor field is required."
+            ]
+          }
+        },
+        "contentType": "application/problem+json; charset=utf-8",
+        "location": null
+      },
+      "saved": null,
+      "loginAs": null,
+      "loginStatus": null,
+      "trimmedLoginStatus": null
+    },
+    {
+      "name": "admin_creates_member",
+      "actor": "admin",
+      "fields": {
+        "name": "  架空の一般ユーザー  ",
+        "email": "  MEMBER@EXAMPLE.TEST ",
+        "avatarColor": "  teal  ",
+        "chatworkAccountId": null,
+        "chatworkDirectRoomId": "  ROOM-A  ",
+        "id": 1000,
+        "isAdmin": true
+      },
+      "passwordMode": "normal",
+      "raw": null,
+      "contentType": "application/json",
+      "accept": "application/json",
+      "response": {
+        "status": 201,
+        "body": {
+          "id": 2,
+          "name": "架空の一般ユーザー",
+          "email": "member@example.test",
+          "avatarColor": "  teal  ",
+          "isAdmin": false,
+          "chatworkAccountId": null,
+          "chatworkDirectRoomId": "ROOM-A"
+        },
+        "contentType": "application/json; charset=utf-8",
+        "location": "/api/Users?id=2"
+      },
+      "saved": {
+        "id": 2,
+        "name": "架空の一般ユーザー",
+        "email": "member@example.test",
+        "avatarColor": "  teal  ",
+        "isAdmin": false,
+        "chatworkAccountId": null,
+        "chatworkDirectRoomId": "ROOM-A"
+      },
+      "loginAs": "member",
+      "loginStatus": 200,
+      "trimmedLoginStatus": null
+    },
+    {
+      "name": "member_invalid_model",
+      "actor": "member",
+      "fields": {
+        "name": null,
+        "email": "new@example.test"
+      },
+      "passwordMode": "normal",
+      "raw": null,
+      "contentType": "application/json",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": {
+          "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+          "title": "One or more validation errors occurred.",
+          "status": 400,
+          "errors": {
+            "Name": [
+              "The Name field is required."
+            ]
+          }
+        },
+        "contentType": "application/problem+json; charset=utf-8",
+        "location": null
+      },
+      "saved": null,
+      "loginAs": null,
+      "loginStatus": null,
+      "trimmedLoginStatus": null
+    },
+    {
+      "name": "admin_duplicate_json",
+      "actor": "admin",
+      "fields": {
+        "name": "架空の追加ユーザー",
+        "email": " ADMIN@EXAMPLE.TEST "
+      },
+      "passwordMode": "normal",
+      "raw": null,
+      "contentType": "application/json",
+      "accept": "application/json",
+      "response": {
+        "status": 409,
+        "body": "Email already exists.",
+        "contentType": "application/json; charset=utf-8",
+        "location": null
+      },
+      "saved": null,
+      "loginAs": null,
+      "loginStatus": null,
+      "trimmedLoginStatus": null
+    },
+    {
+      "name": "admin_duplicate_text",
+      "actor": "admin",
+      "fields": {
+        "name": "架空の追加ユーザー",
+        "email": " ADMIN@EXAMPLE.TEST "
+      },
+      "passwordMode": "normal",
+      "raw": null,
+      "contentType": "application/json",
+      "accept": "text/plain",
+      "response": {
+        "status": 409,
+        "body": "Email already exists.",
+        "contentType": "text/plain; charset=utf-8",
+        "location": null
+      },
+      "saved": null,
+      "loginAs": null,
+      "loginStatus": null,
+      "trimmedLoginStatus": null
+    },
+    {
+      "name": "duplicate_invalid_model",
+      "actor": "admin",
+      "fields": {
+        "name": "あああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああ",
+        "email": " ADMIN@EXAMPLE.TEST "
+      },
+      "passwordMode": "normal",
+      "raw": null,
+      "contentType": "application/json",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": {
+          "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+          "title": "One or more validation errors occurred.",
+          "status": 400,
+          "errors": {
+            "Name": [
+              "The field Name must be a string with a maximum length of 100."
+            ]
+          }
+        },
+        "contentType": "application/problem+json; charset=utf-8",
+        "location": null
+      },
+      "saved": null,
+      "loginAs": null,
+      "loginStatus": null,
+      "trimmedLoginStatus": null
+    },
+    {
+      "name": "exact_lengths",
+      "actor": "admin",
+      "fields": {
+        "name": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+        "email": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx@example.test",
+        "chatworkAccountId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "chatworkDirectRoomId": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀"
+      },
+      "passwordMode": "normal",
+      "raw": null,
+      "contentType": "application/json",
+      "accept": "application/json",
+      "response": {
+        "status": 201,
+        "body": {
+          "id": 3,
+          "name": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+          "email": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx@example.test",
+          "avatarColor": "#58a6ff",
+          "isAdmin": false,
+          "chatworkAccountId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "chatworkDirectRoomId": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀"
+        },
+        "contentType": "application/json; charset=utf-8",
+        "location": "/api/Users?id=3"
+      },
+      "saved": {
+        "id": 3,
+        "name": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+        "email": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx@example.test",
+        "avatarColor": "#58a6ff",
+        "isAdmin": false,
+        "chatworkAccountId": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "chatworkDirectRoomId": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀"
+      },
+      "loginAs": null,
+      "loginStatus": 200,
+      "trimmedLoginStatus": null
+    },
+    {
+      "name": "email_over_limit",
+      "actor": "admin",
+      "fields": {
+        "name": "架空の追加ユーザー",
+        "email": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx@example.test"
+      },
+      "passwordMode": "normal",
+      "raw": null,
+      "contentType": "application/json",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": {
+          "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+          "title": "One or more validation errors occurred.",
+          "status": 400,
+          "errors": {
+            "Email": [
+              "The field Email must be a string with a maximum length of 256."
+            ]
+          }
+        },
+        "contentType": "application/problem+json; charset=utf-8",
+        "location": null
+      },
+      "saved": null,
+      "loginAs": null,
+      "loginStatus": null,
+      "trimmedLoginStatus": null
+    },
+    {
+      "name": "name_checked_before_trim",
+      "actor": "admin",
+      "fields": {
+        "name": " ああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああああ",
+        "email": "new@example.test"
+      },
+      "passwordMode": "normal",
+      "raw": null,
+      "contentType": "application/json",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": {
+          "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+          "title": "One or more validation errors occurred.",
+          "status": 400,
+          "errors": {
+            "Name": [
+              "The field Name must be a string with a maximum length of 100."
+            ]
+          }
+        },
+        "contentType": "application/problem+json; charset=utf-8",
+        "location": null
+      },
+      "saved": null,
+      "loginAs": null,
+      "loginStatus": null,
+      "trimmedLoginStatus": null
+    },
+    {
+      "name": "account_checked_before_trim",
+      "actor": "admin",
+      "fields": {
+        "name": "架空の追加ユーザー",
+        "email": "new@example.test",
+        "chatworkAccountId": " aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa "
+      },
+      "passwordMode": "normal",
+      "raw": null,
+      "contentType": "application/json",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": {
+          "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+          "title": "One or more validation errors occurred.",
+          "status": 400,
+          "errors": {
+            "ChatworkAccountId": [
+              "The field ChatworkAccountId must be a string with a maximum length of 100."
+            ]
+          }
+        },
+        "contentType": "application/problem+json; charset=utf-8",
+        "location": null
+      },
+      "saved": null,
+      "loginAs": null,
+      "loginStatus": null,
+      "trimmedLoginStatus": null
+    },
+    {
+      "name": "room_over_utf16_limit",
+      "actor": "admin",
+      "fields": {
+        "name": "架空の追加ユーザー",
+        "email": "new@example.test",
+        "chatworkDirectRoomId": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀"
+      },
+      "passwordMode": "normal",
+      "raw": null,
+      "contentType": "application/json",
+      "accept": "application/json",
+      "response": {
+        "status": 400,
+        "body": {
+          "type": "https://tools.ietf.org/html/rfc9110#section-15.5.1",
+          "title": "One or more validation errors occurred.",
+          "status": 400,
+          "errors": {
+            "ChatworkDirectRoomId": [
+              "The field ChatworkDirectRoomId must be a string with a maximum length of 100."
+            ]
+          }
+        },
+        "contentType": "application/problem+json; charset=utf-8",
+        "location": null
+      },
+      "saved": null,
+      "loginAs": null,
+      "loginStatus": null,
+      "trimmedLoginStatus": null
+    },
+    {
+      "name": "optional_defaults",
+      "actor": "admin",
+      "fields": {
+        "name": "架空の追加ユーザー",
+        "email": "defaults@example.test"
+      },
+      "passwordMode": "normal",
+      "raw": null,
+      "contentType": "application/json",
+      "accept": "application/json",
+      "response": {
+        "status": 201,
+        "body": {
+          "id": 4,
+          "name": "架空の追加ユーザー",
+          "email": "defaults@example.test",
+          "avatarColor": "#58a6ff",
+          "isAdmin": false,
+          "chatworkAccountId": null,
+          "chatworkDirectRoomId": null
+        },
+        "contentType": "application/json; charset=utf-8",
+        "location": "/api/Users?id=4"
+      },
+      "saved": {
+        "id": 4,
+        "name": "架空の追加ユーザー",
+        "email": "defaults@example.test",
+        "avatarColor": "#58a6ff",
+        "isAdmin": false,
+        "chatworkAccountId": null,
+        "chatworkDirectRoomId": null
+      },
+      "loginAs": null,
+      "loginStatus": 200,
+      "trimmedLoginStatus": null
+    },
+    {
+      "name": "optional_blank",
+      "actor": "admin",
+      "fields": {
+        "name": "架空の追加ユーザー",
+        "email": "blank@example.test",
+        "avatarColor": "",
+        "chatworkAccountId": " \t",
+        "chatworkDirectRoomId": "  "
+      },
+      "passwordMode": "normal",
+      "raw": null,
+      "contentType": "application/json",
+      "accept": "application/json",
+      "response": {
+        "status": 201,
+        "body": {
+          "id": 5,
+          "name": "架空の追加ユーザー",
+          "email": "blank@example.test",
+          "avatarColor": "#58a6ff",
+          "isAdmin": false,
+          "chatworkAccountId": null,
+          "chatworkDirectRoomId": null
+        },
+        "contentType": "application/json; charset=utf-8",
+        "location": "/api/Users?id=5"
+      },
+      "saved": {
+        "id": 5,
+        "name": "架空の追加ユーザー",
+        "email": "blank@example.test",
+        "avatarColor": "#58a6ff",
+        "isAdmin": false,
+        "chatworkAccountId": null,
+        "chatworkDirectRoomId": null
+      },
+      "loginAs": null,
+      "loginStatus": null,
+      "trimmedLoginStatus": null
+    },
+    {
+      "name": "invariant_email_case",
+      "actor": "admin",
+      "fields": {
+        "name": "架空の追加ユーザー",
+        "email": " İ.TEST@EXAMPLE.TEST "
+      },
+      "passwordMode": "normal",
+      "raw": null,
+      "contentType": "application/json",
+      "accept": "application/json",
+      "response": {
+        "status": 201,
+        "body": {
+          "id": 6,
+          "name": "架空の追加ユーザー",
+          "email": "İ.test@example.test",
+          "avatarColor": "#58a6ff",
+          "isAdmin": false,
+          "chatworkAccountId": null,
+          "chatworkDirectRoomId": null
+        },
+        "contentType": "application/json; charset=utf-8",
+        "location": "/api/Users?id=6"
+      },
+      "saved": {
+        "id": 6,
+        "name": "架空の追加ユーザー",
+        "email": "İ.test@example.test",
+        "avatarColor": "#58a6ff",
+        "isAdmin": false,
+        "chatworkAccountId": null,
+        "chatworkDirectRoomId": null
+      },
+      "loginAs": null,
+      "loginStatus": 200,
+      "trimmedLoginStatus": null
+    },
+    {
+      "name": "member_allowed_by_reference",
+      "actor": "member",
+      "fields": {
+        "name": "架空の追加ユーザー",
+        "email": "new@example.test"
+      },
+      "passwordMode": "normal",
+      "raw": null,
+      "contentType": "application/json",
+      "accept": "application/json",
+      "response": {
+        "status": 201,
+        "body": {
+          "id": 7,
+          "name": "架空の追加ユーザー",
+          "email": "new@example.test",
+          "avatarColor": "#58a6ff",
+          "isAdmin": false,
+          "chatworkAccountId": null,
+          "chatworkDirectRoomId": null
+        },
+        "contentType": "application/json; charset=utf-8",
+        "location": "/api/Users?id=7"
+      },
+      "saved": {
+        "id": 7,
+        "name": "架空の追加ユーザー",
+        "email": "new@example.test",
+        "avatarColor": "#58a6ff",
+        "isAdmin": false,
+        "chatworkAccountId": null,
+        "chatworkDirectRoomId": null
+      },
+      "loginAs": null,
+      "loginStatus": null,
+      "trimmedLoginStatus": null
+    },
+    {
+      "name": "request_over_go_auth_limit",
+      "actor": "admin",
+      "fields": {
+        "name": "架空の追加ユーザー",
+        "email": "long-password@example.test"
+      },
+      "passwordMode": "oversize",
+      "raw": null,
+      "contentType": "application/json",
+      "accept": "application/json",
+      "response": {
+        "status": 201,
+        "body": {
+          "id": 8,
+          "name": "架空の追加ユーザー",
+          "email": "long-password@example.test",
+          "avatarColor": "#58a6ff",
+          "isAdmin": false,
+          "chatworkAccountId": null,
+          "chatworkDirectRoomId": null
+        },
+        "contentType": "application/json; charset=utf-8",
+        "location": "/api/Users?id=8"
+      },
+      "saved": {
+        "id": 8,
+        "name": "架空の追加ユーザー",
+        "email": "long-password@example.test",
+        "avatarColor": "#58a6ff",
+        "isAdmin": false,
+        "chatworkAccountId": null,
+        "chatworkDirectRoomId": null
+      },
+      "loginAs": null,
+      "loginStatus": 200,
+      "trimmedLoginStatus": null
+    }
+  ],
+  "races": {
+    "duplicateStatuses": [
+      201,
+      500
+    ],
+    "bootstrapStatuses": [
+      201,
+      201
+    ],
+    "bootstrapAdmins": 2
+  }
+}

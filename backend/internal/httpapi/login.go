@@ -11,6 +11,8 @@ import (
 	"github.com/Haru8644/MeetingRoomBooker/backend/internal/auth"
 )
 
+const maxAuthBodyBytes = 64 << 10
+
 type loginRequest struct {
 	Email      *string
 	Password   string
@@ -24,7 +26,7 @@ func (h sessionHandler) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	decoder := json.NewDecoder(http.MaxBytesReader(w, r.Body, 64<<10))
+	decoder := json.NewDecoder(http.MaxBytesReader(w, r.Body, maxAuthBodyBytes))
 	request := &loginRequest{Email: new("")}
 	err := decoder.Decode(&request)
 	if err == io.EOF || (err == nil && request == nil) {
@@ -43,7 +45,7 @@ func (h sessionHandler) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, session, err := h.service.Login(r.Context(), strings.ToLower(strings.TrimSpace(*request.Email)),
+	user, session, err := h.service.Login(r.Context(), auth.NormalizeEmail(*request.Email),
 		request.Password, string(request.RememberMe) == "true", requestToken(r))
 	if errors.Is(err, auth.ErrUnauthorized) {
 		writeNegotiatedString(w, r, http.StatusUnauthorized, "Invalid email or password.")
@@ -62,12 +64,8 @@ func validateLogin(request *loginRequest) map[string][]string {
 	if request.Email == nil || strings.TrimSpace(*request.Email) == "" {
 		fields["Email"] = []string{"The Email field is required."}
 	}
-	if request.Email != nil {
-		email := *request.Email
-		at := strings.IndexByte(email, '@')
-		if at < 1 || at == len(email)-1 || at != strings.LastIndexByte(email, '@') || strings.ContainsAny(email, "\r\n") {
-			fields["Email"] = append(fields["Email"], "The Email field is not a valid e-mail address.")
-		}
+	if request.Email != nil && !validEmailAddress(*request.Email) {
+		fields["Email"] = append(fields["Email"], "The Email field is not a valid e-mail address.")
 	}
 	if strings.TrimSpace(request.Password) == "" {
 		fields["Password"] = []string{"The Password field is required."}
@@ -76,6 +74,11 @@ func validateLogin(request *loginRequest) map[string][]string {
 		fields["rememberMe"] = []string{"The rememberMe field must be a boolean."}
 	}
 	return fields
+}
+
+func validEmailAddress(email string) bool {
+	at := strings.IndexByte(email, '@')
+	return at > 0 && at < len(email)-1 && at == strings.LastIndexByte(email, '@') && !strings.ContainsAny(email, "\r\n")
 }
 
 func hasJSONContentType(r *http.Request) bool {
