@@ -17,6 +17,7 @@ import (
 const sessionCookieName = "MeetingRoomBooker.GoSession"
 
 type sessionService interface {
+	userAdministration
 	Register(context.Context, auth.Registration, *int) (auth.User, error)
 	Login(context.Context, string, string, bool, string) (auth.User, auth.Session, error)
 	Authenticate(context.Context, string) (auth.User, *auth.Session, error)
@@ -104,6 +105,7 @@ func RegisterSessionRoutes(mux *http.ServeMux, service sessionService, reservati
 		}
 		writeJSON(w, http.StatusOK, participants)
 	}))
+	h.registerAdminUserRoutes(mux, csrf)
 	h.registerNotificationRoutes(mux, csrf, inbox)
 
 	if len(origins) == 0 {
